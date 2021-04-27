@@ -74,16 +74,15 @@ more recent versions of Tensorflow (2+). Therefore, we'll use Tensorflow 1.5.0
 which was proved to work (however, it may possibly also work with 1.15.0).
 
 1. Download the [`bazel
-   0.8.0`](https://github.com/bazelbuild/bazel/releases/tag/0.8.0) appropriate
-   to your platform and run the shell script with the `--user` flag. Put the
-   created `bin` to your $PATH.
+   0.8.0`](https://github.com/bazelbuild/bazel/releases/tag/0.8.0) installer appropriate
+   to your platform and run the shell script with `--user`. Put the created `bin` to your `$PATH`.
 
 2. Download [`tensorflow 1.5.0`](https://github.com/tensorflow/tensorflow/releases/tag/v1.5.0) and
-   extract it to a directory named `tensorflow`. Also, rename the inserted
+   extract it to a newly created directory named `tensorflow`. Also, rename the inserted
    directory to `tensorflow`, so you'll have the directory structure
-   `tensorflow/tensorflow`. Considering you're in the root directory, run the
-   following commands:
-    * `tensorflow`
+   `tensorflow/tensorflow`. Considering you're in the root directory
+   `tensorflow`, run:
+    * `cd tensorflow`
     * `./configure`
     * `bazel build -c opt --verbose_failures //tensorflow:libtensorflow_cc.so`
 
@@ -128,9 +127,8 @@ which was proved to work (however, it may possibly also work with 1.15.0).
     │   └───include/
     │   └───lib/
     ```
-    * `cd` to the `tensorflow` directory we first created (where we extracted the downloaded `tensorflow` folder).
-    * `cd ..`
-    * `mkdir protofuf`
+    * `cd P`
+    * `mkdir protobuf`
     * `cd protobuf`
     * `mkdir include`
     * `mkdir lib`
@@ -143,7 +141,7 @@ which was proved to work (however, it may possibly also work with 1.15.0).
     * `cd tensorflow`
     * `mkdir lib`
     * `mkdir include`
-    * `cp tensorflow/bazel-bin/tensorflow/*.so lib`
+    * `cp tensorflow/bazel-bin/tensorflow/*.so lib/`
     * `cp -r tensorflow/bazel-genfiles/* include/`
     * `cp -r tensorflow/third_party include/`
     * `cp -r tensorflow/tensorflow/contrib/makefile/downloads/nsync include/`
