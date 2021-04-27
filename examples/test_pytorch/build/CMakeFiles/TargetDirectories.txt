@@ -1,3 +1,0 @@
-/home/ferber/repositories/DeePDown/pytorch/build/CMakeFiles/rebuild_cache.dir
-/home/ferber/repositories/DeePDown/pytorch/build/CMakeFiles/edit_cache.dir
-/home/ferber/repositories/DeePDown/pytorch/build/CMakeFiles/example-app.dir

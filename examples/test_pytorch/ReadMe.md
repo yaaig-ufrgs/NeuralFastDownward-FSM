@@ -1,8 +1,11 @@
 1. Download libtorch
 2. set PATH_TORCH to point to the extracted libtorch directory
-3. Build the cmake project
-4. run `create_model.py` to create the model (and playing around with torch)
-5. execute `run.sh`
+3. Build Neural Fast Downward in `debug` mode (./build.py debug)
+4. Build the cmake project
+    * mkdir build && cd build
+    * cmake .. && make
+5. run `create_model.py` to create the model (and playing around with torch)
+6. execute `run.sh`
  - The first four TestTorch Outputs should be:
    TestTorch Output: 0.856784
    TestTorch Output: 0.000999021
