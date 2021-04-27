@@ -78,7 +78,7 @@ which was proved to work (however, it may possibly also work with 1.15.0).
    to your platform and run the shell script with `--user`. Put the created `bin` to your `$PATH`.
 
 2. Download [`tensorflow 1.5.0`](https://github.com/tensorflow/tensorflow/releases/tag/v1.5.0) and
-   extract it to a newly created directory named `tensorflow`. Also, rename the inserted
+   extract it to a newly created directory named `tensorflow`. Also, rename the extracted
    directory to `tensorflow`, so you'll have the directory structure
    `tensorflow/tensorflow`. Considering you're in the root directory
    `tensorflow`, run:
