@@ -89,6 +89,7 @@ which was proved to work (however, it may possibly also work with 1.15.0).
 3. Download the matching Protobuf and Eigen3 versions: 
     * `mkdir tensorflow/contrib/makefile/downloads/eigen`
     * Download [`eigen-3.3.4`](https://gitlab.com/libeigen/eigen/-/releases/3.3.4) and extract its contents to the directory created above.
+    * Comment some lines regarding Eigen (29: `EIGEN_URL` and 78: `download_and_extract`) in `./tensorflow/contrib/makefile/download_dependencies.sh`, as the script tries to download Eigen from a broken link.
     * Run `./tensorflow/contrib/makefile/download_dependencies.sh`. If it fails, try again -- the servers might be unstable.
 
 4. Build Protobuf:
