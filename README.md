@@ -1,13 +1,10 @@
 # Neural Fast Downward
 Neural Fast Downward is intended to help with generating training data for
 classical planning domains, as well as, using machine learning techniques with
-Fast Downward (especially, Tensorflow and PyTorch). The code was quickly 
-refactored and updated to the current (March 2021) Fast Downward main branch.
-Thus, it was not as well tested as it should be. If you find any bugs, please
-contact me (patrick.ferber@unibas.ch) or create a pull request.
+Fast Downward (especially, Tensorflow and PyTorch). 
 
-Neural Fast Downward is a fork from Fast Downward. For more information related to
-Fast Downward, read the bottom part of this README.md.
+Neural Fast Downward is a fork from Fast Downward. For more information (full
+list of contributors, history, etc.), see [here](https://github.com/PatrickFerber/NeuralFastDownward).
 
 
 ## Features
@@ -50,111 +47,126 @@ Furthermore, a network heuristic and network policy are provided. Both are simpl
 wrappers that take an abstract network and take the network outputs as heuristic
 resp. policy values.
 
-**Tensorflow.**
-The setup of Tensorflow has changed overtime. The code is still there, but I have
-not tried to get it running with the current version of Tensorflow. I am glad for
-PR that adapt the code for the current Tensorflow version (if any 
-changes are necessary) and for instructions I can upload for anyone who wants to
-compile their code with Tensorflow.
-After setting up Tensorflow, you have to uncomment the Tensorflow Plugin in
+Below are the build instructions for each ML framework, `PyTorch` and
+`Tensorflow`. In case of error, open an issue.
+
+0. Setup and activate a virtual environment with Python 3.6. Make sure you have `numpy`, `curl` and `cmake`.
+
+#### PyTorch guide
+1. Download [libtorch](https://pytorch.org/cppdocs/installing.html) and extract it to
+any path `P`. 
+
+2. Set an environment variable `PATH_TORCH` that points to `P`.
+
+3. Uncomment the Torch Plugin in
 `src/search/DownwardFiles.cmake`.
 
-**PyTorch.**
-Setting up PyTorch is straight forward. Download `torchlib` and extract it to
-any path `P`. Then set an environment variable `PATH_TORCH` that points to `P`.
-Afterwards, you have to uncomment the Torch Plugin in
-`src/search/DownwardFiles.cmake`.
+4. `./build.py`
+
+5. `pip install torch`
+
+6. If everything is working, you may be able to run the example on
+   `examples/test_pytorch/`.
+
+#### Tensorflow guide
+The original authors don't guarantee that the Tensorflow code will work with
+more recent versions of Tensorflow (2+). Therefore, we'll use Tensorflow 1.5.0
+which was proved to work (however, it may possibly also work with 1.15.0).
+
+1. Download the [`bazel
+   0.8.0`](https://github.com/bazelbuild/bazel/releases/tag/0.8.0) appropriate
+   to your platform and run the shell script with the `--user` flag. Put the
+   created `bin` to your $PATH.
+
+2. Download [`tensorflow 1.5.0`](https://github.com/tensorflow/tensorflow/releases/tag/v1.5.0) and
+   extract it to a directory named `tensorflow`. Also, rename the inserted
+   directory to `tensorflow`, so you'll have the directory structure
+   `tensorflow/tensorflow`. Considering you're in the root directory, run the
+   following commands:
+    * `tensorflow`
+    * `./configure`
+    * `bazel build -c opt --verbose_failures //tensorflow:libtensorflow_cc.so`
+
+3. Download the matching Protobuf and Eigen3 versions: 
+    * `mkdir tensorflow/contrib/makefile/downloads/eigen`
+    * Download [`eigen-3.3.4`](https://gitlab.com/libeigen/eigen/-/releases/3.3.4) and extract its contents to the directory created above.
+    * Run `./tensorflow/contrib/makefile/download_dependencies.sh`. If it fails, try again -- the servers might be unstable.
+
+4. Build Protobuf:
+    * `cd tensorflow/contrib/makefile/downloads/protobuf/`
+    * `mkdir /tmp/proto`
+    * `./autogen.sh`
+    * `./configure --prefix=/tmp/proto/`
+    * `make`
+    * `make install`
+
+5. Build Eigen:
+    * `cd ../eigen`
+    * `mkdir /tmp/eigen`
+    * `mkdir build_dir`
+    * `cd build_dir`
+    * `cmake -DCMAKE_INSTALL_PREFIX=/tmp/eigen/ ../`
+    * `make install`
+
+6. Create a library/include directory structure:
+
+    At the end of this process, your directory structure will look like the
+    following:
+    ```
+    P
+    └───tensorflow/
+    │   └───tensorflow/
+    │   └───include/
+    │   └───lib/
+    │   
+    └───protobuf/
+    │   └───lib/
+    │   └───bin/
+    │   └───include/
+    │   
+    └───eigen/
+    │   └───include/
+    │   └───lib/
+    ```
+    * `cd` to the `tensorflow` directory we first created (where we extracted the downloaded `tensorflow` folder).
+    * `cd ..`
+    * `mkdir protofuf`
+    * `cd protobuf`
+    * `mkdir include`
+    * `mkdir lib`
+    * `cd ..`
+    * `mkdir eigen`
+    * `cd eigen`
+    * `mkdir include`
+    * `mkdir lib`
+    * `cd ..`
+    * `cd tensorflow`
+    * `mkdir lib`
+    * `mkdir include`
+    * `cp tensorflow/bazel-bin/tensorflow/*.so lib`
+    * `cp -r tensorflow/bazel-genfiles/* include/`
+    * `cp -r tensorflow/third_party include/`
+    * `cp -r tensorflow/tensorflow/contrib/makefile/downloads/nsync include/`
+    * `cp -r -n tensorflow/tensorflow/core/* include/tensorflow/core/`
+    * `cp -r /tmp/proto/* ../protobuf/`
+    * `cp -r /tmp/eigen/include/eigen3/* ../eigen/include`
+    * `cp -r /tmp/eigen/* ../eigen/`
+
+7. Setup environment variables for each package to where you all the `include/` and `lib/` directories are stored:
+    * `export PATH_TENSORFLOW=/absolute/path/to/tensorflow/`
+    * `export PATH_PROTOBUF=/absolute/path/to/protobuf/`
+    * `export PATH_EIGEN=/absolute/path/to/eigen/`
+
+8. Build Neural Fast Downward :
+    * After setting up Tensorflow, you have to uncomment the Tensorflow Plugin in `src/search/DownwardFiles.cmake`.
+    * Finally, run `./build.py`.
+
+9. To check if everything worked, run the example on
+    `examples/test_tensorflow`.
+
+* Trained models are available [here](https://zenodo.org/record/4000991).
 
 [Click here for information on extending Neural Fast Downward](EXTENDING.md)
-
-# Fast Downward
-
-Fast Downward is a domain-independent classical planning system.
-
-Copyright 2003-2020 Fast Downward contributors (see below).
-
-For further information:
-- Fast Downward website: <http://www.fast-downward.org>
-- Report a bug or file an issue: <http://issues.fast-downward.org>
-- Fast Downward mailing list: <https://groups.google.com/forum/#!forum/fast-downward>
-- Fast Downward main repository: <https://github.com/aibasel/downward>
-
-
-## Tested software versions
-
-This version of Fast Downward has been tested with the following software versions:
-
-| OS           | Python | C++ compiler                                                     | CMake |
-| ------------ | ------ | ---------------------------------------------------------------- | ----- |
-| Ubuntu 20.04 | 3.8    | GCC 9, GCC 10, Clang 10, Clang 11                                | 3.16  |
-| Ubuntu 18.04 | 3.6    | GCC 7, Clang 6                                                   | 3.10  |
-| macOS 10.15  | 3.6    | AppleClang 12                                                    | 3.19  |
-| Windows 10   | 3.6    | Visual Studio Enterprise 2017 (MSVC 19.16) and 2019 (MSVC 19.28) | 3.19  |
-
-We test LP support with CPLEX 12.9, SoPlex 3.1.1 and Osi 0.107.9.
-On Ubuntu, we test both CPLEX and SoPlex. On Windows, we currently 
-only test CPLEX, and on macOS, we do not test LP solvers (yet).
-
-
-## Contributors
-
-The following list includes all people that actively contributed to
-Fast Downward, i.e. all people that appear in some commits in Fast
-Downward's history (see below for a history on how Fast Downward
-emerged) or people that influenced the development of such commits.
-Currently, this list is sorted by the last year the person has been
-active, and in case of ties, by the earliest year the person started
-contributing, and finally by last name.
-
-- 2003-2020 Malte Helmert
-- 2008-2016, 2018-2020 Gabriele Roeger
-- 2010-2020 Jendrik Seipp
-- 2010-2011, 2013-2020 Silvan Sievers
-- 2012-2020 Florian Pommerening
-- 2013, 2015-2020 Salome Eriksson
-- 2016-2020 Cedric Geissmann
-- 2017-2020 Guillem Francès
-- 2018-2020 Augusto B. Corrêa
-- 2018-2020 Patrick Ferber
-- 2015-2019 Manuel Heusner
-- 2017 Daniel Killenberger
-- 2016 Yusra Alkhazraji
-- 2016 Martin Wehrle
-- 2014-2015 Patrick von Reth
-- 2015 Thomas Keller
-- 2009-2014 Erez Karpas
-- 2014 Robert P. Goldman
-- 2010-2012 Andrew Coles
-- 2010, 2012 Patrik Haslum
-- 2003-2011 Silvia Richter
-- 2009-2011 Emil Keyder
-- 2010-2011 Moritz Gronbach
-- 2010-2011 Manuela Ortlieb
-- 2011 Vidal Alcázar Saiz
-- 2011 Michael Katz
-- 2011 Raz Nissim
-- 2010 Moritz Goebelbecker
-- 2007-2009 Matthias Westphal
-- 2009 Christian Muise
-
-
-## History
-
-The current version of Fast Downward is the merger of three different
-projects:
-
-- the original version of Fast Downward developed by Malte Helmert
-  and Silvia Richter
-- LAMA, developed by Silvia Richter and Matthias Westphal based on
-  the original Fast Downward
-- FD-Tech, a modified version of Fast Downward developed by Erez
-  Karpas and Michael Katz based on the original code
-
-In addition to these three main sources, the codebase incorporates
-code and features from numerous branches of the Fast Downward codebase
-developed for various research papers. The main contributors to these
-branches are Malte Helmert, Gabi Röger and Silvia Richter.
-
 
 ## License
 
