@@ -177,8 +177,6 @@ which was proved to work (however, it may possibly also work with 1.15.0).
 
 * Trained models are available [here](https://zenodo.org/record/4000991).
 
-[Click here for information on extending Neural Fast Downward](EXTENDING.md)
-
 ## License
 
 The following directory is not part of Fast Downward as covered by
