@@ -11,4 +11,4 @@ File = open(GRAPH_PB_PATH,"rb")
 graph.ParseFromString(File.read())
 
 for layer in graph.node:
-    print(layer.name)
+    print("NAME:", layer.name, ", INPUT:", layer.input)
