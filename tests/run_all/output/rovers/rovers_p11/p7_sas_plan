@@ -1,0 +1,7 @@
+(navigate rover0 waypoint5 waypoint1)
+(sample_soil rover0 rover0store waypoint1)
+(sample_rock rover1 rover1store waypoint4)
+(communicate_rock_data rover1 general waypoint4 waypoint4 waypoint1)
+(navigate rover0 waypoint1 waypoint0)
+(communicate_soil_data rover0 general waypoint1 waypoint0 waypoint1)
+; cost = 6 (unit cost)

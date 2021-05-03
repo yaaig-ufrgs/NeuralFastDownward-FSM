@@ -1,0 +1,115 @@
+INFO     Running translator.
+INFO     translator stdin: None
+INFO     translator time limit: 1799.92s
+INFO     translator memory limit: 3584 MB
+INFO     translator command line string: /usr/bin/python3 /home/probst/code/NeuralFastDownward/builds/debug/bin/translator.py ../../tasks/rovers/rovers_p11/domain.pddl ../../tasks/rovers/rovers_p11/p6.pddl --sas-file output.sas
+Parsing...
+Parsing: [0.000s CPU, 0.007s wall-clock]
+Normalizing task... [0.000s CPU, 0.000s wall-clock]
+Instantiating...
+Generating Datalog program... [0.010s CPU, 0.002s wall-clock]
+Normalizing Datalog program...
+Normalizing Datalog program: [0.000s CPU, 0.008s wall-clock]
+Preparing model... [0.010s CPU, 0.006s wall-clock]
+Generated 90 rules.
+Computing model... [0.040s CPU, 0.043s wall-clock]
+660 relevant atoms
+1747 auxiliary atoms
+2407 final queue length
+3025 total queue pushes
+Completing instantiation... [0.030s CPU, 0.024s wall-clock]
+Instantiating: [0.090s CPU, 0.083s wall-clock]
+Computing fact groups...
+Finding invariants...
+35 initial candidates
+Finding invariants: [0.000s CPU, 0.008s wall-clock]
+Checking invariant weight... [0.000s CPU, 0.000s wall-clock]
+Instantiating groups... [0.000s CPU, 0.001s wall-clock]
+Collecting mutex groups... [0.000s CPU, 0.000s wall-clock]
+Choosing groups...
+46 uncovered facts
+Choosing groups: [0.000s CPU, 0.000s wall-clock]
+Building translation key... [0.000s CPU, 0.001s wall-clock]
+Computing fact groups: [0.000s CPU, 0.012s wall-clock]
+Building STRIPS to SAS dictionary... [0.000s CPU, 0.000s wall-clock]
+Building dictionary for full mutex groups... [0.000s CPU, 0.000s wall-clock]
+Building mutex information...
+Building mutex information: [0.000s CPU, 0.000s wall-clock]
+Translating task...
+Processing axioms...
+Simplifying axioms... [0.000s CPU, 0.000s wall-clock]
+Translator axioms removed by simplifying: 0
+Computing negative axioms... [0.000s CPU, 0.000s wall-clock]
+Processing axioms: [0.000s CPU, 0.001s wall-clock]
+Translating task: [0.030s CPU, 0.025s wall-clock]
+96 effect conditions simplified
+0 implied preconditions added
+Detecting unreachable propositions...
+60 operators removed
+0 axioms removed
+70 propositions removed
+Detecting unreachable propositions: [0.010s CPU, 0.012s wall-clock]
+Reordering and filtering variables...
+2 of 38 variables necessary.
+0 of 7 mutex groups necessary.
+20 of 281 operators necessary.
+0 of 0 axiom rules necessary.
+Reordering and filtering variables: [0.000s CPU, 0.002s wall-clock]
+Translator variables: 2
+Translator derived variables: 0
+Translator facts: 10
+Translator goal facts: 1
+Translator mutex groups: 0
+Translator total mutex groups size: 0
+Translator operators: 20
+Translator axioms: 0
+Translator task size: 73
+Translator peak memory: 42556 KB
+Writing output... [0.000s CPU, 0.001s wall-clock]
+Done! [0.140s CPU, 0.143s wall-clock]
+translate exit code: 0
+
+INFO     Running search (debug).
+INFO     search stdin: output.sas
+INFO     search time limit: 1799.71s
+INFO     search memory limit: 3584 MB
+INFO     search command line string: /home/probst/code/NeuralFastDownward/builds/debug/bin/downward --search 'eager_greedy([nh(network=sgnet(path=../../models/rovers/rovers_p11/ocls_ns_ubal_h3_sigmoid_inter_gen_sat_drp0_Kall_pruneOff_9_fold_model.pb,type=classification,unary_threshold=0.00001,state_layer=input_1_1,goal_layer=input_2_1,output_layers=[dense_4_1/Sigmoid],atoms=[Atom at(rover0, waypoint0),Atom at(rover0, waypoint1),Atom at(rover0, waypoint2),Atom at(rover0, waypoint3),Atom at(rover0, waypoint4),Atom at(rover0, waypoint5),Atom at(rover0, waypoint6),Atom at(rover0, waypoint7),Atom at(rover1, waypoint0),Atom at(rover1, waypoint1),Atom at(rover1, waypoint2),Atom at(rover1, waypoint3),Atom at(rover1, waypoint4),Atom at(rover1, waypoint5),Atom at(rover1, waypoint6),Atom at(rover1, waypoint7),Atom at(rover2, waypoint0),Atom at(rover2, waypoint1),Atom at(rover2, waypoint2),Atom at(rover2, waypoint3),Atom at(rover2, waypoint4),Atom at(rover2, waypoint5),Atom at(rover2, waypoint6),Atom at(rover2, waypoint7),Atom at(rover3, waypoint0),Atom at(rover3, waypoint1),Atom at(rover3, waypoint2),Atom at(rover3, waypoint3),Atom at(rover3, waypoint4),Atom at(rover3, waypoint5),Atom at(rover3, waypoint6),Atom at(rover3, waypoint7),Atom at_rock_sample(waypoint0),Atom at_rock_sample(waypoint1),Atom at_rock_sample(waypoint2),Atom at_rock_sample(waypoint4),Atom at_rock_sample(waypoint6),Atom at_rock_sample(waypoint7),Atom at_soil_sample(waypoint0),Atom at_soil_sample(waypoint1),Atom at_soil_sample(waypoint3),Atom at_soil_sample(waypoint6),Atom calibrated(camera0, rover1),Atom calibrated(camera1, rover2),Atom calibrated(camera2, rover3),Atom communicated_image_data(objective1, high_res),Atom communicated_rock_data(waypoint0),Atom communicated_rock_data(waypoint4),Atom communicated_rock_data(waypoint6),Atom communicated_rock_data(waypoint7),Atom communicated_soil_data(waypoint0),Atom communicated_soil_data(waypoint1),Atom communicated_soil_data(waypoint3),Atom communicated_soil_data(waypoint6),Atom dummy(val1),Atom dummy(val2),Atom empty(rover0store),Atom empty(rover1store),Atom empty(rover2store),Atom empty(rover3store),Atom full(rover0store),Atom full(rover1store),Atom full(rover2store),Atom full(rover3store),Atom have_image(rover1, objective1, high_res),Atom have_image(rover2, objective1, high_res),Atom have_image(rover3, objective1, high_res),Atom have_rock_analysis(rover1, waypoint0),Atom have_rock_analysis(rover1, waypoint1),Atom have_rock_analysis(rover1, waypoint2),Atom have_rock_analysis(rover1, waypoint4),Atom have_rock_analysis(rover1, waypoint6),Atom have_rock_analysis(rover1, waypoint7),Atom have_soil_analysis(rover0, waypoint0),Atom have_soil_analysis(rover0, waypoint1),Atom have_soil_analysis(rover0, waypoint3),Atom have_soil_analysis(rover0, waypoint6),Atom have_soil_analysis(rover1, waypoint0),Atom have_soil_analysis(rover1, waypoint1),Atom have_soil_analysis(rover1, waypoint3),Atom have_soil_analysis(rover1, waypoint6),Atom have_soil_analysis(rover2, waypoint0),Atom have_soil_analysis(rover2, waypoint1),Atom have_soil_analysis(rover2, waypoint3),Atom have_soil_analysis(rover2, waypoint6),Atom have_soil_analysis(rover3, waypoint0),Atom have_soil_analysis(rover3, waypoint1),Atom have_soil_analysis(rover3, waypoint3),Atom have_soil_analysis(rover3, waypoint6)],defaults=[1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1,1,0,0,1,0,1,1,0,1,0,0,0,1,1,1,0,0,1,1,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,1],batch_size=50))],cost_type=one)' --internal-plan-file sas_plan < output.sas
+[t=7.3874e-05s, 154940 KB] reading input...
+[t=0.000431817s, 154940 KB] done reading input!
+The current tasks has facts that are not used by the network: NegatedAtom communicated_rock_data(waypoint0), 
+
+Network State Input: Atom at(rover0,waypoint0)(1), Atom at(rover0,waypoint1)(0), Atom at(rover0,waypoint2)(0), Atom at(rover0,waypoint3)(0), Atom at(rover0,waypoint4)(0), Atom at(rover0,waypoint5)(0), Atom at(rover0,waypoint6)(0), Atom at(rover0,waypoint7)(0), Atom at(rover1,waypoint0)(0), Atom at(rover1,waypoint1)(0), Atom at(rover1,waypoint2)(0), Atom at(rover1,waypoint3)(0), Atom at(rover1,waypoint4)(0), Atom at(rover1,waypoint5)(1), Atom at(rover1,waypoint6)(0), Atom at(rover1,waypoint7)(0), Atom at(rover2,waypoint0)(0), Atom at(rover2,waypoint1)(1), Atom at(rover2,waypoint2)(0), Atom at(rover2,waypoint3)(0), Atom at(rover2,waypoint4)(0), Atom at(rover2,waypoint5)(0), Atom at(rover2,waypoint6)(0), Atom at(rover2,waypoint7)(0), Atom at(rover3,waypoint0)(0), Atom at(rover3,waypoint1)(0), Atom at(rover3,waypoint2)(0), Atom at(rover3,waypoint3)(0), Atom at(rover3,waypoint4)(0), Atom at(rover3,waypoint5)(0), Atom at(rover3,waypoint6)(1), Atom at(rover3,waypoint7)(0), Atom at_rock_sample(waypoint0)(0), Atom at_rock_sample(waypoint1)(1), Atom at_rock_sample(waypoint2)(1), Atom at_rock_sample(waypoint4)(0), Atom at_rock_sample(waypoint6)(0), Atom at_rock_sample(waypoint7)(0), Atom at_soil_sample(waypoint0)(0), Atom at_soil_sample(waypoint1)(0), Atom at_soil_sample(waypoint3)(0), Atom at_soil_sample(waypoint6)(0), Atom calibrated(camera0,rover1)(0), Atom calibrated(camera1,rover2)(0), Atom calibrated(camera2,rover3)(1), Atom communicated_image_data(objective1,high_res)(1), Atom communicated_rock_data(waypoint0)(0), Atom communicated_rock_data(waypoint4)(1), Atom communicated_rock_data(waypoint6)(1), Atom communicated_rock_data(waypoint7)(1), Atom communicated_soil_data(waypoint0)(1), Atom communicated_soil_data(waypoint1)(1), Atom communicated_soil_data(waypoint3)(1), Atom communicated_soil_data(waypoint6)(1), Atom dummy(val1)(0), Atom dummy(val2)(0), Atom empty(rover0store)(1), Atom empty(rover1store)(0), Atom empty(rover2store)(1), Atom empty(rover3store)(1), Atom full(rover0store)(0), Atom full(rover1store)(1), Atom full(rover2store)(0), Atom full(rover3store)(0), Atom have_image(rover1,objective1,high_res)(0), Atom have_image(rover2,objective1,high_res)(1), Atom have_image(rover3,objective1,high_res)(1), Atom have_rock_analysis(rover1,waypoint0)(1), Atom have_rock_analysis(rover1,waypoint1)(0), Atom have_rock_analysis(rover1,waypoint2)(0), Atom have_rock_analysis(rover1,waypoint4)(1), Atom have_rock_analysis(rover1,waypoint6)(1), Atom have_rock_analysis(rover1,waypoint7)(1), Atom have_soil_analysis(rover0,waypoint0)(0), Atom have_soil_analysis(rover0,waypoint1)(1), Atom have_soil_analysis(rover0,waypoint3)(0), Atom have_soil_analysis(rover0,waypoint6)(0), Atom have_soil_analysis(rover1,waypoint0)(1), Atom have_soil_analysis(rover1,waypoint1)(0), Atom have_soil_analysis(rover1,waypoint3)(0), Atom have_soil_analysis(rover1,waypoint6)(0), Atom have_soil_analysis(rover2,waypoint0)(0), Atom have_soil_analysis(rover2,waypoint1)(0), Atom have_soil_analysis(rover2,waypoint3)(0), Atom have_soil_analysis(rover2,waypoint6)(0), Atom have_soil_analysis(rover3,waypoint0)(0), Atom have_soil_analysis(rover3,waypoint1)(0), Atom have_soil_analysis(rover3,waypoint3)(1), Atom have_soil_analysis(rover3,waypoint6)(1)
+Initializing network heuristic...
+[t=0.0374094s, 289692 KB] Building successor generator...done!
+[t=0.0375801s, 289692 KB] peak memory difference for successor generator creation: 0 KB
+[t=0.0376158s, 289692 KB] time for successor generation creation: 1.7035e-05s
+[t=0.0376581s, 289692 KB] Variables: 2
+[t=0.0376985s, 289692 KB] FactPairs: 10
+[t=0.0377338s, 289692 KB] Bytes per state: 4
+[t=0.0379785s, 289692 KB] Conducting best first search without reopening closed nodes, (real) bound = 2147483647
+[t=0.0452251s, 749368 KB] New best heuristic value for nh(network = sgnet(path = ../../models/rovers/rovers_p11/ocls_ns_ubal_h3_sigmoid_inter_gen_sat_drp0_Kall_pruneOff_9_fold_model.pb, type = classification, unary_threshold = 0.00001, state_layer = input_1_1, goal_layer = input_2_1, output_layers = list(dense_4_1/Sigmoid), atoms = list(Atom at(rover0, waypoint0), Atom at(rover0, waypoint1), Atom at(rover0, waypoint2), Atom at(rover0, waypoint3), Atom at(rover0, waypoint4), Atom at(rover0, waypoint5), Atom at(rover0, waypoint6), Atom at(rover0, waypoint7), Atom at(rover1, waypoint0), Atom at(rover1, waypoint1), Atom at(rover1, waypoint2), Atom at(rover1, waypoint3), Atom at(rover1, waypoint4), Atom at(rover1, waypoint5), Atom at(rover1, waypoint6), Atom at(rover1, waypoint7), Atom at(rover2, waypoint0), Atom at(rover2, waypoint1), Atom at(rover2, waypoint2), Atom at(rover2, waypoint3), Atom at(rover2, waypoint4), Atom at(rover2, waypoint5), Atom at(rover2, waypoint6), Atom at(rover2, waypoint7), Atom at(rover3, waypoint0), Atom at(rover3, waypoint1), Atom at(rover3, waypoint2), Atom at(rover3, waypoint3), Atom at(rover3, waypoint4), Atom at(rover3, waypoint5), Atom at(rover3, waypoint6), Atom at(rover3, waypoint7), Atom at_rock_sample(waypoint0), Atom at_rock_sample(waypoint1), Atom at_rock_sample(waypoint2), Atom at_rock_sample(waypoint4), Atom at_rock_sample(waypoint6), Atom at_rock_sample(waypoint7), Atom at_soil_sample(waypoint0), Atom at_soil_sample(waypoint1), Atom at_soil_sample(waypoint3), Atom at_soil_sample(waypoint6), Atom calibrated(camera0, rover1), Atom calibrated(camera1, rover2), Atom calibrated(camera2, rover3), Atom communicated_image_data(objective1, high_res), Atom communicated_rock_data(waypoint0), Atom communicated_rock_data(waypoint4), Atom communicated_rock_data(waypoint6), Atom communicated_rock_data(waypoint7), Atom communicated_soil_data(waypoint0), Atom communicated_soil_data(waypoint1), Atom communicated_soil_data(waypoint3), Atom communicated_soil_data(waypoint6), Atom dummy(val1), Atom dummy(val2), Atom empty(rover0store), Atom empty(rover1store), Atom empty(rover2store), Atom empty(rover3store), Atom full(rover0store), Atom full(rover1store), Atom full(rover2store), Atom full(rover3store), Atom have_image(rover1, objective1, high_res), Atom have_image(rover2, objective1, high_res), Atom have_image(rover3, objective1, high_res), Atom have_rock_analysis(rover1, waypoint0), Atom have_rock_analysis(rover1, waypoint1), Atom have_rock_analysis(rover1, waypoint2), Atom have_rock_analysis(rover1, waypoint4), Atom have_rock_analysis(rover1, waypoint6), Atom have_rock_analysis(rover1, waypoint7), Atom have_soil_analysis(rover0, waypoint0), Atom have_soil_analysis(rover0, waypoint1), Atom have_soil_analysis(rover0, waypoint3), Atom have_soil_analysis(rover0, waypoint6), Atom have_soil_analysis(rover1, waypoint0), Atom have_soil_analysis(rover1, waypoint1), Atom have_soil_analysis(rover1, waypoint3), Atom have_soil_analysis(rover1, waypoint6), Atom have_soil_analysis(rover2, waypoint0), Atom have_soil_analysis(rover2, waypoint1), Atom have_soil_analysis(rover2, waypoint3), Atom have_soil_analysis(rover2, waypoint6), Atom have_soil_analysis(rover3, waypoint0), Atom have_soil_analysis(rover3, waypoint1), Atom have_soil_analysis(rover3, waypoint3), Atom have_soil_analysis(rover3, waypoint6)), defaults = list(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1), batch_size = 50)): 0
+[t=0.0454393s, 749368 KB] g=0, 1 evaluated, 0 expanded
+[t=0.0454853s, 749368 KB] Initial heuristic value for nh(network = sgnet(path = ../../models/rovers/rovers_p11/ocls_ns_ubal_h3_sigmoid_inter_gen_sat_drp0_Kall_pruneOff_9_fold_model.pb, type = classification, unary_threshold = 0.00001, state_layer = input_1_1, goal_layer = input_2_1, output_layers = list(dense_4_1/Sigmoid), atoms = list(Atom at(rover0, waypoint0), Atom at(rover0, waypoint1), Atom at(rover0, waypoint2), Atom at(rover0, waypoint3), Atom at(rover0, waypoint4), Atom at(rover0, waypoint5), Atom at(rover0, waypoint6), Atom at(rover0, waypoint7), Atom at(rover1, waypoint0), Atom at(rover1, waypoint1), Atom at(rover1, waypoint2), Atom at(rover1, waypoint3), Atom at(rover1, waypoint4), Atom at(rover1, waypoint5), Atom at(rover1, waypoint6), Atom at(rover1, waypoint7), Atom at(rover2, waypoint0), Atom at(rover2, waypoint1), Atom at(rover2, waypoint2), Atom at(rover2, waypoint3), Atom at(rover2, waypoint4), Atom at(rover2, waypoint5), Atom at(rover2, waypoint6), Atom at(rover2, waypoint7), Atom at(rover3, waypoint0), Atom at(rover3, waypoint1), Atom at(rover3, waypoint2), Atom at(rover3, waypoint3), Atom at(rover3, waypoint4), Atom at(rover3, waypoint5), Atom at(rover3, waypoint6), Atom at(rover3, waypoint7), Atom at_rock_sample(waypoint0), Atom at_rock_sample(waypoint1), Atom at_rock_sample(waypoint2), Atom at_rock_sample(waypoint4), Atom at_rock_sample(waypoint6), Atom at_rock_sample(waypoint7), Atom at_soil_sample(waypoint0), Atom at_soil_sample(waypoint1), Atom at_soil_sample(waypoint3), Atom at_soil_sample(waypoint6), Atom calibrated(camera0, rover1), Atom calibrated(camera1, rover2), Atom calibrated(camera2, rover3), Atom communicated_image_data(objective1, high_res), Atom communicated_rock_data(waypoint0), Atom communicated_rock_data(waypoint4), Atom communicated_rock_data(waypoint6), Atom communicated_rock_data(waypoint7), Atom communicated_soil_data(waypoint0), Atom communicated_soil_data(waypoint1), Atom communicated_soil_data(waypoint3), Atom communicated_soil_data(waypoint6), Atom dummy(val1), Atom dummy(val2), Atom empty(rover0store), Atom empty(rover1store), Atom empty(rover2store), Atom empty(rover3store), Atom full(rover0store), Atom full(rover1store), Atom full(rover2store), Atom full(rover3store), Atom have_image(rover1, objective1, high_res), Atom have_image(rover2, objective1, high_res), Atom have_image(rover3, objective1, high_res), Atom have_rock_analysis(rover1, waypoint0), Atom have_rock_analysis(rover1, waypoint1), Atom have_rock_analysis(rover1, waypoint2), Atom have_rock_analysis(rover1, waypoint4), Atom have_rock_analysis(rover1, waypoint6), Atom have_rock_analysis(rover1, waypoint7), Atom have_soil_analysis(rover0, waypoint0), Atom have_soil_analysis(rover0, waypoint1), Atom have_soil_analysis(rover0, waypoint3), Atom have_soil_analysis(rover0, waypoint6), Atom have_soil_analysis(rover1, waypoint0), Atom have_soil_analysis(rover1, waypoint1), Atom have_soil_analysis(rover1, waypoint3), Atom have_soil_analysis(rover1, waypoint6), Atom have_soil_analysis(rover2, waypoint0), Atom have_soil_analysis(rover2, waypoint1), Atom have_soil_analysis(rover2, waypoint3), Atom have_soil_analysis(rover2, waypoint6), Atom have_soil_analysis(rover3, waypoint0), Atom have_soil_analysis(rover3, waypoint1), Atom have_soil_analysis(rover3, waypoint3), Atom have_soil_analysis(rover3, waypoint6)), defaults = list(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1), batch_size = 50)): 0
+[t=0.0455291s, 749368 KB] pruning method: none
+[t=0.0469933s, 1011512 KB] Solution found!
+[t=0.0470995s, 1011512 KB] Actual search time: 0.00156427s
+communicate_rock_data rover1 general waypoint0 waypoint5 waypoint1 (1)
+[t=0.047142s, 1011512 KB] Plan length: 1 step(s).
+[t=0.047142s, 1011512 KB] Plan cost: 1
+[t=0.047142s, 1011512 KB] Expanded 2 state(s).
+[t=0.047142s, 1011512 KB] Reopened 0 state(s).
+[t=0.047142s, 1011512 KB] Evaluated 3 state(s).
+[t=0.047142s, 1011512 KB] Evaluations: 3
+[t=0.047142s, 1011512 KB] Generated 2 state(s).
+[t=0.047142s, 1011512 KB] Dead ends: 0 state(s).
+[t=0.047142s, 1011512 KB] Number of registered states: 3
+[t=0.047142s, 1011512 KB] Int hash set load factor: 3/4 = 0.75
+[t=0.047142s, 1011512 KB] Int hash set resizes: 2
+[t=0.047142s, 1011512 KB] Search time: 0.00916571s
+[t=0.047142s, 1011512 KB] Total time: 0.047142s
+Solution found.
+Peak memory: 1011512 KB
+Remove intermediate file output.sas
+search exit code: 0
+
+

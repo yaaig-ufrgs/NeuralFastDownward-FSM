@@ -1,0 +1,2 @@
+(communicate_rock_data rover1 general waypoint0 waypoint5 waypoint1)
+; cost = 1 (unit cost)
