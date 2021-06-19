@@ -100,6 +100,7 @@ void SamplingEngine::update_current_technique() {
 }
 
 SearchStatus SamplingEngine::step() {
+    assert(!finalize);
     update_current_technique();
     if (current_technique == sampling_techniques.end()) {
         finalize = true;
@@ -119,7 +120,7 @@ SearchStatus SamplingEngine::step() {
 
 void SamplingEngine::print_statistics() const {
 
-    cout << "Generated Samples: " << (generated_samples + sample_cache_size)
+    cout << "Generated Entries: " << (generated_samples + sample_cache_size)
          << endl;
     cout << "Sampling Techniques used:" << endl;
     for (auto &st : sampling_techniques) {
@@ -130,6 +131,9 @@ void SamplingEngine::print_statistics() const {
 }
 
 void SamplingEngine::save_plan_if_necessary() {
+    if (get_status() != SearchStatus::IN_PROGRESS) {
+        finalize = true;
+    }
     assert(finalize || sample_cache_size >= max_sample_cache_size);
     while ((finalize || sample_cache_size >= max_sample_cache_size) &&
            sample_cache_size > 0 &&
@@ -171,6 +175,7 @@ void SamplingEngine::save_plan_if_necessary() {
             sample_cache.begin() + idx_vector + 
                 ((sample_cache[idx_vector].empty()) ? 1 : 0));
         sample_cache_size -= nb_samples;
+        generated_samples += nb_samples;
         count_sample_files++;
     }
 }
