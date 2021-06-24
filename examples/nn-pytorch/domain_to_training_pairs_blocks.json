@@ -1,0 +1,4674 @@
+{
+  "blocksworld": [
+    {
+      "state": [
+        "(on b2 b1)",
+        "(on b3 b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(handempty)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-3-9804-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-3-9804-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(clear b3)",
+        "(handempty)",
+        "(on-table b3)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-3-9804-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b2 b3)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(handempty)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-3-9804-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(holding b2)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-3-9804-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(handempty)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-3-9804-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(clear b1)",
+        "(holding b3)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-3-9804-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-3-9804-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(holding b1)",
+        "(on-table b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-3-9804-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-3-9804-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on-table b3)",
+        "(on b1 b2)",
+        "(clear b3)",
+        "(handempty)",
+        "(clear b1)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-3-9804-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on b1 b2)",
+        "(clear b1)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-3-9804-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(handempty)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-3-9804-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b2 b3)",
+        "(on-table b3)",
+        "(on b1 b2)",
+        "(handempty)",
+        "(clear b1)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-3-9804-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(holding b1)",
+        "(on b2 b3)",
+        "(on-table b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-3-9804-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(handempty)",
+        "(clear b1)",
+        "(on b2 b3)",
+        "(on-table b3)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-3-9804-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b1)",
+        "(clear b3)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(holding b2)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-3-9804-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-3-9804-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(holding b1)",
+        "(on-table b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-3-9804-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-3-9804-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b2 b3)",
+        "(on-table b3)",
+        "(on b1 b2)",
+        "(handempty)",
+        "(clear b1)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-3-9804-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(holding b1)",
+        "(on b2 b3)",
+        "(on-table b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-3-9804-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(handempty)",
+        "(clear b1)",
+        "(on b2 b3)",
+        "(on-table b3)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-3-9804-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b1)",
+        "(clear b3)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(holding b2)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-3-9804-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-3-9804-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(holding b1)",
+        "(on-table b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-3-9804-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-3-9804-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b2 b3)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(handempty)",
+        "(clear b1)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-3-9804-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b1)",
+        "(clear b3)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(holding b2)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-3-9804-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-3-9804-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(clear b1)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-3-9804-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(handempty)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-3-9804-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on-table b3)",
+        "(on b1 b2)",
+        "(clear b3)",
+        "(handempty)",
+        "(clear b1)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-3-9804-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(holding b1)",
+        "(on-table b3)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-3-9804-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-3-9804-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(clear b1)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-3-9804-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b1)",
+        "(clear b3)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b3 b2)",
+        "(clear b1)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-3-9804-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on b3 b1)",
+        "(handempty)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-3-9804-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(clear b1)",
+        "(holding b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-3-9804-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-3-9804-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b1)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(holding b2)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-3-9804-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(handempty)",
+        "(on-table b3)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-3-9804-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-3-9804-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(clear b3)",
+        "(handempty)",
+        "(on b3 b2)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-3-9804-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on b3 b1)",
+        "(handempty)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-3-9804-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on b1 b2)",
+        "(clear b1)",
+        "(holding b3)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-3-9804-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-3-9804-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(holding b1)",
+        "(on-table b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-3-9804-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-3-9804-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(clear b1)",
+        "(holding b3)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-3-9804-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(handempty)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-3-9804-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(holding b2)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-3-9804-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(handempty)",
+        "(on b2 b3)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-3-9804-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(handempty)",
+        "(clear b1)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-3-9804-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b1)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(holding b2)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-3-9804-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b2 b3)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-3-9804-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(holding b1)",
+        "(on b2 b3)",
+        "(on-table b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-3-9804-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on b2 b3)",
+        "(on-table b3)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-3-9804-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks3/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on b4 b1)",
+        "(on-table b3)",
+        "(on b1 b2)",
+        "(clear b3)",
+        "(handempty)",
+        "(clear b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-4-5774-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(holding b4)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-4-5774-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-4-5774-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(holding b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-4-5774-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-4-5774-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-4-5774-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(on b2 b3)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-4-5774-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on-table b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(handempty)",
+        "(clear b1)",
+        "(on b3 b4)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-4-5774-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(clear b1)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-4-5774-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-4-5774-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(holding b4)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-4-5774-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-4-5774-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-4-5774-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(on b3 b1)",
+        "(handempty)",
+        "(on b2 b3)",
+        "(clear b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-4-5774-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(holding b4)",
+        "(on b2 b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-4-5774-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(handempty)",
+        "(on b2 b3)",
+        "(clear b4)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-4-5774-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on b1 b2)",
+        "(on b3 b1)",
+        "(handempty)",
+        "(clear b4)",
+        "(on b4 b3)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-4-5774-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(holding b4)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-4-5774-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-4-5774-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(clear b1)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-4-5774-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-4-5774-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(holding b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-4-5774-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(handempty)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-4-5774-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b4)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(holding b2)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-4-5774-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on b2 b1)",
+        "(handempty)",
+        "(on b1 b4)",
+        "(on-table b3)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-4-5774-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b2 b1)",
+        "(on-table b4)",
+        "(on b3 b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(handempty)",
+        "(clear b4)"
+      ],
+      "value": 10,
+      "problem": {
+        "name": "bw-4-5774-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(on b2 b1)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 9,
+      "problem": {
+        "name": "bw-4-5774-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(on-table b4)",
+        "(clear b3)",
+        "(handempty)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-4-5774-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-4-5774-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(on b2 b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-4-5774-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(holding b1)",
+        "(on-table b3)",
+        "(on b2 b4)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-4-5774-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b4)",
+        "(on b1 b3)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(on b2 b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-4-5774-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b4)",
+        "(on b1 b3)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-4-5774-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b4)",
+        "(on b2 b1)",
+        "(on b1 b3)",
+        "(handempty)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-4-5774-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on b2 b1)",
+        "(on b1 b3)",
+        "(holding b4)",
+        "(on-table b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-4-5774-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on b2 b1)",
+        "(on b1 b3)",
+        "(handempty)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-4-5774-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b4)",
+        "(on-table b2)",
+        "(on b1 b4)",
+        "(on b3 b2)",
+        "(clear b3)",
+        "(handempty)",
+        "(clear b1)"
+      ],
+      "value": 10,
+      "problem": {
+        "name": "bw-4-5774-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(holding b3)"
+      ],
+      "value": 9,
+      "problem": {
+        "name": "bw-4-5774-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-4-5774-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(holding b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-4-5774-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-4-5774-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(holding b4)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-4-5774-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-4-5774-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(holding b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-4-5774-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(clear b3)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-4-5774-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on-table b2)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-4-5774-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(clear b3)",
+        "(handempty)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(on b1 b4)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-4-5774-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on b1 b2)",
+        "(on b3 b1)",
+        "(handempty)",
+        "(clear b4)",
+        "(on b4 b3)"
+      ],
+      "value": 12,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(holding b4)"
+      ],
+      "value": 11,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b4)"
+      ],
+      "value": 10,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(clear b1)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 9,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on b3 b4)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(holding b1)",
+        "(on b3 b4)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on b3 b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(clear b1)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(clear b3)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(holding b4)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b4)",
+        "(on b4 b3)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(holding b2)",
+        "(clear b4)",
+        "(on b4 b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(handempty)",
+        "(on b2 b4)",
+        "(on b4 b3)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-4-5774-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b1)",
+        "(on-table b3)",
+        "(on b2 b4)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(handempty)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-4-5774-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b1)",
+        "(on b4 b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-4-5774-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b2 b3)",
+        "(handempty)",
+        "(on b4 b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-4-5774-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(holding b4)",
+        "(clear b1)",
+        "(on b2 b3)",
+        "(on-table b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-4-5774-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(handempty)",
+        "(clear b1)",
+        "(on b2 b3)",
+        "(clear b4)",
+        "(on-table b3)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-4-5774-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b1)",
+        "(on-table b4)",
+        "(clear b3)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-4-5774-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(handempty)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-4-5774-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(on-table b4)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-4-5774-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b3 b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(on b2 b1)",
+        "(clear b3)",
+        "(handempty)",
+        "(clear b4)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-4-5774-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(on b3 b2)",
+        "(on b4 b1)",
+        "(handempty)",
+        "(clear b4)"
+      ],
+      "value": 12,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(on b3 b2)",
+        "(holding b4)",
+        "(clear b1)"
+      ],
+      "value": 11,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b4)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(on b3 b2)",
+        "(clear b1)",
+        "(clear b4)"
+      ],
+      "value": 10,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(on b3 b2)",
+        "(holding b1)",
+        "(clear b4)"
+      ],
+      "value": 9,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b4)",
+        "(handempty)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(on b3 b2)",
+        "(clear b1)",
+        "(clear b4)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(clear b1)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(handempty)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on b2 b1)",
+        "(on-table b1)",
+        "(holding b4)",
+        "(on-table b3)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(clear b3)",
+        "(on b2 b1)",
+        "(on-table b1)",
+        "(handempty)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(clear b3)",
+        "(handempty)",
+        "(on b3 b4)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-4-5774-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b4)",
+        "(on-table b3)",
+        "(on b2 b4)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(handempty)",
+        "(clear b1)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-4-5774-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-4-5774-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-4-5774-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(clear b1)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-4-5774-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on b3 b4)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-4-5774-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b1)",
+        "(on b2 b3)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(handempty)",
+        "(clear b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-4-5774-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b1)",
+        "(clear b3)",
+        "(on b4 b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-4-5774-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(on b4 b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-4-5774-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(holding b4)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-4-5774-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-4-5774-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(clear b1)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-4-5774-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(clear b3)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b4)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-4-5774-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks4/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b1 b5)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(clear b3)",
+        "(handempty)",
+        "(clear b1)",
+        "(clear b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-5-168-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(holding b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-5-168-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b4)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(clear b5)",
+        "(clear b1)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-5-168-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(holding b3)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b5)",
+        "(clear b1)",
+        "(clear b4)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-5-168-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b4)",
+        "(handempty)",
+        "(on-table b2)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(clear b5)",
+        "(clear b1)",
+        "(on b3 b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-5-168-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(clear b5)",
+        "(clear b1)",
+        "(on b3 b4)",
+        "(holding b2)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-5-168-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(handempty)",
+        "(clear b5)",
+        "(clear b1)",
+        "(on b2 b3)",
+        "(on b3 b4)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-5-168-1",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task01.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b5)",
+        "(on-table b2)",
+        "(on-table b3)",
+        "(on b5 b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(clear b4)",
+        "(on b4 b3)"
+      ],
+      "value": 10,
+      "problem": {
+        "name": "bw-5-168-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on b5 b2)",
+        "(clear b5)",
+        "(holding b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(on b4 b3)"
+      ],
+      "value": 9,
+      "problem": {
+        "name": "bw-5-168-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b1)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b5 b2)",
+        "(clear b5)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(on b4 b3)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-5-168-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(holding b5)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(on b4 b3)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-5-168-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b2)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(clear b5)",
+        "(on-table b1)",
+        "(handempty)",
+        "(clear b1)",
+        "(clear b4)",
+        "(on b4 b3)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-5-168-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(holding b4)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-5-168-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b4 b2)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on-table b3)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(clear b5)",
+        "(clear b1)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-5-168-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b4 b2)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(clear b1)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-5-168-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b4 b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(handempty)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(clear b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-5-168-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on b3 b1)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(holding b4)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-5-168-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(handempty)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(clear b4)",
+        "(on b4 b3)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-5-168-2",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task02.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b4)",
+        "(handempty)",
+        "(on-table b3)",
+        "(on b2 b4)",
+        "(on b1 b2)",
+        "(clear b3)",
+        "(clear b5)",
+        "(clear b1)"
+      ],
+      "value": 12,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(clear b5)",
+        "(holding b1)",
+        "(on-table b3)",
+        "(on b2 b4)"
+      ],
+      "value": 11,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on-table b4)",
+        "(handempty)",
+        "(on b1 b3)",
+        "(clear b5)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(on b2 b4)"
+      ],
+      "value": 10,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b4)",
+        "(on b1 b3)",
+        "(clear b5)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 9,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b4)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(clear b5)",
+        "(clear b1)",
+        "(clear b4)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(clear b5)",
+        "(holding b4)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(on b4 b5)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(clear b4)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(holding b1)",
+        "(on-table b3)",
+        "(on b4 b5)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(clear b3)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(on b4 b5)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b3)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(on b4 b5)",
+        "(holding b2)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on b2 b1)",
+        "(handempty)",
+        "(on b1 b4)",
+        "(on-table b3)",
+        "(on b4 b5)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on b2 b1)",
+        "(on b1 b4)",
+        "(on b4 b5)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b3)",
+        "(on b2 b1)",
+        "(handempty)",
+        "(on b3 b2)",
+        "(on b1 b4)",
+        "(on b4 b5)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-5-168-3",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task03.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b1 b5)",
+        "(on b4 b2)",
+        "(on-table b2)",
+        "(on-table b3)",
+        "(handempty)",
+        "(clear b1)",
+        "(on b5 b3)",
+        "(clear b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-5-168-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on b5 b3)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(holding b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-5-168-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on b5 b3)",
+        "(on-table b1)",
+        "(handempty)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-5-168-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(holding b5)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-5-168-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(clear b5)",
+        "(on-table b2)",
+        "(on b5 b4)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-5-168-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(on b5 b4)",
+        "(clear b5)",
+        "(clear b1)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-5-168-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b3 b5)",
+        "(on b4 b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(on b5 b4)",
+        "(handempty)",
+        "(clear b1)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-5-168-4",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task04.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b2 b1)",
+        "(on b3 b4)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on b5 b2)",
+        "(handempty)",
+        "(on b4 b5)"
+      ],
+      "value": 10,
+      "problem": {
+        "name": "bw-5-168-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b4)",
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(on b5 b2)",
+        "(on b4 b5)",
+        "(holding b3)"
+      ],
+      "value": 9,
+      "problem": {
+        "name": "bw-5-168-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b4)",
+        "(on-table b1)",
+        "(on b2 b1)",
+        "(clear b3)",
+        "(on b5 b2)",
+        "(handempty)",
+        "(on-table b3)",
+        "(on b4 b5)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-5-168-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on b2 b1)",
+        "(on-table b1)",
+        "(on b5 b2)",
+        "(clear b5)",
+        "(holding b4)",
+        "(on-table b3)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-5-168-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b3)",
+        "(on b2 b1)",
+        "(on-table b1)",
+        "(handempty)",
+        "(on-table b4)",
+        "(on b5 b2)",
+        "(clear b5)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-5-168-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on b2 b1)",
+        "(on-table b1)",
+        "(holding b5)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-5-168-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b4)",
+        "(on b2 b1)",
+        "(handempty)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(clear b5)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-5-168-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(clear b5)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-5-168-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b4)",
+        "(handempty)",
+        "(on-table b3)",
+        "(on b2 b3)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b5)",
+        "(clear b1)",
+        "(clear b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-5-168-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on-table b4)",
+        "(clear b5)",
+        "(holding b1)",
+        "(on b2 b3)",
+        "(clear b4)",
+        "(on-table b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-5-168-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on b1 b5)",
+        "(on-table b4)",
+        "(handempty)",
+        "(clear b1)",
+        "(on b2 b3)",
+        "(clear b4)",
+        "(on-table b3)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-5-168-5",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task05.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(on-table b3)",
+        "(on b4 b5)",
+        "(clear b2)",
+        "(handempty)",
+        "(on b5 b1)",
+        "(clear b4)"
+      ],
+      "value": 10,
+      "problem": {
+        "name": "bw-5-168-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(holding b4)",
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(clear b5)",
+        "(on b5 b1)",
+        "(on-table b3)"
+      ],
+      "value": 9,
+      "problem": {
+        "name": "bw-5-168-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(clear b5)",
+        "(on b5 b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-5-168-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(holding b5)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-5-168-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(clear b5)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b1 b3)",
+        "(on b5 b4)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-5-168-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(on b5 b4)",
+        "(clear b5)",
+        "(holding b1)",
+        "(on-table b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-5-168-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b5 b4)",
+        "(clear b5)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-5-168-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(holding b5)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-5-168-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b4 b2)",
+        "(on-table b1)",
+        "(on b5 b3)",
+        "(handempty)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-5-168-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b5 b3)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(holding b4)",
+        "(clear b1)",
+        "(on-table b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-5-168-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(on b5 b3)",
+        "(on-table b2)",
+        "(handempty)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(on b4 b5)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-5-168-6",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task06.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b4)",
+        "(on b1 b4)",
+        "(on-table b3)",
+        "(on b2 b5)",
+        "(clear b2)",
+        "(clear b3)",
+        "(handempty)",
+        "(on b5 b1)"
+      ],
+      "value": 10,
+      "problem": {
+        "name": "bw-5-168-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b5)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on b1 b4)",
+        "(on b5 b1)",
+        "(on-table b3)",
+        "(holding b2)"
+      ],
+      "value": 9,
+      "problem": {
+        "name": "bw-5-168-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b5)",
+        "(on-table b4)",
+        "(on b2 b3)",
+        "(handempty)",
+        "(on b1 b4)",
+        "(on b5 b1)",
+        "(on-table b3)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-5-168-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b4)",
+        "(holding b5)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(on b2 b3)",
+        "(on-table b3)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-5-168-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(clear b5)",
+        "(on-table b4)",
+        "(handempty)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(on b2 b3)",
+        "(on-table b3)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-5-168-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on-table b4)",
+        "(clear b5)",
+        "(holding b1)",
+        "(on b2 b3)",
+        "(clear b4)",
+        "(on-table b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-5-168-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b4)",
+        "(handempty)",
+        "(on b2 b3)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b5)",
+        "(clear b1)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-5-168-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(clear b3)",
+        "(clear b5)",
+        "(clear b1)",
+        "(on-table b3)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-5-168-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b4)",
+        "(on b2 b1)",
+        "(handempty)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(clear b5)",
+        "(clear b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-5-168-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on b2 b1)",
+        "(on-table b1)",
+        "(clear b5)",
+        "(holding b4)",
+        "(on-table b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-5-168-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b4 b2)",
+        "(clear b3)",
+        "(on b2 b1)",
+        "(on-table b1)",
+        "(handempty)",
+        "(clear b5)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-5-168-7",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task07.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b1 b5)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(clear b3)",
+        "(handempty)",
+        "(clear b1)",
+        "(clear b4)"
+      ],
+      "value": 10,
+      "problem": {
+        "name": "bw-5-168-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(holding b1)",
+        "(on-table b3)",
+        "(clear b4)"
+      ],
+      "value": 9,
+      "problem": {
+        "name": "bw-5-168-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on-table b4)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(clear b5)",
+        "(clear b1)",
+        "(clear b4)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-5-168-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b4)",
+        "(on-table b2)",
+        "(holding b5)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(clear b1)",
+        "(clear b4)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-5-168-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b4)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on-table b3)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(clear b5)",
+        "(on b5 b1)",
+        "(clear b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-5-168-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(holding b4)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(on b5 b1)",
+        "(on-table b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-5-168-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b4)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(handempty)",
+        "(on b5 b1)",
+        "(on-table b3)",
+        "(on b4 b5)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-5-168-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b4)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(on b5 b1)",
+        "(on b4 b5)",
+        "(holding b3)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-5-168-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b3 b4)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(handempty)",
+        "(on b5 b1)",
+        "(on b4 b5)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-5-168-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b3 b4)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on b5 b1)",
+        "(on b4 b5)",
+        "(holding b2)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-5-168-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(on-table b1)",
+        "(handempty)",
+        "(on b5 b1)",
+        "(on b2 b3)",
+        "(on b3 b4)",
+        "(on b4 b5)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-5-168-8",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task08.pddl"
+      }
+    },
+    {
+      "state": [
+        "(handempty)",
+        "(on-table b2)",
+        "(on b1 b4)",
+        "(on b3 b2)",
+        "(clear b5)",
+        "(on b5 b1)",
+        "(on b4 b3)"
+      ],
+      "value": 12,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b3 b2)",
+        "(on-table b2)",
+        "(holding b5)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(on b4 b3)"
+      ],
+      "value": 11,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b5)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b3 b2)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(on b4 b3)"
+      ],
+      "value": 10,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b5)",
+        "(on-table b2)",
+        "(on b3 b2)",
+        "(holding b1)",
+        "(clear b4)",
+        "(on b4 b3)"
+      ],
+      "value": 9,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b5)",
+        "(on-table b1)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b3 b2)",
+        "(clear b1)",
+        "(clear b4)",
+        "(on b4 b3)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b5)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(on b3 b2)",
+        "(holding b4)",
+        "(clear b1)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b5)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(handempty)",
+        "(on-table b2)",
+        "(on b3 b2)",
+        "(on b4 b1)",
+        "(clear b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(on b4 b1)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(handempty)",
+        "(on-table b2)",
+        "(clear b5)",
+        "(on b4 b1)",
+        "(on b3 b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(holding b5)",
+        "(on b4 b1)",
+        "(on b3 b4)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b5)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on-table b2)",
+        "(on b5 b2)",
+        "(handempty)",
+        "(on b4 b1)",
+        "(on b3 b4)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b1)",
+        "(on-table b2)",
+        "(on b5 b2)",
+        "(clear b5)",
+        "(on b4 b1)",
+        "(clear b4)",
+        "(holding b3)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on b3 b5)",
+        "(on-table b1)",
+        "(clear b3)",
+        "(on-table b2)",
+        "(on b5 b2)",
+        "(handempty)",
+        "(on b4 b1)",
+        "(clear b4)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-5-168-9",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task09.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b4)",
+        "(handempty)",
+        "(on b2 b4)",
+        "(clear b3)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(on b5 b2)",
+        "(clear b5)"
+      ],
+      "value": 10,
+      "problem": {
+        "name": "bw-5-168-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(holding b5)",
+        "(on b2 b4)"
+      ],
+      "value": 9,
+      "problem": {
+        "name": "bw-5-168-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(on b3 b1)",
+        "(handempty)",
+        "(clear b5)",
+        "(on b2 b4)"
+      ],
+      "value": 8,
+      "problem": {
+        "name": "bw-5-168-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(holding b3)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(clear b5)",
+        "(clear b1)",
+        "(on b2 b4)"
+      ],
+      "value": 7,
+      "problem": {
+        "name": "bw-5-168-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b3 b5)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(clear b3)",
+        "(handempty)",
+        "(clear b1)",
+        "(on b2 b4)"
+      ],
+      "value": 6,
+      "problem": {
+        "name": "bw-5-168-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b3 b5)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on-table b1)",
+        "(clear b1)",
+        "(clear b4)",
+        "(holding b2)"
+      ],
+      "value": 5,
+      "problem": {
+        "name": "bw-5-168-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b3 b5)",
+        "(clear b2)",
+        "(on-table b1)",
+        "(on-table b4)",
+        "(handempty)",
+        "(clear b1)",
+        "(on b2 b3)",
+        "(clear b4)"
+      ],
+      "value": 4,
+      "problem": {
+        "name": "bw-5-168-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b3 b5)",
+        "(clear b2)",
+        "(on-table b4)",
+        "(holding b1)",
+        "(on b2 b3)",
+        "(clear b4)"
+      ],
+      "value": 3,
+      "problem": {
+        "name": "bw-5-168-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b3 b5)",
+        "(clear b2)",
+        "(on-table b4)",
+        "(handempty)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(on b2 b3)"
+      ],
+      "value": 2,
+      "problem": {
+        "name": "bw-5-168-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b3 b5)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on b1 b4)",
+        "(clear b1)",
+        "(holding b2)"
+      ],
+      "value": 1,
+      "problem": {
+        "name": "bw-5-168-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task10.pddl"
+      }
+    },
+    {
+      "state": [
+        "(on-table b5)",
+        "(on b3 b5)",
+        "(clear b2)",
+        "(clear b3)",
+        "(on-table b4)",
+        "(on b2 b1)",
+        "(handempty)",
+        "(on b1 b4)"
+      ],
+      "value": 0,
+      "problem": {
+        "name": "bw-5-168-10",
+        "domain_name": "blocksworld",
+        "domain_pddl": "../benchmarks/blocks-slaney/domain.pddl",
+        "problem_pddl": "../benchmarks/blocks-slaney/blocks5/task10.pddl"
+      }
+    }
+  ]
+}
