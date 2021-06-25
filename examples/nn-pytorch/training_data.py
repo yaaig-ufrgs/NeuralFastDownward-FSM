@@ -31,7 +31,7 @@ Boolean format example for max blocks = 5
 
 | handempty |   clear   |   holding   |   on-table   |             on               |
 -------------------------------------------------------------------------------------
-| 1         | 1 0 0 0 0 |  0 0 0 0 0  |0  0  1  0  0 | 1  0  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 |
+| 1         | 1 0 0 0 0 |  0 0 0 0 0  |0  0  1  0  0 | 1  0  0  0  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0 |
   0           1 2 3 4 5    6 7 8 9 10  11 12 13 14 15  16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
 """
 
@@ -40,7 +40,6 @@ def states_to_boolean(data: [], domain: str):
     states = [t[0] for t in data]
 
     if domain == "blocksworld":
-
         permDict = {}
         index = 0
         for p in permutations(range(1, 6), 2):
