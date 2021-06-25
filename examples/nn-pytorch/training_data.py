@@ -1,4 +1,5 @@
 from json import load
+from itertools import permutations
 
 def load_training_state_value_tuples(json_file: str):
     """
@@ -28,19 +29,54 @@ on b2 b3
 
 Boolean format example for max blocks = 5
 
-| handempty |   clear   |   holding   |   object  |  on-table |         on          |
+| handempty |   clear   |   holding   |   on-table   |             on               |
 -------------------------------------------------------------------------------------
-| 1         | 1 0 0 0 0 |  0 0 0 0 0  | 0 0 0 0 0 | 0 0 1 0 0 | 1 0 0 1 0 0 0 0 0 0 |
+| 1         | 1 0 0 0 0 |  0 0 0 0 0  |0  0  1  0  0 | 1  0  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 |
+  0           1 2 3 4 5    6 7 8 9 10  11 12 13 14 15  16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35
 """
+
 def states_to_boolean(data: [], domain: str):
     bool_states = []
     states = [t[0] for t in data]
-    print(states)
 
     if domain == "blocksworld":
-       bool_state = [0]*31 
-    
 
+        permDict = {}
+        index = 0
+        for p in permutations(range(1, 6), 2):
+            permDict[p] = index
+            index += 1
+
+        for state in states:
+           bool_state = []
+           handempty = [0]
+           clear = [0]*5
+           holding = [0]*5
+           on_table = [0]*5
+           on = [0]*20
+
+           for atom in state:
+               var_list = atom.split()
+               if var_list[0] == "handempty":
+                   handempty[0] = 1
+               elif var_list[0] == "clear":
+                   bx = int(var_list[1][1])-1
+                   clear[bx] = 1;
+               elif var_list[0] == "holding":
+                   bx = int(var_list[1][1])-1
+                   holding[bx] = 1
+               elif var_list[0] == "on-table":
+                   bx = int(var_list[1][1])-1
+                   on_table[bx] = 1
+               elif var_list[0] == "on":
+                   bx = (int(var_list[1][1]), int(var_list[2][1]))
+                   on[permDict[bx]] = 1
+
+           bool_state = handempty + clear + holding + on_table + on
+           bool_states.append(bool_state)
+
+    return bool_states
+                   
 # TODO - to avoid having to take the state-value pairs from Shen's data.
 def generate_optimal_state_value_pairs(problem):
     pass
