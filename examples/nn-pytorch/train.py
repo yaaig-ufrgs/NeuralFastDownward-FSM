@@ -15,27 +15,8 @@ from training_data import (
    states_to_boolean,
 )
 
-
-# TODO train.py
-
 # Use CPU instead of GPU.
 device = torch.device("cpu")
-
-# TODO prepare REAL training/input data
-# Ferber on the input:
-# The inputs of our networks are states represented as fixed
-# size Boolean vectors. We associate every entry of the input
-# vector with a fact of Π. For all facts that are part of the input
-# state we set their vector entries to 1. All other entries are set
-# to 0. We train the network using the mean squared error as
-# loss function and the adam optimizer with its default param-
-
-## Example input just to check if things are working
-#x = torch.linspace(-math.pi, math.pi, 2000, device=device)
-#y = torch.sin(x)
-# Prepare the input tensor (x, x^2, x^3).
-#p = torch.tensor([1, 2, 3])
-#xx = x.unsqueeze(-1).pow(p).to(device)
 
 ## Real training data
 training_data_file = "domain_to_training_pairs_blocks.json"
@@ -44,28 +25,27 @@ state_value_pairs = load_training_state_value_tuples(training_data_file)
 states = states_to_boolean(state_value_pairs, "blocksworld")
 heuristics = [t[1] for t in state_value_pairs]
 
-print(len(states))
-print(len(heuristics))
+y = torch.tensor(heuristics, dtype=torch.float32)
+x = torch.tensor(states, dtype=torch.float32)
 
-# CONTINUE...
+print("x:", x.shape)
+print("y:", y.shape)
 
-
-hnn = HNN().to(device)
+hnn = HNN(input_size=x.shape[1], hidden_units=x.shape[1], output_size=1).to(device)
 print(hnn)
 
 loss_fn = nn.MSELoss()
 optimizer = optim.Adam(hnn.parameters(), lr=0.001)
 
-"""
 for epoch in range(1000):
     loss = 0.0
-    y_pred = hnn(xx)
+    y_pred = hnn(x)
 
     # Calculate loss.
     loss = loss_fn(y_pred, y)
 
     if epoch % 100 == 99:
-        print(f"{epoch}\t {loss.item()}")
+        print(f"{epoch}\t y_pred={y_pred}, y={y}\t loss={loss.item()}")
 
     # Clear gradients for the variables it will update.
     optimizer.zero_grad()
@@ -75,4 +55,3 @@ for epoch in range(1000):
 
     # Update parameters.
     optimizer.step()
-"""
