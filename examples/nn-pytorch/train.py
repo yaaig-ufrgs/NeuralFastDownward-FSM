@@ -11,47 +11,86 @@ import sys
 
 from model import HNN
 from training_data import (
-   load_training_state_value_tuples,
-   states_to_boolean,
+    InstanceDataset,
+    load_training_state_value_tuples,
+    states_to_boolean,
 )
+
 
 # Use CPU instead of GPU.
 device = torch.device("cpu")
 
+
+def train_loop(dataloader, model, loss_fn, optimizer):
+    size = len(dataloader.dataset)
+    for batch, (X, y) in enumerate(dataloader):
+        # Compute prediction and loss
+        pred = model(X)
+        loss = loss_fn(pred, y)
+
+        if batch % 100 == 0:
+            current = batch * len(X)
+            print(f"loss: {loss.item():>7f}")
+
+        # Clear gradients for the variables it will update.
+        optimizer.zero_grad()
+
+        # Compute gradient of the loss.
+        loss.backward()
+
+        # Update parameters.
+        optimizer.step()
+
+        
+def val_loop(dataloader, model, loss_fn):
+    size = len(dataloader.dataset)
+    num_batches = len(dataloader)
+    test_loss = 0
+
+    with torch.no_grad():
+        for X, y in dataloader:
+            pred = model(X)
+            print(f"Pred: {pred}")
+            print(f"y   : {y}")
+            test_loss += loss_fn(pred, y).item()
+
+    test_loss /= num_batches
+    print(f"Test Error: \nAvg loss: {test_loss:>8f} \n")
+
+
 ## Real training data
-training_data_file = "domain_to_training_pairs_blocks.json"
-state_value_pairs = load_training_state_value_tuples(training_data_file)
+dataset = InstanceDataset("domain_to_training_pairs_blocks.json", "blocksworld")
 
-states = states_to_boolean(state_value_pairs, "blocksworld")
-heuristics = [t[1] for t in state_value_pairs]
+train_size = int(0.8 * len(dataset))
+val_size = len(dataset) - train_size
+train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
 
-y = torch.tensor(heuristics, dtype=torch.float32)
-x = torch.tensor(states, dtype=torch.float32)
+print(len(train_dataset))
+print(len(val_dataset))
 
-print("x:", x.shape)
-print("y:", y.shape)
+train_dataloader = DataLoader(dataset=train_dataset,
+                         batch_size=10,
+                         shuffle=True,
+                         num_workers=1)
 
-hnn = HNN(input_size=x.shape[1], hidden_units=x.shape[1], output_size=1).to(device)
-print(hnn)
+val_dataloader = DataLoader(dataset=val_dataset,
+                         batch_size=10,
+                         shuffle=True,
+                         num_workers=1)
+
+
+x_shape = dataset.x_shape()
+y_shape = dataset.y_shape()
+
+model = HNN(input_size=x_shape[1], hidden_units=x_shape[1], output_size=1).to(device)
+print(model)
 
 loss_fn = nn.MSELoss()
-optimizer = optim.Adam(hnn.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-for epoch in range(1000):
-    loss = 0.0
-    y_pred = hnn(x)
-
-    # Calculate loss.
-    loss = loss_fn(y_pred, y)
-
-    if epoch % 100 == 99:
-        print(f"{epoch}\t y_pred={y_pred}, y={y}\t loss={loss.item()}")
-
-    # Clear gradients for the variables it will update.
-    optimizer.zero_grad()
-
-    # Compute gradient of the loss.
-    loss.backward()
-
-    # Update parameters.
-    optimizer.step()
+epochs = 100
+for t in range(epochs):
+    print(f"Epoch {t+1}\n-------------------------------")
+    train_loop(train_dataloader, model, loss_fn, optimizer)
+    #val_loop(val_dataloader, model, loss_fn)
+print("Done!")

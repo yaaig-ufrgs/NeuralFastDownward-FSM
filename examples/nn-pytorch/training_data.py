@@ -1,5 +1,28 @@
+import torch
+from torch.utils.data import Dataset, DataLoader
+
 from json import load
 from itertools import permutations
+
+class InstanceDataset(Dataset):
+    def __init__(self, training_data: str, domain: str):
+        self.data = load_training_state_value_tuples(training_data)
+        self.domain = domain
+        self.states = torch.tensor(states_to_boolean(self.data, self.domain), dtype=torch.float32)
+        self.hvalues = torch.tensor([t[1] for t in self.data], dtype=torch.float32)
+
+    def __getitem__(self, idx):
+        return self.states[idx], self.hvalues[idx]
+
+    def __len__(self):
+        return len(self.states)
+
+    def x_shape(self):
+        return self.states.shape
+
+    def y_shape(self):
+        return self.hvalues.shape
+
 
 def load_training_state_value_tuples(json_file: str):
     """
@@ -75,7 +98,7 @@ def states_to_boolean(data: [], domain: str):
            bool_states.append(bool_state)
 
     return bool_states
-                   
+
 # TODO - to avoid having to take the state-value pairs from Shen's data.
 def generate_optimal_state_value_pairs(problem):
     pass

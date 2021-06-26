@@ -29,5 +29,5 @@ class HNN(nn.Module):
         z = torch.sigmoid(self.hid1(x))
         z = torch.sigmoid(self.hid2(z))
         z = torch.sigmoid(self.hid3(z))
-        z = self.opt(z)
+        z = torch.flatten(self.opt(z))
         return z
