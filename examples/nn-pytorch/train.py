@@ -93,3 +93,30 @@ for t in range(epochs):
     train_loop(train_dataloader, model, loss_fn, optimizer)
     val_loop(val_dataloader, model, loss_fn)
 print("Done!")
+
+
+""" 
+What is torch.jit.trace?
+------------------------
+docs: https://pytorch.org/docs/stable/generated/torch.jit.trace.html
+
+"Trace a function and return an executable or ScriptFunction that will be optimized using 
+just-in-time compilation. Tracing is ideal for code that operates only on Tensors and lists, 
+dictionaries, and tuples of Tensors."
+
+"Using torch.jit.trace and torch.jit.trace_module, you can turn an existing module or Python 
+function into a TorchScript ScriptFunction or ScriptModule. You must provide example inputs, 
+and we run the function, recording the operations performed on all the tensors."
+
+In other words, "tracing" a model means transforming your PyTorch code ("eager mode") to 
+TorchScript code ("script mode"). Script mode is focused on production, while eager mode is 
+for prototyping and research. Script mode is performatic (JIT) and portable. 
+
+TorchScript is a domain-specific language for ML, and it is a subset of Python.
+"""
+
+example_input = train_dataloader.dataset[0][0]
+
+traced_model = torch.jit.trace(model, example_input)
+print(f"\nTraced model:\n{traced_model}")
+traced_model.save("traced.pt")
