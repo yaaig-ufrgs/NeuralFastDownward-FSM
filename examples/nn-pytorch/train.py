@@ -30,7 +30,7 @@ def train_loop(dataloader, model, loss_fn, optimizer):
 
         if batch % 100 == 0:
             current = batch * len(X)
-            print(f"loss: {loss.item():>7f}")
+            print(f"Train loss:\t {loss.item():>7f}")
 
         # Clear gradients for the variables it will update.
         optimizer.zero_grad()
@@ -45,17 +45,17 @@ def train_loop(dataloader, model, loss_fn, optimizer):
 def val_loop(dataloader, model, loss_fn):
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
-    test_loss = 0
+    val_loss = 0
 
     with torch.no_grad():
         for X, y in dataloader:
             pred = model(X)
-            print(f"Pred: {pred}")
-            print(f"y   : {y}")
-            test_loss += loss_fn(pred, y).item()
+            diff = np.array(pred-y)
+            print(f"Val diff avg:\t {np.average(diff)}")
+            val_loss += loss_fn(pred, y).item()
 
-    test_loss /= num_batches
-    print(f"Test Error: \nAvg loss: {test_loss:>8f} \n")
+    val_loss /= num_batches
+    print(f"Avg val loss:\t {val_loss:>8f} \n")
 
 
 ## Real training data
@@ -65,8 +65,8 @@ train_size = int(0.8 * len(dataset))
 val_size = len(dataset) - train_size
 train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
 
-print(len(train_dataset))
-print(len(val_dataset))
+print("len train dataset", len(train_dataset))
+print("len val dataset", len(val_dataset))
 
 train_dataloader = DataLoader(dataset=train_dataset,
                          batch_size=10,
@@ -77,7 +77,6 @@ val_dataloader = DataLoader(dataset=val_dataset,
                          batch_size=10,
                          shuffle=True,
                          num_workers=1)
-
 
 x_shape = dataset.x_shape()
 y_shape = dataset.y_shape()
@@ -92,5 +91,5 @@ epochs = 100
 for t in range(epochs):
     print(f"Epoch {t+1}\n-------------------------------")
     train_loop(train_dataloader, model, loss_fn, optimizer)
-    #val_loop(val_dataloader, model, loss_fn)
+    val_loop(val_dataloader, model, loss_fn)
 print("Done!")

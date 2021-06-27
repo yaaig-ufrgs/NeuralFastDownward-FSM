@@ -2,13 +2,13 @@ import torch
 import torch.nn as nn
 
 # TODO Create model (Ferber)
-#     - Supervised learning
-#     - Feed forward
-#     - Input = vector representation of a state S (boolean)
-#     - 3 hidden layers, Sigmoid activation
-#     - Output = heuristic estimate of the distance from S to a goal
-#     - Adam optimizer, MSE, Batch size 100
-#     - 10-fold cross-validation (9 as training, 1 as validation) --> low-priority
+#     - Supervised learning - DONE
+#     - Feed forward - DONE
+#     - Input = vector representation of a state S (boolean) - DONE for blocksworld
+#     - 3 hidden layers, Sigmoid activation - DONE
+#     - Output = heuristic estimate of the distance from S to a goal DONE (not unary)
+#     - Adam optimizer, MSE, Batch size 100 - WAIT
+#     - 10-fold cross-validation (9 as training, 1 as validation) --> TODO low-priority
 
 # H(euristic) Neural Network
 class HNN(nn.Module):
