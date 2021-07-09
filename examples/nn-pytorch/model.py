@@ -14,7 +14,7 @@ import torch.nn as nn
 class HNN(nn.Module):
     def __init__(
         self,
-        input_size: int = 3,
+        input_size: int = 25,
         hidden_units: int = 32,
         output_size: int = 1,
             
