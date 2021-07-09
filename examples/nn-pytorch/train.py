@@ -10,12 +10,7 @@ import math
 import sys
 
 from model import HNN
-from training_data import (
-    InstanceDataset,
-    load_training_state_value_tuples,
-    states_to_boolean,
-)
-
+from training_data import InstanceDataset
 
 # Use CPU instead of GPU.
 device = torch.device("cpu")
@@ -59,7 +54,7 @@ def val_loop(dataloader, model, loss_fn):
 
 
 ## Real training data
-dataset = InstanceDataset("domain_to_training_pairs_blocks.json", "blocksworld")
+dataset = InstanceDataset("sas_plan")
 
 train_size = int(0.8 * len(dataset))
 val_size = len(dataset) - train_size
