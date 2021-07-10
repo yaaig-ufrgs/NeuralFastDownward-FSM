@@ -19,8 +19,9 @@ TorchSamplingNetwork::TorchSamplingNetwork(const Options &opts)
     : TorchNetwork(opts),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       // Check _parse() to set these values:
-      heuristic_shift(0),
-      heuristic_multiplier(1) {}
+      heuristic_shift(opts.get<int>("shift")),
+      heuristic_multiplier(opts.get<int>("multiplier")),
+      heuristic_null(opts.get<bool>("hnull")) {}
 
 TorchSamplingNetwork::~TorchSamplingNetwork() {}
 
@@ -52,11 +53,19 @@ vector<at::Tensor> TorchSamplingNetwork::get_input_tensors(const State &state) {
 
 void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
     at::Tensor tensor = output.toTensor();
-    auto accessor = tensor.accessor<float, 1>();
-    for (int64_t i = 0; i < tensor.size(0); ++i){
-        // last_h = (accessor[i][0]+heuristic_shift) * heuristic_multiplier; // originally the accessor has 2 dims
-        last_h = (accessor[i]+heuristic_shift) * heuristic_multiplier;
-        last_h_batch.push_back(last_h);
+    if (!heuristic_null) {
+        auto accessor = tensor.accessor<float, 1>();
+        for (int64_t i = 0; i < tensor.size(0); ++i) {
+          // last_h = (accessor[i][0]+heuristic_shift) * heuristic_multiplier; // OLD originally the accessor had 2 dims
+          last_h = (accessor[i] + heuristic_shift) * heuristic_multiplier;
+          last_h_batch.push_back(last_h);
+        }
+    }
+    else {
+        for (int64_t i = 0; i < tensor.size(0); ++i) {
+            last_h = 0;
+            last_h_batch.push_back(last_h);
+        }
     }
 }
 
@@ -81,6 +90,10 @@ static shared_ptr<neural_networks::AbstractNetwork> _parse(OptionParser &parser)
             "Multiply the predicted (and shifted) heuristic value (useful, if "
             "the model predicts small float values, but heuristics have to be "
             "integers", "1");
+    parser.add_option<bool>(
+            "hnull",
+            "Use heuristic = 0 to simulate a blind search.", "false");
+
     Options opts = parser.parse();
 
     shared_ptr<neural_networks::TorchSamplingNetwork> network;
