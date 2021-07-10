@@ -45,5 +45,5 @@ def load_training_state_value_tuples(sas_plan: str):
                     state.append(int(values[i]))
                 states.append(state)
                 hvalues.append(int(values[0]))
-    
+
     return states, hvalues
