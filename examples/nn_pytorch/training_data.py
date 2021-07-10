@@ -1,8 +1,5 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
-
-from json import load
-from itertools import permutations
+from torch.utils.data import Dataset
 
 class InstanceDataset(Dataset):
     def __init__(self, training_data: str):

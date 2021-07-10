@@ -2,10 +2,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import DataLoader
 
 from model import HNN
-from training_data import InstanceDataset
 
 class TrainWorkflow():
     def __init__(

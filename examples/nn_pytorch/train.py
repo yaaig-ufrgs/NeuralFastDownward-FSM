@@ -4,10 +4,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import TensorDataset, DataLoader
-
-import math
-import sys
+from torch.utils.data import DataLoader
 
 from model import HNN
 from train_workflow import TrainWorkflow
@@ -52,8 +49,7 @@ train_wf = TrainWorkflow(model=model,
                          train_dataloader=train_dataloader,
                          val_dataloader=val_dataloader,
                          max_num_epochs=100,
-                         optimizer=optim.Adam(model.parameters(), lr=0.001),
-                         loss_fn=nn.MSELoss())
+                         optimizer=optim.Adam(model.parameters(), lr=0.001))
 
 train_wf.run()
 
