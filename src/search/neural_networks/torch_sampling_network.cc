@@ -21,7 +21,7 @@ TorchSamplingNetwork::TorchSamplingNetwork(const Options &opts)
       // Check _parse() to set these values:
       heuristic_shift(opts.get<int>("shift")),
       heuristic_multiplier(opts.get<int>("multiplier")),
-      heuristic_null(opts.get<bool>("hnull")) {}
+      blind(opts.get<bool>("blind")) {}
 
 TorchSamplingNetwork::~TorchSamplingNetwork() {}
 
@@ -53,7 +53,7 @@ vector<at::Tensor> TorchSamplingNetwork::get_input_tensors(const State &state) {
 
 void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
     at::Tensor tensor = output.toTensor();
-    if (!heuristic_null) {
+    if (!blind) {
         auto accessor = tensor.accessor<float, 1>();
         for (int64_t i = 0; i < tensor.size(0); ++i) {
           // last_h = (accessor[i][0]+heuristic_shift) * heuristic_multiplier; // OLD originally the accessor had 2 dims
@@ -91,7 +91,7 @@ static shared_ptr<neural_networks::AbstractNetwork> _parse(OptionParser &parser)
             "the model predicts small float values, but heuristics have to be "
             "integers", "1");
     parser.add_option<bool>(
-            "hnull",
+            "blind",
             "Use heuristic = 0 to simulate a blind search.", "false");
 
     Options opts = parser.parse();

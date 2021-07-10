@@ -12,7 +12,7 @@ protected:
     const std::vector<FactPair> relevant_facts;
     const int heuristic_shift;
     const int heuristic_multiplier;
-    const bool heuristic_null;
+    const bool blind;
 
     int last_h = Heuristic::NO_VALUE;
     std::vector<int> last_h_batch;
