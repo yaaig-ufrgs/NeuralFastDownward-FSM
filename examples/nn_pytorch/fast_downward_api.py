@@ -1,4 +1,3 @@
-#from driver.main import main as fd_main
 import subprocess
 import sys
 

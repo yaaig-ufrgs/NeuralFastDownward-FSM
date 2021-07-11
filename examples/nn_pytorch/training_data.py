@@ -1,5 +1,5 @@
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 
 class InstanceDataset(Dataset):
     def __init__(self, training_data: str):
@@ -20,7 +20,7 @@ class InstanceDataset(Dataset):
         return self.hvalues.shape
 
 
-def load_training_state_value_tuples(sas_plan: str):
+def load_training_state_value_tuples(sas_plan: str) -> ([[int]], [int]):
     """
     Load state-value pairs from a sampling output, returning
     a list of states (each state is a bool list) and a list
@@ -44,3 +44,19 @@ def load_training_state_value_tuples(sas_plan: str):
                 hvalues.append(int(values[0]))
 
     return states, hvalues
+
+
+def setup_dataloaders(dataset: InstanceDataset, train_split: float, batch_size: int,
+                      shuffle: bool) -> (DataLoader, DataLoader):
+
+    train_size = int(train_split * len(dataset))
+    val_size = len(dataset) - train_size
+    train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+
+    train_dataloader = DataLoader(dataset=train_dataset, batch_size=batch_size,
+                                  shuffle=shuffle, num_workers=1)
+    val_dataloader = DataLoader(dataset=val_dataset, batch_size=batch_size,
+                                shuffle=shuffle, num_workers=1)
+
+    return train_dataloader, val_dataloader
+
