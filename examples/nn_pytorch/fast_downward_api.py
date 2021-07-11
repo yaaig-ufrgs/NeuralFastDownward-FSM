@@ -4,18 +4,18 @@ import sys
 FD = "../../fast-downward.py"
 
 def solve_instances_with_fd(traced_model: str, domain_pddl: str, instances_pddl: list[str],
-                            blind: bool = False) -> list[(int,int)]:
+                            blind: bool = False) -> [int]:
     """
     Tries to solve a list of PDDL instances with the network. 
     Returns a list of tuples representing (instance_index,exit_code).
     """
 
-    instances = []
+    instance_exit_codes = []
 
     opts = (f'astar(nh(torch_sampling_network(path={traced_model},\n'
             f'blind={str(blind).lower()})))')
 
-    for idx, ins in enumerate(instances_pddl):
+    for ins in instances_pddl:
         """
         exit_code = 0   -->  success
         exit_code = 1   -->  search plan found and out of memory
@@ -29,6 +29,6 @@ def solve_instances_with_fd(traced_model: str, domain_pddl: str, instances_pddl:
 
         """
         exit_code = subprocess.call([FD, domain_pddl, ins, "--search", opts])
-        instances.append((idx, exit_code))
+        instance_exit_codes.append(exit_code)
         
-    return instances
+    return instance_exit_codes
