@@ -50,7 +50,7 @@ for i in range(5, len(sas_lines)-1):
         pddl1 = pddl1.replace(problem_name, new_problem_name)
         pddl2 = ":init"
         for i in init:
-            pddl2 += " ("+i+")"
+            pddl2 += "\n\t("+i+")"
         pddl2 += ")\n"
         pddl3 = "(:goal" + pddl.split(":goal" if ":goal" in pddl else ":GOAL")[1]
 
