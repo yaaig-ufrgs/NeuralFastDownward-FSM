@@ -5,8 +5,8 @@ import torch.nn as nn
 #     - Supervised learning - DONE
 #     - Feed forward - DONE
 #     - Input = vector representation of a state S (boolean) - DONE for blocksworld
-#     - 3 hidden layers, Sigmoid activation - DONE
-#     - Output = heuristic estimate of the distance from S to a goal DONE (not unary)
+#     - 1-3 hidden layers, Sigmoid activation - DONE
+#     - Output = heuristic estimate of the distance from S to a goal DONE
 #     - Adam optimizer, MSE, Batch size 100 - WAIT
 #     - 10-fold cross-validation (9 as training, 1 as validation) --> TODO low-priority
 
@@ -14,9 +14,9 @@ import torch.nn as nn
 class HNN(nn.Module):
     def __init__(
         self,
-        input_size: int = 25,
-        hidden_units: int = 32,
-        output_size: int = 1,
+        input_size: int,
+        hidden_units: int,
+        output_size: int,
             
     ):
         super(HNN, self).__init__()
@@ -29,5 +29,6 @@ class HNN(nn.Module):
         z = torch.sigmoid(self.hid1(x))
         z = torch.sigmoid(self.hid2(z))
         z = torch.sigmoid(self.hid3(z))
-        z = torch.flatten(self.opt(z))
+        z = torch.sigmoid(self.opt(z))
+        #z = torch.flatten(self.opt(z))
         return z

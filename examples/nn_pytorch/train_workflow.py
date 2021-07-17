@@ -85,10 +85,11 @@ class TrainWorkflow():
         traced_model = torch.jit.trace(self.model, example_input)
         traced_model.save(filename)
 
-    def run(self):
+    def run(self, validation=True):
         for t in range(self.max_num_epochs):
             print(f"Epoch {t+1}\n-------------------------------")
             self.train_loop()
-            self.val_loop()
+            if validation:
+                self.val_loop()
         print("Done!")
 

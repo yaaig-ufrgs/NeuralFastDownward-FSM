@@ -1,11 +1,16 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
 
+from utils import to_unary
+
 class InstanceDataset(Dataset):
-    def __init__(self, training_data: str):
+    def __init__(self, training_data: str, domain_max_value: int):
         states, hvalues = load_training_state_value_tuples(training_data)
+
+        self.domain_max_value = domain_max_value
         self.states = torch.tensor(states, dtype=torch.float32)
-        self.hvalues = torch.tensor(hvalues, dtype=torch.float32)
+        self.hvalues = torch.tensor([to_unary(n, domain_max_value) for n in hvalues],
+                                    dtype=torch.float32)
 
     def __getitem__(self, idx):
         return self.states[idx], self.hvalues[idx]
@@ -48,6 +53,9 @@ def load_training_state_value_tuples(sas_plan: str) -> ([[int]], [int]):
 
 def setup_dataloaders(dataset: InstanceDataset, train_split: float, batch_size: int,
                       shuffle: bool) -> (DataLoader, DataLoader):
+    """
+    Setup training and validation datasets using a random split.
+    """
 
     train_size = int(train_split * len(dataset))
     val_size = len(dataset) - train_size
@@ -59,4 +67,14 @@ def setup_dataloaders(dataset: InstanceDataset, train_split: float, batch_size: 
                                 shuffle=shuffle, num_workers=1)
 
     return train_dataloader, val_dataloader
+
+
+def setup_train_dataloader(dataset: InstanceDataset, batch_size: int, shuffle: bool) ->(DataLoader, DataLoader):
+    """
+    Setup only a training dataset.
+    """
+
+    train_dataloader = DataLoader(dataset=dataset, batch_size=batch_size,
+                                  shuffle=shuffle, num_workers=1)
+    return train_dataloader
 
