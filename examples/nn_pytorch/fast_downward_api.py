@@ -20,11 +20,10 @@ def parse_plan(filename):
 
 def solve_instances_with_fd(domain_pddl, instances_pddl, opts = "astar(lmcut())"):
     """
-    Tries to solve a list of PDDL instances with the opts . 
+    Tries to solve a list of PDDL instances.
     Returns a list of costs (same order of instances_pddl).
-    
-    """
 
+    """
     instances_costs = []
 
     for ins in instances_pddl:
@@ -46,3 +45,12 @@ def solve_instances_with_fd(domain_pddl, instances_pddl, opts = "astar(lmcut())"
         instances_costs.append(cost)
         
     return instances_costs
+
+
+def solve_instance_with_fd(domain_pddl, instance_pddl, opts = "astar(lmcut())"):
+    """
+    Tries to solve a PDDL instance. Return the cost (or None if search fails).
+    """
+    exit_code = subprocess.call([FD, domain_pddl, instance_pddl, "--search", opts])
+    cost, problem_type = parse_plan("sas_plan")
+    return cost

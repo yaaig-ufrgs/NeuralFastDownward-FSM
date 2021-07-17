@@ -6,7 +6,12 @@ import fast_downward_api as fd_api
 
 class InstanceDataset(Dataset):
     def __init__(self, training_data: str, domain_max_value: int):
-        states, hvalues = load_training_state_value_tuples(training_data)
+        state_value_pairs = load_training_state_value_tuples(training_data)
+
+        states, hvalues = [], []
+        for pair in state_value_pairs:
+            states.append(pair[0])
+            hvalues.append(pair[1])
 
         self.domain_max_value = domain_max_value
         self.states = torch.tensor(states, dtype=torch.float32)
@@ -25,6 +30,22 @@ class InstanceDataset(Dataset):
     def y_shape(self):
         return self.hvalues.shape
 
+def generate_optimal_state_value_pairs(domain, problems):
+    """
+    Generates the state value pair from a set of problems.
+    Returns a list of tuple(state, value).
+    """
+
+    states = convert_pddl_to_boolean(domain, problems)
+    state_value_pairs = []
+    for i in range(len(problems)):
+        value = fd_api.solve_instance_with_fd(domain, problems[i])
+        if value != None:
+            state_value_pairs.append((states[i], value))
+        else:
+            print(f"Solution plan not found for the problem {problems[i]}")
+
+    return state_value_pairs
 
 def load_training_state_value_tuples(sas_plan: str) -> ([[int]], [int]):
     """
@@ -106,20 +127,3 @@ def convert_pddl_to_boolean(domain, problems):
         states.append(state)
 
     return states
-
-def generate_optimal_state_value_pairs(domain, problems):
-    """
-    Generates the state value pair from a set of problems.
-    Returns in the same order as the problems.
-    """
-
-    states = convert_pddl_to_boolean(domain, problems)
-    values = fd_api.solve_instances_with_fd(domain, problems)
-
-    assert len(states) == len(values) == len(problems)
-
-    state_value_pairs = []
-    for i in range(len(problems)):
-        state_value_pairs.append((states[i], values[i]))
-
-    return state_value_pairs
