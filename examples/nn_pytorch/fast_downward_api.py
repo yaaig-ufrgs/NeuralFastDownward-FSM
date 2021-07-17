@@ -1,19 +1,31 @@
 import subprocess
 import sys
 
+import re
+
 FD = "../../fast-downward.py"
 
-def solve_instances_with_fd(traced_model: str, domain_pddl: str, instances_pddl: list[str],
-                            blind: bool = False) -> [int]:
+def parse_plan(filename):
+    PLAN_INFO_REGEX = re.compile(r"; cost = (\d+) \((unit cost|general cost)\)\n")
+    last_line = ""
+    with open(filename) as sas_plan:
+        for last_line in sas_plan:
+            pass
+    match = PLAN_INFO_REGEX.match(last_line)
+    if match:
+        return int(match.group(1)), match.group(2)
+    else:
+        return None, None
+
+
+def solve_instances_with_fd(domain_pddl, instances_pddl, opts = "astar(lmcut())"):
     """
-    Tries to solve a list of PDDL instances with the network. 
-    Returns a list of tuples representing (instance_index,exit_code).
+    Tries to solve a list of PDDL instances with the opts . 
+    Returns a list of costs (same order of instances_pddl).
+    
     """
 
-    instance_exit_codes = []
-
-    opts = (f'astar(nh(torch_sampling_network(path={traced_model},\n'
-            f'blind={str(blind).lower()})))')
+    instances_costs = []
 
     for ins in instances_pddl:
         """
@@ -29,6 +41,8 @@ def solve_instances_with_fd(traced_model: str, domain_pddl: str, instances_pddl:
 
         """
         exit_code = subprocess.call([FD, domain_pddl, ins, "--search", opts])
-        instance_exit_codes.append(exit_code)
+
+        cost, problem_type = parse_plan("sas_plan")
+        instances_costs.append(cost)
         
-    return instance_exit_codes
+    return instances_costs

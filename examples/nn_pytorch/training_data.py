@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 from utils import to_unary
+import fast_downward_api as fd_api
 
 class InstanceDataset(Dataset):
     def __init__(self, training_data: str, domain_max_value: int):
@@ -78,3 +79,47 @@ def setup_train_dataloader(dataset: InstanceDataset, batch_size: int, shuffle: b
                                   shuffle=shuffle, num_workers=1)
     return train_dataloader
 
+
+def convert_pddl_to_boolean(domain, problems):
+    """
+    From a pddl, it gets the boolean vector in the format for network input.
+    """
+
+    # TODO: Get atoms order from domain
+    with open("atoms/probBLOCKS-12-0.txt") as f:
+        # Read and convert (e.g. "Atom ontable(a)" -> "ontable a")
+        atoms = [x[5:] for x in f.readlines()[0].split(";")] # remove "Atom " prefix
+        for i in range(len(atoms)):
+            pred, objs = atoms[i].split("(")
+            objs = objs[:-1].replace(",", "")
+            atoms[i] = pred
+            if objs != "":
+                atoms[i] += " " + objs
+
+    states = []
+    for problem in problems:
+        with open(problem) as f:
+            initial_state = f.read().split(":init")[1].split(":goal")[0]
+        state = []
+        for a in atoms:
+            state.append(int(a in initial_state))
+        states.append(state)
+
+    return states
+
+def generate_optimal_state_value_pairs(domain, problems):
+    """
+    Generates the state value pair from a set of problems.
+    Returns in the same order as the problems.
+    """
+
+    states = convert_pddl_to_boolean(domain, problems)
+    values = fd_api.solve_instances_with_fd(domain, problems)
+
+    assert len(states) == len(values) == len(problems)
+
+    state_value_pairs = []
+    for i in range(len(problems)):
+        state_value_pairs.append((states[i], values[i]))
+
+    return state_value_pairs
