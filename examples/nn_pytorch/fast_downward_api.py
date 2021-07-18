@@ -2,7 +2,6 @@ import subprocess
 import json
 
 import re
-from typing import final
 
 FD = "../../fast-downward.py"
 SAS_PLAN_FILE = "sas_plan"
@@ -49,24 +48,31 @@ def solve_instances_with_fd(domain_pddl, instances_pddl, opts = "astar(lmcut())"
     return instances_costs
 
 
-def solve_instance_with_fd(domain_pddl, instance_pddl, opts = "astar(lmcut())"):
+def solve_instance_with_fd(domain_pddl, instance_pddl, opts = "astar(lmcut())", time_limit = 86400, memory_limit = 34359738368, force = False):
     """
     Tries to solve a PDDL instance. Return the cost (or None if search fails).
+    Time limit in seconds, memory limit in bytes.
     """
 
     cost = get_cached_plan_cost(instance_pddl)
-    if cost == None:
-        exit_code = subprocess.call([FD, domain_pddl, instance_pddl, "--search", opts])
+    if force or cost == None:
+        exit_code = subprocess.call([FD, domain_pddl, instance_pddl, f"--search-time-limit {time_limit}", f"--search-memory-limit {memory_limit}", "--search", opts])
+        input("aa")
         cost, _ = parse_plan()
         add_cached_plan_cost(instance_pddl, cost)
 
     return cost
 
 
-def solve_instance_with_fd_nh(domain_pddl, instance_pddl, traced_model, blind = False):
-    opts = (f'astar(nh(torch_sampling_network(path={traced_model},\n'
-            f'blind={str(blind).lower()})))')
-    return solve_instance_with_fd(domain_pddl, instance_pddl, opts)
+def solve_instance_with_fd_nh(domain_pddl, instance_pddl, traced_model, blind = True, unary_threshold = 0.01, time_limit = 1800, memory_limit = 4080218931):
+    """
+    Tries to solve a PDDL instance with the torch_sampling_network. Return the cost (or None if search fails).
+    Default limits from paper (30 min, 3.8GB)
+    """
+
+    opts = (f'astar(nh(torch_sampling_network(path={traced_model},'
+            f'blind={str(blind).lower()},unary_threshold={unary_threshold})))')
+    return solve_instance_with_fd(domain_pddl, instance_pddl, opts, time_limit, memory_limit, force=True)
 
 
 def get_cached_plan_cost(pddl):

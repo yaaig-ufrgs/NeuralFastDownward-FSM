@@ -5,7 +5,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
 
 from model import HNN
 from train_workflow import TrainWorkflow
@@ -15,6 +14,7 @@ import fast_downward_api as fd_api
 """
 Use as:
 $ ./train <training_domain> <task_folder>
+e.g. $ python3 train.py blocksworld ../../tasks/blocksworld_ipc/probBLOCKS-12-0
 """
 
 domain = argv[1]
@@ -32,7 +32,7 @@ if domain == "blocksworld":
 # TODO
 domain = task_folder+"/domain.pddl"
 problems = []
-N_PROBLEMS = 20
+N_PROBLEMS = 200
 for i in range(N_PROBLEMS):
     problems.append(task_folder+f"/p{i+1}.pddl")
 
@@ -52,7 +52,7 @@ for fold_idx in range(N_FOLDS):
     train_wf = TrainWorkflow(model=model,
                                 train_dataloader=train_dataloader,
                                 val_dataloader=val_dataloader,
-                                max_num_epochs=1,
+                                max_num_epochs=1000,
                                 optimizer=optim.Adam(model.parameters(), lr=0.001))
 
     train_wf.run(validation=True)
