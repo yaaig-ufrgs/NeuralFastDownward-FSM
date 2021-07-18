@@ -13,6 +13,7 @@ protected:
     const int heuristic_shift;
     const int heuristic_multiplier;
     const bool blind;
+    const double unary_threshold;
 
     int last_h = Heuristic::NO_VALUE;
     std::vector<int> last_h_batch;
@@ -29,6 +30,8 @@ public:
     virtual bool is_heuristic() override;
     virtual int get_heuristic() override;
     virtual const std::vector<int> &get_heuristics() override;
+
+    int unary_to_value(const std::vector<double>& unary_h);
 };
 }
 #endif /* NEURAL_NETWORKS_TORCH_SAMPLING_NETWORK_H */

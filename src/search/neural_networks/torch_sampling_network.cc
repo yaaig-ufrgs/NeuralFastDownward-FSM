@@ -21,7 +21,8 @@ TorchSamplingNetwork::TorchSamplingNetwork(const Options &opts)
       // Check _parse() to set these values:
       heuristic_shift(opts.get<int>("shift")),
       heuristic_multiplier(opts.get<int>("multiplier")),
-      blind(opts.get<bool>("blind")) {}
+      blind(opts.get<bool>("blind")),
+      unary_threshold(opts.get<double>("unary_threshold")) {}
 
 TorchSamplingNetwork::~TorchSamplingNetwork() {}
 
@@ -32,6 +33,17 @@ bool TorchSamplingNetwork::is_heuristic() {
 
 int TorchSamplingNetwork::get_heuristic() {
     return last_h;
+}
+
+int TorchSamplingNetwork::unary_to_value(const vector<double>& unary_h) {
+    int hvalue = unary_h.size() - 1;
+    for (size_t i = 0; i < unary_h.size(); i++) {
+        if (unary_h[i] < unary_threshold) {
+            hvalue = i - 1;
+            break;
+        }
+    }
+    return hvalue;
 }
 
 const vector<int> &TorchSamplingNetwork::get_heuristics() {
@@ -53,19 +65,31 @@ vector<at::Tensor> TorchSamplingNetwork::get_input_tensors(const State &state) {
 
 void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
     at::Tensor tensor = output.toTensor();
+    std::vector<double> unary_output(tensor.data_ptr<float>(),
+                                    tensor.data_ptr<float>() + tensor.numel());
     if (!blind) {
-        auto accessor = tensor.accessor<float, 1>();
+        last_h = unary_to_value(unary_output);
+        last_h_batch.push_back(last_h);
+        /* Batch not working.
+        auto accessor = tensor.accessor<float, 2>();
         for (int64_t i = 0; i < tensor.size(0); ++i) {
-          // last_h = (accessor[i][0]+heuristic_shift) * heuristic_multiplier; // OLD originally the accessor had 2 dims
-          last_h = (accessor[i] + heuristic_shift) * heuristic_multiplier;
+          //std::vector<float> v(accessor[i][0].data_ptr<float>(), accessor[i][0].data_ptr<float>() + accessor[i][0].numel());
+          last_h = (accessor[i][0]+heuristic_shift) * heuristic_multiplier; // OLD originally the accessor had 2 dims
+          // last_h = (accessor[i] + heuristic_shift) * heuristic_multiplier;
+          //last_h = unary_to_value(accessor[i]) + heuristic_shift * heuristic_multiplier;
           last_h_batch.push_back(last_h);
         }
+        */
     }
     else {
+        last_h = 0;
+        last_h_batch.push_back(last_h);
+        /* Batch not working.
         for (int64_t i = 0; i < tensor.size(0); ++i) {
             last_h = 0;
             last_h_batch.push_back(last_h);
         }
+        */
     }
 }
 
@@ -93,6 +117,9 @@ static shared_ptr<neural_networks::AbstractNetwork> _parse(OptionParser &parser)
     parser.add_option<bool>(
             "blind",
             "Use heuristic = 0 to simulate a blind search.", "false");
+    parser.add_option<double>(
+            "unary_threshold",
+            "Threshold to use when interpreting unary heuristic values to a single value.", "0.01");
 
     Options opts = parser.parse();
 
