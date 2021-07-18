@@ -51,6 +51,14 @@ def solve_instance_with_fd(domain_pddl, instance_pddl, opts = "astar(lmcut())"):
     """
     Tries to solve a PDDL instance. Return the cost (or None if search fails).
     """
+    return 10
+
     exit_code = subprocess.call([FD, domain_pddl, instance_pddl, "--search", opts])
     cost, problem_type = parse_plan("sas_plan")
     return cost
+
+
+def solve_instance_with_fd_nh(domain_pddl, instance_pddl, traced_model, blind = False):
+    opts = (f'astar(nh(torch_sampling_network(path={traced_model},\n'
+            f'blind={str(blind).lower()})))')
+    return solve_instance_with_fd(domain_pddl, instance_pddl, opts)

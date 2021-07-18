@@ -1,8 +1,15 @@
 from random import shuffle as random_shuffle
 
+from torch.utils.data import DataLoader
+
+from training_data import InstanceDataset, generate_optimal_state_value_pairs
+
+
 class KFoldTrainingData():
-    def __init__(self, state_value_pairs, num_folds = 10, shuffle = False):
-        self.state_value_pairs = state_value_pairs
+    def __init__(self, domain, problems, domain_max_value, batch_size, num_folds = 10, shuffle = False):
+        self.state_value_pairs = generate_optimal_state_value_pairs(domain, problems)
+        self.domain_max_value = domain_max_value
+        self.batch_size = batch_size
         self.num_folds = num_folds
         if shuffle:
             random_shuffle(self.state_value_pairs)
@@ -26,17 +33,22 @@ class KFoldTrainingData():
                     test_set.append(state_value_pair)
                 else:
                     training_set.append(state_value_pair)
-            kfolds.append((training_set, test_set))
+
+            train_dataloader = DataLoader(dataset=InstanceDataset(training_set, self.domain_max_value),
+                                          batch_size=self.batch_size, num_workers=1)
+            test_dataloader = DataLoader(dataset=InstanceDataset(test_set, self.domain_max_value),
+                                          batch_size=self.batch_size, num_workers=1)
+            kfolds.append((train_dataloader, test_dataloader))
         
         return kfolds
 
 
-    def get_fold(self, id):
+    def get_fold(self, idx):
         """
-        Returns a fold as tuple(training set, test set).
+        Returns a fold as tuple(train dataloader, test dataloader).
         Counting from 0.
         """
-        return self.kfolds[id]
+        return self.kfolds[idx]
 
 
     def get_num_fold(self):
