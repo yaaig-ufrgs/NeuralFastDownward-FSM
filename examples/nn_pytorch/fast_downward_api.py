@@ -57,7 +57,6 @@ def solve_instance_with_fd(domain_pddl, instance_pddl, opts = "astar(lmcut())", 
     cost = get_cached_plan_cost(instance_pddl)
     if force or cost == None:
         exit_code = subprocess.call([FD, domain_pddl, instance_pddl, f"--search-time-limit {time_limit}", f"--search-memory-limit {memory_limit}", "--search", opts])
-        input("aa")
         cost, _ = parse_plan()
         add_cached_plan_cost(instance_pddl, cost)
 

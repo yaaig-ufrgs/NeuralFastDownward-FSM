@@ -104,15 +104,6 @@ def setup_train_dataloader(dataset: InstanceDataset, batch_size: int, shuffle: b
     return train_dataloader
 
 
-
-
-
-
-
-
-
-
-
 def load_training_state_value_tuples(sas_plan: str) -> ([[int]], [int]):
     """
     Load state-value pairs from a sampling output, returning
