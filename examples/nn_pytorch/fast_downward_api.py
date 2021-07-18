@@ -1,14 +1,17 @@
 import subprocess
-import sys
+import json
 
 import re
+from typing import final
 
 FD = "../../fast-downward.py"
+SAS_PLAN_FILE = "sas_plan"
+CACHE_PLAN_COST = "plan_cost.json"
 
-def parse_plan(filename):
+def parse_plan():
     PLAN_INFO_REGEX = re.compile(r"; cost = (\d+) \((unit cost|general cost)\)\n")
     last_line = ""
-    with open(filename) as sas_plan:
+    with open(SAS_PLAN_FILE) as sas_plan:
         for last_line in sas_plan:
             pass
     match = PLAN_INFO_REGEX.match(last_line)
@@ -40,8 +43,7 @@ def solve_instances_with_fd(domain_pddl, instances_pddl, opts = "astar(lmcut())"
 
         """
         exit_code = subprocess.call([FD, domain_pddl, ins, "--search", opts])
-
-        cost, problem_type = parse_plan("sas_plan")
+        cost, _ = parse_plan()
         instances_costs.append(cost)
         
     return instances_costs
@@ -51,8 +53,13 @@ def solve_instance_with_fd(domain_pddl, instance_pddl, opts = "astar(lmcut())"):
     """
     Tries to solve a PDDL instance. Return the cost (or None if search fails).
     """
-    exit_code = subprocess.call([FD, domain_pddl, instance_pddl, "--search", opts])
-    cost, _ = parse_plan("sas_plan")
+
+    cost = get_cached_plan_cost(instance_pddl)
+    if cost == None:
+        exit_code = subprocess.call([FD, domain_pddl, instance_pddl, "--search", opts])
+        cost, _ = parse_plan()
+        add_cached_plan_cost(instance_pddl, cost)
+
     return cost
 
 
@@ -60,3 +67,29 @@ def solve_instance_with_fd_nh(domain_pddl, instance_pddl, traced_model, blind = 
     opts = (f'astar(nh(torch_sampling_network(path={traced_model},\n'
             f'blind={str(blind).lower()})))')
     return solve_instance_with_fd(domain_pddl, instance_pddl, opts)
+
+
+def get_cached_plan_cost(pddl):
+    try:
+        with open(CACHE_PLAN_COST, "r") as f:
+            data = json.loads(f.read())
+    except:
+        data = {}
+    if pddl in data:
+        return data[pddl]
+    return None
+
+
+def add_cached_plan_cost(pddl, cost):
+    try:
+        with open(CACHE_PLAN_COST, "r") as f:
+            data = json.loads(f.read())
+        data[pddl] = cost
+        with open(CACHE_PLAN_COST, "w") as f:
+            json.dump(data, f, indent=4, sort_keys=True)
+    except:
+        # Create it if not exists
+        data = {}
+        with open(CACHE_PLAN_COST, "w") as f:
+            data[pddl] = cost
+            json.dump(data, f, indent=4, sort_keys=True)
