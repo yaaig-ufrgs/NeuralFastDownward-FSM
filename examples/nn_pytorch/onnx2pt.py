@@ -17,9 +17,9 @@ onnx_model = onnx.load(sys.argv[1])
 pytorch_model = ConvertModel(onnx_model)
 
 domain = "../../tasks/blocksworld_ipc/probBLOCKS-12-0/domain.pddl"
-problems = ["../../tasks/blocksworld_ipc/probBLOCKS-12-0/p1.pddl"]
+problems = ["../../tasks/blocksworld_ipc/probBLOCKS-12-0/p1.pddl", "../../tasks/blocksworld_ipc/probBLOCKS-12-0/p1.pddl"]
 domain_max_value = 327
-kfold = KFoldTrainingData(domain, problems, domain_max_value, batch_size=1, num_folds=1, shuffle=False)
+kfold = KFoldTrainingData(domain, problems, domain_max_value, batch_size=1, num_folds=2, shuffle=False)
 train_dataloader, _ = kfold.get_fold(0)
 
 example_input = train_dataloader.dataset[0][0]
