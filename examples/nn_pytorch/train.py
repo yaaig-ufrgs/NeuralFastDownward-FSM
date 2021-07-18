@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 from model import HNN
 from train_workflow import TrainWorkflow
 from k_fold_training_data import KFoldTrainingData
+import fast_downward_api as fd_api
 
 """
 Use as:
@@ -31,13 +32,14 @@ if domain == "blocksworld":
 # TODO
 domain = task_folder+"/domain.pddl"
 problems = []
-N_PROBLEMS = 10
+N_PROBLEMS = 20
 for i in range(N_PROBLEMS):
     problems.append(task_folder+f"/p{i+1}.pddl")
 
 N_FOLDS = 10
 kfold = KFoldTrainingData(domain, problems, domain_max_value, batch_size=10, num_folds=N_FOLDS, shuffle=False)
 
+val_success = []
 for fold_idx in range(N_FOLDS):
     train_dataloader, val_dataloader = kfold.get_fold(fold_idx)
 
@@ -47,13 +49,30 @@ for fold_idx in range(N_FOLDS):
 
     print(model)
 
-    train_wf_blind = TrainWorkflow(model=model,
+    train_wf = TrainWorkflow(model=model,
                                 train_dataloader=train_dataloader,
                                 val_dataloader=val_dataloader,
-                                max_num_epochs=10,
+                                max_num_epochs=1,
                                 optimizer=optim.Adam(model.parameters(), lr=0.001))
 
-    train_wf_blind.run(validation=True)
+    train_wf.run(validation=True)
 
-    blind_model_fname = f"traced_fold_{fold_idx}.pt"
-    train_wf_blind.save_traced_model(blind_model_fname)
+    model_fname = f"traced_fold_{fold_idx}.pt"
+    train_wf.save_traced_model(model_fname)
+
+    """
+    Test step
+    """
+    val_problems = kfold.get_test_problems_from_fold(fold_idx)
+    plans_found = 0
+    for problem in val_problems:
+        cost = fd_api.solve_instance_with_fd_nh(domain, problem, model_fname)
+        plans_found += int(cost != None)
+    success_rate = 100 * plans_found / len(val_problems)
+    val_success.append(success_rate)
+    print(f"Fold {fold_idx} val success: {plans_found} of {len(val_problems)} ({success_rate}%)")
+
+print()
+print(f"Max val success (fold {val_success.index(max(val_success))}): {max(val_success)}%")
+print(f"Min val success (fold {val_success.index(min(val_success))}): {min(val_success)}%")
+print(f"Avg val success: {sum(val_success) / len(val_success)}%")
