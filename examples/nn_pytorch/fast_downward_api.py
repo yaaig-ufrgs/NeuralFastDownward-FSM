@@ -10,9 +10,12 @@ CACHE_PLAN_COST = "plan_cost.json"
 def parse_plan():
     PLAN_INFO_REGEX = re.compile(r"; cost = (\d+) \((unit cost|general cost)\)\n")
     last_line = ""
-    with open(SAS_PLAN_FILE) as sas_plan:
-        for last_line in sas_plan:
-            pass
+    try:
+        with open(SAS_PLAN_FILE) as sas_plan:
+            for last_line in sas_plan:
+                pass
+    except:
+        pass
     match = PLAN_INFO_REGEX.match(last_line)
     if match:
         return int(match.group(1)), match.group(2)
@@ -56,7 +59,8 @@ def solve_instance_with_fd(domain_pddl, instance_pddl, opts = "astar(lmcut())", 
 
     cost = get_cached_plan_cost(instance_pddl)
     if force or cost == None:
-        exit_code = subprocess.call([FD, domain_pddl, instance_pddl, f"--search-time-limit {time_limit}", f"--search-memory-limit {memory_limit}", "--search", opts])
+        # exit_code = subprocess.call([FD, domain_pddl, instance_pddl, "--search", opts, "--search-time-limit", str(time_limit)+"s", "--search-memory-limit", str(memory_limit)])
+        exit_code = subprocess.call([FD, domain_pddl, instance_pddl, "--search", opts])
         cost, _ = parse_plan()
         add_cached_plan_cost(instance_pddl, cost)
 
