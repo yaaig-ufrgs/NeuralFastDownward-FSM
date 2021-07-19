@@ -13,8 +13,8 @@ import fast_downward_api as fd_api
 
 """
 Use as:
-$ ./train <training_domain> <task_folder>
-e.g. $ python3 train.py blocksworld ../../tasks/blocksworld_ipc/probBLOCKS-12-0
+$ ./train.py <training_domain> <task_folder>
+e.g. $ ./train.py blocksworld ../../tasks/blocksworld_ipc/probBLOCKS-12-0
 """
 
 domain = argv[1]
@@ -30,14 +30,14 @@ if domain == "blocksworld":
     domain_max_value = 327
 
 # TODO
-domain = task_folder+"/domain.pddl"
+domain_pddl = task_folder+"/domain.pddl"
 problems = []
-N_PROBLEMS = 200
+N_PROBLEMS = 5
 for i in range(N_PROBLEMS):
     problems.append(task_folder+f"/p{i+1}.pddl")
 
-N_FOLDS = 10
-kfold = KFoldTrainingData(domain, problems, domain_max_value, batch_size=10, num_folds=N_FOLDS, shuffle=False)
+N_FOLDS = 5
+kfold = KFoldTrainingData(domain_pddl, problems, domain_max_value, batch_size=10, num_folds=N_FOLDS, shuffle=False)
 
 val_success = []
 for fold_idx in range(N_FOLDS):
@@ -52,7 +52,7 @@ for fold_idx in range(N_FOLDS):
     train_wf = TrainWorkflow(model=model,
                                 train_dataloader=train_dataloader,
                                 val_dataloader=val_dataloader,
-                                max_num_epochs=1000,
+                                max_num_epochs=100,
                                 optimizer=optim.Adam(model.parameters(), lr=0.001))
 
     train_wf.run(validation=True)
@@ -62,6 +62,7 @@ for fold_idx in range(N_FOLDS):
 
     """
     Test step
+    """
     """
     val_problems = kfold.get_test_problems_from_fold(fold_idx)
     plans_found = 0
@@ -76,3 +77,4 @@ print()
 print(f"Max val success (fold {val_success.index(max(val_success))}): {max(val_success)}%")
 print(f"Min val success (fold {val_success.index(min(val_success))}): {min(val_success)}%")
 print(f"Avg val success: {sum(val_success) / len(val_success)}%")
+    """
