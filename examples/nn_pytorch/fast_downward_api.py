@@ -51,23 +51,22 @@ def solve_instances_with_fd(domain_pddl, instances_pddl, opts = "astar(lmcut())"
     return instances_costs
 
 
-def solve_instance_with_fd(domain_pddl, instance_pddl, opts = "astar(lmcut())", time_limit = 86400, memory_limit = 34359738368, force = False):
+def solve_instance_with_fd(domain_pddl, instance_pddl, opts = "astar(lmcut())", time_limit = "999999s", memory_limit = "32G", force = False):
     """
     Tries to solve a PDDL instance. Return the cost (or None if search fails).
-    Time limit in seconds, memory limit in bytes.
     """
 
     cost = get_cached_plan_cost(instance_pddl)
     if force or cost == None:
-        # exit_code = subprocess.call([FD, domain_pddl, instance_pddl, "--search", opts, "--search-time-limit", str(time_limit)+"s", "--search-memory-limit", str(memory_limit)])
-        exit_code = subprocess.call([FD, domain_pddl, instance_pddl, "--search", opts])
+        exit_code = subprocess.call([FD, "--search-time-limit", time_limit, "--search-memory-limit", memory_limit, domain_pddl, instance_pddl, "--search", opts])
+        # exit_code = subprocess.call([FD, domain_pddl, instance_pddl, "--search", opts])
         cost, _ = parse_plan()
         add_cached_plan_cost(instance_pddl, cost)
 
     return cost
 
 
-def solve_instance_with_fd_nh(domain_pddl, instance_pddl, traced_model, blind = True, unary_threshold = 0.01, time_limit = 1800, memory_limit = 4080218931):
+def solve_instance_with_fd_nh(domain_pddl, instance_pddl, traced_model, blind = True, unary_threshold = 0.01, time_limit = "1800s", memory_limit = "3800M"):
     """
     Tries to solve a PDDL instance with the torch_sampling_network. Return the cost (or None if search fails).
     Default limits from paper (30 min, 3.8GB)
