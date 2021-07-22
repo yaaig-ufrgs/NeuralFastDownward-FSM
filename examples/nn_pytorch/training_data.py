@@ -1,3 +1,4 @@
+import random
 import torch
 from torch.utils.data import Dataset, DataLoader
 
@@ -30,7 +31,7 @@ class InstanceDataset(Dataset):
         return self.hvalues.shape
 
 
-def load_training_state_value_pairs(sas_plans: [str]) -> ([[int]], [int]):
+def load_training_state_value_pairs(sas_plans: [str]) -> [([int], int)]:
     """
     Load state-value pairs from a sampling output, returning
     a list of states (each state is a bool list) and a list
@@ -38,8 +39,8 @@ def load_training_state_value_pairs(sas_plans: [str]) -> ([[int]], [int]):
     """
 
     state_value_pairs = []
-    #states = []
-    #hvalues = []
+    states = []
+    hvalues = []
     for sp in sas_plans:
         print(sp)
         with open(sp) as f:
@@ -48,18 +49,25 @@ def load_training_state_value_pairs(sas_plans: [str]) -> ([[int]], [int]):
 
             for i in range(5, len(lines)):
                 if lines[i][0] != '#':
+                    # Reading the current plan.
                     values = lines[i].split(';')
 
                     state = []
                     for i in range(1, states_len+1):
                         state.append(int(values[i]))
-                    #states.append(state)
-                    #hvalues.append(int(values[0]))
-                    state_value_pairs.append((state, int(values[0])))
+                    states.append(state)
+                    hvalues.append(int(values[0]))
+                else:
+                    # Finished reading the current plan, so get a random state-value from it.
+                    state_value_pairs.append(select_random_state(states, hvalues))
+                    states.clear()
+                    hvalues.clear()
 
-    #return states, hvalues
     return state_value_pairs
 
+def select_random_state(states: [[int]], hvalues: [int]) -> ([int], int):
+    i = random.choice(range(len(hvalues)))
+    return ((states[i], hvalues[i]))
 
 def generate_optimal_state_value_pairs(domain, problems):
     """
