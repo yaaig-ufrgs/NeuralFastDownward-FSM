@@ -2,7 +2,11 @@ from random import shuffle as random_shuffle
 
 from torch.utils.data import DataLoader
 
-from training_data import InstanceDataset, generate_optimal_state_value_pairs
+from training_data import (
+    InstanceDataset,
+    generate_optimal_state_value_pairs,
+    load_training_state_value_pairs,
+)
 
 
 class KFoldTrainingData():
@@ -10,7 +14,10 @@ class KFoldTrainingData():
         if shuffle:
             random_shuffle(problems)
         self.problems = problems
-        self.state_value_pairs = generate_optimal_state_value_pairs(domain, problems)
+        if problems[0][-5:] == ".pddl":
+            self.state_value_pairs = generate_optimal_state_value_pairs(domain, problems)
+        else:
+            self.state_value_pairs = load_training_state_value_pairs(problems)
         self.domain_max_value = domain_max_value
         self.batch_size = batch_size
         self.num_folds = num_folds
@@ -43,6 +50,7 @@ class KFoldTrainingData():
                                           batch_size=self.batch_size, num_workers=1)
             test_dataloader = DataLoader(dataset=InstanceDataset(test_set, self.domain_max_value),
                                           batch_size=self.batch_size, num_workers=1)
+
             kfolds.append((train_dataloader, test_dataloader))
             kfolds_problems.append((training_problems, test_problems))
         

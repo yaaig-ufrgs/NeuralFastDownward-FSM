@@ -13,31 +13,39 @@ import fast_downward_api as fd_api
 
 """
 Use as:
-$ ./train.py <training_domain> <task_folder>
-e.g. $ ./train.py blocksworld ../../tasks/blocksworld_ipc/probBLOCKS-12-0
+$ ./train <training_domain> <task_folder|sas_plan>
+e.g. $ ./train.py blocks sas-plans/sas_plan_test_blocks
+e.g. $ ./train.py blocks ../../tasks/blocksworld_ipc/probBLOCKS-12-0
 """
 
 domain = argv[1]
-task_folder = argv[2]
+#task_folder = argv[2]
+sas_plan = argv[2]
 domain_max_value = 1
 
 # Use CPU instead of GPU.
 device = torch.device("cpu")
 
-
 # TODO other domains
-if domain == "blocksworld":
+if domain == "blocks":
     domain_max_value = 327
 
+problems = [sas_plan]
+domain_pddl = "instances/"+domain+"-domain.pddl"
+print(domain_pddl)
+
+"""
 # TODO
 domain_pddl = task_folder+"/domain.pddl"
 problems = []
 N_PROBLEMS = 5
 for i in range(N_PROBLEMS):
     problems.append(task_folder+f"/p{i+1}.pddl")
+"""
 
-N_FOLDS = 5
-kfold = KFoldTrainingData(domain_pddl, problems, domain_max_value, batch_size=10, num_folds=N_FOLDS, shuffle=False)
+N_FOLDS = 2
+kfold = KFoldTrainingData(domain_pddl, problems, domain_max_value, batch_size=10,
+                          num_folds=N_FOLDS, shuffle=False)
 
 val_success = []
 for fold_idx in range(N_FOLDS):

@@ -6,14 +6,13 @@ import fast_downward_api as fd_api
 
 class InstanceDataset(Dataset):
     def __init__(self, state_value_pairs, domain_max_value):
+        self.domain_max_value = domain_max_value
+
         states, hvalues = [], []
         for pair in state_value_pairs:
             states.append(pair[0])
             hvalues.append(pair[1])
 
-        # states, hvalues = load_training_state_value_tuples(state_value_pairs)
-
-        self.domain_max_value = domain_max_value
         self.states = torch.tensor(states, dtype=torch.float32)
         self.hvalues = torch.tensor([to_unary(n, domain_max_value) for n in hvalues],
                                     dtype=torch.float32)
@@ -29,6 +28,38 @@ class InstanceDataset(Dataset):
 
     def y_shape(self):
         return self.hvalues.shape
+
+
+def load_training_state_value_pairs(sas_plans: [str]) -> ([[int]], [int]):
+    """
+    Load state-value pairs from a sampling output, returning
+    a list of states (each state is a bool list) and a list
+    of hvalues. States and hvalues correspond by index.
+    """
+
+    state_value_pairs = []
+    #states = []
+    #hvalues = []
+    for sp in sas_plans:
+        print(sp)
+        with open(sp) as f:
+            lines = f.readlines()
+            states_len = len(lines[2].split(';'))
+
+            for i in range(5, len(lines)):
+                if lines[i][0] != '#':
+                    values = lines[i].split(';')
+
+                    state = []
+                    for i in range(1, states_len+1):
+                        state.append(int(values[i]))
+                    #states.append(state)
+                    #hvalues.append(int(values[0]))
+                    state_value_pairs.append((state, int(values[0])))
+
+    #return states, hvalues
+    return state_value_pairs
+
 
 def generate_optimal_state_value_pairs(domain, problems):
     """
