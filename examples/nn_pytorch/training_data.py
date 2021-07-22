@@ -65,9 +65,11 @@ def load_training_state_value_pairs(sas_plans: [str]) -> [([int], int)]:
 
     return state_value_pairs
 
+
 def select_random_state(states: [[int]], hvalues: [int]) -> ([int], int):
     i = random.choice(range(len(hvalues)))
     return ((states[i], hvalues[i]))
+
 
 def generate_optimal_state_value_pairs(domain, problems):
     """
