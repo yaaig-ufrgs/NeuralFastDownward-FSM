@@ -26,10 +26,6 @@ domain_max_value = 1
 # Use CPU instead of GPU.
 device = torch.device("cpu")
 
-# TODO other domains
-if domain == "blocks":
-    domain_max_value = 327
-
 problems = [sas_plan]
 domain_pddl = "instances/"+domain+"-domain.pddl"
 print(domain_pddl)
@@ -44,7 +40,7 @@ for i in range(N_PROBLEMS):
 """
 
 N_FOLDS = 2
-kfold = KFoldTrainingData(domain_pddl, problems, domain_max_value, batch_size=10,
+kfold = KFoldTrainingData(domain_pddl, problems, batch_size=10,
                           num_folds=N_FOLDS, shuffle=False)
 
 val_success = []
