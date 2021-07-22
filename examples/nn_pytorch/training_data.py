@@ -7,15 +7,15 @@ import fast_downward_api as fd_api
 
 class InstanceDataset(Dataset):
     def __init__(self, state_value_pairs, domain_max_value):
-        self.domain_max_value = domain_max_value
-
         states, hvalues = [], []
         for pair in state_value_pairs:
             states.append(pair[0])
             hvalues.append(pair[1])
 
+        self.domain_max_value = domain_max_value
+
         self.states = torch.tensor(states, dtype=torch.float32)
-        self.hvalues = torch.tensor([to_unary(n, domain_max_value) for n in hvalues],
+        self.hvalues = torch.tensor([to_unary(n, self.domain_max_value) for n in hvalues],
                                     dtype=torch.float32)
 
     def __getitem__(self, idx):
@@ -31,16 +31,17 @@ class InstanceDataset(Dataset):
         return self.hvalues.shape
 
 
-def load_training_state_value_pairs(sas_plans: [str]) -> [([int], int)]:
+def load_training_state_value_pairs(sas_plans: [str]) -> ([([int], int)], int):
     """
-    Load state-value pairs from a sampling output, returning
-    a list of states (each state is a bool list) and a list
-    of hvalues. States and hvalues correspond by index.
+    Load state-value pairs from a sampling output, 
+    Returns a tuple containing a list of state-value pairs 
+    and the domain max value.
     """
 
     state_value_pairs = []
     states = []
     hvalues = []
+    domain_max_value = 0;
     for sp in sas_plans:
         print(sp)
         with open(sp) as f:
@@ -51,19 +52,21 @@ def load_training_state_value_pairs(sas_plans: [str]) -> [([int], int)]:
                 if lines[i][0] != '#':
                     # Reading the current plan.
                     values = lines[i].split(';')
-
                     state = []
                     for i in range(1, states_len+1):
                         state.append(int(values[i]))
                     states.append(state)
-                    hvalues.append(int(values[0]))
+                    hval = int(values[0])
+                    hvalues.append(hval)
+                    if hval > domain_max_value:
+                        domain_max_value = hval
                 else:
                     # Finished reading the current plan, so get a random state-value from it.
                     state_value_pairs.append(select_random_state(states, hvalues))
                     states.clear()
                     hvalues.clear()
 
-    return state_value_pairs
+    return state_value_pairs, domain_max_value
 
 
 def select_random_state(states: [[int]], hvalues: [int]) -> ([int], int):
