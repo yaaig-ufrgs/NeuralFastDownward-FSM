@@ -25,14 +25,14 @@ class TrainWorkflow():
         
     def train_loop(self):
         size = len(self.train_dataloader.dataset)
+        num_batches = len(self.train_dataloader)
+        train_loss = 0
+
         for batch, (X, y) in enumerate(self.train_dataloader):
             # Compute prediction and loss
             pred = self.model(X)
             loss = self.loss_fn(pred, y)
-
-            if batch % 100 == 0:
-                current = batch * len(X)
-                print(f"Train loss:\t {loss.item():>7f}")
+            train_loss += loss.item()
 
             # Clear gradients for the variables it will update.
             self.optimizer.zero_grad()
@@ -42,6 +42,9 @@ class TrainWorkflow():
 
             # Update parameters.
             self.optimizer.step()
+        
+        train_loss /= num_batches
+        print(f" | avg_train_loss={train_loss:>7f}", end="", flush=True)
 
     def val_loop(self):
         size = len(self.val_dataloader.dataset)
@@ -51,12 +54,11 @@ class TrainWorkflow():
         with torch.no_grad():
             for X, y in self.val_dataloader:
                 pred = self.model(X)
-                diff = np.array(pred-y)
-                print(f"Val diff avg:\t {np.average(diff)}")
                 val_loss += self.loss_fn(pred, y).item()
 
         val_loss /= num_batches
-        print(f"Avg val loss:\t {val_loss:>8f} \n")
+        print(f" | avg_val_loss={val_loss:>8f}")
+        return val_loss
 
     def save_traced_model(self, filename: str):
         """ 
@@ -86,10 +88,20 @@ class TrainWorkflow():
         traced_model.save(filename)
 
     def run(self, validation=True):
+        best_val_loss = 1
+        max_epochs_without_improving = 5
+        count = 0
         for t in range(self.max_num_epochs):
-            print(f"Epoch {t+1}\n-------------------------------")
+            print(f"Epoch {t+1}", end="", flush=True)
             self.train_loop()
             if validation:
-                self.val_loop()
+                last_val_loss = self.val_loop()
+                if last_val_loss < best_val_loss:
+                    best_val_loss = last_val_loss
+                    count = 0
+                else:
+                    count += 1
+                    if count >= max_epochs_without_improving:
+                        print(f"The loss on the validation data didn't improve in {max_epochs_without_improving} epochs.")
+                        break
         print("Done!")
-

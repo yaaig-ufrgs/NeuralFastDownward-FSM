@@ -23,6 +23,7 @@ if __name__ == "__main__":
     samples = argv[1]
     test_task_folder = argv[2]
     shuffle_tasks = False
+    test_step = False
 
     if not path.exists(OUTPUT_MODEL_FOLDER):
         makedirs(OUTPUT_MODEL_FOLDER)
@@ -47,12 +48,14 @@ if __name__ == "__main__":
                     hidden_units=train_dataloader.dataset.x_shape()[1],
                     output_size=train_dataloader.dataset.y_shape()[1]).to(torch.device("cpu"))
 
+        print(f"\n---------- FOLD {fold_idx+1}/{N_FOLDS} ----------")
         print(model)
+        print()
 
         train_wf = TrainWorkflow(model=model,
                                     train_dataloader=train_dataloader,
                                     val_dataloader=val_dataloader,
-                                    max_num_epochs=10,
+                                    max_num_epochs=7,
                                     optimizer=optim.Adam(model.parameters(), lr=0.001))
 
         train_wf.run(validation=True)
@@ -60,19 +63,19 @@ if __name__ == "__main__":
         model_fname = f"{OUTPUT_MODEL_FOLDER}/traced_fold_{fold_idx}.pt"
         train_wf.save_traced_model(model_fname)
 
-        """
-        Test step
-        """
-        plans_found = 0
-        num_tests = int(len(problems_pddl) / N_FOLDS)
-        for problem_pddl in problems_pddl[num_tests*fold_idx : num_tests*fold_idx+num_tests]:
-            cost = fd_api.solve_instance_with_fd_nh(domain_pddl, problem_pddl, model_fname)
-            plans_found += int(cost != None)
-        success_rate = 100 * plans_found / num_tests
-        test_success.append(success_rate)
-        print(f"Fold {fold_idx} test success: {plans_found} of {num_tests} ({success_rate}%)")
+        """ Test """
+        if test_step:
+            plans_found = 0
+            num_tests = int(len(problems_pddl) / N_FOLDS)
+            for problem_pddl in problems_pddl[num_tests*fold_idx : num_tests*fold_idx+num_tests]:
+                cost = fd_api.solve_instance_with_fd_nh(domain_pddl, problem_pddl, model_fname)
+                plans_found += int(cost != None)
+            success_rate = 100 * plans_found / num_tests
+            test_success.append(success_rate)
+            print(f"Fold {fold_idx} test success: {plans_found} of {num_tests} ({success_rate}%)")
 
-    print()
-    print(f"Max test success (fold {test_success.index(max(test_success))}): {max(test_success)}%")
-    print(f"Min test success (fold {test_success.index(min(test_success))}): {min(test_success)}%")
-    print(f"Avg test success: {sum(test_success) / len(test_success)}%")
+    if test_step:
+        print()
+        print(f"Max test success (fold {test_success.index(max(test_success))}): {max(test_success)}%")
+        print(f"Min test success (fold {test_success.index(min(test_success))}): {min(test_success)}%")
+        print(f"Avg test success: {sum(test_success) / len(test_success)}%")

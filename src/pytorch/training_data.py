@@ -32,7 +32,7 @@ class InstanceDataset(Dataset):
         return self.hvalues.shape
 
 
-def load_training_state_value_pairs(samples_file, sample_strategy: int = SAMPLE_ENTIRE_PLAN) -> ([([int], int)], int):
+def load_training_state_value_pairs(samples_file, sample_strategy: int = SAMPLE_RANDOM_STATE) -> ([([int], int)], int):
     """
     Load state-value pairs from a sampling output, 
     Returns a tuple containing a list of state-value pairs 
