@@ -32,45 +32,43 @@ class InstanceDataset(Dataset):
         return self.hvalues.shape
 
 
-def load_training_state_value_pairs(sas_plans: [str], sample_strategy: int = SAMPLE_RANDOM_STATE) -> ([([int], int)], int):
+def load_training_state_value_pairs(samples_file, sample_strategy: int = SAMPLE_ENTIRE_PLAN) -> ([([int], int)], int):
     """
     Load state-value pairs from a sampling output, 
     Returns a tuple containing a list of state-value pairs 
     and the domain max value.
     """
-
     state_value_pairs = []
     pair = []
     domain_max_value = 0
-    for sp in sas_plans:
-        print(sp)
-        with open(sp) as f:
-            lines = f.readlines()
-            states_len = len(lines[2].split(';'))
+    # TODO this reading step at the beginning of the workflow
+    with open(samples_file) as f:
+        lines = f.readlines()
+        states_len = len(lines[2].split(';'))
 
-            for i in range(5, len(lines)):
-                if lines[i][0] != '#':
-                    # Reading the current plan.
-                    values = lines[i].split(';')
-                    state = []
-                    for i in range(1, states_len+1):
-                        state.append(int(values[i]))
-                    pair.append((state, int(values[0])))
-                elif lines[i][:5] == '# ---':
-                    # Finished reading the current plan, so sample the state(s) from it.
-                    if sample_strategy == SAMPLE_INIT_STATE:
-                        state_value_pairs.append(pair[0])
-                    elif sample_strategy == SAMPLE_RANDOM_STATE:
-                        i = random.choice(range(len(pair)))
+        for i in range(5, len(lines)):
+            if lines[i][0] != '#':
+                # Reading the current plan.
+                values = lines[i].split(';')
+                state = []
+                for i in range(1, states_len+1):
+                    state.append(int(values[i]))
+                pair.append((state, int(values[0])))
+            elif lines[i][:5] == '# ---':
+                # Finished reading the current plan, so sample the state(s) from it.
+                if sample_strategy == SAMPLE_INIT_STATE:
+                    state_value_pairs.append(pair[0])
+                elif sample_strategy == SAMPLE_RANDOM_STATE:
+                    i = random.choice(range(len(pair)))
+                    state_value_pairs.append(pair[i])
+                elif sample_strategy == SAMPLE_ENTIRE_PLAN:
+                    for i in range(len(pair)):
                         state_value_pairs.append(pair[i])
-                    elif sample_strategy == SAMPLE_ENTIRE_PLAN:
-                        for i in range(len(pair)):
-                            state_value_pairs.append(pair[i])
 
-                    if pair[-1][1] > domain_max_value:
-                        domain_max_value = pair[-1][1]
+                if pair[-1][1] > domain_max_value:
+                    domain_max_value = pair[-1][1]
 
-                    pair.clear()
+                pair.clear()
 
     return state_value_pairs, domain_max_value
 
