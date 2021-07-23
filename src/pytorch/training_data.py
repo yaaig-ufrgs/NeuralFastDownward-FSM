@@ -3,6 +3,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 from utils import to_unary
+from utils import SAMPLE_INIT_STATE, SAMPLE_RANDOM_STATE, SAMPLE_ENTIRE_PLAN
 import fast_downward_api as fd_api
 
 class InstanceDataset(Dataset):
@@ -31,7 +32,7 @@ class InstanceDataset(Dataset):
         return self.hvalues.shape
 
 
-def load_training_state_value_pairs(sas_plans: [str]) -> ([([int], int)], int):
+def load_training_state_value_pairs(sas_plans: [str], sample_strategy: int = SAMPLE_RANDOM_STATE) -> ([([int], int)], int):
     """
     Load state-value pairs from a sampling output, 
     Returns a tuple containing a list of state-value pairs 
@@ -39,9 +40,8 @@ def load_training_state_value_pairs(sas_plans: [str]) -> ([([int], int)], int):
     """
 
     state_value_pairs = []
-    states = []
-    hvalues = []
-    domain_max_value = 0;
+    pair = []
+    domain_max_value = 0
     for sp in sas_plans:
         print(sp)
         with open(sp) as f:
@@ -55,23 +55,24 @@ def load_training_state_value_pairs(sas_plans: [str]) -> ([([int], int)], int):
                     state = []
                     for i in range(1, states_len+1):
                         state.append(int(values[i]))
-                    states.append(state)
-                    hval = int(values[0])
-                    hvalues.append(hval)
-                    if hval > domain_max_value:
-                        domain_max_value = hval
-                else:
-                    # Finished reading the current plan, so get a random state-value from it.
-                    state_value_pairs.append(select_random_state(states, hvalues))
-                    states.clear()
-                    hvalues.clear()
+                    pair.append((state, int(values[0])))
+                elif lines[i][:5] == '# ---':
+                    # Finished reading the current plan, so sample the state(s) from it.
+                    if sample_strategy == SAMPLE_INIT_STATE:
+                        state_value_pairs.append(pair[0])
+                    elif sample_strategy == SAMPLE_RANDOM_STATE:
+                        i = random.choice(range(len(pair)))
+                        state_value_pairs.append(pair[i])
+                    elif sample_strategy == SAMPLE_ENTIRE_PLAN:
+                        for i in range(len(pair)):
+                            state_value_pairs.append(pair[i])
+
+                    if pair[-1][1] > domain_max_value:
+                        domain_max_value = pair[-1][1]
+
+                    pair.clear()
 
     return state_value_pairs, domain_max_value
-
-
-def select_random_state(states: [[int]], hvalues: [int]) -> ([int], int):
-    i = random.choice(range(len(hvalues)))
-    return ((states[i], hvalues[i]))
 
 
 def generate_optimal_state_value_pairs(domain, problems):
