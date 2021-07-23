@@ -2,7 +2,7 @@
 
 from sys import argv
 
-import fast_downward_api as fd_api
+import src.pytorch.fast_downward_api as fd_api
 
 """
 Use as:

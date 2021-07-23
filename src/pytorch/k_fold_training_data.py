@@ -2,7 +2,7 @@ from random import shuffle as random_shuffle
 
 from torch.utils.data import DataLoader
 
-from training_data import (
+from src.pytorch.training_data import (
     InstanceDataset,
     generate_optimal_state_value_pairs,
     load_training_state_value_pairs,

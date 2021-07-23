@@ -2,9 +2,9 @@ import random
 import torch
 from torch.utils.data import Dataset, DataLoader
 
-from utils import to_unary
-from utils import SAMPLE_INIT_STATE, SAMPLE_RANDOM_STATE, SAMPLE_ENTIRE_PLAN
-import fast_downward_api as fd_api
+from src.pytorch.utils import to_unary
+from src.pytorch.utils import SAMPLE_INIT_STATE, SAMPLE_RANDOM_STATE, SAMPLE_ENTIRE_PLAN
+import src.pytorch.fast_downward_api as fd_api
 
 class InstanceDataset(Dataset):
     def __init__(self, state_value_pairs, domain_max_value):

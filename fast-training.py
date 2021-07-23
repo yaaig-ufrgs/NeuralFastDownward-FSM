@@ -2,23 +2,30 @@
 
 from sys import argv
 from random import shuffle
+from datetime import datetime
+from os import path, makedirs
 import torch
 import torch.optim as optim
 
-from model import HNN
-from train_workflow import TrainWorkflow
-from k_fold_training_data import KFoldTrainingData
-import fast_downward_api as fd_api
+from src.pytorch.model import HNN
+from src.pytorch.train_workflow import TrainWorkflow
+from src.pytorch.k_fold_training_data import KFoldTrainingData
+import src.pytorch.fast_downward_api as fd_api
 
 """
 Use: $ ./train.py sas_plan test_tasks_folder
-e.g. $ ./train.py ../../outputs/sampling/sampling_blocksworld_ipc/probBLOCKS-12-0 ../../tasks/blocksworld_ipc/probBLOCKS-12-0
+e.g. $ ./train.py ../../results/sampling/sampling_blocksworld_ipc/probBLOCKS-12-0 ../../tasks/blocksworld_ipc/probBLOCKS-12-0
 """
+
+OUTPUT_MODEL_FOLDER = f"results/train-pytorch-{datetime.now().isoformat().replace('-', '.').replace(':', '.')}"
 
 if __name__ == "__main__":
     samples = argv[1]
     test_task_folder = argv[2]
     shuffle_tasks = False
+
+    if not path.exists(OUTPUT_MODEL_FOLDER):
+        makedirs(OUTPUT_MODEL_FOLDER)
 
     domain_pddl = test_task_folder+"/domain.pddl"
     problems_pddl = []
@@ -45,12 +52,12 @@ if __name__ == "__main__":
         train_wf = TrainWorkflow(model=model,
                                     train_dataloader=train_dataloader,
                                     val_dataloader=val_dataloader,
-                                    max_num_epochs=2,
+                                    max_num_epochs=10,
                                     optimizer=optim.Adam(model.parameters(), lr=0.001))
 
         train_wf.run(validation=True)
 
-        model_fname = f"traced_fold_{fold_idx}.pt"
+        model_fname = f"{OUTPUT_MODEL_FOLDER}/traced_fold_{fold_idx}.pt"
         train_wf.save_traced_model(model_fname)
 
         """

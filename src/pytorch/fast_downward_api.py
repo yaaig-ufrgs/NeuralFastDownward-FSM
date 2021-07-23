@@ -3,7 +3,7 @@ import json
 
 import re
 
-FD = "../../fast-downward.py"
+FD = "./fast-downward.py"
 SAS_PLAN_FILE = "sas_plan"
 CACHE_PLAN_COST = "plan_cost.json"
 

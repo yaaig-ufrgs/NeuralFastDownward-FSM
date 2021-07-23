@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from model import HNN
+from src.pytorch.model import HNN
 
 class TrainWorkflow():
     def __init__(
@@ -20,7 +20,7 @@ class TrainWorkflow():
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
         self.max_num_epochs = max_num_epochs
-        self.optimizer = optimizer;
+        self.optimizer = optimizer
         self.loss_fn = loss_fn
         
     def train_loop(self):
