@@ -1,0 +1,2 @@
+domain,hid0,hid1,hid3,hid5,exp hid1,exp hid3,exp hi5,relu,drop0.2,drop0.4,reg0.1,reg1,reg10,init,entire
+blocks12,100,100,100,100,314,451,7739,100,100,100,0,0,0,0,100
