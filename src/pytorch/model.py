@@ -17,18 +17,17 @@ class HNN(nn.Module):
         input_size: int,
         hidden_units: int,
         output_size: int,
-            
     ):
         super(HNN, self).__init__()
         self.hid1 = nn.Linear(input_size, hidden_units)
-        #self.hid2 = nn.Linear(hidden_units, hidden_units)
-        #self.hid3 = nn.Linear(hidden_units, hidden_units)
+        # self.hid2 = nn.Linear(hidden_units, hidden_units)
+        # self.hid3 = nn.Linear(hidden_units, hidden_units)
         self.opt = nn.Linear(hidden_units, output_size)
 
     def forward(self, x):
         z = torch.sigmoid(self.hid1(x))
-        #z = torch.sigmoid(self.hid2(z))
-        #z = torch.sigmoid(self.hid3(z))
+        # z = torch.sigmoid(self.hid2(z))
+        # z = torch.sigmoid(self.hid3(z))
         z = torch.sigmoid(self.opt(z))
-        #z = torch.flatten(self.opt(z))
+        # z = torch.flatten(self.opt(z))
         return z

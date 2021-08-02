@@ -6,6 +6,7 @@ from src.pytorch.utils import to_unary
 from src.pytorch.utils import SAMPLE_INIT_STATE, SAMPLE_RANDOM_STATE, SAMPLE_ENTIRE_PLAN
 import src.pytorch.fast_downward_api as fd_api
 
+
 class InstanceDataset(Dataset):
     def __init__(self, state_value_pairs, domain_max_value):
         states, hvalues = [], []
@@ -16,8 +17,9 @@ class InstanceDataset(Dataset):
         self.domain_max_value = domain_max_value
 
         self.states = torch.tensor(states, dtype=torch.float32)
-        self.hvalues = torch.tensor([to_unary(n, self.domain_max_value) for n in hvalues],
-                                    dtype=torch.float32)
+        self.hvalues = torch.tensor(
+            [to_unary(n, self.domain_max_value) for n in hvalues], dtype=torch.float32
+        )
 
     def __getitem__(self, idx):
         return self.states[idx], self.hvalues[idx]
@@ -83,7 +85,7 @@ def convert_pddl_to_boolean(domain, problems):
     # TODO: Get atoms order from domain
     with open("atoms/probBLOCKS-12-0.txt") as f:
         # Read and convert (e.g. "Atom ontable(a)" -> "ontable a")
-        atoms = [x[5:] for x in f.readlines()[0].split(";")] # remove "Atom " prefix
+        atoms = [x[5:] for x in f.readlines()[0].split(";")]  # remove "Atom " prefix
         for i in range(len(atoms)):
             pred, objs = atoms[i].split("(")
             objs = objs[:-1].replace(",", "")
@@ -103,31 +105,39 @@ def convert_pddl_to_boolean(domain, problems):
     return states
 
 
-def setup_dataloaders(dataset: InstanceDataset, train_split: float, batch_size: int,
-                      shuffle: bool) -> (DataLoader, DataLoader):
+def setup_dataloaders(
+    dataset: InstanceDataset, train_split: float, batch_size: int, shuffle: bool
+) -> (DataLoader, DataLoader):
     """
     Setup training and validation datasets using a random split.
     """
 
     train_size = int(train_split * len(dataset))
     val_size = len(dataset) - train_size
-    train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+    train_dataset, val_dataset = torch.utils.data.random_split(
+        dataset, [train_size, val_size]
+    )
 
-    train_dataloader = DataLoader(dataset=train_dataset, batch_size=batch_size,
-                                  shuffle=shuffle, num_workers=1)
-    val_dataloader = DataLoader(dataset=val_dataset, batch_size=batch_size,
-                                shuffle=shuffle, num_workers=1)
+    train_dataloader = DataLoader(
+        dataset=train_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=1
+    )
+    val_dataloader = DataLoader(
+        dataset=val_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=1
+    )
 
     return train_dataloader, val_dataloader
 
 
-def setup_train_dataloader(dataset: InstanceDataset, batch_size: int, shuffle: bool) -> (DataLoader, DataLoader):
+def setup_train_dataloader(
+    dataset: InstanceDataset, batch_size: int, shuffle: bool
+) -> (DataLoader, DataLoader):
     """
     Setup only a training dataset.
     """
 
-    train_dataloader = DataLoader(dataset=dataset, batch_size=batch_size,
-                                  shuffle=shuffle, num_workers=1)
+    train_dataloader = DataLoader(
+        dataset=dataset, batch_size=batch_size, shuffle=shuffle, num_workers=1
+    )
     return train_dataloader
 
 
@@ -140,16 +150,18 @@ def load_training_state_value_tuples(sas_plan: str) -> ([[int]], [int]):
 
     states = []
     hvalues = []
-    with open(sas_plan,) as f:
+    with open(
+        sas_plan,
+    ) as f:
         lines = f.readlines()
-        states_len = len(lines[2].split(';'))
+        states_len = len(lines[2].split(";"))
 
         for i in range(5, len(lines)):
-            if lines[i][0] != '#':
-                values = lines[i].split(';')
+            if lines[i][0] != "#":
+                values = lines[i].split(";")
 
                 state = []
-                for i in range(1, states_len+1):
+                for i in range(1, states_len + 1):
                     state.append(int(values[i]))
                 states.append(state)
                 hvalues.append(int(values[0]))
