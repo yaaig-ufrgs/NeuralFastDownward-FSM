@@ -13,8 +13,8 @@ from src.pytorch.k_fold_training_data import KFoldTrainingData
 import src.pytorch.fast_downward_api as fd_api
 
 """
-Use: $ ./train.py sas_plan test_tasks_folder
-e.g. $ ./train.py ../../results/sampling/sampling_blocksworld_ipc/probBLOCKS-12-0 ../../tasks/blocksworld_ipc/probBLOCKS-12-0
+Use: $ ./fast-training.py sas_plan test_tasks_folder
+e.g. $ ./fast-training.py ../../results/sampling/sampling_blocksworld_ipc/probBLOCKS-12-0 ../../tasks/blocksworld_ipc/probBLOCKS-12-0
 """
 
 OUTPUT_MODEL_FOLDER = f"results/train-pytorch-{datetime.now().isoformat().replace('-', '.').replace(':', '.')}"
