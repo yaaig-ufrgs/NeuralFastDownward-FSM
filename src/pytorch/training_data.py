@@ -44,8 +44,7 @@ def load_training_state_value_pairs(samples_file: str) -> ([([int], int)], int):
     domain_max_value = 0
     # TODO this reading step at the beginning of the workflow
     with open(samples_file) as f:
-        lines = f.readlines()
-
+        lines = f.readlines()[1:]
         for line in lines:
             l = line.split("\n")[0].split(";")
             value = int(l[0])
