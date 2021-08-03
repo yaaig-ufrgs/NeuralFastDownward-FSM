@@ -20,7 +20,7 @@ e.g. $ ./fast-training.py results/sampling/sampling_blocksworld_ipc/probBLOCKS-1
 """
 
 DOMAIN = argv[2].partition("tasks")[-1].split("/")[-1]
-OUTPUT_MODEL_FOLDER = f"results/train/train-pytorch-{DOMAIN}-{datetime.now().isoformat().replace('-', '.').replace(':', '.')}"
+OUTPUT_MODEL_FOLDER = f"results/train/{DOMAIN}-train-pytorch-{datetime.now().isoformat().replace('-', '.').replace(':', '.')}"
 
 _log = logging.getLogger(__name__)
 
@@ -34,7 +34,6 @@ if __name__ == "__main__":
         makedirs(OUTPUT_MODEL_FOLDER)
 
     # TODO insert more info to log filename once we have parametrization done.
-    # TODO separated eval log
     setup_full_logging(OUTPUT_MODEL_FOLDER)
     _log.info(f"Training for domain {DOMAIN}")
 
