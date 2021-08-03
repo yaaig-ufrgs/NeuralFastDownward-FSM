@@ -464,6 +464,7 @@ fast_downward_plugin(
         sampling_engines/sampling_search
         sampling_engines/sampling_search_base
         sampling_engines/sampling_search_simple
+        sampling_engines/sampling_search_ferber
         sampling_engines/sampling_v
         sampling_engines/sampling_tasks
         sampling_engines/plugin_sampling.cc
