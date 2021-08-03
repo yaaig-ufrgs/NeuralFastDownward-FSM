@@ -30,14 +30,14 @@ string SamplingSearchFerber::extract_single_sample(Trajectory trajectory, size_t
 
     if (store_plan_cost) {
         if (select_state_method == SelectStateMethod::ENTIRE_PLAN) {
-            if (idx_t != trajectory.size() - 1) {
+            if (idx_t != trajectory.size() - 1)
                 *cost += ops[plan[idx_t]].get_cost();
-            }
             oss << *cost << field_separator;
         }
         else {
             for (size_t i = idx_t; i-- > 0;) {
-                *cost += ops[plan[i]].get_cost();
+                if (i != trajectory.size() - 1)
+                    *cost += ops[plan[i]].get_cost();
             } 
             oss << *cost << field_separator;
         }
