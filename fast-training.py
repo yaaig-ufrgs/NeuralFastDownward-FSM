@@ -19,9 +19,9 @@ Use: $ ./fast-training.py sas_plan test_tasks_folder
 e.g. $ ./fast-training.py ../../results/sampling/sampling_blocksworld_ipc/probBLOCKS-12-0 ../../tasks/blocksworld_ipc/probBLOCKS-12-0
 """
 
-_log = logging.getLogger(__name__)
-
 OUTPUT_MODEL_FOLDER = f"results/train/train-pytorch-{datetime.now().isoformat().replace('-', '.').replace(':', '.')}"
+
+_log = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     samples = argv[1]
@@ -33,9 +33,8 @@ if __name__ == "__main__":
         makedirs(OUTPUT_MODEL_FOLDER)
 
     # TODO insert more info to log filename once we have parametrization done.
-    # does not work...
+    # TODO separated eval log
     setup_full_logging(OUTPUT_MODEL_FOLDER)
-    print(_log.handlers)
 
     domain_pddl = test_task_folder+"/domain.pddl"
     problems_pddl = []
@@ -62,14 +61,14 @@ if __name__ == "__main__":
 
         if fold_idx == 0:
             _log.info(
-                f"- Network input units: {model.input_units}"
-                f"- Network hidden layers: {model.nb_layers}"
-                f"- Network output units: {model.output_units}"
-                f"- {model}"
+                f"\nNetwork input units: {model.input_units}\n"
+                f"Network hidden layers: {model.nb_layers}\n"
+                f"Network output units: {model.output_units}\n"
+                f"{model}"
             )
 
         _log.info(
-            f"\n---------- FOLD {fold_idx+1}/{N_FOLDS} ----------"
+            f"----- FOLD {fold_idx+1}/{N_FOLDS} -----"
         )
 
         train_wf = TrainWorkflow(model=model,
