@@ -16,10 +16,11 @@ import src.pytorch.fast_downward_api as fd_api
 
 """
 Use: $ ./fast-training.py sas_plan test_tasks_folder
-e.g. $ ./fast-training.py ../../results/sampling/sampling_blocksworld_ipc/probBLOCKS-12-0 ../../tasks/blocksworld_ipc/probBLOCKS-12-0
+e.g. $ ./fast-training.py results/sampling/sampling_blocksworld_ipc/probBLOCKS-12-0 tasks/blocksworld_ipc/probBLOCKS-12-0
 """
 
-OUTPUT_MODEL_FOLDER = f"results/train/train-pytorch-{datetime.now().isoformat().replace('-', '.').replace(':', '.')}"
+DOMAIN = argv[2].partition("tasks")[-1].split("/")[-1]
+OUTPUT_MODEL_FOLDER = f"results/train/train-pytorch-{DOMAIN}-{datetime.now().isoformat().replace('-', '.').replace(':', '.')}"
 
 _log = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ if __name__ == "__main__":
     # TODO insert more info to log filename once we have parametrization done.
     # TODO separated eval log
     setup_full_logging(OUTPUT_MODEL_FOLDER)
+    _log.info(f"Training for domain {DOMAIN}")
 
     domain_pddl = test_task_folder+"/domain.pddl"
     problems_pddl = []
