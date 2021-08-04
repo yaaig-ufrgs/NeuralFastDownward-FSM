@@ -1,8 +1,6 @@
 import argparse
 from pathlib import Path
 
-# TODO: add help message for each argument
-
 from default_args import (
     DEFAULT_OUTPUT_LAYER,
     DEFAULT_NUM_FOLDS,
@@ -14,11 +12,16 @@ from default_args import (
     DEFAULT_SHUFFLE,
     DEFAULT_LEARNING_RATE,
     DEFAULT_MAX_EPOCHS,
-    DEFAULT_MAX_TRAINING_TIME
+    DEFAULT_MAX_TRAINING_TIME,
+    DEFAULT_SEARCH_ALGORITHM,
+    DEFAULT_MAX_SEARCH_TIME,
+    DEFAULT_OUTPUT_FOLDER,
 )
 
+# TODO: add help message for each argument
+
 def get_train_parser():
-    parser = argparse.ArgumentParser(description="train description")
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         'samples',
         type=argparse.FileType('r'),
@@ -91,3 +94,44 @@ def get_train_parser():
         default=DEFAULT_SHUFFLE,
     )
     return parser.parse_args()
+
+def get_test_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "model",
+        type=Path,
+    )
+    parser.add_argument(
+        "domain_pddl",
+        type=Path,
+    )
+    parser.add_argument(
+        "problem_pddls",
+        type=Path,
+        nargs="+"
+    )
+    parser.add_argument(
+        "-a",
+        "--search-algorithm",
+        choices=["astar", "eager_greedy"],
+        default=DEFAULT_SEARCH_ALGORITHM,
+    )
+    parser.add_argument(
+        "-t",
+        "--max-search-time",
+        type=int,
+        default=DEFAULT_MAX_SEARCH_TIME,
+    )
+    parser.add_argument(
+        "-o",
+        "--output-folder",
+        type=Path,
+        default=DEFAULT_OUTPUT_FOLDER,
+    )
+    parser.add_argument(
+        "-s",
+        "--shuffle",
+        type=int,
+        default=DEFAULT_SHUFFLE,
+    )
+    return parser
