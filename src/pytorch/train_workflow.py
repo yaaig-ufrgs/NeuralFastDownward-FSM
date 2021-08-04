@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 import torch
 import torch.nn as nn
@@ -5,6 +6,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from src.pytorch.model import HNN
+
+_log = logging.getLogger(__name__)
 
 
 class TrainWorkflow:
@@ -45,7 +48,9 @@ class TrainWorkflow:
             self.optimizer.step()
 
         train_loss /= num_batches
-        print(f" | avg_train_loss={train_loss:>7f}", end="", flush=True)
+        _log.info(
+            f" | avg_train_loss={train_loss:>7f}"
+        )
 
     def val_loop(self):
         size = len(self.val_dataloader.dataset)
@@ -58,7 +63,9 @@ class TrainWorkflow:
                 val_loss += self.loss_fn(pred, y).item()
 
         val_loss /= num_batches
-        print(f" | avg_val_loss={val_loss:>8f}")
+        _log.info(
+            f" | avg_val_loss={val_loss:>8f}"
+        )
         return val_loss
 
     def save_traced_model(self, filename: str):
@@ -93,7 +100,9 @@ class TrainWorkflow:
         max_epochs_without_improving = 5
         count = 0
         for t in range(self.max_num_epochs):
-            print(f"Epoch {t+1}", end="", flush=True)
+            _log.info(
+                f"Epoch {t+1}"
+            )
             self.train_loop()
             if validation:
                 last_val_loss = self.val_loop()
@@ -103,8 +112,10 @@ class TrainWorkflow:
                 else:
                     count += 1
                     if count >= max_epochs_without_improving:
-                        print(
+                        _log.info(
                             f"The loss on the validation data didn't improve in {max_epochs_without_improving} epochs."
                         )
                         break
-        print("Done!")
+        _log.info(
+            "Done!"
+        )
