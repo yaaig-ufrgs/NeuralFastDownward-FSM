@@ -698,6 +698,7 @@ fast_downward_plugin(
     HELP "Sampling Techniques"
     SOURCES
         sampling_techniques/technique_gbackward_none
+        sampling_techniques/technique_gbackward_fukunaga
         sampling_techniques/technique_iforward_none
         sampling_techniques/technique_uniform_none
         sampling_techniques/technique_null
