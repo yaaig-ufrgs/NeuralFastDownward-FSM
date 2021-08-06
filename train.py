@@ -6,16 +6,16 @@ import torch
 from src.pytorch.k_fold_training_data import KFoldTrainingData
 from src.pytorch.model import HNN
 from src.pytorch.train_workflow import TrainWorkflow
-from src.pytorch.utils.parse_args import get_train_args
-from src.pytorch.utils.save import create_train_directory
-from src.pytorch.utils.helpers import logging_train_config
 from src.pytorch.log import setup_full_logging
+from src.pytorch.utils.helpers import logging_train_config, create_directory
+from src.pytorch.utils.parse_args import get_train_args
 
+# TODO: output_layer, max_training_time args
 
 _log = logging.getLogger(__name__)
 
 def train_main(args):
-    dirname = create_train_directory(args)
+    dirname = create_directory(args)
     setup_full_logging(dirname)
     logging_train_config(args, dirname)
 
@@ -31,23 +31,29 @@ def train_main(args):
         )
         train_dataloader, val_dataloader = kfold.get_fold(fold_idx)
 
-        model = HNN(input_units=train_dataloader.dataset.x_shape()[1],
-                    nb_layers=args.hidden_layers,
-                    output_units=train_dataloader.dataset.y_shape()[1]).to(torch.device("cpu"))
+        model = HNN(
+            input_units=train_dataloader.dataset.x_shape()[1],
+            output_units=train_dataloader.dataset.y_shape()[1],
+            hidden_layers=args.hidden_layers,
+            activation=args.activation,
+            dropout_rate=args.dropout_rate
+        ).to(torch.device("cpu"))
 
         if fold_idx == 0:
             _log.info(
-                f"\nNetwork input units: {model.input_units}\n"
-                f"Network hidden layers: {model.nb_layers}\n"
-                f"Network output units: {model.output_units}\n"
                 f"{model}"
             )
 
-        train_wf = TrainWorkflow(model=model,
+        train_wf = TrainWorkflow(
+            model=model,
             train_dataloader=train_dataloader,
             val_dataloader=val_dataloader,
-            max_num_epochs=args.max_epochs,
-            optimizer=torch.optim.Adam(model.parameters(), lr=args.learning_rate))
+            max_epochs=args.max_epochs,
+            optimizer=torch.optim.Adam(
+                model.parameters(),
+                lr=args.learning_rate,
+                weight_decay=args.weight_decay)
+        )
 
         train_wf.run(validation=True)
 

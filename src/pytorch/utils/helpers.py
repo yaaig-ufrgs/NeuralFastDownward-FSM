@@ -3,6 +3,8 @@ Simple auxiliary functions.
 """
 
 import logging
+from os import path, makedirs
+from datetime import datetime
 
 SAMPLE_INIT_STATE = 1
 SAMPLE_RANDOM_STATE = 2
@@ -13,6 +15,23 @@ _log = logging.getLogger(__name__)
 def to_unary(n: int, max_value: int) -> [int]:
     max_value += 1
     return [1 if i < n else 0 for i in range(max_value)]
+
+def create_directory(args, config_in_foldername = False):
+    problem = "_".join(args.samples.name.split("/")[-1].split("_")[-2:])
+
+    dirname = problem
+    if config_in_foldername:
+        dirname += f"_{args.activation}_{args.output_layer}_" + \
+            f"hid{args.hidden_layers}_w{args.weight_decay}_d{args.dropout_rate}"
+
+    dirname = args.output_folder/f"{dirname}_{datetime.now().isoformat().replace('-', '.').replace(':', '.')}"
+
+    if path.exists(dirname):
+        raise RuntimeError(f"Directory {dirname} already exists")
+    makedirs(dirname)
+    makedirs(dirname/"models")
+
+    return dirname
 
 def get_domain_from_dirname(dirname):
     # TODO
