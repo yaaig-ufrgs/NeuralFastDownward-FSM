@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from default_args import (
+from src.pytorch.utils.default_args import (
     DEFAULT_OUTPUT_LAYER,
     DEFAULT_NUM_FOLDS,
     DEFAULT_HIDDEN_LAYERS,
@@ -15,12 +15,13 @@ from default_args import (
     DEFAULT_MAX_TRAINING_TIME,
     DEFAULT_SEARCH_ALGORITHM,
     DEFAULT_MAX_SEARCH_TIME,
+    DEFAULT_MAX_SEARCH_MEMORY,
     DEFAULT_OUTPUT_FOLDER,
 )
 
 # TODO: add help message for each argument
 
-def get_train_parser():
+def get_train_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'samples',
@@ -29,7 +30,7 @@ def get_train_parser():
     parser.add_argument(
         "-o",
         "--output-layer",
-        choices=["regression", "unary", "one-hot"],
+        choices=["regression", "prefix", "one-hot"],
         default=DEFAULT_OUTPUT_LAYER,
     )
     parser.add_argument(
@@ -93,9 +94,15 @@ def get_train_parser():
         type=int,
         default=DEFAULT_SHUFFLE,
     )
+    parser.add_argument(
+        "-of",
+        "--output-folder",
+        type=Path,
+        default=DEFAULT_OUTPUT_FOLDER,
+    )
     return parser.parse_args()
 
-def get_test_parser():
+def get_test_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "model",
@@ -120,18 +127,24 @@ def get_test_parser():
         "-t",
         "--max-search-time",
         type=int,
-        default=DEFAULT_MAX_SEARCH_TIME,
+        default=DEFAULT_SEARCH_TIME,
     )
     parser.add_argument(
-        "-o",
-        "--output-folder",
-        type=Path,
-        default=DEFAULT_OUTPUT_FOLDER,
+        "-m",
+        "--max-search-memory",
+        type=int,
+        default=DEFAULT_MAX_SEARCH_MEMORY,
     )
     parser.add_argument(
         "-s",
         "--shuffle",
         type=int,
         default=DEFAULT_SHUFFLE,
+    )
+    parser.add_argument(
+        "-o",
+        "--output-folder",
+        type=Path,
+        default=DEFAULT_OUTPUT_FOLDER,
     )
     return parser

@@ -1,30 +1,91 @@
 import torch
 import torch.nn as nn
 
-# TODO parametrization
-
 # H(euristic) Neural Network
 class HNN(nn.Module):
     def __init__(
         self,
         input_units: int,
-        nb_layers: int,
         output_units: int,
+        hidden_layers: int,
+        activation: str,
+        dropout_rate: float,
     ):
         super(HNN, self).__init__()
         self.input_units = input_units
         self.output_units = output_units
-        self.nb_layers = nb_layers
-        unit_diff = input_units - output_units
-        step = int(unit_diff / (nb_layers+1))
+        self.hidden_layers = hidden_layers
+        self.activation = activation
+        self.dropout_rate = dropout_rate
 
-        self.hid1 = nn.Linear(input_units-0*step, input_units-1*step)
-        self.opt = nn.Linear(input_units-nb_layers*step, output_units)
+        unit_diff = input_units - output_units
+        step = int(unit_diff / (hidden_layers+1))
+
+        # self.hid = []
+        # for i in range(self.hidden_layers):
+        #     self.hid.append(nn.Linear(input_units-i*step, input_units-(i+1)*step))
+
+        if self.hidden_layers > 0:
+            self.hid1 = nn.Linear(input_units-0*step, input_units-1*step)
+        if self.hidden_layers > 1:
+            self.hid2 = nn.Linear(input_units-1*step, input_units-2*step)
+        if self.hidden_layers > 2:
+            self.hid3 = nn.Linear(input_units-2*step, input_units-3*step)
+        if self.hidden_layers > 3:
+            self.hid4 = nn.Linear(input_units-3*step, input_units-4*step)
+        if self.hidden_layers > 4:
+            self.hid5 = nn.Linear(input_units-4*step, input_units-5*step)
+
+        self.opt = nn.Linear(input_units-hidden_layers*step, output_units)
+
+        if self.dropout_rate > 0:
+            self.dropout = nn.Dropout(self.dropout_rate)
 
 
     def forward(self, x):
-        z = torch.sigmoid(self.hid1(x))
-        # z = torch.sigmoid(self.hid2(z))
-        z = torch.sigmoid(self.opt(z))
-        # z = torch.flatten(self.opt(z))
-        return z
+        # for h in self.hid:
+        #     if self.activation == "sigmoid":
+        #         x = torch.sigmoid(h(x))
+        #     elif self.activation == "relu":
+        #         x = torch.relu(h(x))
+
+        #     if self.dropout_rate > 0:
+        #         x = self.dropout(x)
+
+        if self.hidden_layers > 0:
+            if self.activation == "sigmoid":
+                x = torch.sigmoid(self.hid1(x))
+            elif self.activation == "relu":
+                x = torch.relu(self.hid1(x))
+            if self.dropout_rate > 0:
+                x = self.dropout(x)
+        if self.hidden_layers > 1:
+            if self.activation == "sigmoid":
+                x = torch.sigmoid(self.hid2(x))
+            elif self.activation == "relu":
+                x = torch.relu(self.hid2(x))
+            if self.dropout_rate > 0:
+                x = self.dropout(x)
+        if self.hidden_layers > 2:
+            if self.activation == "sigmoid":
+                x = torch.sigmoid(self.hid3(x))
+            elif self.activation == "relu":
+                x = torch.relu(self.hid3(x))
+            if self.dropout_rate > 0:
+                x = self.dropout(x)
+        if self.hidden_layers > 3:
+            if self.activation == "sigmoid":
+                x = torch.sigmoid(self.hid4(x))
+            elif self.activation == "relu":
+                x = torch.relu(self.hid4(x))
+            if self.dropout_rate > 0:
+                x = self.dropout(x)
+        if self.hidden_layers > 4:
+            if self.activation == "sigmoid":
+                x = torch.sigmoid(self.hid5(x))
+            elif self.activation == "relu":
+                x = torch.relu(self.hid5(x))
+            if self.dropout_rate > 0:
+                x = self.dropout(x)
+
+        return torch.sigmoid(self.opt(x))

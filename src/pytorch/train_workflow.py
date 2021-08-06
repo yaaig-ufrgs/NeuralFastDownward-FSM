@@ -16,14 +16,14 @@ class TrainWorkflow:
         model: HNN,
         train_dataloader: DataLoader,
         val_dataloader: DataLoader,
-        max_num_epochs: int,
+        max_epochs: int,
         optimizer: optim.Optimizer,
         loss_fn: nn = nn.MSELoss(),
     ):
         self.model = model
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
-        self.max_num_epochs = max_num_epochs
+        self.max_epochs = max_epochs
         self.optimizer = optimizer
         self.loss_fn = loss_fn
 
@@ -96,18 +96,17 @@ class TrainWorkflow:
         traced_model.save(filename)
 
     def run(self, validation=True):
-        best_val_loss = 1
-        max_epochs_without_improving = 5
+        last_val_loss = 1
+        max_epochs_without_improving = 100
         count = 0
-        for t in range(self.max_num_epochs):
+        for t in range(self.max_epochs):
             _log.info(
                 f"Epoch {t+1}"
             )
             self.train_loop()
             if validation:
-                last_val_loss = self.val_loop()
-                if last_val_loss < best_val_loss:
-                    best_val_loss = last_val_loss
+                cur_val_loss = self.val_loop()
+                if (last_val_loss - cur_val_loss) > 0.01:
                     count = 0
                 else:
                     count += 1
@@ -116,6 +115,7 @@ class TrainWorkflow:
                             f"The loss on the validation data didn't improve in {max_epochs_without_improving} epochs."
                         )
                         break
+            last_val_loss = cur_val_loss
         _log.info(
             "Done!"
         )

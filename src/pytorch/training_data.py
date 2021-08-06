@@ -2,8 +2,7 @@ import random
 import torch
 from torch.utils.data import Dataset, DataLoader
 
-from src.pytorch.utils import to_unary
-from src.pytorch.utils import SAMPLE_INIT_STATE, SAMPLE_RANDOM_STATE, SAMPLE_ENTIRE_PLAN
+from src.pytorch.utils.helpers import to_unary
 import src.pytorch.fast_downward_api as fd_api
 
 
@@ -43,17 +42,16 @@ def load_training_state_value_pairs(samples_file: str) -> ([([int], int)], int):
     state_value_pairs = []
     domain_max_value = 0
     # TODO this reading step at the beginning of the workflow
-    with open(samples_file) as f:
-        lines = f.readlines()[1:]
-        for line in lines:
-            l = line.split("\n")[0].split(";")
-            value = int(l[0])
-            state = []
-            for i in range(1, len(l)):
-                state.append(int(l[i]))
-            state_value_pairs.append((state, int(l[0])))
-            if state_value_pairs[-1][1] > domain_max_value:
-                domain_max_value = state_value_pairs[-1][1]
+    lines = samples_file.readlines()[1:]
+    for line in lines:
+        l = line.split("\n")[0].split(";")
+        value = int(l[0])
+        state = []
+        for i in range(1, len(l)):
+            state.append(int(l[i]))
+        state_value_pairs.append((state, int(l[0])))
+        if state_value_pairs[-1][1] > domain_max_value:
+            domain_max_value = state_value_pairs[-1][1]
 
     return state_value_pairs, domain_max_value
 
