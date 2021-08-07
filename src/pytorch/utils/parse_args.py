@@ -105,16 +105,16 @@ def get_train_args():
 def get_test_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "model",
+        "model_folder",
         type=Path,
     )
     parser.add_argument(
         "domain_pddl",
-        type=Path,
+        type=str,
     )
     parser.add_argument(
         "problem_pddls",
-        type=Path,
+        type=str,
         nargs="+"
     )
     parser.add_argument(
@@ -127,7 +127,7 @@ def get_test_args():
         "-t",
         "--max-search-time",
         type=int,
-        default=DEFAULT_SEARCH_TIME,
+        default=DEFAULT_MAX_SEARCH_TIME,
     )
     parser.add_argument(
         "-m",
@@ -135,16 +135,4 @@ def get_test_args():
         type=int,
         default=DEFAULT_MAX_SEARCH_MEMORY,
     )
-    parser.add_argument(
-        "-s",
-        "--shuffle",
-        type=int,
-        default=DEFAULT_SHUFFLE,
-    )
-    parser.add_argument(
-        "-o",
-        "--output-folder",
-        type=Path,
-        default=DEFAULT_OUTPUT_FOLDER,
-    )
-    return parser
+    return parser.parse_args()

@@ -5,7 +5,7 @@ _log = logging.getLogger(__name__)
 
 class Timer(object):
     def __init__(self, time_limit: int):
-        self.last_start_time = 0.0
+        self.last_start_time = None
         self.accumulated_time = 0.0
         self.time_limit = time_limit
         self.timeout = False
@@ -18,11 +18,16 @@ class Timer(object):
             return self
 
     def pause(self):
-        if self.start_time:
+        if self.last_start_time:
             self.accumulated_time += perf_counter() - self.last_start_time
-            self.start_time = None
+            self.last_start_time = None
         else:
             raise RuntimeError("Timer has not been started!")
+
+    def restart(self):
+        self.last_start_time = perf_counter()
+        self.accumulated_time = 0.0
+        self.timeout = False
 
     def check_timeout(self) -> bool:
         if not self.timeout:

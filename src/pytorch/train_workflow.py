@@ -95,7 +95,7 @@ class TrainWorkflow:
         traced_model = torch.jit.trace(self.model, example_input)
         traced_model.save(filename)
 
-    def run(self, training_timer, validation=True):
+    def run(self, train_timer, validation=True):
         last_val_loss = 1
         max_epochs_without_improving = 100
         count = 0
@@ -117,7 +117,7 @@ class TrainWorkflow:
             last_val_loss = cur_val_loss
             
             # Check once every 10 epochs
-            if (t % 10 == 0) and training_timer.check_timeout():
+            if (t % 10 == 0) and train_timer.check_timeout():
                 return
 
         _log.info("Done!")

@@ -56,8 +56,8 @@ def solve_instance_with_fd(
     domain_pddl,
     instance_pddl,
     opts="astar(lmcut())",
-    time_limit="999999s",
-    memory_limit="32G",
+    time_limit=604800,
+    memory_limit=32000000,
     force=False,
 ):
     """
@@ -70,9 +70,9 @@ def solve_instance_with_fd(
             [
                 FD,
                 "--search-time-limit",
-                time_limit,
+                str(time_limit),
                 "--search-memory-limit",
-                memory_limit,
+                str(memory_limit),
                 domain_pddl,
                 instance_pddl,
                 "--search",
@@ -83,17 +83,16 @@ def solve_instance_with_fd(
         cost, _ = parse_plan()
         add_cached_plan_cost(instance_pddl, cost)
 
-    return cost
+    return {"cost" : cost}
 
 
 def solve_instance_with_fd_nh(
     domain_pddl,
-    instance_pddl,
+    problem_pddl,
     traced_model,
-    blind=False,
     unary_threshold=0.01,
-    time_limit="1800s",
-    memory_limit="3800M",
+    time_limit=604800,
+    memory_limit=32000000,
 ):
     """
     Tries to solve a PDDL instance with the torch_sampling_network. Return the cost (or None if search fails).
@@ -102,10 +101,10 @@ def solve_instance_with_fd_nh(
 
     opts = (
         f"astar(nh(torch_sampling_network(path={traced_model},"
-        f"blind={str(blind).lower()},unary_threshold={unary_threshold})))"
+        f"blind={str('False').lower()},unary_threshold={unary_threshold})))"
     )
     return solve_instance_with_fd(
-        domain_pddl, instance_pddl, opts, time_limit, memory_limit, force=True
+        domain_pddl, problem_pddl, opts, time_limit, memory_limit, force=True
     )
 
 
