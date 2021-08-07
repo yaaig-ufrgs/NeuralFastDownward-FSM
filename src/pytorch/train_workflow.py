@@ -47,10 +47,7 @@ class TrainWorkflow:
             # Update parameters.
             self.optimizer.step()
 
-        train_loss /= num_batches
-        _log.info(
-            f" | avg_train_loss={train_loss:>7f}"
-        )
+        return train_loss / num_batches
 
     def val_loop(self):
         size = len(self.val_dataloader.dataset)
@@ -62,11 +59,7 @@ class TrainWorkflow:
                 pred = self.model(X)
                 val_loss += self.loss_fn(pred, y).item()
 
-        val_loss /= num_batches
-        _log.info(
-            f" | avg_val_loss={val_loss:>8f}"
-        )
-        return val_loss
+        return val_loss / num_batches
 
     def save_traced_model(self, filename: str):
         """
@@ -100,8 +93,7 @@ class TrainWorkflow:
         max_epochs_without_improving = 100
         count = 0
         for t in range(self.max_epochs):
-            _log.info(f"Epoch {t}")
-            self.train_loop()
+            cur_train_loss = self.train_loop()
             if validation:
                 cur_val_loss = self.val_loop()
                 if (last_val_loss - cur_val_loss) > 0.01:
@@ -114,10 +106,15 @@ class TrainWorkflow:
                             f"in {max_epochs_without_improving} epochs."
                         )
                         break
-            last_val_loss = cur_val_loss
-            
+
+                last_val_loss = cur_val_loss
+                _log.info(f"Epoch {t} | avg_train_loss={cur_train_loss:>7f} | avg_val_loss={cur_val_loss:>7f}")
+            else:
+                _log.info(f"Epoch {t} | avg_train_loss={cur_train_loss:>7f}")
+
             # Check once every 10 epochs
             if (t % 10 == 0) and train_timer.check_timeout():
                 return
 
         _log.info("Done!")
+        return cur_val_loss if validation else None

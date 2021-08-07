@@ -14,8 +14,6 @@ from src.pytorch.utils.timer import Timer
 
 # TODO:
 #   - Output layer arg
-#   - Save best model, save top epochs?
-#   - Debug logs
 
 _log = logging.getLogger(__name__)
 
@@ -30,6 +28,7 @@ def train_main(args):
         shuffle=args.shuffle)
 
     train_timer = Timer(args.max_training_time).start()
+    best_fold = {"fold" : -1, "val_loss" : -1}
 
     for fold_idx in range(args.num_folds):
         _log.info(
@@ -60,7 +59,16 @@ def train_main(args):
                 weight_decay=args.weight_decay)
         )
 
-        train_wf.run(train_timer, validation=True)
+        fold_val_loss = train_wf.run(train_timer, validation=True)
+
+        if fold_val_loss < best_fold["val_loss"] or fold_idx == 0:
+            _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
+            best_fold["fold"] = fold_idx
+            best_fold["val_loss"] = fold_val_loss
+        else:
+            _log.info(
+                f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
+            )
 
         if train_timer.check_timeout():
             _log.info(
@@ -70,10 +78,14 @@ def train_main(args):
 
         train_wf.save_traced_model(f"{dirname}/models/traced_fold{fold_idx}.pt")
 
-    # TODO: get the best fold
-    best_fold = 0
-    copyfile(f"{dirname}/models/traced_fold{best_fold}.pt", f"{dirname}/traced_best.pt")
-    _log.info(f"Saving traced_fold{best_fold}.pt as best model.")
+    _log.info("Finishing training.")
+    _log.info(f"Elapsed time: {train_timer.current_time()}")
+
+    copyfile(f"{dirname}/models/traced_fold{best_fold['fold']}.pt", f"{dirname}/traced_best.pt")
+    _log.info(
+        f"Saving traced_fold{best_fold['fold']}.pt as best model (val loss = {best_fold['val_loss']})"
+    )
+
 
     _log.info("Training complete!")
 
