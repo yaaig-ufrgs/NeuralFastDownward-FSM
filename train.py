@@ -84,7 +84,6 @@ def train_main(args):
         f"Saving traced_fold{best_fold['fold']}.pt as best model (val loss = {best_fold['val_loss']})"
     )
 
-
     _log.info("Training complete!")
 
 
