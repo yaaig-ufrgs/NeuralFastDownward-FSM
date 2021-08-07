@@ -1,10 +1,13 @@
+import logging
 from random import shuffle as randshuffle
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 
 from src.pytorch.training_data import (
     InstanceDataset,
     load_training_state_value_pairs,
 )
+
+_log = logging.getLogger(__name__)
 
 class KFoldTrainingData:
     def __init__(self, samples_file, batch_size=100, num_folds=10, output_layer="regression", shuffle=False):
@@ -15,9 +18,8 @@ class KFoldTrainingData:
         self.batch_size = batch_size
         self.num_folds = num_folds
         self.output_layer = output_layer
+        self.shuffle = shuffle
         self.kfolds = self.generate_kfold_training_data()
-        if shuffle:
-            randshuffle(self.state_value_pairs)
 
     def generate_kfold_training_data(self):
         """
@@ -26,28 +28,37 @@ class KFoldTrainingData:
         The first item corresponds to train set, and the second to test set.
         """
 
-        instances_per_fold = int(len(self.state_value_pairs) / self.num_folds)
+        _log.info(f"Generating {self.num_folds}-fold...")
+
         kfolds = []
+        instances_per_fold = int(len(self.state_value_pairs) / self.num_folds)
         for i in range(self.num_folds):
             training_set, test_set = [], []
 
             for j in range(len(self.state_value_pairs)):
-                if int(j / instances_per_fold) == i:
-                    test_set.append(self.state_value_pairs[j])
+                if self.num_folds == 1:
+                    train_split = 0.8
+                    train_size = int(train_split * len(self.state_value_pairs))
+                    val_size = len(self.state_value_pairs) - train_size
+                    training_set, test_set = random_split(self.state_value_pairs, [train_size, val_size])
                 else:
-                    training_set.append(self.state_value_pairs[j])
+                    if int(j / instances_per_fold) == i:
+                        test_set.append(self.state_value_pairs[j])
+                    else:
+                        training_set.append(self.state_value_pairs[j])
 
             train_dataloader = DataLoader(
                 dataset=InstanceDataset(training_set, self.domain_max_value, self.output_layer),
                 batch_size=self.batch_size,
+                shuffle=self.shuffle,
                 num_workers=1,
             )
             test_dataloader = DataLoader(
                 dataset=InstanceDataset(test_set, self.domain_max_value, self.output_layer),
                 batch_size=self.batch_size,
+                shuffle=self.shuffle,
                 num_workers=1,
             )
-
             kfolds.append((train_dataloader, test_dataloader))
 
         return kfolds

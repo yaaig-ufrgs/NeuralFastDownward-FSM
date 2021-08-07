@@ -114,7 +114,8 @@ class TrainWorkflow:
 
             # Check once every 10 epochs
             if (t % 10 == 0) and train_timer.check_timeout():
-                return
+                break
+            if t == self.max_epochs - 1:
+                _log.info("Done!")
 
-        _log.info("Done!")
         return cur_val_loss if validation else None

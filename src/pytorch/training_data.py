@@ -1,11 +1,9 @@
-import logging
 import torch
 from torch.utils.data import Dataset, DataLoader
 
 from src.pytorch.utils.helpers import to_prefix, to_onehot
 import src.pytorch.fast_downward_api as fd_api
 
-_log = logging.getLogger(__name__)
 
 class InstanceDataset(Dataset):
     def __init__(self, state_value_pairs, domain_max_value, output_layer):
