@@ -78,6 +78,7 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
 
     OperatorsProxy ops = task_proxy.get_operators();
     Trajectory trajectory;
+    // "engine" is the teacher-search engine
     engine->get_search_space().trace_path(engine->get_goal_state(), trajectory);
     Plan plan = engine->get_plan();
     assert(plan.size() == trajectory.size() - 1);
@@ -154,12 +155,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_fukunaga(OptionParser &pa
             "store_plan_cost",
             "Store for every state its cost along the plan to the goal",
             "true");
-
     parser.add_option<bool>(
             "store_state",
             "Store every state along the plan",
             "true");
-
     parser.add_option<bool>(
             "store_operator",
             "Store for every state along the plan the next chosen operator",

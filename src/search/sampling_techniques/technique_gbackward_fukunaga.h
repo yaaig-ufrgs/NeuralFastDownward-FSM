@@ -16,6 +16,7 @@ class RandomRegressionWalkSampler;
 namespace sampling_technique {
 class TechniqueGBackwardFukunaga : public SamplingTechnique {
 protected:
+    const bool use_dfs;
     std::shared_ptr<utils::DiscreteDistribution> steps;
     const bool wrap_partial_assignment;
     const bool deprioritize_undoing_steps;

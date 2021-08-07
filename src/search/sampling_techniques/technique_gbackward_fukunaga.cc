@@ -37,6 +37,7 @@ const string &TechniqueGBackwardFukunaga::get_name() const {
 
 TechniqueGBackwardFukunaga::TechniqueGBackwardFukunaga(const options::Options &opts)
         : SamplingTechnique(opts),
+          use_dfs(opts.get<bool>("use_dfs")),
           steps(opts.get<shared_ptr<utils::DiscreteDistribution>>("distribution")),
           wrap_partial_assignment(opts.get<bool>("wrap_partial_assignment")),
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
@@ -66,7 +67,6 @@ std::shared_ptr<AbstractTask> TechniqueGBackwardFukunaga::create_next(
         cache.clear();
     }
 
-
     auto is_valid_state = [&](PartialAssignment &partial_assignment) {
         return !(is_valid_walk) || regression_task_proxy->convert_to_full_state(
                 partial_assignment, true, *rng).first;
@@ -86,46 +86,49 @@ std::shared_ptr<AbstractTask> TechniqueGBackwardFukunaga::create_next(
         func_bias = &pab;
     }
 
-    while (true) {
-        PartialAssignment partial_assignment =
-                rrws->sample_state_length(
-                        regression_task_proxy->get_goal_assignment(),
-                        steps->next(),
-                        deprioritize_undoing_steps,
-                        is_valid_state,
-                        func_bias,
-                        bias_probabilistic,
-                        bias_adapt);
+    //if (!use_dfs) {
+        while (true) {
+            PartialAssignment partial_assignment =
+                    rrws->sample_state_length(
+                            regression_task_proxy->get_goal_assignment(),
+                            steps->next(),
+                            deprioritize_undoing_steps,
+                            is_valid_state,
+                            func_bias,
+                            bias_probabilistic,
+                            bias_adapt);
 
-        auto complete_assignment = partial_assignment.get_full_state(true, *rng);
-        if (!complete_assignment.first) {
-            continue;
-        }
-        if (wrap_partial_assignment) {
-            if (last_task != seed_task) {
-                last_partial_wrap_task = make_shared<extra_tasks::PartialStateWrapperTask>(seed_task);
+            auto complete_assignment = partial_assignment.get_full_state(true, *rng);
+            if (!complete_assignment.first) {
+                continue;
             }
+            if (wrap_partial_assignment) {
+                if (last_task != seed_task) {
+                    last_partial_wrap_task = make_shared<extra_tasks::PartialStateWrapperTask>(seed_task);
+                }
 
-            vector<int> new_init_values;
-            new_init_values.reserve(partial_assignment.size());
-            for (size_t i = 0; i < partial_assignment.size(); ++i) {
-                new_init_values.push_back(
-                        partial_assignment.assigned(i) ?
-                        partial_assignment[i].get_value() :
-                        seed_task->get_variable_domain_size(i));
+                vector<int> new_init_values;
+                new_init_values.reserve(partial_assignment.size());
+                for (size_t i = 0; i < partial_assignment.size(); ++i) {
+                    new_init_values.push_back(
+                            partial_assignment.assigned(i) ?
+                            partial_assignment[i].get_value() :
+                            seed_task->get_variable_domain_size(i));
+                }
+                return make_shared<extra_tasks::ModifiedInitGoalsTask>(
+                        last_partial_wrap_task,
+                        move(new_init_values),
+                        extractGoalFacts(regression_task_proxy->get_goals()));
+            } else {
+            return make_shared<extra_tasks::ModifiedInitGoalsTask>(
+                seed_task, extractInitialState(complete_assignment.second),
+                extractGoalFacts(regression_task_proxy->get_goals()));
             }
-            return make_shared<extra_tasks::ModifiedInitGoalsTask>(
-                    last_partial_wrap_task,
-                    move(new_init_values),
-                    extractGoalFacts(regression_task_proxy->get_goals()));
-        } else {
-            return make_shared<extra_tasks::ModifiedInitGoalsTask>(
-                    seed_task,
-                    extractInitialState(complete_assignment.second),
-                    extractGoalFacts(regression_task_proxy->get_goals()));
-
         }
-    }
+    //}
+    //else {
+        // TODO DFS
+    //}
 }
 
 void TechniqueGBackwardFukunaga::do_upgrade_parameters() {
@@ -140,6 +143,11 @@ void TechniqueGBackwardFukunaga::dump_upgradable_parameters(std::ostream &stream
 static shared_ptr<TechniqueGBackwardFukunaga> _parse_technique_gbackward_fukunaga(
         options::OptionParser &parser) {
     SamplingTechnique::add_options_to_parser(parser);
+    parser.add_option<shared_ptr<utils::DiscreteDistribution>>(
+            "use_dfs",
+            "Use a depth-first-search-based sampling strategy instead of random walk."
+            "false"
+    );
     parser.add_option<shared_ptr<utils::DiscreteDistribution>>(
             "distribution",
             "Discrete random distribution to determine the random walk length used"

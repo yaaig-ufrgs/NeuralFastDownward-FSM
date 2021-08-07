@@ -57,7 +57,7 @@ std::vector<std::string> SamplingSearchBase::sample(std::shared_ptr<AbstractTask
     sampling_technique::modified_task = task;
     next_engine();
     utils::g_log.silence = true;
-    engine->search();
+    engine->search(); // search is performed here
     utils::g_log.silence = false;
     vector<string> samples;
     if (engine->found_solution()) {
