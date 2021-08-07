@@ -2,13 +2,13 @@ import logging
 import torch
 from torch.utils.data import Dataset, DataLoader
 
-from src.pytorch.utils.helpers import to_unary
+from src.pytorch.utils.helpers import to_prefix, to_onehot
 import src.pytorch.fast_downward_api as fd_api
 
 _log = logging.getLogger(__name__)
 
 class InstanceDataset(Dataset):
-    def __init__(self, state_value_pairs, domain_max_value):
+    def __init__(self, state_value_pairs, domain_max_value, output_layer):
         states, hvalues = [], []
         for pair in state_value_pairs:
             states.append(pair[0])
@@ -17,9 +17,20 @@ class InstanceDataset(Dataset):
         self.domain_max_value = domain_max_value
 
         self.states = torch.tensor(states, dtype=torch.float32)
-        self.hvalues = torch.tensor(
-            [to_unary(n, self.domain_max_value) for n in hvalues], dtype=torch.float32
-        )
+        if output_layer == "regression":
+            self.hvalues = torch.tensor(
+                [[n] for n in hvalues], dtype=torch.float32
+            )
+        elif output_layer == "prefix":
+            self.hvalues = torch.tensor(
+                [to_prefix(n, self.domain_max_value) for n in hvalues], dtype=torch.float32
+            )
+        elif output_layer == "one-hot":
+            self.hvalues = torch.tensor(
+                [to_onehot(n, self.domain_max_value) for n in hvalues], dtype=torch.float32
+            )
+        else:
+            raise RuntimeError(f"Invalid output layer: {output_layer}")
 
     def __getitem__(self, idx):
         return self.states[idx], self.hvalues[idx]

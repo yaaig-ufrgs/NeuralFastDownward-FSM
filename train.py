@@ -12,9 +12,6 @@ from src.pytorch.utils.helpers import logging_train_config, create_train_directo
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
 
-# TODO:
-#   - Output layer arg
-
 _log = logging.getLogger(__name__)
 
 def train_main(args):
@@ -25,10 +22,11 @@ def train_main(args):
     kfold = KFoldTrainingData(args.samples,
         batch_size=args.batch_size,
         num_folds=args.num_folds,
+        output_layer=args.output_layer,
         shuffle=args.shuffle)
 
     train_timer = Timer(args.max_training_time).start()
-    best_fold = {"fold" : -1, "val_loss" : -1}
+    best_fold = {"fold" : -1, "val_loss" : 1}
 
     for fold_idx in range(args.num_folds):
         _log.info(
@@ -61,7 +59,7 @@ def train_main(args):
 
         fold_val_loss = train_wf.run(train_timer, validation=True)
 
-        if fold_val_loss < best_fold["val_loss"] or fold_idx == 0:
+        if fold_val_loss < best_fold["val_loss"]:
             _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
             best_fold["fold"] = fold_idx
             best_fold["val_loss"] = fold_val_loss

@@ -9,9 +9,13 @@ from datetime import datetime
 
 _log = logging.getLogger(__name__)
 
-def to_unary(n: int, max_value: int) -> [int]:
+def to_prefix(n: int, max_value: int) -> [int]:
     max_value += 1
     return [1 if i < n else 0 for i in range(max_value)]
+
+def to_onehot(n: int, max_value: int) -> [int]:
+    max_value += 1
+    return [1 if i == n else 0 for i in range(max_value)]
 
 def get_domain_from_samples_filename(samples):
     # TODO
