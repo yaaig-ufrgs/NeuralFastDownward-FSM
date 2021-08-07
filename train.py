@@ -9,8 +9,12 @@ from src.pytorch.train_workflow import TrainWorkflow
 from src.pytorch.log import setup_full_logging
 from src.pytorch.utils.helpers import logging_train_config, create_directory
 from src.pytorch.utils.parse_args import get_train_args
+from src.pytorch.utils.timer import Timer
 
-# TODO: output_layer, max_training_time args
+# TODO:
+#   - Output layer arg
+#   - Save best model, save top epochs?
+#   - Debug logs
 
 _log = logging.getLogger(__name__)
 
@@ -23,6 +27,8 @@ def train_main(args):
         batch_size=args.batch_size,
         num_folds=args.num_folds,
         shuffle=args.shuffle)
+
+    training_timer = Timer(args.max_training_time).start()
 
     for fold_idx in range(args.num_folds):
         _log.info(
@@ -40,9 +46,7 @@ def train_main(args):
         ).to(torch.device("cpu"))
 
         if fold_idx == 0:
-            _log.info(
-                f"{model}"
-            )
+            _log.info(model)
 
         train_wf = TrainWorkflow(
             model=model,
@@ -55,10 +59,18 @@ def train_main(args):
                 weight_decay=args.weight_decay)
         )
 
-        train_wf.run(validation=True)
+        train_wf.run(training_timer, validation=True)
 
-        model_fname = f"dirname/models/traced_fold{fold_idx}.pt"
-        train_wf.save_traced_model(str(model_fname))
+        if training_timer.check_timeout():
+            _log.info(
+                f"Maximum training time reached. Stopping training."
+            )
+            break
+
+        train_wf.save_traced_model(f"{dirname}/models/traced_fold{fold_idx}.pt")
+
+    _log.info("Training complete!")
+
 
 if __name__ == "__main__":
     train_main(get_train_args())

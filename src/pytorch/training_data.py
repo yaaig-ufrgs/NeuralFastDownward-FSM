@@ -1,10 +1,11 @@
-import random
+import logging
 import torch
 from torch.utils.data import Dataset, DataLoader
 
 from src.pytorch.utils.helpers import to_unary
 import src.pytorch.fast_downward_api as fd_api
 
+_log = logging.getLogger(__name__)
 
 class InstanceDataset(Dataset):
     def __init__(self, state_value_pairs, domain_max_value):
@@ -39,9 +40,9 @@ def load_training_state_value_pairs(samples_file: str) -> ([([int], int)], int):
     Returns a tuple containing a list of state-value pairs
     and the domain max value.
     """
+
     state_value_pairs = []
     domain_max_value = 0
-    # TODO this reading step at the beginning of the workflow
     lines = samples_file.readlines()[1:]
     for line in lines:
         l = line.split("\n")[0].split(";")
@@ -100,42 +101,6 @@ def convert_pddl_to_boolean(domain, problems):
         states.append(state)
 
     return states
-
-
-def setup_dataloaders(
-    dataset: InstanceDataset, train_split: float, batch_size: int, shuffle: bool
-) -> (DataLoader, DataLoader):
-    """
-    Setup training and validation datasets using a random split.
-    """
-
-    train_size = int(train_split * len(dataset))
-    val_size = len(dataset) - train_size
-    train_dataset, val_dataset = torch.utils.data.random_split(
-        dataset, [train_size, val_size]
-    )
-
-    train_dataloader = DataLoader(
-        dataset=train_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=1
-    )
-    val_dataloader = DataLoader(
-        dataset=val_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=1
-    )
-
-    return train_dataloader, val_dataloader
-
-
-def setup_train_dataloader(
-    dataset: InstanceDataset, batch_size: int, shuffle: bool
-) -> (DataLoader, DataLoader):
-    """
-    Setup only a training dataset.
-    """
-
-    train_dataloader = DataLoader(
-        dataset=dataset, batch_size=batch_size, shuffle=shuffle, num_workers=1
-    )
-    return train_dataloader
 
 
 def load_training_state_value_tuples(sas_plan: str) -> ([[int]], [int]):

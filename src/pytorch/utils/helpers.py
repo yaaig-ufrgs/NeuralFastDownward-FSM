@@ -3,6 +3,7 @@ Simple auxiliary functions.
 """
 
 import logging
+import json
 from os import path, makedirs
 from datetime import datetime
 
@@ -33,35 +34,54 @@ def create_directory(args, config_in_foldername = False):
 
     return dirname
 
-def get_domain_from_dirname(dirname):
+def get_domain_from_samples_filename(samples):
     # TODO
     return ""
 
-def logging_train_config(args, dirname):
-    _log.info(f"Training for domain {get_domain_from_dirname(dirname)}")
-    _log.info(f"Configuration")
-    _log.info(f" | Samples: {args.samples.name}")
-    _log.info(f" | Output layer: {args.output_layer}")
-    _log.info(f" | Num folds: {args.num_folds}")
-    _log.info(f" | Hidden layers: {args.hidden_layers}")
-    _log.info(f" | Batch size: {args.batch_size}")
-    _log.info(f" | Learning rate: {args.learning_rate}")
-    _log.info(f" | Max epochs: {args.max_epochs}")
-    _log.info(f" | Max training time: {args.max_training_time}s")
-    _log.info(f" | Activation: {args.activation}")
-    _log.info(f" | Weight decay: {args.weight_decay}")
-    _log.info(f" | Dropout rate: {args.dropout_rate}")
-    _log.info(f" | Shuffle: {args.shuffle}")
-    _log.info(f" | Output folder: {args.output_folder}")
+def logging_train_config(args, dirname, save_json=True):
+    args_dic = {
+        "Domain" : get_domain_from_samples_filename(args.samples.name),
+        "Samples" : args.samples.name,
+        "Output layer" : args.output_layer,
+        "Num folds" : args.num_folds,
+        "Hidden layers" : args.hidden_layers,
+        "Batch size" : args.batch_size,
+        "Learning rate" : args.learning_rate,
+        "Max epochs" : args.max_epochs,
+        "Max training time" : args.max_training_time,
+        "Activation" : args.activation,
+        "Weight decay" : args.weight_decay,
+        "Dropout rate" : args.dropout_rate,
+        "Shuffle" : args.shuffle,
+        "Output folder" : str(args.output_folder),
+    }
 
-def logging_test_config(args, dirname):
-    _log.info(f"Testing for domain {get_domain_from_dirname(dirname)}")
     _log.info(f"Configuration")
-    _log.info(f" | Model: {args.model}")
-    _log.info(f" | Domain PDDL: {args.domain_pddl}")
-    _log.info(f" | Problems PDDL: {args.problems_pddl}")
-    _log.info(f" | Search algorithm: {args.search_algorithm}")
-    _log.info(f" | Max search time: {args.max_search_time}s")
-    _log.info(f" | Max search memory: {args.max_search_memory}") # TODO: unit
-    _log.info(f" | Shuffle: {args.shuffle}")
-    _log.info(f" | Output folder: {args.output_folder}")
+    for a in args_dic:
+        _log.info(f" | {a}: {args_dic[a]}")
+
+    if save_json:
+        with open(f"{dirname}/train_args.json", "w") as f:
+            json.dump(args_dic, f, indent=4)
+
+
+def logging_test_config(args, dirname, save_json=True):
+    args_dic = {
+        "Domain" : get_domain_from_samples_filename(dirname),
+        "Model" : args.model,
+        "Domain PDDL" : args.domain_pddl,
+        "Problems PDDL" : args.problems_pddl, # TODO: problems list []
+        "Search algorithm" : args.search_algorithm,
+        "Max search time" : args.max_search_time,
+        "Max search memory" : args.max_search_memory, # TODO: unit
+        "Shuffle" : args.shuffle,
+        "Output folder" : args.output_folder,
+    }
+
+    _log.info(f"Configuration")
+    for a in args_dic:
+        _log.info(f" | {a}: {args_dic[a]}")
+
+    if save_json:
+        with open(f"{dirname}/test_args.json", "w") as f:
+            json.dump(args_dic, f, indent=4)
