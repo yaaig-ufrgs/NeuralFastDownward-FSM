@@ -14,6 +14,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_MAX_EPOCHS,
     DEFAULT_MAX_TRAINING_TIME,
     DEFAULT_SEARCH_ALGORITHM,
+    DEFAULT_UNARY_THRESHOLD,
     DEFAULT_MAX_SEARCH_TIME,
     DEFAULT_MAX_SEARCH_MEMORY,
     DEFAULT_OUTPUT_FOLDER,
@@ -120,8 +121,14 @@ def get_test_args():
     parser.add_argument(
         "-a",
         "--search-algorithm",
-        choices=["astar", "eager_greedy"],
+        choices=["astar", "eager_greedy", "blind"],
         default=DEFAULT_SEARCH_ALGORITHM,
+    )
+    parser.add_argument(
+        "-u",
+        "--unary-threshold",
+        type=int,
+        default=DEFAULT_UNARY_THRESHOLD,
     )
     parser.add_argument(
         "-t",

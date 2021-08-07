@@ -1,18 +1,15 @@
-import subprocess
-import json
-
+from subprocess import check_output, CalledProcessError
 import re
 
-FD = "./fast-downward.py"
-SAS_PLAN_FILE = "sas_plan"
-CACHE_PLAN_COST = "plan_cost.json"
+_FD = "./fast-downward.py"
+_SAS_PLAN_FILE = "sas_plan"
 
 
 def parse_plan():
     PLAN_INFO_REGEX = re.compile(r"; cost = (\d+) \((unit cost|general cost)\)\n")
     last_line = ""
     try:
-        with open(SAS_PLAN_FILE) as sas_plan:
+        with open(_SAS_PLAN_FILE) as sas_plan:
             for last_line in sas_plan:
                 pass
     except:
@@ -23,34 +20,37 @@ def parse_plan():
     else:
         return None, None
 
+def parse_fd_output(output: str):
+    assert "Solution found!" in output
 
-def solve_instances_with_fd(domain_pddl, instances_pddl, opts="astar(lmcut())"):
-    """
-    Tries to solve a list of PDDL instances.
-    Returns a list of costs (same order of instances_pddl).
+    # Remove \n to use in re.compile.
+    output = output.replace("\n", " ")
 
-    """
-    instances_costs = []
+    data = re.findall(
+        r".*Plan length: (\d+) step\(s\)..*"
+        r".*Plan cost: (\d+).*"
+        r".*Expanded (\d+) state\(s\)..*"
+        r".*Reopened (\d+) state\(s\)..*"
+        r".*Evaluated (\d+) state\(s\)..*"
+        r".*Generated (\d+) state\(s\)..*"
+        r".*Dead ends: (\d+) state\(s\)..*"
+        r".*Search time: (.+?)s.*"
+        r".*Total time: (.+?)s.*"
+        , output
+    )
 
-    for ins in instances_pddl:
-        """
-        exit_code = 0   -->  success
-        exit_code = 1   -->  search plan found and out of memory
-        exit_code = 2   -->  seach plan found and out of time
-        exit_code = 3   -->  seach plan found and out of time & memoru
-        exit_code = 11  -->  search unsolvable
-        exit_code = 12  -->  search unsolvable incomplete
-        exit_code = 22  -->  search out of memory
-        exit_code = 23  -->  search out of time
-        exit_code = 24  -->  search out of memory & time
-
-        """
-        exit_code = subprocess.call([FD, domain_pddl, ins, "--search", opts])
-        cost, _ = parse_plan()
-        instances_costs.append(cost)
-
-    return instances_costs
-
+    return {
+        "search_state" : "success",
+        "plan_length" : data[0][0],
+        "plan_cost" : data[0][1],
+        "expanded" : data[0][2],
+        "reopened" : data[0][3],
+        "evaluated" : data[0][4],
+        "generated" : data[0][5],
+        "dead_ends" : data[0][6],
+        "search_time" : data[0][7],
+        "total_time" : data[0][8]
+    }
 
 def solve_instance_with_fd(
     domain_pddl,
@@ -58,17 +58,15 @@ def solve_instance_with_fd(
     opts="astar(lmcut())",
     time_limit=604800,
     memory_limit=32000000,
-    force=False,
 ):
     """
     Tries to solve a PDDL instance. Return the cost (or None if search fails).
     """
 
-    cost = get_cached_plan_cost(instance_pddl)
-    if force or cost == None:
-        exit_code = subprocess.call(
+    try:
+        output = check_output(
             [
-                FD,
+                _FD,
                 "--search-time-limit",
                 str(time_limit),
                 "--search-memory-limit",
@@ -79,56 +77,46 @@ def solve_instance_with_fd(
                 opts,
             ]
         )
-        # exit_code = subprocess.call([FD, domain_pddl, instance_pddl, "--search", opts])
-        cost, _ = parse_plan()
-        add_cached_plan_cost(instance_pddl, cost)
+        return parse_fd_output(output.decode("utf-8"))
 
-    return {"cost" : cost}
+    except CalledProcessError as e:
+        exit_code = {
+            1  : "search plan found and out of memory",
+            2  : "seach plan found and out of time",
+            3  : "seach plan found and out of time & memory",
+            11 : "search unsolvable",
+            # 12 : "search unsolvable incomplete",
+            12 : "search out of time",
+            22 : "search out of memory",
+            23 : "search out of time",
+            24 : "search out of memory and time"
+        }
+        return {"search_state" : exit_code[e.returncode] \
+            if e.returncode in exit_code else f"Unknown return code: {e.returncode}"}
 
 
 def solve_instance_with_fd_nh(
     domain_pddl,
     problem_pddl,
     traced_model,
+    search_algorithm = "astar",
     unary_threshold=0.01,
     time_limit=604800,
-    memory_limit=32000000,
+    memory_limit=128000,
 ):
     """
     Tries to solve a PDDL instance with the torch_sampling_network. Return the cost (or None if search fails).
-    Default limits from paper (30 min, 3.8GB)
     """
 
-    opts = (
-        f"astar(nh(torch_sampling_network(path={traced_model},"
-        f"blind={str('False').lower()},unary_threshold={unary_threshold})))"
-    )
+    network = f"torch_sampling_network(path={traced_model}," \
+        f"blind={str(search_algorithm == 'blind').lower()}," \
+        f"unary_threshold={unary_threshold})"
+
+    if search_algorithm == "astar" or search_algorithm == "blind":
+        opts = (f"astar(nh({network}), max_time={time_limit})")
+    elif search_algorithm == "eager_greedy":
+        opts = (f"eager_greedy([nh({network})], max_time={time_limit})")
+
     return solve_instance_with_fd(
-        domain_pddl, problem_pddl, opts, time_limit, memory_limit, force=True
+        domain_pddl, problem_pddl, opts, time_limit, memory_limit
     )
-
-
-def get_cached_plan_cost(pddl):
-    try:
-        with open(CACHE_PLAN_COST, "r") as f:
-            data = json.loads(f.read())
-    except:
-        data = {}
-    if pddl in data:
-        return data[pddl]
-    return None
-
-
-def add_cached_plan_cost(pddl, cost):
-    try:
-        with open(CACHE_PLAN_COST, "r") as f:
-            data = json.loads(f.read())
-        data[pddl] = cost
-        with open(CACHE_PLAN_COST, "w") as f:
-            json.dump(data, f, indent=4, sort_keys=True)
-    except:
-        # Create it if not exists
-        data = {}
-        with open(CACHE_PLAN_COST, "w") as f:
-            data[pddl] = cost
-            json.dump(data, f, indent=4, sort_keys=True)

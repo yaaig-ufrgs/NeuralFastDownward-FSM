@@ -3,7 +3,7 @@ Simple auxiliary functions.
 """
 
 import logging
-from json import dump, load
+from json import dump
 from os import path, makedirs
 from datetime import datetime
 
@@ -12,10 +12,6 @@ _log = logging.getLogger(__name__)
 def to_unary(n: int, max_value: int) -> [int]:
     max_value += 1
     return [1 if i < n else 0 for i in range(max_value)]
-
-def get_unary_threshold(model_folder):
-    with open(f"{model_folder}/train_args.json", "r") as f:
-        return load(f)["unary_threshold"]
 
 def get_domain_from_samples_filename(samples):
     # TODO
@@ -88,7 +84,7 @@ def logging_test_config(args, dirname, json=True):
         "Problems PDDL" : args.problem_pddls,
         "Search algorithm" : args.search_algorithm,
         "Max search time" : f"{args.max_search_time}s",
-        "Max search memory" : f"{args.max_search_memory}??", # check unit
+        "Max search memory" : f"{args.max_search_memory} MB",
     }
 
     _log.info(f"Configuration")

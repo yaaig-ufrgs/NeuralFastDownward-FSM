@@ -2,6 +2,7 @@
 
 import logging
 import torch
+from shutil import copyfile
 
 from src.pytorch.k_fold_training_data import KFoldTrainingData
 from src.pytorch.model import HNN
@@ -68,6 +69,11 @@ def train_main(args):
             break
 
         train_wf.save_traced_model(f"{dirname}/models/traced_fold{fold_idx}.pt")
+
+    # TODO: get the best fold
+    best_fold = 0
+    copyfile(f"{dirname}/models/traced_fold{best_fold}.pt", f"{dirname}/traced_best.pt")
+    _log.info(f"Saving traced_fold{best_fold}.pt as best model.")
 
     _log.info("Training complete!")
 
