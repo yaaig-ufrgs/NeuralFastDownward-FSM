@@ -45,10 +45,6 @@ def test_main(args):
         )
         _log.info(f"Result: {results['results'][problem_pddl]}")
 
-        if i > 1:
-            results["results"][problem_pddl] = {"search_state" : "blabla"}
-            break
-
     # Compute test results statistics
     decimal_places = 6
     rlist = {}
@@ -69,7 +65,7 @@ def test_main(args):
         elif x == "total_time":
             for i in range(len(rlist[x])):
                 rlist[x][i] = float(rlist[x][i])
-            results["stats"]["total_accumulated_time"] = sum(rlist[x])
+            results["stats"]["total_accumulated_time"] = round(sum(rlist[x]), decimal_places)
         elif x == "search_time":
             for i in range(len(rlist[x])):
                 rlist[x][i] = float(rlist[x][i])
