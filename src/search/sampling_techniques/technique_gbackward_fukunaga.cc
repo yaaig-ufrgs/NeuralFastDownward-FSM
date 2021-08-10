@@ -143,9 +143,9 @@ void TechniqueGBackwardFukunaga::dump_upgradable_parameters(std::ostream &stream
 static shared_ptr<TechniqueGBackwardFukunaga> _parse_technique_gbackward_fukunaga(
         options::OptionParser &parser) {
     SamplingTechnique::add_options_to_parser(parser);
-    parser.add_option<shared_ptr<utils::DiscreteDistribution>>(
+    parser.add_option<bool>(
             "use_dfs",
-            "Use a depth-first-search-based sampling strategy instead of random walk."
+            "Use a depth-first-search-based sampling strategy instead of random walk.",
             "false"
     );
     parser.add_option<shared_ptr<utils::DiscreteDistribution>>(
