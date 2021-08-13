@@ -95,8 +95,14 @@ SearchStatus SamplingEngine::step() {
         return SOLVED;
     }
 
-    const shared_ptr<AbstractTask> next_task = (*current_technique)->next(task);
-    vector<string> new_samples =  sample(next_task);
+    vector<string> new_samples;
+    if ((*current_technique)->get_name() == "gbackward_fukunaga") { // TODO: use_teacher_search
+        const shared_ptr<AbstractTask> next_task = (*current_technique)->next_all(task);
+        new_samples = sample(next_task);
+    } else {
+        const shared_ptr<AbstractTask> next_task = (*current_technique)->next(task);
+        new_samples = sample(next_task);
+    }
     sample_cache_manager.insert(new_samples.begin(), new_samples.end());
     return IN_PROGRESS;
 }

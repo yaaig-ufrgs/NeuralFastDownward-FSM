@@ -49,7 +49,7 @@ TechniqueGBackwardFukunaga::TechniqueGBackwardFukunaga(const options::Options &o
           bias_reload_counter(0) {
 }
 
-std::shared_ptr<AbstractTask> TechniqueGBackwardFukunaga::create_next(
+vector<std::shared_ptr<AbstractTask>> TechniqueGBackwardFukunaga::create_next_vec(
         shared_ptr<AbstractTask> seed_task, const TaskProxy &task_proxy) {
     if (seed_task != last_task) {
         regression_task_proxy = make_shared<RegressionTaskProxy>(*seed_task);
@@ -86,49 +86,52 @@ std::shared_ptr<AbstractTask> TechniqueGBackwardFukunaga::create_next(
         func_bias = &pab;
     }
 
-    //if (!use_dfs) {
+    vector<std::shared_ptr<AbstractTask>> tasks;
+    // if (!use_dfs) {
         while (true) {
-            PartialAssignment partial_assignment =
-                    rrws->sample_state_length(
+            vector<pair<State, int>> vec_samples =
+                    rrws->vec_sample_state_length(
                             regression_task_proxy->get_goal_assignment(),
                             steps->next(),
+                            *rng,
                             deprioritize_undoing_steps,
                             is_valid_state,
                             func_bias,
                             bias_probabilistic,
                             bias_adapt);
+            
+            for (auto &sample : vec_samples) {
+                if (wrap_partial_assignment) {
+                    if (last_task != seed_task) {
+                        last_partial_wrap_task = make_shared<extra_tasks::PartialStateWrapperTask>(seed_task);
+                    }
 
-            auto complete_assignment = partial_assignment.get_full_state(true, *rng);
-            if (!complete_assignment.first) {
-                continue;
-            }
-            if (wrap_partial_assignment) {
-                if (last_task != seed_task) {
-                    last_partial_wrap_task = make_shared<extra_tasks::PartialStateWrapperTask>(seed_task);
+                    vector<int> new_init_values;
+                    new_init_values.reserve(sample.first.size());
+                    for (size_t i = 0; i < sample.first.size(); ++i) {
+                        new_init_values.push_back(
+                                sample.first.assigned(i) ?
+                                sample.first[i].get_value() :
+                                seed_task->get_variable_domain_size(i));
+                    }
+                    return tasks.push_back(<extra_tasks::ModifiedInitGoalsTask>(
+                            last_partial_wrap_task,
+                            move(new_init_values),
+                            extractGoalFacts(regression_task_proxy->get_goals()),
+                            sample.second));
+                } else {
+                    return tasks.push_back(<extra_tasks::ModifiedInitGoalsTask>(
+                        seed_task, extractInitialState(sample.first),
+                        extractGoalFacts(regression_task_proxy->get_goals()),
+                        sample.second));
                 }
-
-                vector<int> new_init_values;
-                new_init_values.reserve(partial_assignment.size());
-                for (size_t i = 0; i < partial_assignment.size(); ++i) {
-                    new_init_values.push_back(
-                            partial_assignment.assigned(i) ?
-                            partial_assignment[i].get_value() :
-                            seed_task->get_variable_domain_size(i));
-                }
-                return make_shared<extra_tasks::ModifiedInitGoalsTask>(
-                        last_partial_wrap_task,
-                        move(new_init_values),
-                        extractGoalFacts(regression_task_proxy->get_goals()));
-            } else {
-            return make_shared<extra_tasks::ModifiedInitGoalsTask>(
-                seed_task, extractInitialState(complete_assignment.second),
-                extractGoalFacts(regression_task_proxy->get_goals()));
             }
         }
-    //}
-    //else {
-        // TODO DFS
-    //}
+    // } else {
+    //     // TODO: DFS
+    //     cout << "DFS not implemented yet!" << endl;
+    // }
+    return tasks;
 }
 
 void TechniqueGBackwardFukunaga::do_upgrade_parameters() {
