@@ -173,11 +173,12 @@ S sample_with_random_walk(
 }
 
 template<typename S, typename G>
-vector<pair<S, int>> vec_sample_with_random_walk(
+vector<pair<State, int>> vec_sample_with_random_walk(
         const S &state,
         int length,
         const G &generator,
         const function<S (const S &, const OperatorID &)> &construct_candidate,
+        utils::RandomNumberGenerator &rng1,
         utils::RandomNumberGenerator &rng,
         bool deprioritize_undoing_steps,
         const function<int (S &)> *bias,
@@ -190,7 +191,7 @@ vector<pair<S, int>> vec_sample_with_random_walk(
     S candidate_state(current_state);
     S previous_state(current_state);
     S pre_previous_state(current_state);
-    vector<pair<S, int>> state_h;
+    vector<pair<State, int>> state_h;
     double initial_bias = (bias == nullptr) ? 1 : (*bias)(current_state);
     double current_bias = initial_bias;
 
@@ -219,8 +220,11 @@ vector<pair<S, int>> vec_sample_with_random_walk(
                 break;
             }
         }
-        state_h.push_back(make_pair(current_state, h));
-        h++;
+        auto complete_assignment = current_state.get_full_state(true, rng1);
+        if (complete_assignment.first) {
+            state_h.push_back(make_pair(complete_assignment.second, h));
+            h++;
+        }
     }
 
     return state_h;
@@ -332,13 +336,14 @@ static PartialAssignment sample_partial_assignment_with_random_backward_walk(
             adapt_bias,
             &is_dead_end,
             &is_valid_state
-            );
+    );
 }
 
-static vector<pair<PartialAssignment, int>> vec_sample_partial_assignment_with_random_backward_walk(
+static vector<pair<State, int>> vec_sample_partial_assignment_with_random_backward_walk(
     const RegressionTaskProxy &regression_task_proxy, const PartialAssignment &goals,
     const predecessor_generator::PredecessorGenerator &predecessor_generator,
     int length,
+    utils::RandomNumberGenerator &rng1,
     utils::RandomNumberGenerator &rng,
     bool deprioritize_undoing_steps,
     const ValidStateDetector & is_valid_state,
@@ -360,6 +365,7 @@ static vector<pair<PartialAssignment, int>> vec_sample_partial_assignment_with_r
             length,
             predecessor_generator,
             construct_candidate,
+            rng1,
             rng,
             deprioritize_undoing_steps,
             bias,
@@ -367,7 +373,7 @@ static vector<pair<PartialAssignment, int>> vec_sample_partial_assignment_with_r
             adapt_bias,
             &is_dead_end,
             &is_valid_state
-            );
+    );
 }
 
 
@@ -513,9 +519,10 @@ PartialAssignment RandomRegressionWalkSampler::sample_state_length(
         is_dead_end);
 }
 
-vector<pair<PartialAssignment, int>> RandomRegressionWalkSampler::vec_sample_state_length(
+vector<pair<State, int>> RandomRegressionWalkSampler::vec_sample_state_length(
     const PartialAssignment &goals,
     int length,
+    utils::RandomNumberGenerator &rng1,
     bool deprioritize_undoing_steps,
     const ValidStateDetector &is_valid_state,
     const PartialAssignmentBias *bias,
@@ -527,6 +534,7 @@ vector<pair<PartialAssignment, int>> RandomRegressionWalkSampler::vec_sample_sta
         goals,
         *predecessor_generator,
         length,
+        rng1,
         rng,
         deprioritize_undoing_steps,
         is_valid_state,
