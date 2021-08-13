@@ -172,6 +172,61 @@ S sample_with_random_walk(
     return current_state;
 }
 
+template<typename S, typename G>
+vector<pair<S, int>> vec_sample_with_random_walk(
+        const S &state,
+        int length,
+        const G &generator,
+        const function<S (const S &, const OperatorID &)> &construct_candidate,
+        utils::RandomNumberGenerator &rng,
+        bool deprioritize_undoing_steps,
+        const function<int (S &)> *bias,
+        bool probabilistic_bias,
+        double adapt_bias,
+        const function<bool (S &)> *is_dead_end = nullptr,
+        const function<bool (S &)> *is_valid_state = nullptr) {
+    // Sample states state during a random walk of length length.
+    S current_state(state);
+    S candidate_state(current_state);
+    S previous_state(current_state);
+    S pre_previous_state(current_state);
+    vector<pair<S, int>> state_h;
+    double initial_bias = (bias == nullptr) ? 1 : (*bias)(current_state);
+    double current_bias = initial_bias;
+
+    int h = 0;
+    size_t len = length;
+    while (state_h.size() < len) {
+        if (!sample_next_state(
+                current_state,
+                previous_state,
+                pre_previous_state,
+                current_bias,
+                generator,
+                construct_candidate,
+                rng,
+                deprioritize_undoing_steps,
+                bias,
+                probabilistic_bias,
+                adapt_bias,
+                is_dead_end,
+                is_valid_state)) {
+            if (is_dead_end != nullptr && (*is_dead_end)(current_state)) {
+                current_state = S(state);
+                current_bias = initial_bias;
+                h = 0;
+            } else {
+                break;
+            }
+        }
+        state_h.push_back(make_pair(current_state, h));
+        h++;
+    }
+
+    return state_h;
+}
+
+
 
 static State sample_state_with_random_forward_walk(
     const OperatorsProxy &operators,
@@ -279,6 +334,42 @@ static PartialAssignment sample_partial_assignment_with_random_backward_walk(
             &is_valid_state
             );
 }
+
+static vector<pair<PartialAssignment, int>> vec_sample_partial_assignment_with_random_backward_walk(
+    const RegressionTaskProxy &regression_task_proxy, const PartialAssignment &goals,
+    const predecessor_generator::PredecessorGenerator &predecessor_generator,
+    int length,
+    utils::RandomNumberGenerator &rng,
+    bool deprioritize_undoing_steps,
+    const ValidStateDetector & is_valid_state,
+    const PartialAssignmentBias *bias,
+    bool probabilistic_bias,
+    double adapt_bias,
+    const PartialDeadEndDetector &is_dead_end) {
+
+    const function<PartialAssignment (const PartialAssignment &, const OperatorID &)>
+            construct_candidate =
+            [&] (const PartialAssignment &s, const OperatorID &op_id) -> PartialAssignment {
+                RegressionOperatorProxy op_proxy = regression_task_proxy.
+                        get_regression_operator(op_id);
+                assert(task_properties::is_applicable(op_proxy, s));
+                return op_proxy.get_anonym_predecessor(s);
+    };
+    return vec_sample_with_random_walk(
+            goals,
+            length,
+            predecessor_generator,
+            construct_candidate,
+            rng,
+            deprioritize_undoing_steps,
+            bias,
+            probabilistic_bias,
+            adapt_bias,
+            &is_dead_end,
+            &is_valid_state
+            );
+}
+
 
 static PartialAssignment sample_partial_assignments_with_random_backward_walks(
     const RegressionTaskProxy &regression_task_proxy,
@@ -421,6 +512,28 @@ PartialAssignment RandomRegressionWalkSampler::sample_state_length(
         bias, probabilistic_bias, adapt_bias,
         is_dead_end);
 }
+
+vector<pair<PartialAssignment, int>> RandomRegressionWalkSampler::vec_sample_state_length(
+    const PartialAssignment &goals,
+    int length,
+    bool deprioritize_undoing_steps,
+    const ValidStateDetector &is_valid_state,
+    const PartialAssignmentBias *bias,
+    bool probabilistic_bias,
+    double adapt_bias,
+    const PartialDeadEndDetector &is_dead_end) const {
+    return vec_sample_partial_assignment_with_random_backward_walk(
+        regression_task_proxy,
+        goals,
+        *predecessor_generator,
+        length,
+        rng,
+        deprioritize_undoing_steps,
+        is_valid_state,
+        bias, probabilistic_bias, adapt_bias,
+        is_dead_end);
+}
+
 
 std::pair<PartialAssignmentRegistry, utils::HashMap<size_t, int>> RandomRegressionWalkSampler::sample_area(
         const PartialAssignment &initial,

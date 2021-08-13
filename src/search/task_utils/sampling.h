@@ -169,6 +169,17 @@ public:
         double adapt_bias=-1,
         const PartialDeadEndDetector &is_dead_end = [](const PartialAssignment &) {return false;}) const;
 
+    std::vector<std::pair<PartialAssignment, int>> vec_sample_state_length(
+        const PartialAssignment &goals, int length,
+        bool deprioritize_undoing_steps = false,
+        const ValidStateDetector &is_valid_state = [](const PartialAssignment &) {return true;},
+        const PartialAssignmentBias *bias = nullptr,
+        bool probabilistic_bias=true,
+        double adapt_bias=-1,
+        const PartialDeadEndDetector &is_dead_end = [](const PartialAssignment &) {return false;}) const;
+
+
+
     std::pair<PartialAssignmentRegistry, utils::HashMap<size_t, int>> sample_area(
         const PartialAssignment &initial,
         int max_cost,
