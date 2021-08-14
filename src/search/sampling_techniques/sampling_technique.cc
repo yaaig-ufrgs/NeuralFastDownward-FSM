@@ -185,7 +185,7 @@ shared_ptr<AbstractTask> SamplingTechnique::next(
         counter++;
         while (true) {
             shared_ptr<AbstractTask> next_task = create_next(
-                    seed_task, task_proxy);
+                    seed_task, task_proxy)[0];
             modified_task = next_task;
             if ((check_mutexes && !test_mutexes(next_task)) ||
                 (check_solvable && !test_solvable(
@@ -208,7 +208,7 @@ shared_ptr<AbstractTask> SamplingTechnique::next_all(
         update_alternative_task_mutexes(seed_task);
         counter++;
         while (true) {
-            vector<shared_ptr<AbstractTask>> next_tasks = vec_create_next(
+            vector<shared_ptr<AbstractTask>> next_tasks = create_next(
                     seed_task, task_proxy);
             shared_ptr<AbstractTask> next_task = next_tasks[0];
             modified_task = next_task;

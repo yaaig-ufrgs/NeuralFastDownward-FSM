@@ -33,10 +33,9 @@ protected:
     std::shared_ptr<RegressionTaskProxy> regression_task_proxy = nullptr;
     std::shared_ptr<sampling::RandomRegressionWalkSampler> rrws = nullptr;
 
-    virtual std::vector<std::shared_ptr<AbstractTask>> vec_create_next(
+    virtual std::vector<std::shared_ptr<AbstractTask>> create_next(
         std::shared_ptr<AbstractTask> seed_task,
         const TaskProxy &task_proxy) override;
-
 
     virtual void do_upgrade_parameters() override ;
 

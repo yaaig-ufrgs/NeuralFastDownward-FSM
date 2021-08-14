@@ -25,7 +25,7 @@ protected:
     int bias_reload_counter;
     std::shared_ptr<sampling::RandomWalkSampler> rws = nullptr;
 
-    virtual std::shared_ptr<AbstractTask> create_next(
+    virtual std::vector<std::shared_ptr<AbstractTask>> create_next(
             std::shared_ptr<AbstractTask> seed_task,
             const TaskProxy &task_proxy) override;
 

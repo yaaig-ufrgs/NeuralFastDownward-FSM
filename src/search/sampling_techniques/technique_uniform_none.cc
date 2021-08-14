@@ -17,7 +17,7 @@ const string &TechniqueUniformNone::get_name() const {
 TechniqueUniformNone::TechniqueUniformNone(const options::Options &opts)
         : SamplingTechnique(opts) { }
 
-std::shared_ptr<AbstractTask> TechniqueUniformNone::create_next(
+vector<std::shared_ptr<AbstractTask>> TechniqueUniformNone::create_next(
         shared_ptr<AbstractTask> seed_task, const TaskProxy &) {
     TaskProxy seed_task_proxy(*seed_task);
     int c = 0;
@@ -28,8 +28,10 @@ std::shared_ptr<AbstractTask> TechniqueUniformNone::create_next(
                 .get_full_state(check_mutexes, *rng);
         if (state.first) {
             vector<int> values = state.second.get_values();
-            return make_shared<extra_tasks::ModifiedInitGoalsTask>(
-                    seed_task, move(values), extractGoalFacts(seed_task_proxy.get_goals()));
+            return vector<std::shared_ptr<AbstractTask>>{
+                make_shared<extra_tasks::ModifiedInitGoalsTask>(
+                    seed_task, move(values),
+                    extractGoalFacts(seed_task_proxy.get_goals()))};
         } else {
             c++;
         }

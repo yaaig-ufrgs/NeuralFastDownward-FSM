@@ -48,7 +48,7 @@ TechniqueGBackwardNone::TechniqueGBackwardNone(const options::Options &opts)
           bias_reload_counter(0) {
 }
 
-std::shared_ptr<AbstractTask> TechniqueGBackwardNone::create_next(
+vector<std::shared_ptr<AbstractTask>> TechniqueGBackwardNone::create_next(
         shared_ptr<AbstractTask> seed_task, const TaskProxy &task_proxy) {
     if (seed_task != last_task) {
         regression_task_proxy = make_shared<RegressionTaskProxy>(*seed_task);
@@ -66,10 +66,9 @@ std::shared_ptr<AbstractTask> TechniqueGBackwardNone::create_next(
         cache.clear();
     }
 
-
     auto is_valid_state = [&](PartialAssignment &partial_assignment) {
-        return !(is_valid_walk) || regression_task_proxy->convert_to_full_state(
-                partial_assignment, true, *rng).first;
+      return !(is_valid_walk) ||
+          regression_task_proxy->convert_to_full_state(partial_assignment, true, *rng).first;
     };
     PartialAssignmentBias *func_bias = nullptr;
     PartialAssignmentBias pab = [&](PartialAssignment &partial_assignment) {
@@ -114,16 +113,15 @@ std::shared_ptr<AbstractTask> TechniqueGBackwardNone::create_next(
                         partial_assignment[i].get_value() :
                         seed_task->get_variable_domain_size(i));
             }
-            return make_shared<extra_tasks::ModifiedInitGoalsTask>(
-                    last_partial_wrap_task,
-                    move(new_init_values),
-                    extractGoalFacts(regression_task_proxy->get_goals()));
+            return vector<std::shared_ptr<AbstractTask>>{
+                make_shared<extra_tasks::ModifiedInitGoalsTask>(
+                    last_partial_wrap_task, move(new_init_values),
+                    extractGoalFacts(regression_task_proxy->get_goals()))};
         } else {
-            return make_shared<extra_tasks::ModifiedInitGoalsTask>(
-                    seed_task,
-                    extractInitialState(complete_assignment.second),
-                    extractGoalFacts(regression_task_proxy->get_goals()));
-
+          return vector<std::shared_ptr<AbstractTask>>{
+              make_shared<extra_tasks::ModifiedInitGoalsTask>(
+                  seed_task, extractInitialState(complete_assignment.second),
+                  extractGoalFacts(regression_task_proxy->get_goals()))};
         }
     }
 }

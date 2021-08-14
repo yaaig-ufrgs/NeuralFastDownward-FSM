@@ -7,7 +7,7 @@ namespace sampling_technique {
 
 class TechniqueNoneNone : public SamplingTechnique {
 protected:
-    virtual std::shared_ptr<AbstractTask> create_next(
+    virtual std::vector<std::shared_ptr<AbstractTask>> create_next(
             std::shared_ptr<AbstractTask> seed_task,
             const TaskProxy &task_proxy) override;
 public:

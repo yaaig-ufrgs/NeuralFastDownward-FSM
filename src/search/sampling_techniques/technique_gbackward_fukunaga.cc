@@ -49,7 +49,7 @@ TechniqueGBackwardFukunaga::TechniqueGBackwardFukunaga(const options::Options &o
           bias_reload_counter(0) {
 }
 
-vector<std::shared_ptr<AbstractTask>> TechniqueGBackwardFukunaga::create_next_vec(
+vector<std::shared_ptr<AbstractTask>> TechniqueGBackwardFukunaga::create_next(
         shared_ptr<AbstractTask> seed_task, const TaskProxy &task_proxy) {
     if (seed_task != last_task) {
         regression_task_proxy = make_shared<RegressionTaskProxy>(*seed_task);
@@ -114,16 +114,18 @@ vector<std::shared_ptr<AbstractTask>> TechniqueGBackwardFukunaga::create_next_ve
                                 sample.first[i].get_value() :
                                 seed_task->get_variable_domain_size(i));
                     }
-                    return tasks.push_back(<extra_tasks::ModifiedInitGoalsTask>(
+                    tasks.push_back(make_shared<extra_tasks::ModifiedInitGoalsTask>(
                             last_partial_wrap_task,
                             move(new_init_values),
                             extractGoalFacts(regression_task_proxy->get_goals()),
                             sample.second));
+                    return tasks;
                 } else {
-                    return tasks.push_back(<extra_tasks::ModifiedInitGoalsTask>(
+                    tasks.push_back(make_shared<extra_tasks::ModifiedInitGoalsTask>(
                         seed_task, extractInitialState(sample.first),
                         extractGoalFacts(regression_task_proxy->get_goals()),
                         sample.second));
+                    return tasks;
                 }
             }
         }
