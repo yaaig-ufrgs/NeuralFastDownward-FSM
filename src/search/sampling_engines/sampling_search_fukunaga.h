@@ -7,7 +7,7 @@
 #include <random>
 
 
-/* SamplingSearchFukunaga TODO
+/* SamplingSearchFukunaga
  * ----------------------
  * Similar to SamplingSearchFerber, but heuristics are not
  * estimated by a teacher search.

@@ -15,7 +15,7 @@ SamplingTasks::SamplingTasks(const options::Options &opts)
 string SamplingTasks::sample_file_header() const {
     return "";
 }
-vector<string> SamplingTasks::sample(shared_ptr<AbstractTask> task) {
-    return vector<string> {task->get_sas()};
+vector<string> SamplingTasks::sample(vector<shared_ptr<AbstractTask>> tasks) {
+    return vector<string> {tasks[0]->get_sas()};
 }
 }

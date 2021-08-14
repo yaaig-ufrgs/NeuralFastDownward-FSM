@@ -242,7 +242,8 @@ string SamplingV::convert_output(
  }
 
 
-vector<string> SamplingV::sample(shared_ptr<AbstractTask> task) {
+vector<string> SamplingV::sample(vector<shared_ptr<AbstractTask>> tasks) {
+    shared_ptr<AbstractTask> task = tasks[0];
     if (qevaluator == nullptr ||
         (evaluator_reload_frequency != -1 && 
          evaluator_reload_counter >= evaluator_reload_frequency)) {

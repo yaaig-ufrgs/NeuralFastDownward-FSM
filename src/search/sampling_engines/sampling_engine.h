@@ -40,9 +40,7 @@ protected:
     virtual void update_current_technique();
     virtual SearchStatus step() override;
     virtual std::vector<std::string> sample(
-        std::shared_ptr<AbstractTask> task) = 0;
-    virtual std::vector<std::string> sample_all(
-            std::vector<std::shared_ptr<AbstractTask>> tasks);
+        std::vector<std::shared_ptr<AbstractTask>> tasks) = 0;
 public:
     explicit SamplingEngine(const options::Options &opts);
     virtual ~SamplingEngine() = default;

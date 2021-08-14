@@ -42,9 +42,7 @@ protected:
     virtual std::vector<std::string> extract_samples() = 0;
 
     virtual std::vector<std::string> sample(
-            std::shared_ptr<AbstractTask> task) override;
-    virtual std::vector<std::string> sample_all(
-            std::vector<std::shared_ptr<AbstractTask>> tasks);
+            std::vector<std::shared_ptr<AbstractTask>> tasks) override;
     virtual void next_engine();
 
     

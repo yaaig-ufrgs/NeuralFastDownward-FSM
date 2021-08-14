@@ -80,7 +80,7 @@ protected:
     /* Overwritten Methods*/
     virtual void initialize() override;
     std::vector<std::string> sample(
-        std::shared_ptr<AbstractTask> task) override;
+        std::vector<std::shared_ptr<AbstractTask>> tasks) override;
     
 
 public:

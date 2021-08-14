@@ -52,31 +52,24 @@ void SamplingSearchBase::next_engine() {
     utils::g_log.silence = false;
 }
 
-std::vector<std::string> SamplingSearchBase::sample(std::shared_ptr<AbstractTask> task) {
-    utils::g_log << "." << flush;
-    sampling_technique::modified_task = task;
-    next_engine();
-    utils::g_log.silence = true;
-    engine->search(); // search is performed here
-    utils::g_log.silence = false;
+std::vector<std::string> SamplingSearchBase::sample(std::vector<std::shared_ptr<AbstractTask>> tasks) {
     vector<string> samples;
-    if (engine->found_solution()) {
-        samples = extract_samples();
-        post_search(samples);
-    }
-    return samples;
-}
-
-std::vector<std::string> SamplingSearchBase::sample_all(std::vector<std::shared_ptr<AbstractTask>> tasks) {
     utils::g_log << "." << flush;
-    sampling_technique::modified_tasks = tasks;
-    vector<string> samples = extract_samples();
-    post_search(samples);
 
-    std::cout << "AAAAAAAAAAAAAAAAAAAAA" << std::endl;
-    for (auto s: samples) {
-        std::cout << s << std::endl;
+    if (tasks.size() == 1) {
+        sampling_technique::modified_task = tasks[0];
+        next_engine();
+        utils::g_log.silence = true;
+        engine->search(); // search is performed here
+        utils::g_log.silence = false;
+        if (engine->found_solution()) {
+            samples = extract_samples();
+        }
+    } else {
+        sampling_technique::modified_tasks = tasks;
+        samples = extract_samples();
     }
+    post_search(samples);
     return samples;
 }
 
