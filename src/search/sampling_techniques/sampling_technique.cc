@@ -194,6 +194,36 @@ shared_ptr<AbstractTask> SamplingTechnique::next(
     }
 }
 
+ shared_ptr<AbstractTask> SamplingTechnique::next_all(
+        const shared_ptr<AbstractTask> &seed_task) {
+    return next_all(seed_task, TaskProxy(*seed_task));
+}
+
+shared_ptr<AbstractTask> SamplingTechnique::next_all(
+        const shared_ptr<AbstractTask> &seed_task,
+        const TaskProxy &task_proxy) {
+    if (empty()) {
+        return nullptr;
+    } else {
+        update_alternative_task_mutexes(seed_task);
+        counter++;
+        while (true) {
+            shared_ptr<AbstractTask> next_task = create_next(
+                    seed_task, task_proxy);
+            modified_task = next_task;
+            if ((check_mutexes && !test_mutexes(next_task)) ||
+                (check_solvable && !test_solvable(
+                        TaskProxy(*next_task)))) {
+                //cout << "Generated task invalid, try anew." << endl;
+                continue;
+            }
+            last_task = seed_task;
+            return next_task;
+
+        }
+    }
+}
+
 void SamplingTechnique::update_alternative_task_mutexes(
         const std::shared_ptr<AbstractTask> &task) {
     if (!use_alternative_mutexes || task == last_task) {
