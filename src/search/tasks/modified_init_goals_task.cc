@@ -6,12 +6,10 @@ namespace extra_tasks {
 ModifiedInitGoalsTask::ModifiedInitGoalsTask(
     const shared_ptr<AbstractTask> &parent,
     const vector<int> &&initial_state,
-    const vector<FactPair> &&goals,
-    const int estimated_heuristic)
+    const vector<FactPair> &&goals)
     : DelegatingTask(parent),
       initial_state(move(initial_state)),
-      goals(move(goals)),
-      estimated_heuristic(estimated_heuristic) {
+      goals(move(goals)) {
 }
 
 int ModifiedInitGoalsTask::get_num_goals() const {
@@ -24,9 +22,5 @@ FactPair ModifiedInitGoalsTask::get_goal_fact(int index) const {
 
 vector<int> ModifiedInitGoalsTask::get_initial_state_values() const {
     return initial_state;
-}
-
-int ModifiedInitGoalsTask::get_estimated_heuristic() const {
-    return estimated_heuristic;
 }
 }

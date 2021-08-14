@@ -18,11 +18,9 @@ TechniqueNoneNone::TechniqueNoneNone(int count,
                                      bool check_mutexes, bool check_solvable)
         : SamplingTechnique(count, check_mutexes, check_solvable) {}
 
-vector<std::shared_ptr<AbstractTask>> TechniqueNoneNone::create_next(
+std::shared_ptr<AbstractTask> TechniqueNoneNone::create_next(
         shared_ptr<AbstractTask> seed_task, const TaskProxy &) {
-    //return seed_task;
-    return std::vector<std::shared_ptr<AbstractTask>>{seed_task};
-
+    return seed_task;
 }
 
 

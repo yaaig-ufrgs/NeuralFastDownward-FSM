@@ -30,7 +30,7 @@ TechniqueIForwardNone::TechniqueIForwardNone(const options::Options &opts)
     }
 }
 
-vector<std::shared_ptr<AbstractTask>> TechniqueIForwardNone::create_next(
+std::shared_ptr<AbstractTask> TechniqueIForwardNone::create_next(
         shared_ptr<AbstractTask> seed_task, const TaskProxy &task_proxy) {
     if (seed_task != last_task) {
         rws = make_shared<sampling::RandomWalkSampler>(task_proxy, *rng);
@@ -65,10 +65,9 @@ vector<std::shared_ptr<AbstractTask>> TechniqueIForwardNone::create_next(
     State new_init = rws->sample_state_length(
             task_proxy.get_initial_state(), steps->next(), [](const State &) { return false; },
             deprioritize_undoing_steps, func_bias, bias_probabilistic, bias_adapt);
-    return vector<std::shared_ptr<AbstractTask>>{
-        make_shared<extra_tasks::ModifiedInitGoalsTask>(
-            seed_task, extractInitialState(new_init),
-            extractGoalFacts(task_proxy.get_goals()))};
+    return make_shared<extra_tasks::ModifiedInitGoalsTask>(seed_task,
+                                                           extractInitialState(new_init),
+                                                           extractGoalFacts(task_proxy.get_goals()));
 }
 
 /* PARSING TECHNIQUE_IFORWARD_NONE*/

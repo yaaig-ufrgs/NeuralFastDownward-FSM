@@ -57,10 +57,10 @@ protected:
     std::vector<std::vector<std::set<FactPair>>> alternative_task_mutexes;
     std::shared_ptr<AbstractTask> last_task = nullptr;
 
-    virtual std::vector<std::shared_ptr<AbstractTask>> create_next(
+    virtual std::shared_ptr<AbstractTask> create_next(
         std::shared_ptr<AbstractTask> seed_task,
         const TaskProxy &task_proxy) = 0;
-    
+
     bool test_mutexes(const std::shared_ptr<AbstractTask> &task) const;
     bool test_solvable(const TaskProxy &task_proxy) const;
 //    void dump_modifications(std::shared_ptr<AbstractTask> task) const;
@@ -83,11 +83,6 @@ public:
     std::shared_ptr<AbstractTask> next(
         const std::shared_ptr<AbstractTask> &seed_task = tasks::g_root_task);
     std::shared_ptr<AbstractTask> next(
-        const std::shared_ptr<AbstractTask> &seed_task,
-        const TaskProxy &task_proxy);
-    std::shared_ptr<AbstractTask> next_all(
-        const std::shared_ptr<AbstractTask> &seed_task = tasks::g_root_task);
-    std::shared_ptr<AbstractTask> next_all(
         const std::shared_ptr<AbstractTask> &seed_task,
         const TaskProxy &task_proxy);
 

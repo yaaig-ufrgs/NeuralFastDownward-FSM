@@ -10,20 +10,17 @@ namespace extra_tasks {
 class ModifiedInitGoalsTask : public tasks::DelegatingTask {
     const std::vector<int> initial_state;
     const std::vector<FactPair> goals;
-    const int estimated_heuristic;
 public:
     ModifiedInitGoalsTask(
         const std::shared_ptr<AbstractTask> &parent,
         const std::vector<int> &&initial_state,
-        const std::vector<FactPair> &&goals,
-        const int estimated_heuristic = -1);
+        const std::vector<FactPair> &&goals);
     virtual ~ModifiedInitGoalsTask() override = default;
 
 
     virtual int get_num_goals() const override;
     virtual FactPair get_goal_fact(int index) const override;
     virtual std::vector<int> get_initial_state_values() const override;
-    int get_estimated_heuristic() const;
 };
 }
 #endif

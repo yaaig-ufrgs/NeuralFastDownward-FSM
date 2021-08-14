@@ -13,9 +13,9 @@ TechniqueNull::TechniqueNull()
         : SamplingTechnique(0, false, false) {}
 
 
-vector<std::shared_ptr<AbstractTask>> TechniqueNull::create_next(
+std::shared_ptr<AbstractTask> TechniqueNull::create_next(
         shared_ptr<AbstractTask> /*seed_task*/, const TaskProxy &) {
-  return {};
+    return nullptr;
 }
 
 }
