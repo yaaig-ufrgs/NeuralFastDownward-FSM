@@ -25,90 +25,29 @@ string SamplingSearchFukunaga::sample_file_header() const {
     return header;
 }
 
-string SamplingSearchFukunaga::extract_single_sample(Trajectory trajectory, size_t idx_t, Plan plan, OperatorsProxy ops, int *cost) {
-    ostringstream oss;
-
-    if (store_plan_cost) {
-        if (select_state_method == SelectStateMethod::ENTIRE_PLAN) {
-            if (idx_t != trajectory.size() - 1)
-                *cost += ops[plan[idx_t]].get_cost();
-            oss << *cost << field_separator;
-        }
-        else {
-            for (size_t i = idx_t; i-- > 0;) {
-                if (i != trajectory.size() - 1)
-                    *cost += ops[plan[i]].get_cost();
-            } 
-            oss << *cost << field_separator;
-        }
-    }
-
-    if (store_state) {
-        State state = engine->get_state_registry().lookup_state(trajectory[idx_t]);
-        state.unpack();
-        vector<int> values = state.get_values();
-        for (const FactPair &fp: relevant_facts) {
-            oss << (values[fp.var] == fp.value ? 1 : 0) << state_separator;
-        }
-        oss.seekp(-1, oss.cur);
-        oss << field_separator;
-    }
-
-    if (store_operator) {
-        // Select no operator for the goal state
-        int next_op = idx_t >= plan.size() ?
-                OperatorID::no_operator.get_index() :
-                plan[idx_t].get_index();
-
-        for (int idx = 0; idx < task->get_num_operators(); ++idx) {
-            oss << (next_op == idx ? 1 : 0) << state_separator;
-        }
-        oss.seekp(-1, oss.cur);
-        oss << field_separator;
-    }
-
-    string s = oss.str();
-    s.pop_back();
-
-    return s;
-}
-
 vector<string> SamplingSearchFukunaga::extract_samples() {
     vector<string> samples;
+    for (std::shared_ptr<AbstractTask>& task: sampling_technique::modified_tasks) {
+        ostringstream oss;
 
-    OperatorsProxy ops = task_proxy.get_operators();
-    Trajectory trajectory;
-    // "engine" is the teacher-search engine
-    engine->get_search_space().trace_path(engine->get_goal_state(), trajectory);
-    Plan plan = engine->get_plan();
-    assert(plan.size() == trajectory.size() - 1);
-    // Sequence:    s0 a0 s1 a1 s2
-    // Plan:        a0 a1
-    // Trajectory:  s0 s1 s2
-
-    int cost = 0;
-    uniform_int_distribution<int> gen(0, trajectory.size()-1);
-    // RANDOM_STATE
-    if (select_state_method == SelectStateMethod::RANDOM_STATE) {
-        size_t idx_t = gen(eng);
-        string sample = extract_single_sample(trajectory, idx_t, plan, ops, &cost);
-        samples.push_back(sample);
-
-    }
-    // ENTIRE_PLAN
-    else if (select_state_method == SelectStateMethod::ENTIRE_PLAN) {
-        for (size_t idx_t = trajectory.size(); idx_t-- > 0;) {
-            string sample = extract_single_sample(trajectory, idx_t, plan, ops, &cost);
-            samples.push_back(sample);
+        if (store_plan_cost) {
+            oss << task->estimated_heuristic << field_separator;
         }
-    }
-    // INIT_STATE
-    else if (select_state_method == SelectStateMethod::INIT_STATE) {
-        size_t idx_t = trajectory.size() - 1;
-        string sample = extract_single_sample(trajectory, idx_t, plan, ops, &cost);
-        samples.push_back(sample);
-    }
 
+        if (store_state) {
+            vector<int> values = task->get_initial_state_values();
+            for (const FactPair &fp: relevant_facts) {
+                oss << (values[fp.var] == fp.value ? 1 : 0) << state_separator;
+            }
+            oss.seekp(-1, oss.cur);
+            oss << field_separator;
+        }
+
+        string s = oss.str();
+        s.pop_back();
+
+        samples.push_back(s);
+    }
     return samples;
 }
 

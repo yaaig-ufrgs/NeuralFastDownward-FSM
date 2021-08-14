@@ -31,6 +31,7 @@ class Registry;
 
 namespace sampling_technique {
 extern std::shared_ptr<AbstractTask> modified_task;
+extern std::vector<std::shared_ptr<AbstractTask>> modified_tasks;
 
 class SamplingTechnique {
 private:
@@ -85,11 +86,8 @@ public:
     std::shared_ptr<AbstractTask> next(
         const std::shared_ptr<AbstractTask> &seed_task,
         const TaskProxy &task_proxy);
-    std::shared_ptr<AbstractTask> next_all(
+    std::vector<std::shared_ptr<AbstractTask>> next_all(
         const std::shared_ptr<AbstractTask> &seed_task = tasks::g_root_task);
-    std::shared_ptr<AbstractTask> next_all(
-        const std::shared_ptr<AbstractTask> &seed_task,
-        const TaskProxy &task_proxy);
 
     virtual void initialize() {
     }

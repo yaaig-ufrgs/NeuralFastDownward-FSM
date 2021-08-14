@@ -19,6 +19,7 @@ namespace sampling_technique {
  * We use this to instantiate search engines with our desired modified tasks.
  */
 std::shared_ptr<AbstractTask> modified_task = nullptr;
+std::vector<std::shared_ptr<AbstractTask>> modified_tasks = std::vector<std::shared_ptr<AbstractTask>>();
 
 static shared_ptr<AbstractTask> _parse_sampling_transform(
         options::OptionParser &parser) {
@@ -194,34 +195,30 @@ shared_ptr<AbstractTask> SamplingTechnique::next(
     }
 }
 
- shared_ptr<AbstractTask> SamplingTechnique::next_all(
+vector<shared_ptr<AbstractTask>> SamplingTechnique::next_all(
         const shared_ptr<AbstractTask> &seed_task) {
-    return next_all(seed_task, TaskProxy(*seed_task));
-}
-
-shared_ptr<AbstractTask> SamplingTechnique::next_all(
-        const shared_ptr<AbstractTask> &seed_task,
-        const TaskProxy &task_proxy) {
-    if (empty()) {
-        return nullptr;
-    } else {
-        update_alternative_task_mutexes(seed_task);
-        counter++;
-        while (true) {
-            shared_ptr<AbstractTask> next_task = create_next(
-                    seed_task, task_proxy);
-            modified_task = next_task;
-            if ((check_mutexes && !test_mutexes(next_task)) ||
-                (check_solvable && !test_solvable(
-                        TaskProxy(*next_task)))) {
-                //cout << "Generated task invalid, try anew." << endl;
-                continue;
-            }
-            last_task = seed_task;
-            return next_task;
-
+    // TODO:
+    //  - restarts from seed_task (and h = 0) if there are no more paths to take
+    //  - check duplicated tasks
+    shared_ptr<AbstractTask> next_task = seed_task;
+    int h = 0;
+    vector<shared_ptr<AbstractTask>> tasks;
+    while (!empty()) {
+        update_alternative_task_mutexes(next_task);
+        next_task = create_next(next_task, TaskProxy(*next_task));
+        modified_task = next_task;
+        if ((check_mutexes && !test_mutexes(next_task)) ||
+            (check_solvable && !test_solvable(
+                    TaskProxy(*next_task)))) {
+            //cout << "Generated task invalid, try anew." << endl;
+            continue;
         }
+        next_task->estimated_heuristic = ++h;
+        tasks.push_back(next_task);
+        last_task = next_task;
+        counter++;
     }
+    return tasks;
 }
 
 void SamplingTechnique::update_alternative_task_mutexes(

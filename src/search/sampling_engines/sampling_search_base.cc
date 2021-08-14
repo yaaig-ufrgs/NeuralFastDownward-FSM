@@ -67,6 +67,18 @@ std::vector<std::string> SamplingSearchBase::sample(std::shared_ptr<AbstractTask
     return samples;
 }
 
+std::vector<std::string> SamplingSearchBase::sample_all(std::vector<std::shared_ptr<AbstractTask>> tasks) {
+    utils::g_log << "." << flush;
+    sampling_technique::modified_tasks = tasks;
+    vector<string> samples = extract_samples();
+    post_search(samples);
+
+    std::cout << "AAAAAAAAAAAAAAAAAAAAA" << std::endl;
+    for (auto s: samples) {
+        std::cout << s << std::endl;
+    }
+    return samples;
+}
 
 void SamplingSearchBase::post_search(vector<string> &/*samples*/) {}
 

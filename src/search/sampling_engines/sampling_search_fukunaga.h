@@ -43,7 +43,6 @@ protected:
 
     std::mt19937 eng = seeded_engine();
 
-    std::string extract_single_sample(Trajectory trajectory, size_t idx_t, Plan plan, OperatorsProxy ops, int *cost);
     virtual std::vector<std::string> extract_samples() override;
     virtual std::string construct_header() const;
     virtual std::string sample_file_header() const override;

@@ -95,9 +95,18 @@ SearchStatus SamplingEngine::step() {
         return SOLVED;
     }
 
-    const shared_ptr<AbstractTask> next_task = (*current_technique)->next(task);
-    vector<string> new_samples =  sample(next_task);
-    sample_cache_manager.insert(new_samples.begin(), new_samples.end());
+    if ((*current_technique)->get_name() == "gbackward_fukunaga") { // TODO: not use_teacher_search
+        vector<shared_ptr<AbstractTask>> tasks_all = (*current_technique)->next_all(task);
+        std::cout << "---------- Total: " << tasks_all.size() << std::endl;
+        for (auto x: tasks_all)
+            std::cout << "---- h: " << x->estimated_heuristic << std::endl;
+        vector<string> new_samples = sample_all(tasks_all);
+        sample_cache_manager.insert(new_samples.begin(), new_samples.end());
+    } else {
+        const shared_ptr<AbstractTask> next_task = (*current_technique)->next(task);
+        vector<string> new_samples = sample(next_task);
+        sample_cache_manager.insert(new_samples.begin(), new_samples.end());
+    }
     return IN_PROGRESS;
 }
 
@@ -114,6 +123,12 @@ void SamplingEngine::print_statistics() const {
 
 void SamplingEngine::save_plan_if_necessary() {
     sample_cache_manager.finalize();
+}
+
+std::vector<std::string> sample_all(std::vector<std::shared_ptr<AbstractTask>> tasks) {
+    // TODO
+    for (auto t: tasks) break;
+    return std::vector<std::string>();
 }
 
 void SamplingEngine::add_sampling_options(options::OptionParser &parser) {

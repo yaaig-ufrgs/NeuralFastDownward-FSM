@@ -43,6 +43,8 @@ protected:
 
     virtual std::vector<std::string> sample(
             std::shared_ptr<AbstractTask> task) override;
+    virtual std::vector<std::string> sample_all(
+            std::vector<std::shared_ptr<AbstractTask>> tasks);
     virtual void next_engine();
 
     
