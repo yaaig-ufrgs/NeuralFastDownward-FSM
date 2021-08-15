@@ -11,6 +11,7 @@ class StateRegistry;
 class RegressionTaskProxy;
 namespace sampling {
 class RandomRegressionWalkSampler;
+class DFSSampler;
 }
 
 namespace sampling_technique {
@@ -32,6 +33,7 @@ protected:
     std::shared_ptr<AbstractTask> last_partial_wrap_task = nullptr;
     std::shared_ptr<RegressionTaskProxy> regression_task_proxy = nullptr;
     std::shared_ptr<sampling::RandomRegressionWalkSampler> rrws = nullptr;
+    std::shared_ptr<sampling::DFSSampler> dfss = nullptr;
 
     virtual std::shared_ptr<AbstractTask> create_next(
             std::shared_ptr<AbstractTask> seed_task,

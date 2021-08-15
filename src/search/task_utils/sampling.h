@@ -30,33 +30,6 @@ using PartialAssignmentBias = std::function<int (PartialAssignment &)>;
 using StateBias = std::function<int (State &)>;
 
 namespace sampling {
-/*
-  Sample states with depth-first-search.
-*/
-
-class DFSSampler {
-    // TODO
-    const OperatorsProxy operators;
-    const std::unique_ptr<successor_generator::SuccessorGenerator> successor_generator;
-    const State initial_state;
-    const double average_operator_costs;
-
-public:
-    DFSSampler(
-        const TaskProxy &task_proxy);
-    ~DFSSampler();
-
-    State sample_state(
-        int init_h,
-        const DeadEndDetector &is_dead_end = [](const State &) {return false;}) const;
-
-    State sample_state_length(
-        const State &init_state,
-        int length,
-        const DeadEndDetector &is_dead_end = [](const State &) {return false;},
-        bool deprioritize_undoing_steps = false
-        ) const;
-};
 
 /*
   Sample states with random walks.
@@ -175,6 +148,26 @@ public:
         int max_states,
         bool check_mutexes = true
         ) const;
+};
+
+/*
+  Sample states with depth-first-search.
+*/
+class DFSSampler {
+    const RegressionTaskProxy regression_task_proxy;
+    const std::unique_ptr<predecessor_generator::PredecessorGenerator> predecessor_generator;
+    const PartialAssignment goals;
+    const double average_operator_costs;
+
+public:
+    DFSSampler(
+        const RegressionTaskProxy &regression_task_proxy);
+    ~DFSSampler();
+
+    PartialAssignment sample_state_length(
+        const PartialAssignment &goals, int length,
+        const ValidStateDetector &is_valid_state = [](const PartialAssignment &) {return true;},
+        const PartialDeadEndDetector &is_dead_end = [](const PartialAssignment &) {return false;}) const;
 };
 }
 

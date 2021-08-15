@@ -13,7 +13,7 @@ using namespace std;
 
 namespace sampling {
 template<typename S, typename G>
-bool sample_next_state(
+bool sample_next_state_with_random_walk(
         S &current_state,
         S &previous_state,
         S &pre_previous_state,
@@ -146,7 +146,7 @@ S sample_with_random_walk(
     double current_bias = initial_bias;
 
     for (int j = 0; j < length; ++j) {
-        if (!sample_next_state(
+        if (!sample_next_state_with_random_walk(
                 current_state,
                 previous_state,
                 pre_previous_state,
@@ -495,5 +495,125 @@ std::pair<PartialAssignmentRegistry, utils::HashMap<size_t, int>> RandomRegressi
         }
     }
     return {move(registry), move(id2cost)};
+}
+
+template<typename S, typename G>
+bool sample_next_state_with_depth_first_search(
+        S &current_state,
+        S &previous_state,
+        S &pre_previous_state,
+        const G &generator,
+        const function<S (const S &, const OperatorID &)> &construct_candidate,
+        const function<bool (S &)> *is_dead_end = nullptr,
+        const function<bool (S &)> *is_valid_state = nullptr) {
+
+    pre_previous_state = move(previous_state);
+    previous_state = move(current_state);
+    vector<OperatorID> applicable_operators;
+    generator.generate_applicable_ops(previous_state, applicable_operators);
+    // If there are no applicable operators, do not walk further.
+    if (applicable_operators.empty()) {
+        current_state = move(previous_state);
+        return false;
+    } else {
+        while(!applicable_operators.empty()){
+            int idx_op = 0; // open in depth
+            // Generate successor candidate
+            S candidate_state = construct_candidate(
+                    previous_state, applicable_operators[idx_op]);
+            applicable_operators.erase(applicable_operators.begin() + idx_op);
+            if ((is_valid_state != nullptr && !(*is_valid_state)(candidate_state)) ||
+                    (is_dead_end != nullptr && (*is_dead_end)(candidate_state))) {
+                continue;
+            }
+            current_state = move(candidate_state);
+            return true;
+        }
+        current_state = move(previous_state);
+        return false;
+    }
+}
+
+template<typename S, typename G>
+S sample_with_depth_first_search(
+        const S &state,
+        int length,
+        const G &generator,
+        const function<S (const S &, const OperatorID &)> &construct_candidate,
+        const function<bool (S &)> *is_dead_end = nullptr,
+        const function<bool (S &)> *is_valid_state = nullptr) {
+    // Sample one state with a random walk of length length.
+    S current_state(state);
+    S candidate_state(current_state);
+    S previous_state(current_state);
+    S pre_previous_state(current_state);
+
+    for (int j = 0; j < length; ++j) {
+        if (!sample_next_state_with_depth_first_search(
+                current_state,
+                previous_state,
+                pre_previous_state,
+                generator,
+                construct_candidate,
+                is_dead_end,
+                is_valid_state)) {
+            if (is_dead_end != nullptr && (*is_dead_end)(current_state)) {
+                current_state = S(state);
+            } else {
+                break;
+            }
+        }
+    }
+    return current_state;
+}
+
+static PartialAssignment sample_partial_assignment_with_depth_first_search(
+    const RegressionTaskProxy &regression_task_proxy, const PartialAssignment &goals,
+    const predecessor_generator::PredecessorGenerator &predecessor_generator,
+    int length,
+    const ValidStateDetector & is_valid_state,
+    const PartialDeadEndDetector &is_dead_end) {
+
+    const function<PartialAssignment (const PartialAssignment &, const OperatorID &)>
+            construct_candidate =
+            [&] (const PartialAssignment &s, const OperatorID &op_id) -> PartialAssignment {
+                RegressionOperatorProxy op_proxy = regression_task_proxy.
+                        get_regression_operator(op_id);
+                assert(task_properties::is_applicable(op_proxy, s));
+                return op_proxy.get_anonym_predecessor(s);
+    };
+    return sample_with_depth_first_search(
+            goals,
+            length,
+            predecessor_generator,
+            construct_candidate,
+            &is_dead_end,
+            &is_valid_state
+            );
+}
+
+DFSSampler::DFSSampler(
+    const RegressionTaskProxy &regression_task_proxy)
+    : regression_task_proxy(regression_task_proxy),
+      predecessor_generator(utils::make_unique_ptr<predecessor_generator::PredecessorGenerator>(regression_task_proxy)),
+      goals(regression_task_proxy.get_goal_assignment()),
+      average_operator_costs(task_properties::get_average_operator_cost(regression_task_proxy)) {
+}
+
+DFSSampler::~DFSSampler() {
+}
+
+PartialAssignment DFSSampler::sample_state_length(
+    const PartialAssignment &goals,
+    int length,
+    const ValidStateDetector &is_valid_state,
+    const PartialDeadEndDetector &is_dead_end) const {
+    return sample_partial_assignment_with_depth_first_search(
+        regression_task_proxy,
+        goals,
+        *predecessor_generator,
+        length,
+        is_valid_state,
+        is_dead_end);
 }
 }
