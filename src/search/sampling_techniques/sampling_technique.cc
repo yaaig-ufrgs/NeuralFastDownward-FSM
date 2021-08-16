@@ -200,12 +200,12 @@ vector<shared_ptr<AbstractTask>> SamplingTechnique::next_all(
     // TODO:
     //  - restarts from seed_task (and h = 0) if there are no more paths to take
     //  - check duplicated tasks
-    shared_ptr<AbstractTask> next_task = seed_task;
+    shared_ptr<AbstractTask> last_task = seed_task;
     int h = 0;
     vector<shared_ptr<AbstractTask>> tasks;
     while (!empty()) {
-        update_alternative_task_mutexes(next_task);
-        next_task = create_next(next_task, TaskProxy(*next_task));
+        update_alternative_task_mutexes(last_task);
+        shared_ptr<AbstractTask> next_task = create_next(last_task, TaskProxy(*last_task));
         modified_task = next_task;
         if ((check_mutexes && !test_mutexes(next_task)) ||
             (check_solvable && !test_solvable(
@@ -400,16 +400,16 @@ vector<FactPair> SamplingTechnique::extractGoalFacts(
     return goals;
 }
 
-//vector<FactPair> SamplingTechnique::extractGoalFacts(const State &state) {
-//    vector<FactPair> goals;
-//    goals.reserve(state.size());
-//    int var = 0;
-//    for (int val : state.get_values()) {
-//        goals.emplace_back(var, val);
-//        var++;
-//    }
-//    return goals;
-//}
+vector<FactPair> SamplingTechnique::extractGoalFacts(const State &state) {
+   vector<FactPair> goals;
+   goals.reserve(state.size());
+   int var = 0;
+   for (int val : state.get_values()) {
+       goals.emplace_back(var, val);
+       var++;
+   }
+   return goals;
+}
 
 
 static PluginTypePlugin<SamplingTechnique> _type_plugin(

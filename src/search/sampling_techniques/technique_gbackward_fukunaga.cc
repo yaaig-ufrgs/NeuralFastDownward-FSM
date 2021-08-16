@@ -121,7 +121,8 @@ std::shared_ptr<AbstractTask> TechniqueGBackwardFukunaga::create_next(
             } else {
                 return make_shared<extra_tasks::ModifiedInitGoalsTask>(
                     seed_task, extractInitialState(complete_assignment.second),
-                    extractGoalFacts(regression_task_proxy->get_goals()));
+                    extractGoalFacts(complete_assignment.second));
+                    // extractGoalFacts(regression_task_proxy->get_goals()));
             }
         }
     } else { // use random walk
@@ -160,7 +161,8 @@ std::shared_ptr<AbstractTask> TechniqueGBackwardFukunaga::create_next(
             } else {
             return make_shared<extra_tasks::ModifiedInitGoalsTask>(
                 seed_task, extractInitialState(complete_assignment.second),
-                extractGoalFacts(regression_task_proxy->get_goals()));
+                extractGoalFacts(complete_assignment.second));
+                // extractGoalFacts(regression_task_proxy->get_goals()));
             }
         }
     }

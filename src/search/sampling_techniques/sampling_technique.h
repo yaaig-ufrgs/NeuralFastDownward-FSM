@@ -96,7 +96,7 @@ public:
     static void add_options_to_parser(options::OptionParser &parser);
     static std::vector<int> extractInitialState(const State &state);
     static std::vector<FactPair> extractGoalFacts(const GoalsProxy &goals_proxy);
-//    static std::vector<FactPair> extractGoalFacts(const State &state);
+   static std::vector<FactPair> extractGoalFacts(const State &state);
 
     virtual bool has_upgradeable_parameters() const;
     virtual void upgrade_parameters();
