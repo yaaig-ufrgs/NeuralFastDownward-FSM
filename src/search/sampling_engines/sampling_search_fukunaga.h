@@ -18,13 +18,7 @@ namespace options {
 class Options;
 }
 
-
 namespace sampling_engine {
-
-std::mt19937 seeded_engine() {
-    std::random_device rd; // Used to obtain a seed for the RNG
-    return std::mt19937(rd()); // Standard mersenne_twister_engine seeded with rd()
-}
 
 enum SelectStateMethod {
     RANDOM_STATE,
@@ -40,8 +34,6 @@ protected:
     const bool store_operator;
     const std::vector<FactPair> relevant_facts;
     const std::string header;
-
-    std::mt19937 eng = seeded_engine();
 
     virtual std::vector<std::string> extract_samples() override;
     virtual std::string construct_header() const;

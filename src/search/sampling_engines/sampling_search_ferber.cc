@@ -86,10 +86,9 @@ vector<string> SamplingSearchFerber::extract_samples() {
     // Trajectory:  s0 s1 s2
 
     int cost = 0;
-    uniform_int_distribution<int> gen(0, trajectory.size()-1);
     // RANDOM_STATE
     if (select_state_method == SelectStateMethod::RANDOM_STATE) {
-        size_t idx_t = gen(eng);
+        size_t idx_t = (*rng)(trajectory.size());
         string sample = extract_single_sample(trajectory, idx_t, plan, ops, &cost);
         samples.push_back(sample);
 
