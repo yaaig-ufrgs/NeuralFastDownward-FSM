@@ -207,12 +207,6 @@ vector<shared_ptr<AbstractTask>> SamplingTechnique::next_all(
         update_alternative_task_mutexes(last_task);
         shared_ptr<AbstractTask> next_task = create_next(last_task, TaskProxy(*last_task));
         modified_task = next_task;
-        if ((check_mutexes && !test_mutexes(next_task)) ||
-            (check_solvable && !test_solvable(
-                    TaskProxy(*next_task)))) {
-            //cout << "Generated task invalid, try anew." << endl;
-            continue;
-        }
         next_task->estimated_heuristic = ++h;
         tasks.push_back(next_task);
         last_task = next_task;
