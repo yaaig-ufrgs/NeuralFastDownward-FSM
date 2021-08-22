@@ -59,8 +59,11 @@ protected:
     std::shared_ptr<AbstractTask> last_task = nullptr;
 
     virtual std::shared_ptr<AbstractTask> create_next(
-        std::shared_ptr<AbstractTask> seed_task,
-        const TaskProxy &task_proxy) = 0;
+        std::shared_ptr<AbstractTask> /*seed_task*/,
+        const TaskProxy &/*task_proxy*/) { return {}; };
+    virtual std::vector<std::shared_ptr<AbstractTask>> create_next_all(
+        std::shared_ptr<AbstractTask> /*seed_task*/,
+        const TaskProxy &/*task_proxy*/) { return {}; };
 
     bool test_mutexes(const std::shared_ptr<AbstractTask> &task) const;
     bool test_solvable(const TaskProxy &task_proxy) const;

@@ -56,7 +56,8 @@ std::vector<std::string> SamplingSearchBase::sample(std::vector<std::shared_ptr<
     vector<string> samples;
     utils::g_log << "." << flush;
 
-    if (tasks.size() == 1) {
+    if (false) {
+    // if (tasks.size() == 1) {
         sampling_technique::modified_task = tasks[0];
         next_engine();
         utils::g_log.silence = true;
@@ -66,6 +67,7 @@ std::vector<std::string> SamplingSearchBase::sample(std::vector<std::shared_ptr<
             samples = extract_samples();
         }
     } else {
+        std::cout << "AAAAAAA" << std::endl; 
         sampling_technique::modified_tasks = tasks;
         samples = extract_samples();
     }

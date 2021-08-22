@@ -197,17 +197,13 @@ shared_ptr<AbstractTask> SamplingTechnique::next(
 
 vector<shared_ptr<AbstractTask>> SamplingTechnique::next_all(
         const shared_ptr<AbstractTask> &seed_task) {
-    // TODO:
-    //  - restarts from seed_task (and h = 0) if there are no more paths to take
-    //  - check duplicated tasks
     shared_ptr<AbstractTask> last_task = seed_task;
-    int h = 0;
     vector<shared_ptr<AbstractTask>> tasks;
     while (!empty()) {
         update_alternative_task_mutexes(last_task);
-        shared_ptr<AbstractTask> next_task = create_next(last_task, TaskProxy(*last_task));
+        vector<shared_ptr<AbstractTask>> next_tasks = create_next_all(last_task, TaskProxy(*last_task));
+        shared_ptr<AbstractTask> next_task = next_tasks[0];
         modified_task = next_task;
-        next_task->estimated_heuristic = ++h;
         tasks.push_back(next_task);
         last_task = next_task;
         counter++;

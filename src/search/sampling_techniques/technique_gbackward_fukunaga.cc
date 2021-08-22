@@ -38,7 +38,7 @@ const string &TechniqueGBackwardFukunaga::get_name() const {
 TechniqueGBackwardFukunaga::TechniqueGBackwardFukunaga(const options::Options &opts)
         : SamplingTechnique(opts),
           use_dfs(opts.get<bool>("use_dfs")),
-          steps(opts.get<shared_ptr<utils::DiscreteDistribution>>("distribution")),
+          walk_length(opts.get<int>("walk_length")),
           wrap_partial_assignment(opts.get<bool>("wrap_partial_assignment")),
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
           is_valid_walk(opts.get<bool>("is_valid_walk")),
@@ -49,7 +49,7 @@ TechniqueGBackwardFukunaga::TechniqueGBackwardFukunaga(const options::Options &o
           bias_reload_counter(0) {
 }
 
-std::shared_ptr<AbstractTask> TechniqueGBackwardFukunaga::create_next(
+std::vector<std::shared_ptr<AbstractTask>> TechniqueGBackwardFukunaga::create_next_all(
         shared_ptr<AbstractTask> seed_task, const TaskProxy &task_proxy) {
     if (seed_task != last_task) {
         regression_task_proxy = make_shared<RegressionTaskProxy>(*seed_task);
@@ -85,6 +85,9 @@ std::shared_ptr<AbstractTask> TechniqueGBackwardFukunaga::create_next(
         func_bias = &pab;
     }
 
+    std::vector<std::shared_ptr<AbstractTask>> samples;
+    hash_table.clear();
+
     if (use_dfs) {
         while (true) {
             PartialAssignment partial_assignment =
@@ -112,57 +115,56 @@ std::shared_ptr<AbstractTask> TechniqueGBackwardFukunaga::create_next(
                         seed_task->get_variable_domain_size(i));
             }
 
-            return make_shared<extra_tasks::ModifiedInitGoalsTask>(
+            return {make_shared<extra_tasks::ModifiedInitGoalsTask>(
                     last_partial_wrap_task,
                     move(new_init_values),
-                    extractGoalFacts(regression_task_proxy->get_goals()));
+                    extractGoalFacts(regression_task_proxy->get_goals()))};
         }
     } else { // Random Walk
         while (true) {
-            PartialAssignment partial_assignment =
-                    rrws->sample_state_length(
-                            regression_task_proxy->get_goal_assignment(),
-                            1,
-                            deprioritize_undoing_steps,
-                            //is_valid_state,
-                            [](PartialAssignment &) { return true; },
-                            func_bias,
-                            bias_probabilistic,
-                            bias_adapt);
+            PartialAssignment partial_assignment = regression_task_proxy->get_goal_assignment();
+            int h = 1;
+            while (h <= walk_length) {
+                PartialAssignment new_partial_assignment = rrws->sample_state_length(
+                    partial_assignment,
+                    1,
+                    deprioritize_undoing_steps,
+                    [](PartialAssignment &) { return true; },
+                    func_bias,
+                    bias_probabilistic,
+                    bias_adapt
+                );
 
-            // Wraps a partial assignment obtained by the regression for the initial state
-            // into a task which has additional values for undefined variables.
-            // ...but Fukunaga: "Undefined values are not explicitly represented."
-            if (last_task != seed_task) {
-                last_partial_wrap_task = make_shared<extra_tasks::PartialStateWrapperTask>(seed_task);
+                // duplicates
+                if (hash_table.find(new_partial_assignment) != hash_table.end())
+                    continue;
+                hash_table.insert(new_partial_assignment);
+
+                auto aa = new_partial_assignment.get_full_state(true, *rng);
+                std::cout << h << " : " <<  aa.first << std::endl;
+                if (!aa.first) continue;
+
+                std::shared_ptr<AbstractTask> task = make_shared<extra_tasks::ModifiedInitGoalsTask>(
+                    seed_task,
+                    extractInitialState(aa.second), // TODO
+                    extractGoalFacts(regression_task_proxy->get_goals())
+                );
+                task->estimated_heuristic = h++;
+                samples.push_back(task);
+                partial_assignment = new_partial_assignment;
             }
-
-            // TODO think about this
-            vector<int> new_init_values;
-            new_init_values.reserve(partial_assignment.size());
-
-            for (size_t i = 0; i < partial_assignment.size(); ++i) {
-                new_init_values.push_back(
-                        partial_assignment.assigned(i) ?
-                        partial_assignment[i].get_value() :
-                        seed_task->get_variable_domain_size(i));
-            }
-
-            return make_shared<extra_tasks::ModifiedInitGoalsTask>(
-                    last_partial_wrap_task,
-                    move(new_init_values),
-                    extractGoalFacts(regression_task_proxy->get_goals()));
+            return samples;
         }
     }
 }
 
-void TechniqueGBackwardFukunaga::do_upgrade_parameters() {
-    steps->upgrade_parameters();
-}
+// void TechniqueGBackwardFukunaga::do_upgrade_parameters() {
+//     // steps->upgrade_parameters();
+// }
 
-void TechniqueGBackwardFukunaga::dump_upgradable_parameters(std::ostream &stream) const {
-    steps->dump_parameters(stream);
-}
+// void TechniqueGBackwardFukunaga::dump_upgradable_parameters(std::ostream &/*stream*/) const {
+//     // steps->dump_parameters(stream);
+// }
 
 /* PARSING TECHNIQUE_GBACKWARD_FUKUNAGA*/
 static shared_ptr<TechniqueGBackwardFukunaga> _parse_technique_gbackward_fukunaga(
@@ -173,10 +175,11 @@ static shared_ptr<TechniqueGBackwardFukunaga> _parse_technique_gbackward_fukunag
             "Use a depth-first-search-based sampling strategy instead of random walk.",
             "false"
     );
-    parser.add_option<shared_ptr<utils::DiscreteDistribution>>(
-            "distribution",
-            "Discrete random distribution to determine the random walk length used"
-            " by this technique.");
+    parser.add_option<int>(
+            "walk_length",
+            "Number of steps in each run.",
+            "100"
+    );
     parser.add_option<bool>(
             "wrap_partial_assignment",
             "If set, wraps a partial assignment obtained by the regression for the "

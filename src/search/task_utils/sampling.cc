@@ -163,6 +163,7 @@ S sample_with_random_walk(
             if (is_dead_end != nullptr && (*is_dead_end)(current_state)) {
                 current_state = S(state);
                 current_bias = initial_bias;
+                std::cout << "deu mt ruim" << std::endl;
             } else {
                 break;
             }

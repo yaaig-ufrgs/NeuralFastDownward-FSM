@@ -818,7 +818,7 @@ inline bool PartialAssignment::assigned(const VariableProxy &var) const {
 }
 
 inline bool PartialAssignment::operator==(const PartialAssignment &other) const {
-    assert(task == other.task);
+    // assert(task == other.task);
     return *values == *other.values;
 }
 
