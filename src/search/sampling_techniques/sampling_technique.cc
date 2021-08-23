@@ -19,7 +19,7 @@ namespace sampling_technique {
  * We use this to instantiate search engines with our desired modified tasks.
  */
 std::shared_ptr<AbstractTask> modified_task = nullptr;
-std::vector<std::shared_ptr<AbstractTask>> modified_tasks = std::vector<std::shared_ptr<AbstractTask>>();
+std::vector<std::shared_ptr<PartialAssignment>> modified_tasks = std::vector<std::shared_ptr<PartialAssignment>>();
 
 static shared_ptr<AbstractTask> _parse_sampling_transform(
         options::OptionParser &parser) {
@@ -36,7 +36,6 @@ static shared_ptr<AbstractTask> _parse_sampling_transform(
 
 static Plugin<AbstractTask> _plugin_sampling_transform(
         "sampling_transform", _parse_sampling_transform);
-
 
 
 const string SamplingTechnique::no_dump_directory = "false";
@@ -195,17 +194,19 @@ shared_ptr<AbstractTask> SamplingTechnique::next(
     }
 }
 
-vector<shared_ptr<AbstractTask>> SamplingTechnique::next_all(
+vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         const shared_ptr<AbstractTask> &seed_task) {
-    shared_ptr<AbstractTask> last_task = seed_task;
-    vector<shared_ptr<AbstractTask>> tasks;
+    vector<shared_ptr<PartialAssignment>> tasks;
     while (!empty()) {
-        update_alternative_task_mutexes(last_task);
-        vector<shared_ptr<AbstractTask>> next_tasks = create_next_all(last_task, TaskProxy(*last_task));
-        shared_ptr<AbstractTask> next_task = next_tasks[0];
-        modified_task = next_task;
-        tasks.push_back(next_task);
-        last_task = next_task;
+        update_alternative_task_mutexes(seed_task);
+        vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
+        for (shared_ptr<PartialAssignment>& task : next_tasks)
+            tasks.push_back(task);
+
+        // shared_ptr<AbstractTask> next_task = next_tasks[0];
+        // modified_task = next_task;
+        // tasks.push_back(next_task);
+        // last_task = next_task;
         counter++;
     }
     return tasks;

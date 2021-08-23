@@ -96,8 +96,8 @@ SearchStatus SamplingEngine::step() {
     }
 
     if ((*current_technique)->get_name() == "gbackward_fukunaga") { // TODO: use_teacher_search var
-        vector<shared_ptr<AbstractTask>> tasks_all = (*current_technique)->next_all(task);
-        vector<string> new_samples = sample(tasks_all);
+        vector<shared_ptr<PartialAssignment>> tasks_all = (*current_technique)->next_all(task);
+        vector<string> new_samples = sample_all(tasks_all);
         
         std::cout << "new samples" << std::endl;
         for (unsigned i = 0; i < new_samples.size(); i++)

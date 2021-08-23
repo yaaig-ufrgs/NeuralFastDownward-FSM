@@ -587,6 +587,7 @@ protected:
 public:
     using ItemType = FactProxy;
     static const int UNASSIGNED;
+    int estimated_heuristic = 0;
 
     PartialAssignment(const AbstractTask &task, std::vector<int> &&values);
     PartialAssignment(const PartialAssignment &assignment, std::vector<int> &&values);

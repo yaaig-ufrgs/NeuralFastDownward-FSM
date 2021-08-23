@@ -56,8 +56,7 @@ std::vector<std::string> SamplingSearchBase::sample(std::vector<std::shared_ptr<
     vector<string> samples;
     utils::g_log << "." << flush;
 
-    if (false) {
-    // if (tasks.size() == 1) {
+    if (tasks.size() == 1) {
         sampling_technique::modified_task = tasks[0];
         next_engine();
         utils::g_log.silence = true;
@@ -66,14 +65,24 @@ std::vector<std::string> SamplingSearchBase::sample(std::vector<std::shared_ptr<
         if (engine->found_solution()) {
             samples = extract_samples();
         }
-    } else {
-        std::cout << "AAAAAAA" << std::endl; 
-        sampling_technique::modified_tasks = tasks;
-        samples = extract_samples();
     }
+    //else {
+    //    sampling_technique::modified_tasks = tasks;
+    //    samples = extract_samples();
+    //}
     post_search(samples);
     return samples;
 }
+
+std::vector<std::string> SamplingSearchBase::sample_all(std::vector<std::shared_ptr<PartialAssignment>> tasks) {
+    vector<string> samples;
+    utils::g_log << "." << flush;
+    sampling_technique::modified_tasks = tasks;
+    samples = extract_samples();
+    post_search(samples);
+    return samples;
+}
+
 
 void SamplingSearchBase::post_search(vector<string> &/*samples*/) {}
 

@@ -36,7 +36,7 @@ protected:
     std::shared_ptr<sampling::DFSSampler> dfss = nullptr;
     utils::HashSet<PartialAssignment> hash_table;
 
-    virtual std::vector<std::shared_ptr<AbstractTask>> create_next_all(
+    virtual std::vector<std::shared_ptr<PartialAssignment>> create_next_all(
             std::shared_ptr<AbstractTask> seed_task,
             const TaskProxy &task_proxy) override;
 

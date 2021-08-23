@@ -27,7 +27,7 @@ string SamplingSearchFukunaga::sample_file_header() const {
 
 vector<string> SamplingSearchFukunaga::extract_samples() {
     vector<string> samples;
-    for (std::shared_ptr<AbstractTask>& task: sampling_technique::modified_tasks) {
+    for (std::shared_ptr<PartialAssignment>& task: sampling_technique::modified_tasks) {
         ostringstream oss;
 
         if (store_plan_cost) {
@@ -35,7 +35,7 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
         }
 
         if (store_state) {
-            vector<int> values = task->get_initial_state_values();
+            vector<int> values = task->get_values();
             for (const FactPair &fp: relevant_facts) {
                 oss << (values[fp.var] == fp.value ? 1 : 0) << state_separator;
             }

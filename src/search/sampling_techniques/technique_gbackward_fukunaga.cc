@@ -49,7 +49,7 @@ TechniqueGBackwardFukunaga::TechniqueGBackwardFukunaga(const options::Options &o
           bias_reload_counter(0) {
 }
 
-std::vector<std::shared_ptr<AbstractTask>> TechniqueGBackwardFukunaga::create_next_all(
+std::vector<std::shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_all(
         shared_ptr<AbstractTask> seed_task, const TaskProxy &task_proxy) {
     if (seed_task != last_task) {
         regression_task_proxy = make_shared<RegressionTaskProxy>(*seed_task);
@@ -85,10 +85,11 @@ std::vector<std::shared_ptr<AbstractTask>> TechniqueGBackwardFukunaga::create_ne
         func_bias = &pab;
     }
 
-    std::vector<std::shared_ptr<AbstractTask>> samples;
+    std::vector<std::shared_ptr<PartialAssignment>> samples;
     hash_table.clear();
 
     if (use_dfs) {
+        /*
         while (true) {
             PartialAssignment partial_assignment =
                     dfss->sample_state_length(
@@ -97,14 +98,6 @@ std::vector<std::shared_ptr<AbstractTask>> TechniqueGBackwardFukunaga::create_ne
                             //is_valid_state,
                             [](PartialAssignment &) { return true; } );
 
-            // Wraps a partial assignment obtained by the regression for the initial state
-            // into a task which has additional values for undefined variables.
-            // ...but Fukunaga: "Undefined values are not explicitly represented."
-            if (last_task != seed_task) {
-                last_partial_wrap_task = make_shared<extra_tasks::PartialStateWrapperTask>(seed_task);
-            }
-
-            // TODO think about this
             vector<int> new_init_values;
             new_init_values.reserve(partial_assignment.size());
 
@@ -120,8 +113,11 @@ std::vector<std::shared_ptr<AbstractTask>> TechniqueGBackwardFukunaga::create_ne
                     move(new_init_values),
                     extractGoalFacts(regression_task_proxy->get_goals()))};
         }
+        */
     } else { // Random Walk
+        cout << "aaaaaaaaaaaaaaaaaaaa" << endl;
         while (true) {
+            cout << "bbbbbbbbbbbbbbbbb" << endl;
             PartialAssignment partial_assignment = regression_task_proxy->get_goal_assignment();
             int h = 1;
             while (h <= walk_length) {
@@ -134,28 +130,21 @@ std::vector<std::shared_ptr<AbstractTask>> TechniqueGBackwardFukunaga::create_ne
                     bias_probabilistic,
                     bias_adapt
                 );
+                cout << "cccccccccccccccccccc" << endl;
 
-                // duplicates
                 if (hash_table.find(new_partial_assignment) != hash_table.end())
                     continue;
                 hash_table.insert(new_partial_assignment);
 
-                auto aa = new_partial_assignment.get_full_state(true, *rng);
-                std::cout << h << " : " <<  aa.first << std::endl;
-                if (!aa.first) continue;
-
-                std::shared_ptr<AbstractTask> task = make_shared<extra_tasks::ModifiedInitGoalsTask>(
-                    seed_task,
-                    extractInitialState(aa.second), // TODO
-                    extractGoalFacts(regression_task_proxy->get_goals())
-                );
-                task->estimated_heuristic = h++;
-                samples.push_back(task);
+                new_partial_assignment.estimated_heuristic = h++;
+                samples.push_back(make_shared<PartialAssignment>(new_partial_assignment));
                 partial_assignment = new_partial_assignment;
             }
+            cout << "ddddddddddddddddddddddd" << endl;
             return samples;
         }
     }
+    return samples;
 }
 
 // void TechniqueGBackwardFukunaga::do_upgrade_parameters() {

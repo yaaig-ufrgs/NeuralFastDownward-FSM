@@ -44,6 +44,7 @@ bool sample_next_state_with_random_walk(
         bool found_non_reversing_state = false;
 
         int idx_op = 0;
+        //std::cout << "applicable_operators.size: " << applicable_operators.size() << std::endl;
         while(!applicable_operators.empty()){
             // Generate successor candidate
             if (bias == nullptr) {
@@ -163,7 +164,6 @@ S sample_with_random_walk(
             if (is_dead_end != nullptr && (*is_dead_end)(current_state)) {
                 current_state = S(state);
                 current_bias = initial_bias;
-                std::cout << "deu mt ruim" << std::endl;
             } else {
                 break;
             }
