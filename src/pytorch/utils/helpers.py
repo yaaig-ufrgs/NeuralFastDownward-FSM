@@ -70,6 +70,7 @@ def logging_train_config(args, dirname, json=True):
         "Weight decay" : args.weight_decay,
         "Dropout rate" : args.dropout_rate,
         "Shuffle" : args.shuffle,
+        "Random seed" : args.random_seed,
         "Output folder" : str(args.output_folder),
     }
 
