@@ -1,3 +1,5 @@
+#include <stack>
+
 #include "technique_gbackward_fukunaga.h"
 
 #include "../evaluation_result.h"
@@ -12,7 +14,7 @@
 using namespace std;
 
 namespace sampling_technique {
-const std::string TechniqueGBackwardFukunaga::name = "gbackward_fukunaga";
+const string TechniqueGBackwardFukunaga::name = "gbackward_fukunaga";
 
 static int compute_heuristic(
         const TaskProxy &task_proxy, Heuristic *bias,
@@ -38,7 +40,7 @@ const string &TechniqueGBackwardFukunaga::get_name() const {
 TechniqueGBackwardFukunaga::TechniqueGBackwardFukunaga(const options::Options &opts)
         : SamplingTechnique(opts),
           use_dfs(opts.get<bool>("use_dfs")),
-          walk_length(opts.get<int>("walk_length")),
+          max_samples(opts.get<int>("max_samples")),
           wrap_partial_assignment(opts.get<bool>("wrap_partial_assignment")),
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
           is_valid_walk(opts.get<bool>("is_valid_walk")),
@@ -49,7 +51,7 @@ TechniqueGBackwardFukunaga::TechniqueGBackwardFukunaga(const options::Options &o
           bias_reload_counter(0) {
 }
 
-std::vector<std::shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_all(
+vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_all(
         shared_ptr<AbstractTask> seed_task, const TaskProxy &task_proxy) {
     if (seed_task != last_task) {
         regression_task_proxy = make_shared<RegressionTaskProxy>(*seed_task);
@@ -85,75 +87,74 @@ std::vector<std::shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::crea
         func_bias = &pab;
     }
 
-    std::vector<std::shared_ptr<PartialAssignment>> samples;
     hash_table.clear();
+    
+    PartialAssignment partial_assignment = regression_task_proxy->get_goal_assignment();
+    partial_assignment.estimated_heuristic = 0;
+    vector<shared_ptr<PartialAssignment>> samples{
+        make_shared<PartialAssignment>(partial_assignment)
+    };
 
-    if (use_dfs) {
-        /*
-        while (true) {
-            PartialAssignment partial_assignment =
-                    dfss->sample_state_length(
-                            regression_task_proxy->get_goal_assignment(),
-                            1,
-                            //is_valid_state,
-                            [](PartialAssignment &) { return true; } );
+    if (use_dfs) { // sample with DFS
+        stack<pair<PartialAssignment,int>> stack;
+        int idx_op = 0;
+        while (samples.size() < max_samples) {
+            PartialAssignment new_partial_assignment = dfss->sample_state_length(
+                partial_assignment,
+                idx_op,
+                [](PartialAssignment &) { return true; }
+            );
+            // idx_op has the index of the operator that was used,
+            // or -1 if all operators have already been tested
 
-            vector<int> new_init_values;
-            new_init_values.reserve(partial_assignment.size());
-
-            for (size_t i = 0; i < partial_assignment.size(); ++i) {
-                new_init_values.push_back(
-                        partial_assignment.assigned(i) ?
-                        partial_assignment[i].get_value() :
-                        seed_task->get_variable_domain_size(i));
+            if (idx_op == -1) {
+                if (stack.empty())
+                    break;
+                partial_assignment = stack.top().first;
+                idx_op = stack.top().second + 1;
+                stack.pop();
+                continue;
             }
 
-            return {make_shared<extra_tasks::ModifiedInitGoalsTask>(
-                    last_partial_wrap_task,
-                    move(new_init_values),
-                    extractGoalFacts(regression_task_proxy->get_goals()))};
-        }
-        */
-    } else { // Random Walk
-        cout << "aaaaaaaaaaaaaaaaaaaa" << endl;
-        while (true) {
-            cout << "bbbbbbbbbbbbbbbbb" << endl;
-            PartialAssignment partial_assignment = regression_task_proxy->get_goal_assignment();
-            int h = 1;
-            while (h <= walk_length) {
-                PartialAssignment new_partial_assignment = rrws->sample_state_length(
-                    partial_assignment,
-                    1,
-                    deprioritize_undoing_steps,
-                    [](PartialAssignment &) { return true; },
-                    func_bias,
-                    bias_probabilistic,
-                    bias_adapt
-                );
-                cout << "cccccccccccccccccccc" << endl;
+            if (hash_table.find(new_partial_assignment) == hash_table.end()) {
+                new_partial_assignment.estimated_heuristic = partial_assignment.estimated_heuristic + 1;
 
-                if (hash_table.find(new_partial_assignment) != hash_table.end())
-                    continue;
+                hash_table.insert(new_partial_assignment);
+                stack.push(make_pair(new_partial_assignment, idx_op));
+                samples.push_back(make_shared<PartialAssignment>(new_partial_assignment));
+
+                partial_assignment = new_partial_assignment;
+                idx_op = 0; // If new node, use first operator
+            } else {
+                idx_op++; // If same node, use next operator
+            }
+        }
+    } else { // sample with random walk
+        int max_attempts = 100, attempts = 0;
+        while (samples.size() < max_samples) {
+            PartialAssignment new_partial_assignment = rrws->sample_state_length(
+                partial_assignment,
+                1,
+                deprioritize_undoing_steps,
+                [](PartialAssignment &) { return true; },
+                func_bias,
+                bias_probabilistic,
+                bias_adapt
+            );
+
+            if (hash_table.find(new_partial_assignment) == hash_table.end()) {
                 hash_table.insert(new_partial_assignment);
 
-                new_partial_assignment.estimated_heuristic = h++;
+                new_partial_assignment.estimated_heuristic = partial_assignment.estimated_heuristic + 1;
                 samples.push_back(make_shared<PartialAssignment>(new_partial_assignment));
                 partial_assignment = new_partial_assignment;
+            } else if (++attempts >= max_attempts) {
+                break;
             }
-            cout << "ddddddddddddddddddddddd" << endl;
-            return samples;
         }
     }
     return samples;
 }
-
-// void TechniqueGBackwardFukunaga::do_upgrade_parameters() {
-//     // steps->upgrade_parameters();
-// }
-
-// void TechniqueGBackwardFukunaga::dump_upgradable_parameters(std::ostream &/*stream*/) const {
-//     // steps->dump_parameters(stream);
-// }
 
 /* PARSING TECHNIQUE_GBACKWARD_FUKUNAGA*/
 static shared_ptr<TechniqueGBackwardFukunaga> _parse_technique_gbackward_fukunaga(
@@ -165,9 +166,8 @@ static shared_ptr<TechniqueGBackwardFukunaga> _parse_technique_gbackward_fukunag
             "false"
     );
     parser.add_option<int>(
-            "walk_length",
-            "Number of steps in each run.",
-            "100"
+            "max_samples",
+            "Maximum number of steps in each run."
     );
     parser.add_option<bool>(
             "wrap_partial_assignment",

@@ -66,10 +66,6 @@ std::vector<std::string> SamplingSearchBase::sample(std::vector<std::shared_ptr<
             samples = extract_samples();
         }
     }
-    //else {
-    //    sampling_technique::modified_tasks = tasks;
-    //    samples = extract_samples();
-    //}
     post_search(samples);
     return samples;
 }

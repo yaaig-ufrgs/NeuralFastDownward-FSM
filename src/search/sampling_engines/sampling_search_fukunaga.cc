@@ -51,25 +51,10 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
     return samples;
 }
 
-SelectStateMethod select_state_method_format(const string &sel_state_method) {
-    if (sel_state_method == "random_state") {
-        return SelectStateMethod::RANDOM_STATE;
-    } else if (sel_state_method == "entire_plan") {
-        return SelectStateMethod::ENTIRE_PLAN;
-    } else if (sel_state_method == "init_state") {
-        return SelectStateMethod::INIT_STATE;
-    }
-    cerr << "Invalid select state format:" << sel_state_method << endl;
-    utils::exit_with(utils::ExitCode::SEARCH_INPUT_ERROR);
-}
-
 SamplingSearchFukunaga::SamplingSearchFukunaga(const options::Options &opts)
     : SamplingSearchBase(opts),
-      select_state_method(select_state_method_format(
-          opts.get<string>("select_state_method"))),
       store_plan_cost(opts.get<bool>("store_plan_cost")),
       store_state(opts.get<bool>("store_state")),
-      store_operator(opts.get<bool>("store_operator")),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       header(construct_header()){
 }
@@ -83,13 +68,6 @@ static shared_ptr<SearchEngine> _parse_sampling_search_fukunaga(OptionParser &pa
     sampling_engine::SamplingStateEngine::add_sampling_state_options(
             parser, "fields", "pddl", ";", ";");
 
-    parser.add_option<string>(
-            "select_state_method",
-            "Method to select states along the plans. Choose from:\n\
-             * random_state - select a random state from the plans\n\
-             * entire_plan - select all the state from the plans\n\
-             * init_state - select the initial state from the plans",
-            "random_state");
     parser.add_option<bool>(
             "store_plan_cost",
             "Store for every state its cost along the plan to the goal",
@@ -98,10 +76,6 @@ static shared_ptr<SearchEngine> _parse_sampling_search_fukunaga(OptionParser &pa
             "store_state",
             "Store every state along the plan",
             "true");
-    parser.add_option<bool>(
-            "store_operator",
-            "Store for every state along the plan the next chosen operator",
-            "false");
 
     SearchEngine::add_options_to_parser(parser);
     Options opts = parser.parse();

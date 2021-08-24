@@ -18,7 +18,7 @@ namespace sampling_technique {
 class TechniqueGBackwardFukunaga : public SamplingTechnique {
 protected:
     const bool use_dfs;
-    const int walk_length;
+    const unsigned max_samples;
     const bool wrap_partial_assignment;
     const bool deprioritize_undoing_steps;
     const bool is_valid_walk;
