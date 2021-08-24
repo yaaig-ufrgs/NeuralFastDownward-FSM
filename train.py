@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import logging
+import random
+import numpy as np
 import torch
 from shutil import copyfile
 
@@ -15,6 +17,12 @@ from src.pytorch.utils.timer import Timer
 _log = logging.getLogger(__name__)
 
 def train_main(args):
+    if args.random_seed != -1:
+        torch.manual_seed(args.random_seed)
+        torch.use_deterministic_algorithms(True)
+        random.seed(args.random_seed)
+        np.random_seed(args.random_seed)
+
     dirname = create_train_directory(args)
     setup_full_logging(dirname)
     logging_train_config(args, dirname)
@@ -23,7 +31,8 @@ def train_main(args):
         batch_size=args.batch_size,
         num_folds=args.num_folds,
         output_layer=args.output_layer,
-        shuffle=args.shuffle)
+        shuffle=args.shuffle,
+        random_seed=args.random_seed)
 
     train_timer = Timer(args.max_training_time).start()
     best_fold = {"fold" : -1, "val_loss" : 1}

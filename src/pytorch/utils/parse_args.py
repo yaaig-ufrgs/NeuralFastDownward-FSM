@@ -18,6 +18,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_MAX_SEARCH_TIME,
     DEFAULT_MAX_SEARCH_MEMORY,
     DEFAULT_OUTPUT_FOLDER,
+    DEFAULT_RANDOM_SEED,
 )
 
 # TODO: add help message for each argument
@@ -114,6 +115,14 @@ def get_train_args():
         default=DEFAULT_OUTPUT_FOLDER,
         help="Path where the training folder will be saved."
     )
+    parser.add_argument(
+        "-r",
+        "--random_seed",
+        type=int,
+        default=DEFAULT_RANDOM_SEED,
+        help="Random seed to be used. Defaults to no seed."
+    )
+
     return parser.parse_args()
 
 def get_test_args():

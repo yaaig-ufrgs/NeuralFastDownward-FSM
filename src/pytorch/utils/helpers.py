@@ -97,3 +97,4 @@ def logging_test_config(args, dirname, json=True):
 
     if json:
         save_json(f"{dirname}/test_args.json", args_dic)
+
