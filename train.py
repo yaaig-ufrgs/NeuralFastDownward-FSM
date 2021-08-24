@@ -21,7 +21,7 @@ def train_main(args):
         torch.manual_seed(args.random_seed)
         torch.use_deterministic_algorithms(True)
         random.seed(args.random_seed)
-        np.random_seed(args.random_seed)
+        np.random.seed(args.random_seed)
 
     dirname = create_train_directory(args)
     setup_full_logging(dirname)

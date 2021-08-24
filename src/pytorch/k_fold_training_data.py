@@ -51,8 +51,10 @@ class KFoldTrainingData:
                     else:
                         training_set.append(self.state_value_pairs[j])
 
-            worker_fn = None if random_seed == -1 else seed_worker
-            g = None if random_seed == -1 else g.manual_seed(random_seed)
+            worker_fn = None if self.random_seed == -1 else seed_worker
+            g = None if self.random_seed == -1 else torch.Generator()
+            if g != None:
+                g.manual_seed(self.random_seed)
 
             train_dataloader = DataLoader(
                 dataset=InstanceDataset(training_set, self.domain_max_value, self.output_layer),
