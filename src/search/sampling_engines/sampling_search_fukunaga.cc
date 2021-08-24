@@ -17,7 +17,19 @@ namespace sampling_engine {
 
 string SamplingSearchFukunaga::construct_header() const {
     ostringstream oss;
-    oss << "# <Cost>;<State>";
+
+    if (store_plan_cost){
+        oss << "#<PlanCost>=single integer value" << endl;
+    }
+    if (store_state) {
+        oss << "#<State>=";
+        for (const FactPair &fp: relevant_facts) {
+            oss << task->get_fact_name(fp) << state_separator;
+        }
+        oss.seekp(-1,oss.cur);
+        oss << endl;
+    }
+
     return oss.str();
 }
 
@@ -37,6 +49,8 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
         if (store_state) {
             vector<int> values = task->get_values();
             for (const FactPair &fp: relevant_facts) {
+                // if (values[fp.var] == fp.value)
+                //     oss << this->task->get_fact_name(fp) << state_separator;
                 oss << (values[fp.var] == fp.value ? 1 : 0) << state_separator;
             }
             oss.seekp(-1, oss.cur);

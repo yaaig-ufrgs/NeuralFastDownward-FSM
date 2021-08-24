@@ -202,11 +202,6 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
         for (shared_ptr<PartialAssignment>& task : next_tasks)
             tasks.push_back(task);
-
-        // shared_ptr<AbstractTask> next_task = next_tasks[0];
-        // modified_task = next_task;
-        // tasks.push_back(next_task);
-        // last_task = next_task;
         counter++;
     }
     return tasks;

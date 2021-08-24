@@ -83,10 +83,19 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
             return h;
         }
     };
+    
+    auto is_valid_state = [&](PartialAssignment &partial_assignment) {
+        return !(is_valid_walk) || regression_task_proxy->convert_to_full_state(
+                partial_assignment, true, *rng).first;
+    };
+
     if (bias != nullptr) {
         func_bias = &pab;
     }
 
+    // Hash table does not work for cases like:
+    // Atom on(b, a);Atom on(c, b);Atom on(d, c) and
+    // Atom on(b, a);Atom on(c, b);Atom on(d, c);(handempty)
     hash_table.clear();
     
     PartialAssignment partial_assignment = regression_task_proxy->get_goal_assignment();
@@ -102,7 +111,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
             PartialAssignment new_partial_assignment = dfss->sample_state_length(
                 partial_assignment,
                 idx_op,
-                [](PartialAssignment &) { return true; }
+                is_valid_state
             );
             // idx_op has the index of the operator that was used,
             // or -1 if all operators have already been tested
@@ -136,7 +145,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
                 partial_assignment,
                 1,
                 deprioritize_undoing_steps,
-                [](PartialAssignment &) { return true; },
+                is_valid_state,
                 func_bias,
                 bias_probabilistic,
                 bias_adapt
