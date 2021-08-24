@@ -482,10 +482,10 @@ std::pair<PartialAssignmentRegistry, utils::HashMap<size_t, int>> RandomRegressi
                 if (next_assignment.violates_mutexes()){
                     continue;
                 }
-//                auto next_state = next_assignment.get_full_state(check_mutexes, rng);
-//                if (!next_state.first) {
-//                    continue;
-//                }
+            //    auto next_state = next_assignment.get_full_state(check_mutexes, rng);
+            //    if (!next_state.first) {
+            //        continue;
+            //    }
             }
             size_t next_id = registry.lookup_or_insert_by_assignment(
                     next_assignment);
@@ -504,6 +504,7 @@ bool sample_next_state_with_depth_first_search(
         S &pre_previous_state,
         int &idx_op,
         const G &generator,
+        utils::RandomNumberGenerator &rng,
         const function<S (const S &, const OperatorID &)> &construct_candidate,
         const function<bool (S &)> *is_dead_end = nullptr,
         const function<bool (S &)> *is_valid_state = nullptr) {
@@ -512,9 +513,9 @@ bool sample_next_state_with_depth_first_search(
     previous_state = move(current_state);
     vector<OperatorID> applicable_operators;
     generator.generate_applicable_ops(previous_state, applicable_operators);
+    rng.shuffle(applicable_operators);
 
     while ((unsigned)idx_op < applicable_operators.size()){
-        // Generate successor candidate
         S candidate_state = construct_candidate(previous_state, applicable_operators[idx_op]);
         if ((is_valid_state != nullptr && !(*is_valid_state)(candidate_state)) ||
                 (is_dead_end != nullptr && (*is_dead_end)(candidate_state))) {
@@ -534,6 +535,7 @@ S sample_with_depth_first_search(
         const S &state,
         int &idx_op,
         const G &generator,
+        utils::RandomNumberGenerator &rng,
         const function<S (const S &, const OperatorID &)> &construct_candidate,
         const function<bool (S &)> *is_dead_end = nullptr,
         const function<bool (S &)> *is_valid_state = nullptr) {
@@ -548,6 +550,7 @@ S sample_with_depth_first_search(
             pre_previous_state,
             idx_op,
             generator,
+            rng,
             construct_candidate,
             is_dead_end,
             is_valid_state)) {
@@ -562,6 +565,7 @@ static PartialAssignment sample_partial_assignment_with_depth_first_search(
     const RegressionTaskProxy &regression_task_proxy, const PartialAssignment &goals,
     const predecessor_generator::PredecessorGenerator &predecessor_generator,
     int &idx_op,
+    utils::RandomNumberGenerator &rng,
     const ValidStateDetector & is_valid_state,
     const PartialDeadEndDetector &is_dead_end) {
 
@@ -577,6 +581,7 @@ static PartialAssignment sample_partial_assignment_with_depth_first_search(
             goals,
             idx_op,
             predecessor_generator,
+            rng,
             construct_candidate,
             &is_dead_end,
             &is_valid_state
@@ -584,11 +589,13 @@ static PartialAssignment sample_partial_assignment_with_depth_first_search(
 }
 
 DFSSampler::DFSSampler(
-    const RegressionTaskProxy &regression_task_proxy)
+    const RegressionTaskProxy &regression_task_proxy,
+    utils::RandomNumberGenerator &rng)
     : regression_task_proxy(regression_task_proxy),
       predecessor_generator(utils::make_unique_ptr<predecessor_generator::PredecessorGenerator>(regression_task_proxy)),
       goals(regression_task_proxy.get_goal_assignment()),
-      average_operator_costs(task_properties::get_average_operator_cost(regression_task_proxy)) {
+      average_operator_costs(task_properties::get_average_operator_cost(regression_task_proxy)),
+      rng(rng) {
 }
 
 DFSSampler::~DFSSampler() {
@@ -604,6 +611,7 @@ PartialAssignment DFSSampler::sample_state_length(
         goals,
         *predecessor_generator,
         idx_op,
+        rng,
         is_valid_state,
         is_dead_end);
 }

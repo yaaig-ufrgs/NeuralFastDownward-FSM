@@ -28,7 +28,7 @@ shared_ptr<RandomNumberGenerator> parse_rng_from_options(
     if (seed == -1) {
         // Use an arbitrary default seed.
         static shared_ptr<utils::RandomNumberGenerator> rng =
-            make_shared<utils::RandomNumberGenerator>(get_global_mt19937());
+            make_shared<utils::RandomNumberGenerator>();
         return rng;
     } else {
         return make_shared<RandomNumberGenerator>(seed);

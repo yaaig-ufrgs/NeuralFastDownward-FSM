@@ -57,7 +57,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
         regression_task_proxy = make_shared<RegressionTaskProxy>(*seed_task);
         state_registry = make_shared<StateRegistry>(task_proxy);
         if (use_dfs)
-            dfss = make_shared<sampling::DFSSampler>(*regression_task_proxy);
+            dfss = make_shared<sampling::DFSSampler>(*regression_task_proxy, *rng);
         else
             rrws = make_shared<sampling::RandomRegressionWalkSampler>(*regression_task_proxy, *rng);
     }
@@ -94,8 +94,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
     }
 
     // Hash table does not work for cases like:
-    // Atom on(b, a);Atom on(c, b);Atom on(d, c) and
-    // Atom on(b, a);Atom on(c, b);Atom on(d, c);(handempty)
+    //   Atom on(b, a);Atom on(c, b);Atom on(d, c) and
+    //   Atom on(b, a);Atom on(c, b);Atom on(d, c);(handempty)
     hash_table.clear();
     
     PartialAssignment partial_assignment = regression_task_proxy->get_goal_assignment();

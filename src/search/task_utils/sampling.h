@@ -158,10 +158,11 @@ class DFSSampler {
     const std::unique_ptr<predecessor_generator::PredecessorGenerator> predecessor_generator;
     const PartialAssignment goals;
     const double average_operator_costs;
+    utils::RandomNumberGenerator &rng;
 
 public:
     DFSSampler(
-        const RegressionTaskProxy &regression_task_proxy);
+        const RegressionTaskProxy &regression_task_proxy, utils::RandomNumberGenerator &rng);
     ~DFSSampler();
 
     PartialAssignment sample_state_length(
