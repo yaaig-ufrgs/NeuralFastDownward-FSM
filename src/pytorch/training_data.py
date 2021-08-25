@@ -12,13 +12,13 @@ class InstanceDataset(Dataset):
             states.append(pair[0])
             hvalues.append(pair[1])
 
+        self.output_layer = output_layer
         self.domain_max_value = domain_max_value
 
         self.states = torch.tensor(states, dtype=torch.float32)
         if output_layer == "regression":
-            self.hvalues = torch.tensor(
-                [[n] for n in hvalues], dtype=torch.float32
-            )
+            self.hvalues = torch.tensor(hvalues, dtype=torch.float32)
+            print(self.hvalues)
         elif output_layer == "prefix":
             self.hvalues = torch.tensor(
                 [to_prefix(n, self.domain_max_value) for n in hvalues], dtype=torch.float32
@@ -40,6 +40,8 @@ class InstanceDataset(Dataset):
         return self.states.shape
 
     def y_shape(self):
+        if self.output_layer == "regression":
+            return torch.Size([len(self.hvalues), 1])
         return self.hvalues.shape
 
 

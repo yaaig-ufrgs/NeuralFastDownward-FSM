@@ -91,7 +91,12 @@ class HNN(nn.Module):
             if self.dropout_rate > 0:
                 x = self.dropout(x)
 
-        return torch.sigmoid(self.opt(x))
+        if self.activation == "sigmoid":
+            return torch.sigmoid(self.opt(x))
+            #return torch.flatten(self.opt(x))
+        elif self.activation == "relu":
+            return torch.relu(self.opt(x))
+            #return torch.flatten(self.opt(x))
 
 
     # def __str__(self):
