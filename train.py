@@ -46,6 +46,7 @@ def train_main(args):
 
         model = HNN(
             input_units=train_dataloader.dataset.x_shape()[1],
+            hidden_units=args.hidden_units,
             output_units=train_dataloader.dataset.y_shape()[1],
             hidden_layers=args.hidden_layers,
             activation=args.activation,

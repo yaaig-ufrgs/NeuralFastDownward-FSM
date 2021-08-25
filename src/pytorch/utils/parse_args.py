@@ -5,6 +5,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_OUTPUT_LAYER,
     DEFAULT_NUM_FOLDS,
     DEFAULT_HIDDEN_LAYERS,
+    DEFAULT_HIDDEN_UNITS,
     DEFAULT_BATCH_SIZE,
     DEFAULT_ACTIVATION,
     DEFAULT_WEIGHT_DECAY,
@@ -20,8 +21,6 @@ from src.pytorch.utils.default_args import (
     DEFAULT_OUTPUT_FOLDER,
     DEFAULT_RANDOM_SEED,
 )
-
-# TODO: add help message for each argument
 
 def get_train_args():
     parser = argparse.ArgumentParser()
@@ -50,6 +49,13 @@ def get_train_args():
         type=int,
         default=DEFAULT_HIDDEN_LAYERS,
         help="Number of hidden layers of the network."
+    )
+    parser.add_argument(
+        "-hu",
+        "--hidden-units",
+        type=int,
+        default=DEFAULT_HIDDEN_UNITS,
+        help="Fixed number of neurons for each hidden layer of the network."
     )
     parser.add_argument(
         "-b",
@@ -117,7 +123,7 @@ def get_train_args():
     )
     parser.add_argument(
         "-r",
-        "--random_seed",
+        "--random-seed",
         type=int,
         default=DEFAULT_RANDOM_SEED,
         help="Random seed to be used. Defaults to no seed."

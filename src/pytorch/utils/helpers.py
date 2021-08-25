@@ -62,6 +62,7 @@ def logging_train_config(args, dirname, json=True):
         "Output layer" : args.output_layer,
         "Num folds" : args.num_folds,
         "Hidden layers" : args.hidden_layers,
+        "Hidden units": args.hidden_units,
         "Batch size" : args.batch_size,
         "Learning rate" : args.learning_rate,
         "Max epochs" : args.max_epochs,
