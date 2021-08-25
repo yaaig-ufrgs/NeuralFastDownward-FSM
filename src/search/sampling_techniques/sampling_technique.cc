@@ -189,7 +189,7 @@ shared_ptr<AbstractTask> SamplingTechnique::next(
             if ((check_mutexes && !test_mutexes(next_task)) ||
                 (check_solvable && !test_solvable(
                         TaskProxy(*next_task)))) {
-                //cout << "Generated task invalid, try anew." << endl;
+                cout << "Generated task invalid, try anew." << endl;
                 continue;
             }
             last_task = seed_task;
@@ -355,7 +355,8 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
     );
     parser.add_option<int>(
             "samples_per_search",
-            "Maximum number of steps in each run."
+            "Maximum number of steps in each run.",
+            "-1"
     );
     parser.add_option<int>(
             "max_samples",

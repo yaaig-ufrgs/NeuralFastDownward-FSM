@@ -48,7 +48,7 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
         if (store_state) {
             vector<int> values;
             if (use_full_state) {
-                State s = task->get_full_state(false, *rng).second;
+                State s = task->get_full_state(true, *rng).second;
                 s.unpack();
                 values = s.get_values();
             } else {
@@ -56,7 +56,7 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
             }
             for (const FactPair &fp: relevant_facts) {
                 // if (values[fp.var] == fp.value)
-                //     oss << this->task->get_fact_name(fp) << state_separator;
+                    // oss << this->task->get_fact_name(fp) << state_separator;
                 oss << (values[fp.var] == fp.value ? 1 : 0) << state_separator;
             }
 

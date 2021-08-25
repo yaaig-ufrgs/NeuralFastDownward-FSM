@@ -84,7 +84,7 @@ vector<string> SamplingSearchSimple::extract_samples() {
             vector<int> values = state.get_values();
             for (const FactPair &fp: relevant_facts) {
                 // if (values[fp.var] == fp.value)
-                //     oss << this->task->get_fact_name(fp) << state_separator;
+                    // oss << this->task->get_fact_name(fp) << state_separator;
                 oss << (values[fp.var] == fp.value ? 1 : 0) << state_separator;
             }
             oss.seekp(-1,oss.cur);
