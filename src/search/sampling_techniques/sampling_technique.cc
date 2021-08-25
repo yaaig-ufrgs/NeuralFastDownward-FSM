@@ -113,6 +113,7 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
           searches(opts.get<int>("searches")),
           samples_per_search(opts.get<int>("samples_per_search")),
           max_samples(opts.get<int>("max_samples")),
+          remove_duplicates(opts.get<bool>("remove_duplicates")),
 //          dump_directory(opts.get<string>("dump")),
           check_mutexes(opts.get<bool>("check_mutexes")),
           check_solvable(opts.get<bool>("check_solvable")),
@@ -145,6 +146,7 @@ SamplingTechnique::SamplingTechnique(
           searches(searches),
           samples_per_search(-1),
           max_samples(-1),
+          remove_duplicates(false),
 //          dump_directory(move(dump_directory)),
           check_mutexes(check_mutexes),
           check_solvable(check_solvable),
@@ -202,10 +204,17 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         const shared_ptr<AbstractTask> &seed_task) {
     vector<shared_ptr<PartialAssignment>> tasks;
     bool max_samples_reached = false;
+    utils::HashSet<PartialAssignment> hash_table;
     while (!empty() || (max_samples != -1 && !max_samples_reached)) {
         update_alternative_task_mutexes(seed_task);
         vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
         for (shared_ptr<PartialAssignment>& task : next_tasks) {
+            if (remove_duplicates) {
+                if (hash_table.count(*task))
+                    continue;
+                hash_table.insert(*task);
+            }
+
             tasks.push_back(task);
             if (max_samples != -1 && tasks.size() >= (unsigned)max_samples) {
                 max_samples_reached = true;
@@ -362,6 +371,11 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
             "max_samples",
             "Force searches until reaching max_samples samples.",
             "-1"
+    );
+    parser.add_option<bool>(
+            "remove_duplicates",
+            "Remove duplicated samples.",
+            "false"
     );
     parser.add_list_option<shared_ptr<Evaluator>>(
             "evals",

@@ -133,7 +133,6 @@ void SamplingEngine::add_sampling_options(options::OptionParser &parser) {
             "for each task to generate a sampling technique is randomly chosen with"
             "their probability proportional to the remaining tasks of that technique.",
             "false");
-
     parser.add_option<int> (
         "sample_cache_size",
         "If more than sample_cache_size samples are cached, then the entries "
