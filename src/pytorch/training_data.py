@@ -52,16 +52,16 @@ def load_training_state_value_pairs(samples_file: str) -> ([([int], int)], int):
 
     state_value_pairs = []
     domain_max_value = 0
-    lines = samples_file.readlines()[1:]
+    lines = samples_file.readlines()[2:]
     for line in lines:
-        l = line.split("\n")[0].split(";")
-        value = int(l[0])
-        state = []
-        for i in range(1, len(l)):
-            state.append(int(l[i]))
-        state_value_pairs.append((state, int(l[0])))
-        if state_value_pairs[-1][1] > domain_max_value:
-            domain_max_value = state_value_pairs[-1][1]
+        if line[0] != '#':
+            l = line.split("\n")[0].split(";")
+            state = []
+            for i in range(1, len(l)):
+                state.append(int(l[i]))
+            state_value_pairs.append((state, int(l[0])))
+            if state_value_pairs[-1][1] > domain_max_value:
+                domain_max_value = state_value_pairs[-1][1]
 
     return state_value_pairs, domain_max_value
 
