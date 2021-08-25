@@ -44,7 +44,6 @@ def train_main(args):
         )
         train_dataloader, val_dataloader = kfold.get_fold(fold_idx)
 
-        print("output units:", train_dataloader.dataset.y_shape()[1])
         model = HNN(
             input_units=train_dataloader.dataset.x_shape()[1],
             hidden_units=args.hidden_units,
