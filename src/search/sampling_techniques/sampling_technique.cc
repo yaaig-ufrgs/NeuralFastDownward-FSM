@@ -111,6 +111,8 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
           registry(opts.get_registry()),
           predefinitions(opts.get_predefinitions()),
           count(opts.get<int>("count")),
+          max_samples(opts.get<int>("max_samples")),
+          force_max_samples(opts.get<bool>("force_max_samples")),
 //          dump_directory(opts.get<string>("dump")),
           check_mutexes(opts.get<bool>("check_mutexes")),
           check_solvable(opts.get<bool>("check_solvable")),
@@ -141,6 +143,8 @@ SamplingTechnique::SamplingTechnique(
           registry(nullptr),
           predefinitions(nullptr),
           count(count),
+          max_samples(-1),
+          force_max_samples(false),
 //          dump_directory(move(dump_directory)),
           check_mutexes(check_mutexes),
           check_solvable(check_solvable),
@@ -197,11 +201,17 @@ shared_ptr<AbstractTask> SamplingTechnique::next(
 vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         const shared_ptr<AbstractTask> &seed_task) {
     vector<shared_ptr<PartialAssignment>> tasks;
-    while (!empty()) {
+    bool max_samples_reached = false;
+    while (!empty() || (force_max_samples && !max_samples_reached)) {
         update_alternative_task_mutexes(seed_task);
         vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
-        for (shared_ptr<PartialAssignment>& task : next_tasks)
+        for (shared_ptr<PartialAssignment>& task : next_tasks) {
             tasks.push_back(task);
+            if (force_max_samples && tasks.size() >= (unsigned)max_samples) {
+                max_samples_reached = true;
+                break;
+            }
+        }
         counter++;
     }
     return tasks;
@@ -338,8 +348,21 @@ bool SamplingTechnique::test_solvable(const TaskProxy &task_proxy) const {
 //}
 
 void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
-    parser.add_option<int>("count", "Number of times this sampling "
-                                    "technique shall be used.");
+    parser.add_option<int>(
+        "count",
+        "Number of times this sampling technique shall be used.",
+        "1"
+    );
+    parser.add_option<int>(
+            "max_samples",
+            "Maximum number of steps in each run.",
+            "-1"
+    );
+    parser.add_option<bool>(
+            "force_max_samples",
+            "Force searches until reaching max_samples samples.",
+            "false"
+    );
     parser.add_list_option<shared_ptr<Evaluator>>(
             "evals",
             "evaluators for dead-end detection (use only save ones to not "

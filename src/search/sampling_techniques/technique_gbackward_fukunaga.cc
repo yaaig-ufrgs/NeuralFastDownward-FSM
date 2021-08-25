@@ -40,7 +40,6 @@ const string &TechniqueGBackwardFukunaga::get_name() const {
 TechniqueGBackwardFukunaga::TechniqueGBackwardFukunaga(const options::Options &opts)
         : SamplingTechnique(opts),
           use_dfs(opts.get<bool>("use_dfs")),
-          max_samples(opts.get<int>("max_samples")),
           wrap_partial_assignment(opts.get<bool>("wrap_partial_assignment")),
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
           is_valid_walk(opts.get<bool>("is_valid_walk")),
@@ -107,7 +106,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
     if (use_dfs) { // sample with DFS
         stack<pair<PartialAssignment,int>> stack;
         int idx_op = 0;
-        while (samples.size() < max_samples) {
+        while (samples.size() < (unsigned)max_samples) {
             PartialAssignment new_partial_assignment = dfss->sample_state_length(
                 partial_assignment,
                 idx_op,
@@ -140,7 +139,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
         }
     } else { // sample with random walk
         int max_attempts = 100, attempts = 0;
-        while (samples.size() < max_samples) {
+        while (samples.size() < (unsigned)max_samples) {
             PartialAssignment new_partial_assignment = rrws->sample_state_length(
                 partial_assignment,
                 1,
@@ -173,10 +172,6 @@ static shared_ptr<TechniqueGBackwardFukunaga> _parse_technique_gbackward_fukunag
             "use_dfs",
             "Use a depth-first-search-based sampling strategy instead of random walk.",
             "false"
-    );
-    parser.add_option<int>(
-            "max_samples",
-            "Maximum number of steps in each run."
     );
     parser.add_option<bool>(
             "wrap_partial_assignment",

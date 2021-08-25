@@ -27,7 +27,6 @@ string SamplingSearchFukunaga::construct_header() const {
             oss << task->get_fact_name(fp) << state_separator;
         }
         oss.seekp(-1,oss.cur);
-        oss << endl;
     }
 
     return oss.str();
@@ -47,12 +46,20 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
         }
 
         if (store_state) {
-            vector<int> values = task->get_values();
+            vector<int> values;
+            if (use_full_state) {
+                State s = task->get_full_state(true, *rng).second;
+                s.unpack();
+                values = s.get_values();
+            } else {
+                values = task->get_values();
+            }
             for (const FactPair &fp: relevant_facts) {
                 // if (values[fp.var] == fp.value)
                 //     oss << this->task->get_fact_name(fp) << state_separator;
                 oss << (values[fp.var] == fp.value ? 1 : 0) << state_separator;
             }
+
             oss.seekp(-1, oss.cur);
             oss << field_separator;
         }
@@ -69,6 +76,7 @@ SamplingSearchFukunaga::SamplingSearchFukunaga(const options::Options &opts)
     : SamplingSearchBase(opts),
       store_plan_cost(opts.get<bool>("store_plan_cost")),
       store_state(opts.get<bool>("store_state")),
+      use_full_state(opts.get<bool>("use_full_state")),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       header(construct_header()){
 }
@@ -90,6 +98,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_fukunaga(OptionParser &pa
             "store_state",
             "Store every state along the plan",
             "true");
+    parser.add_option<bool>(
+            "use_full_state",
+            "Transform partial assignment to full state.",
+            "false");
 
     SearchEngine::add_options_to_parser(parser);
     Options opts = parser.parse();

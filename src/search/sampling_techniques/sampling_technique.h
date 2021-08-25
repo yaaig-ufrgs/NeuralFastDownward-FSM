@@ -42,6 +42,8 @@ protected:
     options::Registry *registry;
     const options::Predefinitions *predefinitions;
     const int count;
+    const int max_samples;
+    const bool force_max_samples;
 //    const std::string dump_directory;
     const bool check_mutexes;
     const bool check_solvable;
