@@ -41,9 +41,9 @@ public:
 protected:
     options::Registry *registry;
     const options::Predefinitions *predefinitions;
-    const int count;
+    const int searches;
+    const int samples_per_search;
     const int max_samples;
-    const bool force_max_samples;
 //    const std::string dump_directory;
     const bool check_mutexes;
     const bool check_solvable;
@@ -76,7 +76,7 @@ protected:
 
 public:
     explicit SamplingTechnique(const options::Options &opts);
-    SamplingTechnique(int count,
+    SamplingTechnique(int searches,
 //                      std::string dump_directory,
                       bool check_mutexes,
                       bool check_solvable, std::mt19937 &mt = utils::get_global_mt19937());

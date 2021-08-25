@@ -106,7 +106,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
     if (use_dfs) { // sample with DFS
         stack<pair<PartialAssignment,int>> stack;
         int idx_op = 0;
-        while (samples.size() < (unsigned)max_samples) {
+        while (samples.size() < (unsigned)samples_per_search) {
             PartialAssignment new_partial_assignment = dfss->sample_state_length(
                 partial_assignment,
                 idx_op,
@@ -139,7 +139,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
         }
     } else { // sample with random walk
         int max_attempts = 100, attempts = 0;
-        while (samples.size() < (unsigned)max_samples) {
+        while (samples.size() < (unsigned)samples_per_search) {
             PartialAssignment new_partial_assignment = rrws->sample_state_length(
                 partial_assignment,
                 1,

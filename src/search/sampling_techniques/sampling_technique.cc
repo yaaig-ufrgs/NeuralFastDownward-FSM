@@ -110,9 +110,9 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
         : id(next_id++),
           registry(opts.get_registry()),
           predefinitions(opts.get_predefinitions()),
-          count(opts.get<int>("count")),
+          searches(opts.get<int>("searches")),
+          samples_per_search(opts.get<int>("samples_per_search")),
           max_samples(opts.get<int>("max_samples")),
-          force_max_samples(opts.get<bool>("force_max_samples")),
 //          dump_directory(opts.get<string>("dump")),
           check_mutexes(opts.get<bool>("check_mutexes")),
           check_solvable(opts.get<bool>("check_solvable")),
@@ -135,16 +135,16 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
 }
 
 SamplingTechnique::SamplingTechnique(
-        int count,
+        int searches,
 //        string dump_directory,
         bool check_mutexes,
         bool check_solvable, mt19937 &mt)
         : id(next_id++),
           registry(nullptr),
           predefinitions(nullptr),
-          count(count),
+          searches(searches),
+          samples_per_search(-1),
           max_samples(-1),
-          force_max_samples(false),
 //          dump_directory(move(dump_directory)),
           check_mutexes(check_mutexes),
           check_solvable(check_solvable),
@@ -158,7 +158,7 @@ SamplingTechnique::SamplingTechnique(
 SamplingTechnique::~SamplingTechnique() {}
 
 int SamplingTechnique::get_count() const {
-    return count;
+    return searches;
 }
 
 int SamplingTechnique::get_counter() const {
@@ -166,7 +166,7 @@ int SamplingTechnique::get_counter() const {
 }
 
 bool SamplingTechnique::empty() const {
-    return counter >= count;
+    return counter >= searches;
 }
 
 shared_ptr<AbstractTask> SamplingTechnique::next(
@@ -202,12 +202,12 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         const shared_ptr<AbstractTask> &seed_task) {
     vector<shared_ptr<PartialAssignment>> tasks;
     bool max_samples_reached = false;
-    while (!empty() || (force_max_samples && !max_samples_reached)) {
+    while (!empty() || (max_samples != -1 && !max_samples_reached)) {
         update_alternative_task_mutexes(seed_task);
         vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
         for (shared_ptr<PartialAssignment>& task : next_tasks) {
             tasks.push_back(task);
-            if (force_max_samples && tasks.size() >= (unsigned)max_samples) {
+            if (max_samples != -1 && tasks.size() >= (unsigned)max_samples) {
                 max_samples_reached = true;
                 break;
             }
@@ -349,19 +349,18 @@ bool SamplingTechnique::test_solvable(const TaskProxy &task_proxy) const {
 
 void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
     parser.add_option<int>(
-        "count",
-        "Number of times this sampling technique shall be used.",
-        "1"
+            "searches",
+            "Number of times this sampling technique shall be used.",
+            "1"
+    );
+    parser.add_option<int>(
+            "samples_per_search",
+            "Maximum number of steps in each run."
     );
     parser.add_option<int>(
             "max_samples",
-            "Maximum number of steps in each run.",
-            "-1"
-    );
-    parser.add_option<bool>(
-            "force_max_samples",
             "Force searches until reaching max_samples samples.",
-            "false"
+            "-1"
     );
     parser.add_list_option<shared_ptr<Evaluator>>(
             "evals",

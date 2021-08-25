@@ -48,7 +48,7 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
         if (store_state) {
             vector<int> values;
             if (use_full_state) {
-                State s = task->get_full_state(true, *rng).second;
+                State s = task->get_full_state(false, *rng).second;
                 s.unpack();
                 values = s.get_values();
             } else {
