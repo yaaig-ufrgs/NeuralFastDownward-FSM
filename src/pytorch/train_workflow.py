@@ -33,7 +33,7 @@ class TrainWorkflow:
         train_loss = 0
 
         for batch, (X, y) in enumerate(self.train_dataloader):
-            # Compute prediction and loss
+            # Compute prediction and loss.
             pred = self.model(X)
             loss = self.loss_fn(pred, y)
             train_loss += loss.item()
