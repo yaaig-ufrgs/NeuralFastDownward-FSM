@@ -35,7 +35,7 @@ def train_main(args):
         random_seed=args.random_seed)
 
     train_timer = Timer(args.max_training_time).start()
-    best_fold = {"fold" : -1, "val_loss" : 1}
+    best_fold = {"fold" : -1, "val_loss" : float('inf')}
 
     for fold_idx in range(args.num_folds):
         _log.info(
@@ -84,7 +84,7 @@ def train_main(args):
             )
             break
 
-        train_wf.save_traced_model(f"{dirname}/models/traced_fold-{fold_idx}.pt")
+        train_wf.save_traced_model(f"{dirname}/models/traced_fold{fold_idx}.pt")
 
     _log.info("Finishing training.")
     _log.info(f"Elapsed time: {train_timer.current_time()}")
