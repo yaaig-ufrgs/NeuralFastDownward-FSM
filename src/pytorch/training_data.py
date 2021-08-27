@@ -17,8 +17,7 @@ class InstanceDataset(Dataset):
 
         self.states = torch.tensor(states, dtype=torch.float32)
         if output_layer == "regression":
-            self.hvalues = torch.tensor(hvalues, dtype=torch.float32)
-            self.hvalues = self.hvalues.unsqueeze(1)
+            self.hvalues = torch.tensor(hvalues, dtype=torch.float32).unsqueeze(1)
         elif output_layer == "prefix":
             self.hvalues = torch.tensor(
                 [to_prefix(n, self.domain_max_value) for n in hvalues], dtype=torch.float32
