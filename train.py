@@ -84,7 +84,7 @@ def train_main(args):
             )
             break
 
-        train_wf.save_traced_model(f"{dirname}/models/traced_fold{fold_idx}.pt")
+        train_wf.save_traced_model(f"{dirname}/models/traced_fold-{fold_idx}.pt")
 
     _log.info("Finishing training.")
     _log.info(f"Elapsed time: {train_timer.current_time()}")
