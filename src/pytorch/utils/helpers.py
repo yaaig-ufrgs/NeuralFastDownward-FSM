@@ -6,6 +6,7 @@ import logging
 from json import dump, load
 from os import path, makedirs
 from datetime import datetime
+from statistics import median, mean
 from src.pytorch.utils.default_args import DEFAULT_RANDOM_SEED
 
 _log = logging.getLogger(__name__)
@@ -146,7 +147,11 @@ def logging_test_statistics(args, dirname, model, output, decimal_places=4, save
             results["statistics"][model]["max_plan_length"] = max(rlist[x])
             results["statistics"][model]["min_plan_length"] = min(rlist[x])
             results["statistics"][model]["avg_plan_length"] = round(
-                sum(rlist[x]) / len(rlist[x]),
+                mean(rlist[x]),
+                decimal_places
+            )
+            results["statistics"][model]["mdn_plan_length"] = round(
+                median(rlist[x]),
                 decimal_places
             )
         elif x == "total_time":
@@ -157,13 +162,20 @@ def logging_test_statistics(args, dirname, model, output, decimal_places=4, save
             for i in range(len(rlist[x])):
                 rlist[x][i] = float(rlist[x][i])
             results["statistics"][model]["avg_search_time"] = round(
-                sum(rlist[x]) / len(rlist[x]),
+                mean(rlist[x]),
+                decimal_places
+            )
+            results["statistics"][model]["mdn_search_time"] = round(
+                median(rlist[x]),
                 decimal_places
             )
         else:
             for i in range(len(rlist[x])):
                 rlist[x][i] = int(rlist[x][i])
-            results["statistics"][model][f"avg_{x}"] = round(sum(rlist[x]) / len(rlist[x]), decimal_places)
+            results["statistics"][model][f"avg_{x}"] = round(mean(rlist[x]), decimal_places)
+            results["statistics"][model][f"mdn_{x}"] = round(median(rlist[x]), decimal_places)
+
+    #print(rlist)
 
     _log.info(f"Training statistics for model {model}")
     for x in results["statistics"][model]:
