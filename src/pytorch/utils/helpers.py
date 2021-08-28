@@ -154,6 +154,17 @@ def logging_test_statistics(args, dirname, model, output, decimal_places=4, save
                 median(rlist[x]),
                 decimal_places
             )
+        elif x == "expansion_rate":
+            for i in range(len(rlist[x])):
+                rlist[x][i] = float(rlist[x][i])
+            results["statistics"][model]["avg_expansion_rate"] = round(
+                mean(rlist[x]),
+                decimal_places
+            )
+            results["statistics"][model]["mdn_expansion_rate"] = round(
+                median(rlist[x]),
+                decimal_places
+            )
         elif x == "total_time":
             for i in range(len(rlist[x])):
                 rlist[x][i] = float(rlist[x][i])
@@ -174,8 +185,6 @@ def logging_test_statistics(args, dirname, model, output, decimal_places=4, save
                 rlist[x][i] = int(rlist[x][i])
             results["statistics"][model][f"avg_{x}"] = round(mean(rlist[x]), decimal_places)
             results["statistics"][model][f"mdn_{x}"] = round(median(rlist[x]), decimal_places)
-
-    #print(rlist)
 
     _log.info(f"Training statistics for model {model}")
     for x in results["statistics"][model]:

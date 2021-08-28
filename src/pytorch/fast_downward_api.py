@@ -66,6 +66,9 @@ def parse_fd_output(output: str):
         results["generated"] = re_states[0][3]
         results["dead_ends"] = re_states[0][4]
         results["search_time"] = re_time[0][0]
+        results["expansion_rate"] = round(
+            float(results["expanded"])/float(results["search_time"]),
+            4)
         results["total_time"] = re_time[0][1]
     return results
 
