@@ -10,6 +10,7 @@ class HNN(nn.Module):
         output_units: int,
         hidden_layers: int,
         activation: str,
+        output_layer: str,
         dropout_rate: float,
     ):
         super(HNN, self).__init__()
@@ -18,6 +19,7 @@ class HNN(nn.Module):
         self.output_units = output_units
         self.hidden_layers = hidden_layers
         self.dropout_rate = dropout_rate
+        self.output_layer = output_layer
 
         hu = [input_units]
         if len(hidden_units) == 0: # scalable
@@ -50,5 +52,8 @@ class HNN(nn.Module):
             x = self.activation(h(x))
             if self.dropout_rate > 0:
                 x = self.dropout(x)
+
+        if self.output_layer == "regression":
+            return self.opt(x)
         return self.activation(self.opt(x))
         # return torch.flatten(self.opt(x))

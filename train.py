@@ -55,6 +55,7 @@ def train_main(args):
             output_units=train_dataloader.dataset.y_shape()[1],
             hidden_layers=args.hidden_layers,
             activation=args.activation,
+            output_layer=args.output_layer,
             dropout_rate=args.dropout_rate
         ).to(torch.device("cpu"))
 
