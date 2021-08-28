@@ -22,7 +22,7 @@ def train_main(args):
         torch.use_deterministic_algorithms(True)
         random.seed(args.seed)
         np.random.seed(args.seed)
-    
+
     dirname = create_train_directory(args)
     setup_full_logging(dirname)
 
@@ -84,13 +84,12 @@ def train_main(args):
                 f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
             )
 
+        train_wf.save_traced_model(f"{dirname}/models/traced_{fold_idx}.pt")
         if train_timer.check_timeout():
             _log.info(
                 f"Maximum training time reached. Stopping training."
             )
             break
-
-        train_wf.save_traced_model(f"{dirname}/models/traced_{fold_idx}.pt")
 
     _log.info("Finishing training.")
     _log.info(f"Elapsed time: {train_timer.current_time()}")
