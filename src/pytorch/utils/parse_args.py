@@ -112,7 +112,7 @@ def get_train_args():
         help="Dropout rate for hidden layers. (default: %(default)s)"
     )
     parser.add_argument(
-        "-s",
+        "-sh",
         "--shuffle",
         type=int,
         default=DEFAULT_SHUFFLE,
@@ -126,8 +126,8 @@ def get_train_args():
         help="Path where the training folder will be saved. (default: %(default)s)"
     )
     parser.add_argument(
-        "-r",
-        "--random-seed",
+        "-s",
+        "--seed",
         type=int,
         default=DEFAULT_RANDOM_SEED,
         help="Random seed to be used. Defaults to no seed. (default: random)"

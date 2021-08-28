@@ -66,7 +66,7 @@ def logging_train_config(args, dirname, json=True):
         "weight_decay" : args.weight_decay,
         "dropout_rate" : args.dropout_rate,
         "shuffle" : args.shuffle,
-        "random_seed" : args.random_seed if args.random_seed != DEFAULT_RANDOM_SEED
+        "seed" : args.seed if args.seed != DEFAULT_RANDOM_SEED
             else "random",
         "output_folder" : str(args.output_folder)
     }

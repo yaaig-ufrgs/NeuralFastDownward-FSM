@@ -17,11 +17,11 @@ from src.pytorch.utils.timer import Timer
 _log = logging.getLogger(__name__)
 
 def train_main(args):
-    if args.random_seed != -1:
-        torch.manual_seed(args.random_seed)
+    if args.seed != -1:
+        torch.manual_seed(args.seed)
         torch.use_deterministic_algorithms(True)
-        random.seed(args.random_seed)
-        np.random.seed(args.random_seed)
+        random.seed(args.seed)
+        np.random.seed(args.seed)
     
     dirname = create_train_directory(args)
     setup_full_logging(dirname)
@@ -29,7 +29,7 @@ def train_main(args):
     if len(args.hidden_units) not in [0, 1, args.hidden_layers]:
         _log.error("Invalid hidden_units length.")
         return
-        
+
     logging_train_config(args, dirname)
 
     kfold = KFoldTrainingData(args.samples,
@@ -37,7 +37,7 @@ def train_main(args):
         num_folds=args.num_folds,
         output_layer=args.output_layer,
         shuffle=args.shuffle,
-        random_seed=args.random_seed)
+        seed=args.seed)
 
     train_timer = Timer(args.max_training_time).start()
     best_fold = {"fold" : -1, "val_loss" : float("inf")}
