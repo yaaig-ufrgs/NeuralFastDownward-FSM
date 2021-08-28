@@ -47,7 +47,8 @@ def test_main(args):
                 search_algorithm=args.search_algorithm,
                 unary_threshold=args.unary_threshold,
                 time_limit=args.max_search_time,
-                memory_limit=args.max_search_memory
+                memory_limit=args.max_search_memory,
+                save_log_to=dirname
             )
             _log.info(f"{output[problem_pddl]}")
 

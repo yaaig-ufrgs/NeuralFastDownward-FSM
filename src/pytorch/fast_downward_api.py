@@ -1,12 +1,21 @@
+import logging
+from os import path, makedirs
 from subprocess import check_output, CalledProcessError
-import re
+from re import compile, findall
+from src.pytorch.utils.default_args import (
+    DEFAULT_SEARCH_ALGORITHM,
+    DEFAULT_MAX_SEARCH_TIME,
+    DEFAULT_MAX_SEARCH_MEMORY,
+    DEFAULT_UNARY_THRESHOLD
+)
+
+_log = logging.getLogger(__name__)
 
 _FD = "./fast-downward.py"
 _SAS_PLAN_FILE = "sas_plan"
 
-
 def parse_plan():
-    PLAN_INFO_REGEX = re.compile(r"; cost = (\d+) \((unit cost|general cost)\)\n")
+    PLAN_INFO_REGEX = compile(r"; cost = (\d+) \((unit cost|general cost)\)\n")
     last_line = ""
     try:
         with open(_SAS_PLAN_FILE) as sas_plan:
@@ -22,11 +31,9 @@ def parse_plan():
 
 def parse_fd_output(output: str):
     assert "Solution found!" in output
-
     # Remove \n to use in re.compile.
     output = output.replace("\n", " ")
-
-    data = re.findall(
+    data = findall(
         r".*Plan length: (\d+) step\(s\)..*"
         r".*Plan cost: (\d+).*"
         r".*Expanded (\d+) state\(s\)..*"
@@ -38,7 +45,6 @@ def parse_fd_output(output: str):
         r".*Total time: (.+?)s.*"
         , output
     )
-
     return {
         "search_state" : "success",
         "plan_length" : data[0][0],
@@ -52,17 +58,24 @@ def parse_fd_output(output: str):
         "total_time" : data[0][8]
     }
 
+def save_downward_log(folder, instance_pddl, output):
+    downward_logs = f"{folder}/downward_logs"
+    if not path.exists(downward_logs):
+        makedirs(downward_logs)
+    instance_name = instance_pddl.split("/")[-1].split(".pddl")[0]
+    filename = f"{downward_logs}/{instance_name}.log"
+    with open(filename, "w") as f:
+        f.write(output)
+    _log.info(f"Downward log saved to {filename}")
+
 def solve_instance_with_fd(
     domain_pddl,
     instance_pddl,
     opts="astar(lmcut())",
-    time_limit=604800,
-    memory_limit=32000000,
+    time_limit=DEFAULT_MAX_SEARCH_TIME,
+    memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
+    save_log_to=""
 ):
-    """
-    Tries to solve a PDDL instance. Return the cost (or None if search fails).
-    """
-
     try:
         output = check_output(
             [
@@ -76,8 +89,10 @@ def solve_instance_with_fd(
                 "--search",
                 opts,
             ]
-        )
-        return parse_fd_output(output.decode("utf-8"))
+        ).decode("utf-8")
+        if save_log_to != "":
+            save_downward_log(save_log_to, instance_pddl, output)
+        return parse_fd_output(output)
 
     except CalledProcessError as e:
         exit_code = {
@@ -99,13 +114,14 @@ def solve_instance_with_fd_nh(
     domain_pddl,
     problem_pddl,
     traced_model,
-    search_algorithm = "astar",
-    unary_threshold=0.01,
-    time_limit=604800,
-    memory_limit=128000,
+    search_algorithm=DEFAULT_SEARCH_ALGORITHM,
+    unary_threshold=DEFAULT_UNARY_THRESHOLD,
+    time_limit=DEFAULT_MAX_SEARCH_TIME,
+    memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
+    save_log_to=""
 ):
     """
-    Tries to solve a PDDL instance with the torch_sampling_network. Return the cost (or None if search fails).
+    Tries to solve a PDDL instance with the torch_sampling_network.
     """
 
     network = f"torch_sampling_network(path={traced_model}," \
@@ -118,5 +134,5 @@ def solve_instance_with_fd_nh(
         opts = (f"eager_greedy([nh({network})], max_time={time_limit})")
 
     return solve_instance_with_fd(
-        domain_pddl, problem_pddl, opts, time_limit, memory_limit
+        domain_pddl, problem_pddl, opts, time_limit, memory_limit, save_log_to
     )
