@@ -19,22 +19,25 @@ def test_main(args):
     setup_full_logging(dirname)
     logging_test_config(args, dirname)
 
-    models = []
-    models_folder = f"{args.train_folder}/models"
-    if args.test_model == "best":
-        best_fold_path = f"{models_folder}/traced_best_val_loss.pt"
-        if path.exists(best_fold_path):
-            models.append(best_fold_path)
-        else:
-            _log.error(f"Best val loss model does not exists!")
-    elif args.test_model == "all":
-        i = 0
-        while path.exists(f"{models_folder}/traced_{i}.pt"):
-            models.append(f"{models_folder}/traced_{i}.pt")
-            i += 1
-    if len(models) == 0:
-        _log.error("No models found for testing.")
-        return
+    if args.heuristic == "nn":
+        models = []
+        models_folder = f"{args.train_folder}/models"
+        if args.test_model == "best":
+            best_fold_path = f"{models_folder}/traced_best_val_loss.pt"
+            if path.exists(best_fold_path):
+                models.append(best_fold_path)
+            else:
+                _log.error(f"Best val loss model does not exists!")
+        elif args.test_model == "all":
+            i = 0
+            while path.exists(f"{models_folder}/traced_{i}.pt"):
+                models.append(f"{models_folder}/traced_{i}.pt")
+                i += 1
+        if len(models) == 0:
+            _log.error("No models found for testing.")
+            return
+    else:
+        models = [""]
 
     for model_path in models:
         output = {}
@@ -49,6 +52,7 @@ def test_main(args):
                 unary_threshold=args.unary_threshold,
                 time_limit=args.max_search_time,
                 memory_limit=args.max_search_memory,
+                max_expansions=args.max_expansions,
                 save_log_to=dirname
             )
             _log.info(f"{output[problem_pddl]}")
