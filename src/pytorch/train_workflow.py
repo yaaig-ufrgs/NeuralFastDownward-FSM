@@ -1,5 +1,4 @@
 import logging
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -28,7 +27,7 @@ class TrainWorkflow:
         self.loss_fn = loss_fn
 
     def train_loop(self):
-        size = len(self.train_dataloader.dataset)
+        # size = len(self.train_dataloader.dataset)
         num_batches = len(self.train_dataloader)
         train_loss = 0
 
@@ -50,7 +49,7 @@ class TrainWorkflow:
         return train_loss / num_batches
 
     def val_loop(self):
-        size = len(self.val_dataloader.dataset)
+        # size = len(self.val_dataloader.dataset)
         num_batches = len(self.val_dataloader)
         val_loss = 0
 
@@ -89,7 +88,7 @@ class TrainWorkflow:
         traced_model.save(filename)
 
     def run(self, train_timer, validation=True):
-        last_val_loss = 1
+        last_val_loss = 0
         max_epochs_without_improving = 100
         count = 0
         for t in range(self.max_epochs):
@@ -108,7 +107,8 @@ class TrainWorkflow:
                         break
 
                 last_val_loss = cur_val_loss
-                _log.info(f"Epoch {t} | avg_train_loss={cur_train_loss:>7f} | avg_val_loss={cur_val_loss:>7f}")
+                _log.info(f"Epoch {t} | avg_train_loss={cur_train_loss:>7f} "
+                                    f"| avg_val_loss={cur_val_loss:>7f}")
             else:
                 _log.info(f"Epoch {t} | avg_train_loss={cur_train_loss:>7f}")
 
