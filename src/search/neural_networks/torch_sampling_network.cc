@@ -67,8 +67,10 @@ void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
     at::Tensor tensor = output.toTensor();
     std::vector<double> unary_output(tensor.data_ptr<float>(),
                                     tensor.data_ptr<float>() + tensor.numel());
+
     if (!blind) {
-        last_h = unary_to_value(unary_output);
+        // Regression (tensor.size(1) == 1) or Classification (tensor.size(1) > 1).
+        last_h = tensor.size(1) == 1 ? unary_output[0] : unary_to_value(unary_output);
         last_h_batch.push_back(last_h);
         /* Batch not working.
         auto accessor = tensor.accessor<float, 2>();
