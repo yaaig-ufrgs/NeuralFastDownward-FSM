@@ -21,27 +21,35 @@ def to_onehot(n: int, max_value: int) -> [int]:
 def get_datetime():
     return datetime.now().isoformat().replace('-', '.').replace(':', '.')
 
-def create_train_directory(args, config_in_foldername = False):
-    dirname = args.samples.name.split("/")[-1]
+def create_train_directory(args, config_in_foldername=False):
+    sep = "."
+    dirname = f"{args.output_folder}/nfd_train{sep}{args.samples.name.split('/')[-1]}{sep}seed_{args.seed}"
     if config_in_foldername:
-        dirname += f"_{args.activation}_{args.output_layer}_" + \
-            f"hid{args.hidden_layers}_w{args.weight_decay}_d{args.dropout_rate}"
-
-    dirname = args.output_folder/f"{dirname}_{get_datetime()}"
+        dirname += f"{sep}{args.output_layer}_{args.activation}_hid{args.hidden_layers}"
+        if args.weight_decay > 0:
+            dirname += f"_w{args.weight_decay}"
+        if args.dropout_rate > 0:
+            dirname += f"_d{args.dropout_rate}"
     if path.exists(dirname):
-        raise RuntimeError(f"Directory {dirname} already exists")
+        i = 2
+        while path.exists(f"{dirname}{sep}{i}"):
+            i += 1
+        dirname = dirname+f"{sep}{i}"
     makedirs(dirname)
-    makedirs(dirname/"models")
-
+    makedirs(f"{dirname}/models")
     return dirname
 
 def create_test_directory(args):
+    sep = "."
     tests_folder = args.train_folder/"tests"
     if not path.exists(tests_folder):
         makedirs(tests_folder)
-    dirname = tests_folder/f"test_{get_datetime()}"
+    dirname = f"{tests_folder}/nfd_test"
     if path.exists(dirname):
-        raise RuntimeError(f"Directory {dirname} already exists")
+        i = 2
+        while path.exists(f"{dirname}{sep}{i}"):
+            i += 1
+        dirname = dirname+f"{sep}{i}"
     makedirs(dirname)
     return dirname
 

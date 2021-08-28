@@ -87,7 +87,7 @@ def get_train_args():
         "--max-training-time",
         type=int,
         default=DEFAULT_MAX_TRAINING_TIME,
-        help="Maximum network training time (all folds). (default: %(default)s)"
+        help="Maximum network training time (all folds). (default: %(default)ss)"
     )
     parser.add_argument(
         "-a",
@@ -172,14 +172,14 @@ def get_test_args():
         "--max-search-time",
         type=int,
         default=DEFAULT_MAX_SEARCH_TIME,
-        help="Time limit for searching each problem. (default: %(default)s)"
+        help="Time limit for searching each problem. (default: %(default)ss)"
     )
     parser.add_argument(
         "-m",
         "--max-search-memory",
         type=int,
         default=DEFAULT_MAX_SEARCH_MEMORY,
-        help="Memory limit for searching each problem. (default: %(default)s)"
+        help="Memory limit for searching each problem. (default: %(default)sMB)"
     )
     parser.add_argument(
         "-pt",
