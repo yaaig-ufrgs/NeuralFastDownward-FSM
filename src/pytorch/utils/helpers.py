@@ -69,7 +69,7 @@ def logging_train_config(args, dirname, json=True):
         "batch_size" : args.batch_size,
         "learning_rate" : args.learning_rate,
         "max_epochs" : args.max_epochs,
-        "max_training_time" : args.max_training_time,
+        "max_training_time" : f"{args.max_training_time}s",
         "activation" : args.activation,
         "weight_decay" : args.weight_decay,
         "dropout_rate" : args.dropout_rate,

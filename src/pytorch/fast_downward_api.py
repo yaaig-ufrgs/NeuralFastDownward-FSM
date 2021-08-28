@@ -12,51 +12,54 @@ from src.pytorch.utils.default_args import (
 _log = logging.getLogger(__name__)
 
 _FD = "./fast-downward.py"
-_SAS_PLAN_FILE = "sas_plan"
-
-def parse_plan():
-    PLAN_INFO_REGEX = compile(r"; cost = (\d+) \((unit cost|general cost)\)\n")
-    last_line = ""
-    try:
-        with open(_SAS_PLAN_FILE) as sas_plan:
-            for last_line in sas_plan:
-                pass
-    except:
-        pass
-    match = PLAN_INFO_REGEX.match(last_line)
-    if match:
-        return int(match.group(1)), match.group(2)
-    else:
-        return None, None
+_FD_EXIT_CODE = {
+    0  : "success",
+    1  : "search plan found and out of memory",
+    2  : "seach plan found and out of time",
+    3  : "seach plan found and out of time & memory",
+    11 : "search unsolvable",
+    # 12 : "search unsolvable incomplete",
+    12 : "search out of time",
+    22 : "search out of memory",
+    23 : "search out of time",
+    24 : "search out of memory and time"
+}
 
 def parse_fd_output(output: str):
-    assert "Solution found!" in output
-    # Remove \n to use in re.compile.
+    # Remove \n to use in re.
     output = output.replace("\n", " ")
-    data = findall(
+    re_plan = findall(
         r".*Plan length: (\d+) step\(s\)..*"
-        r".*Plan cost: (\d+).*"
+        r".*Plan cost: (\d+).*",
+        output
+    )
+    re_states = findall(
         r".*Expanded (\d+) state\(s\)..*"
         r".*Reopened (\d+) state\(s\)..*"
         r".*Evaluated (\d+) state\(s\)..*"
         r".*Generated (\d+) state\(s\)..*"
-        r".*Dead ends: (\d+) state\(s\)..*"
-        r".*Search time: (.+?)s.*"
-        r".*Total time: (.+?)s.*"
-        , output
+        r".*Dead ends: (\d+) state\(s\)..*",
+        output
     )
-    return {
-        "search_state" : "success",
-        "plan_length" : data[0][0],
-        "plan_cost" : data[0][1],
-        "expanded" : data[0][2],
-        "reopened" : data[0][3],
-        "evaluated" : data[0][4],
-        "generated" : data[0][5],
-        "dead_ends" : data[0][6],
-        "search_time" : data[0][7],
-        "total_time" : data[0][8]
-    }
+    re_time = findall(
+        r".*Search time: (.+?)s.*"
+        r".*Total time: (.+?)s.*",
+        output
+    )
+    exit_code = int(findall(r".*search exit code: (\d+).*", output)[0])
+    results = {"search_state" : _FD_EXIT_CODE[exit_code] \
+        if exit_code in _FD_EXIT_CODE else f"unknown exit code {exit_code}"}
+    if exit_code == 0:
+        results["plan_length"] = re_plan[0][0]
+        results["plan_cost"] = re_plan[0][1]
+    results["expanded"] = re_states[0][0]
+    results["reopened"] = re_states[0][1]
+    results["evaluated"] = re_states[0][2]
+    results["generated"] = re_states[0][3]
+    results["dead_ends"] = re_states[0][4]
+    results["search_time"] = re_time[0][0]
+    results["total_time"] = re_time[0][1]
+    return results
 
 def save_downward_log(folder, instance_pddl, output):
     downward_logs = f"{folder}/downward_logs"
@@ -89,25 +92,19 @@ def solve_instance_with_fd(
                 "--search",
                 opts,
             ]
-        ).decode("utf-8")
-        if save_log_to != "":
-            save_downward_log(save_log_to, instance_pddl, output)
-        return parse_fd_output(output)
-
+        )
+        _log.info("Solution found.")
     except CalledProcessError as e:
-        exit_code = {
-            1  : "search plan found and out of memory",
-            2  : "seach plan found and out of time",
-            3  : "seach plan found and out of time & memory",
-            11 : "search unsolvable",
-            # 12 : "search unsolvable incomplete",
-            12 : "search out of time",
-            22 : "search out of memory",
-            23 : "search out of time",
-            24 : "search out of memory and time"
-        }
-        return {"search_state" : exit_code[e.returncode] \
-            if e.returncode in exit_code else f"Unknown return code: {e.returncode}"}
+        output = e.output
+        _log.info("Solution not found.")
+    output = output.decode("utf-8")
+    if save_log_to != "":
+        save_downward_log(save_log_to, instance_pddl, output)
+    return parse_fd_output(output)
+
+
+    # return {"search_state" : exit_code[e.returncode] \
+    #     if e.returncode in exit_code else f"Unknown return code: {e.returncode}"}
 
 
 def solve_instance_with_fd_nh(
