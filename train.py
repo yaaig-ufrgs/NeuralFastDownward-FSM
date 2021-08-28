@@ -35,7 +35,7 @@ def train_main(args):
         random_seed=args.random_seed)
 
     train_timer = Timer(args.max_training_time).start()
-    best_fold = {"fold" : -1, "val_loss" : float('inf')}
+    best_fold = {"fold" : -1, "val_loss" : float("inf")}
 
     for fold_idx in range(args.num_folds):
         _log.info(
@@ -84,15 +84,24 @@ def train_main(args):
             )
             break
 
-        train_wf.save_traced_model(f"{dirname}/models/traced_fold{fold_idx}.pt")
+        train_wf.save_traced_model(f"{dirname}/models/traced_{fold_idx}.pt")
 
     _log.info("Finishing training.")
     _log.info(f"Elapsed time: {train_timer.current_time()}")
 
-    copyfile(f"{dirname}/models/traced_fold{best_fold['fold']}.pt", f"{dirname}/traced_best.pt")
-    _log.info(
-        f"Saving traced_fold{best_fold['fold']}.pt as best model (val loss = {best_fold['val_loss']})"
-    )
+    try:
+        _log.info(
+            f"Saving traced_{best_fold['fold']}.pt as best "
+            f"model (by val loss = {best_fold['val_loss']})"
+        )
+        copyfile(
+            f"{dirname}/models/traced_{best_fold['fold']}.pt",
+            f"{dirname}/models/traced_best_val_loss.pt"
+        )
+    except:
+        _log.error(
+            f"Failed to save best fold."
+        )
 
     _log.info("Training complete!")
 

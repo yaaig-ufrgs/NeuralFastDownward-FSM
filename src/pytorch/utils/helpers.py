@@ -3,7 +3,7 @@ Simple auxiliary functions.
 """
 
 import logging
-from json import dump
+from json import dump, load
 from os import path, makedirs
 from datetime import datetime
 
@@ -35,7 +35,7 @@ def create_train_directory(args, config_in_foldername = False):
     return dirname
 
 def create_test_directory(args):
-    tests_folder = args.model_folder/"tests"
+    tests_folder = args.train_folder/"tests"
     if not path.exists(tests_folder):
         makedirs(tests_folder)
     dirname = tests_folder/f"test_{get_datetime()}"
@@ -76,12 +76,13 @@ def logging_train_config(args, dirname, json=True):
 
 def logging_test_config(args, dirname, save_file=True):
     args_dic = {
-        "model" : str(args.model_folder),
+        "train_folder" : str(args.train_folder),
         "domain_pddl" : args.domain_pddl,
         "problems_pddl" : args.problem_pddls,
         "search_algorithm" : args.search_algorithm,
         "max_search_time" : f"{args.max_search_time}s",
         "max_search_memory" : f"{args.max_search_memory} MB",
+        "test_model" : args.test_model
     }
 
     _log.info(f"Configuration")
@@ -91,51 +92,65 @@ def logging_test_config(args, dirname, save_file=True):
     if save_file:
         save_json(f"{dirname}/test_args.json", args_dic)
 
-def logging_test_statistics(args, dirname, problems_output, save_file=True, decimal_places=4):
-    results = {
-        "configuration" : {
-            "search_algorithm" : args.search_algorithm,
-            "max_search_time" : args.max_search_time,
-            "max_search_memory" : args.max_search_memory
-        },
-        "results" : problems_output,
-        "statistics" : {}
-    }
+def logging_test_statistics(args, dirname, model, output, decimal_places=4, save_file=True):
+    test_results_filename = f"{dirname}/test_results.json"
+    if path.exists(test_results_filename):
+        with open(test_results_filename) as f:
+            results = load(f)
+    else:
+        results = {
+            "configuration" : {
+                "search_algorithm" : args.search_algorithm,
+                "max_search_time" : f"{args.max_search_time}s",
+                "max_search_memory" : f"{args.max_search_memory} MB"
+            },
+            "results" : {},
+            "statistics" : {}
+        }
 
+    results["results"][model] = output
+    results["statistics"][model] = {}
     rlist = {}
-    for x in results["results"][args.problem_pddls[0]]:
-        rlist[x] = [results["results"][p][x] for p in results["results"] if x in results["results"][p]]
+    for x in results["results"][model][args.problem_pddls[0]]:
+        rlist[x] = [results["results"][model][p][x] for p in results["results"][model] \
+            if x in results["results"][model][p]]
         if x == "search_state":
-            rlist[x] = [results["results"][p][x] for p in results["results"]]
-            results["statistics"]["plans_found"] = rlist[x].count("success")
-            results["statistics"]["total_problems"] = len(rlist[x])
-            results["statistics"]["coverage"] = \
+            rlist[x] = [results["results"][model][p][x] for p in results["results"][model]]
+            results["statistics"][model]["plans_found"] = rlist[x].count("success")
+            results["statistics"][model]["total_problems"] = len(rlist[x])
+            results["statistics"][model]["coverage"] = \
                 round(
-                    results["statistics"]["plans_found"] / results["statistics"]["total_problems"],
+                    results["statistics"][model]["plans_found"] / results["statistics"][model]["total_problems"],
                     decimal_places
                 )
         elif x == "plan_length":
             for i in range(len(rlist[x])):
                 rlist[x][i] = int(rlist[x][i])
-            results["statistics"]["max_plan_length"] = max(rlist[x])
-            results["statistics"]["min_plan_length"] = min(rlist[x])
-            results["statistics"]["avg_plan_length"] = round(sum(rlist[x]) / len(rlist[x]), decimal_places)
+            results["statistics"][model]["max_plan_length"] = max(rlist[x])
+            results["statistics"][model]["min_plan_length"] = min(rlist[x])
+            results["statistics"][model]["avg_plan_length"] = round(
+                sum(rlist[x]) / len(rlist[x]),
+                decimal_places
+            )
         elif x == "total_time":
             for i in range(len(rlist[x])):
                 rlist[x][i] = float(rlist[x][i])
-            results["statistics"]["total_accumulated_time"] = round(sum(rlist[x]), decimal_places)
+            results["statistics"][model]["total_accumulated_time"] = round(sum(rlist[x]), decimal_places)
         elif x == "search_time":
             for i in range(len(rlist[x])):
                 rlist[x][i] = float(rlist[x][i])
-            results["statistics"]["avg_search_time"] = round(sum(rlist[x]) / len(rlist[x]), decimal_places)
+            results["statistics"][model]["avg_search_time"] = round(
+                sum(rlist[x]) / len(rlist[x]),
+                decimal_places
+            )
         else:
             for i in range(len(rlist[x])):
                 rlist[x][i] = int(rlist[x][i])
-            results["statistics"][f"avg_{x}"] = round(sum(rlist[x]) / len(rlist[x]), decimal_places)
+            results["statistics"][model][f"avg_{x}"] = round(sum(rlist[x]) / len(rlist[x]), decimal_places)
 
-    _log.info("Training statistics")
-    for x in results["statistics"]:
-        _log.info(f" | {x}: {results['statistics'][x]}")
+    _log.info(f"Training statistics for model {model}")
+    for x in results["statistics"][model]:
+        _log.info(f" | {x}: {results['statistics'][model][x]}")
 
     if save_file:
-        save_json(f"{dirname}/test_results.json", results)
+        save_json(test_results_filename, results)

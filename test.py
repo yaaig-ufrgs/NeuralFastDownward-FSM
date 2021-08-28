@@ -19,24 +19,42 @@ def test_main(args):
     setup_full_logging(dirname)
     logging_test_config(args, dirname)
 
-    model_path = f"{args.model_folder}/traced_best.pt"
-    assert path.exists(model_path)
+    models = []
+    models_folder = f"{args.train_folder}/models"
+    if args.test_model == "best":
+        best_fold_path = f"{models_folder}/traced_best_val_loss.pt"
+        if path.exists(best_fold_path):
+            models.append(best_fold_path)
+        else:
+            _log.error(f"Best val loss model does not exists!")
+    elif args.test_model == "all":
+        i = 0
+        while path.exists(f"{models_folder}/traced_{i}.pt"):
+            models.append(f"{models_folder}/traced_{i}.pt")
+            i += 1
+    if len(models) == 0:
+        _log.error("No models found for testing.")
+        return
 
-    problems_output = {}
-    for i, problem_pddl in enumerate(args.problem_pddls):
-        _log.info(f"Solving instance \"{problem_pddl}\" ({i+1}/{len(args.problem_pddls)})")
-        problems_output[problem_pddl] = solve_instance_with_fd_nh(
-            domain_pddl=args.domain_pddl,
-            problem_pddl=problem_pddl,
-            traced_model=model_path,
-            search_algorithm=args.search_algorithm,
-            unary_threshold=args.unary_threshold,
-            time_limit=args.max_search_time,
-            memory_limit=args.max_search_memory
-        )
-        _log.info(f"{problems_output[problem_pddl]}")
+    for model_path in models:
+        output = {}
+        for i, problem_pddl in enumerate(args.problem_pddls):
+            _log.info(f"Solving instance \"{problem_pddl}\" ({i+1}/{len(args.problem_pddls)})")
+            output[problem_pddl] = solve_instance_with_fd_nh(
+                domain_pddl=args.domain_pddl,
+                problem_pddl=problem_pddl,
+                traced_model=model_path,
+                search_algorithm=args.search_algorithm,
+                unary_threshold=args.unary_threshold,
+                time_limit=args.max_search_time,
+                memory_limit=args.max_search_memory
+            )
+            _log.info(f"{output[problem_pddl]}")
 
-    logging_test_statistics(args, dirname, problems_output)
+        model_file = model_path.split("/")[-1]
+        logging_test_statistics(args, dirname, model_file, output)
+        _log.info(f"Test on model {model_file} complete!")
+
     _log.info("Test complete!")
 
 if __name__ == "__main__":
