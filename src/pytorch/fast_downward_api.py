@@ -7,6 +7,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_HEURISTIC,
     DEFAULT_MAX_SEARCH_TIME,
     DEFAULT_MAX_SEARCH_MEMORY,
+    DEFAULT_MAX_EXPANSIONS,
     DEFAULT_UNARY_THRESHOLD
 )
 
@@ -16,11 +17,10 @@ _FD = "./fast-downward.py"
 _FD_EXIT_CODE = {
     0  : "success",
     1  : "search plan found and out of memory",
-    2  : "seach plan found and out of time",
-    3  : "seach plan found and out of time & memory",
+    2  : "search plan found and out of time",
+    3  : "search plan found and out of time & memory",
     11 : "search unsolvable",
-    # 12 : "search unsolvable incomplete",
-    12 : "search out of time",
+    12 : "search unsolvable incomplete",
     22 : "search out of memory",
     23 : "search out of time",
     24 : "search out of memory and time"
@@ -50,6 +50,12 @@ def parse_fd_output(output: str):
     exit_code = int(findall(r".*search exit code: (\d+).*", output)[0])
     results = {"search_state" : _FD_EXIT_CODE[exit_code] \
         if exit_code in _FD_EXIT_CODE else f"unknown exit code {exit_code}"}
+    # Possible exit codes 12
+    if exit_code == 12:
+        if "Time limit reached." in output:
+            results["search_state"] = "timeout"
+        elif "Maximum number of expansions reached." in output:
+            results["search_state"] = "maximum expansions reached"
     if exit_code == 0:
         results["plan_length"] = re_plan[0][0]
         results["plan_cost"] = re_plan[0][1]
@@ -112,6 +118,7 @@ def solve_instance_with_fd_nh(
     unary_threshold=DEFAULT_UNARY_THRESHOLD,
     time_limit=DEFAULT_MAX_SEARCH_TIME,
     memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
+    max_expansions=DEFAULT_MAX_EXPANSIONS,
     save_log_to=""
 ):
     """
@@ -127,8 +134,12 @@ def solve_instance_with_fd_nh(
     
     if search_algorithm == "eager_greedy":
         opt_heuristic = f"[{opt_heuristic}]"
-    opts = (f"{search_algorithm}({opt_heuristic}, max_time={time_limit})")
+
+    opts = f"{search_algorithm}({opt_heuristic}, max_time={time_limit}"
+    if max_expansions != float("inf"):
+        opts += f", max_expansions={max_expansions}"
+    opts += ")"
 
     return solve_instance_with_fd(
-        domain_pddl, problem_pddl, opts, time_limit, memory_limit, save_log_to
+        domain_pddl, problem_pddl, (opts), time_limit, memory_limit, save_log_to
     )

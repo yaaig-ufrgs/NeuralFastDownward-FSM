@@ -94,7 +94,8 @@ def logging_test_config(args, dirname, save_file=True):
         "search_algorithm" : args.search_algorithm,
         "heuristic" : args.heuristic,
         "max_search_time" : f"{args.max_search_time}s",
-        "max_search_memory" : f"{args.max_search_memory} MB"
+        "max_search_memory" : f"{args.max_search_memory} MB",
+        "max_expansions" : str(args.max_expansions)
     }
     if args.heuristic == "nn":
         args_dic["test_model"] = args.test_model
@@ -117,7 +118,8 @@ def logging_test_statistics(args, dirname, model, output, decimal_places=4, save
                 "search_algorithm" : args.search_algorithm,
                 "heuristic" : args.heuristic,
                 "max_search_time" : f"{args.max_search_time}s",
-                "max_search_memory" : f"{args.max_search_memory} MB"
+                "max_search_memory" : f"{args.max_search_memory} MB",
+                "max_expansions" : str(args.max_expansions)
             },
             "results" : {},
             "statistics" : {}

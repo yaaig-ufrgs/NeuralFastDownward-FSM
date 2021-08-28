@@ -19,6 +19,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_UNARY_THRESHOLD,
     DEFAULT_MAX_SEARCH_TIME,
     DEFAULT_MAX_SEARCH_MEMORY,
+    DEFAULT_MAX_EXPANSIONS,
     DEFAULT_OUTPUT_FOLDER,
     DEFAULT_RANDOM_SEED,
     DEFAULT_TEST_MODEL,
@@ -180,14 +181,21 @@ def get_test_args():
         "--max-search-time",
         type=int,
         default=DEFAULT_MAX_SEARCH_TIME,
-        help="Time limit for searching each problem. (default: %(default)ss)"
+        help="Time limit for each search. (default: %(default)ss)"
     )
     parser.add_argument(
         "-m",
         "--max-search-memory",
         type=int,
         default=DEFAULT_MAX_SEARCH_MEMORY,
-        help="Memory limit for searching each problem. (default: %(default)sMB)"
+        help="Memory limit for each search. (default: %(default)sMB)"
+    )
+    parser.add_argument(
+        "-e",
+        "--max-expansions",
+        type=int,
+        default=DEFAULT_MAX_EXPANSIONS,
+        help="Maximum expanded states for each search. (default: %(default)s)"
     )
     parser.add_argument(
         "-pt",
