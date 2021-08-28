@@ -6,6 +6,7 @@ import logging
 from json import dump, load
 from os import path, makedirs
 from datetime import datetime
+from src.pytorch.utils.default_args import DEFAULT_RANDOM_SEED
 
 _log = logging.getLogger(__name__)
 
@@ -54,7 +55,9 @@ def logging_train_config(args, dirname, json=True):
         "output_layer" : args.output_layer,
         "num_folds" : args.num_folds,
         "hidden_layers" : args.hidden_layers,
-        "hidden_units": args.hidden_units,
+        "hidden_units": args.hidden_units if len(args.hidden_units) > 1
+            else (args.hidden_units[0] if len(args.hidden_units) == 1
+            else "scalable"),
         "batch_size" : args.batch_size,
         "learning_rate" : args.learning_rate,
         "max_epochs" : args.max_epochs,
@@ -63,8 +66,9 @@ def logging_train_config(args, dirname, json=True):
         "weight_decay" : args.weight_decay,
         "dropout_rate" : args.dropout_rate,
         "shuffle" : args.shuffle,
-        "random_seed" : args.random_seed,
-        "output_folder" : str(args.output_folder),
+        "random_seed" : args.random_seed if args.random_seed != DEFAULT_RANDOM_SEED
+            else "random",
+        "output_folder" : str(args.output_folder)
     }
 
     _log.info(f"Configuration")

@@ -6,7 +6,7 @@ class HNN(nn.Module):
     def __init__(
         self,
         input_units: int,
-        hidden_units: int,
+        hidden_units: [int],
         output_units: int,
         hidden_layers: int,
         activation: str,
@@ -27,19 +27,30 @@ class HNN(nn.Module):
         # for i in range(self.hidden_layers):
         #     self.hid.append(nn.Linear(input_units-i*step, input_units-(i+1)*step))
 
+        hu = []
+        if len(hidden_units) == 0:
+            for i in range(self.hidden_layers):
+                hu.append(input_units-(i+1)*step)
+        elif len(hidden_units) == 1:
+            hu = hidden_units * self.hidden_layers
+        else:
+            hu = hidden_units
+
         # TODO change how this is done later.
         if self.hidden_layers > 0:
-            self.hid1 = nn.Linear(input_units-0*step, input_units-1*step) if hidden_units == -1 else nn.Linear(input_units, hidden_units)
+            self.hid1 = nn.Linear(input_units, hu[0])
         if self.hidden_layers > 1:
-            self.hid2 = nn.Linear(input_units-1*step, input_units-2*step) if hidden_units == -1 else nn.Linear(hidden_units, hidden_units)
+            self.hid2 = nn.Linear(hu[0], hu[1])
         if self.hidden_layers > 2:
-            self.hid3 = nn.Linear(input_units-2*step, input_units-3*step) if hidden_units == -1 else nn.Linear(hidden_units, hidden_units)
+            self.hid3 = nn.Linear(hu[1], hu[2])
         if self.hidden_layers > 3:
-            self.hid4 = nn.Linear(input_units-3*step, input_units-4*step) if hidden_units == -1 else nn.Linear(hidden_units, hidden_units)
+            self.hid4 = nn.Linear(hu[2], hu[3])
         if self.hidden_layers > 4:
-            self.hid5 = nn.Linear(input_units-4*step, input_units-5*step) if hidden_units == -1 else nn.Linear(hidden_units, hidden_units)
+            self.hid5 = nn.Linear(hu[3], hu[4])
+        if self.hidden_layers > 5:
+            raise NotImplementedError("Implementation limit of 5 hidden layers.")
 
-        self.opt = nn.Linear(input_units-hidden_layers*step, output_units) if hidden_units == -1 else nn.Linear(hidden_units, output_units)
+        self.opt = nn.Linear(hu[-1], output_units)
 
         if self.dropout_rate > 0:
             self.dropout = nn.Dropout(self.dropout_rate)
@@ -97,7 +108,6 @@ class HNN(nn.Module):
         elif self.activation == "relu":
             return torch.relu(self.opt(x))
             #return torch.flatten(self.opt(x))
-
 
     # def __str__(self):
     #     s = f"HNN(\n"

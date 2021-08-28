@@ -45,7 +45,7 @@ def get_train_args():
         help="Number of folds to split training data. (default: %(default)s)"
     )
     parser.add_argument(
-        "-hid",
+        "-hl",
         "--hidden-layers",
         type=int,
         default=DEFAULT_HIDDEN_LAYERS,
@@ -55,8 +55,11 @@ def get_train_args():
         "-hu",
         "--hidden-units",
         type=int,
+        nargs="+",
         default=DEFAULT_HIDDEN_UNITS,
-        help="Fixed number of neurons for each hidden layer of the network. (default: %(default)s)"
+        help="Number of units in each hidden layers. For all hidden layers with same size enter \
+              only one value; for different size between layers enter \"hidden_layers\" values. \
+              (default: scalable according to the input and output units.)"
     )
     parser.add_argument(
         "-b",
@@ -127,7 +130,7 @@ def get_train_args():
         "--random-seed",
         type=int,
         default=DEFAULT_RANDOM_SEED,
-        help="Random seed to be used. Defaults to no seed. (default: %(default)s)"
+        help="Random seed to be used. Defaults to no seed. (default: random)"
     )
 
     return parser.parse_args()

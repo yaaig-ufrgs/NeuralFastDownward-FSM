@@ -22,9 +22,14 @@ def train_main(args):
         torch.use_deterministic_algorithms(True)
         random.seed(args.random_seed)
         np.random.seed(args.random_seed)
-
+    
     dirname = create_train_directory(args)
     setup_full_logging(dirname)
+
+    if len(args.hidden_units) not in [0, 1, args.hidden_layers]:
+        _log.error("Invalid hidden_units length.")
+        return
+        
     logging_train_config(args, dirname)
 
     kfold = KFoldTrainingData(args.samples,
