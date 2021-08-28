@@ -4,6 +4,7 @@ from subprocess import check_output, CalledProcessError
 from re import compile, findall
 from src.pytorch.utils.default_args import (
     DEFAULT_SEARCH_ALGORITHM,
+    DEFAULT_HEURISTIC,
     DEFAULT_MAX_SEARCH_TIME,
     DEFAULT_MAX_SEARCH_MEMORY,
     DEFAULT_UNARY_THRESHOLD
@@ -102,16 +103,12 @@ def solve_instance_with_fd(
         save_downward_log(save_log_to, instance_pddl, output)
     return parse_fd_output(output)
 
-
-    # return {"search_state" : exit_code[e.returncode] \
-    #     if e.returncode in exit_code else f"Unknown return code: {e.returncode}"}
-
-
 def solve_instance_with_fd_nh(
     domain_pddl,
     problem_pddl,
     traced_model,
     search_algorithm=DEFAULT_SEARCH_ALGORITHM,
+    heuristic=DEFAULT_HEURISTIC,
     unary_threshold=DEFAULT_UNARY_THRESHOLD,
     time_limit=DEFAULT_MAX_SEARCH_TIME,
     memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
@@ -121,14 +118,16 @@ def solve_instance_with_fd_nh(
     Tries to solve a PDDL instance with the torch_sampling_network.
     """
 
-    network = f"torch_sampling_network(path={traced_model}," \
-        f"blind={str(search_algorithm == 'blind').lower()}," \
-        f"unary_threshold={unary_threshold})"
-
-    if search_algorithm == "astar" or search_algorithm == "blind":
-        opts = (f"astar(nh({network}), max_time={time_limit})")
-    elif search_algorithm == "eager_greedy":
-        opts = (f"eager_greedy([nh({network})], max_time={time_limit})")
+    if heuristic == "nn":
+        opt_network = f"torch_sampling_network(path={traced_model}," \
+            f"unary_threshold={unary_threshold})"
+        opt_heuristic = f"nh({opt_network})"
+    else:
+        opt_heuristic = f"{heuristic}()"
+    
+    if search_algorithm == "eager_greedy":
+        opt_heuristic = f"[{opt_heuristic}]"
+    opts = (f"{search_algorithm}({opt_heuristic}, max_time={time_limit})")
 
     return solve_instance_with_fd(
         domain_pddl, problem_pddl, opts, time_limit, memory_limit, save_log_to

@@ -45,6 +45,7 @@ def test_main(args):
                 problem_pddl=problem_pddl,
                 traced_model=model_path,
                 search_algorithm=args.search_algorithm,
+                heuristic=args.heuristic,
                 unary_threshold=args.unary_threshold,
                 time_limit=args.max_search_time,
                 memory_limit=args.max_search_memory,

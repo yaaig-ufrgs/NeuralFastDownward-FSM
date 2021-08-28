@@ -92,10 +92,12 @@ def logging_test_config(args, dirname, save_file=True):
         "domain_pddl" : args.domain_pddl,
         "problems_pddl" : args.problem_pddls,
         "search_algorithm" : args.search_algorithm,
+        "heuristic" : args.heuristic,
         "max_search_time" : f"{args.max_search_time}s",
-        "max_search_memory" : f"{args.max_search_memory} MB",
-        "test_model" : args.test_model
+        "max_search_memory" : f"{args.max_search_memory} MB"
     }
+    if args.heuristic == "nn":
+        args_dic["test_model"] = args.test_model
 
     _log.info(f"Configuration")
     for a in args_dic:
@@ -113,6 +115,7 @@ def logging_test_statistics(args, dirname, model, output, decimal_places=4, save
         results = {
             "configuration" : {
                 "search_algorithm" : args.search_algorithm,
+                "heuristic" : args.heuristic,
                 "max_search_time" : f"{args.max_search_time}s",
                 "max_search_memory" : f"{args.max_search_memory} MB"
             },
