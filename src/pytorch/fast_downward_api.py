@@ -51,21 +51,22 @@ def parse_fd_output(output: str):
     results = {"search_state" : _FD_EXIT_CODE[exit_code] \
         if exit_code in _FD_EXIT_CODE else f"unknown exit code {exit_code}"}
     # Possible exit codes 12
-    if exit_code == 12:
-        if "Time limit reached." in output:
-            results["search_state"] = "timeout"
-        elif "Maximum number of expansions reached." in output:
-            results["search_state"] = "maximum expansions reached"
-    if exit_code == 0:
-        results["plan_length"] = re_plan[0][0]
-        results["plan_cost"] = re_plan[0][1]
-    results["expanded"] = re_states[0][0]
-    results["reopened"] = re_states[0][1]
-    results["evaluated"] = re_states[0][2]
-    results["generated"] = re_states[0][3]
-    results["dead_ends"] = re_states[0][4]
-    results["search_time"] = re_time[0][0]
-    results["total_time"] = re_time[0][1]
+    if exit_code in [0, 12]:
+        if exit_code == 12:
+            if "Time limit reached." in output:
+                results["search_state"] = "timeout"
+            elif "Maximum number of expansions reached." in output:
+                results["search_state"] = "maximum expansions reached"
+        if exit_code == 0:
+            results["plan_length"] = re_plan[0][0]
+            results["plan_cost"] = re_plan[0][1]
+        results["expanded"] = re_states[0][0]
+        results["reopened"] = re_states[0][1]
+        results["evaluated"] = re_states[0][2]
+        results["generated"] = re_states[0][3]
+        results["dead_ends"] = re_states[0][4]
+        results["search_time"] = re_time[0][0]
+        results["total_time"] = re_time[0][1]
     return results
 
 def save_downward_log(folder, instance_pddl, output):
@@ -82,7 +83,7 @@ def solve_instance_with_fd(
     domain_pddl,
     instance_pddl,
     opts="astar(lmcut())",
-    time_limit=DEFAULT_MAX_SEARCH_TIME,
+    # time_limit=DEFAULT_MAX_SEARCH_TIME,
     memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
     save_log_to=""
 ):
@@ -90,8 +91,8 @@ def solve_instance_with_fd(
         output = check_output(
             [
                 _FD,
-                "--search-time-limit",
-                str(time_limit),
+                # "--search-time-limit",
+                # str(time_limit),
                 "--search-memory-limit",
                 str(memory_limit),
                 domain_pddl,
@@ -131,7 +132,7 @@ def solve_instance_with_fd_nh(
         opt_heuristic = f"nh({opt_network})"
     else:
         opt_heuristic = f"{heuristic}()"
-    
+
     if search_algorithm == "eager_greedy":
         opt_heuristic = f"[{opt_heuristic}]"
 
@@ -141,5 +142,5 @@ def solve_instance_with_fd_nh(
     opts += ")"
 
     return solve_instance_with_fd(
-        domain_pddl, problem_pddl, (opts), time_limit, memory_limit, save_log_to
+        domain_pddl, problem_pddl, (opts), memory_limit, save_log_to
     )
