@@ -88,12 +88,19 @@ def solve_instance_with_fd(
     instance_pddl,
     opts="astar(lmcut())",
     memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
-    save_log_to=""
+    save_log_to=None
 ):
     try:
         cl = [_FD, "--search-memory-limit", str(memory_limit), instance_pddl, "--search", opts]
         if domain_pddl != DEFAULT_DOMAIN_PDDL:
             cl.insert(3, domain_pddl)
+        if save_log_to != None:
+            # Set temp files to allow running multiple
+            # downwards at the same time
+            cl.insert(1, "--sas-file")
+            cl.insert(2, f"{save_log_to}/output.sas")
+            cl.insert(3, "--plan-file")
+            cl.insert(4, f"{save_log_to}/sas_plan")
         output = check_output(cl)
         _log.info("Solution found.")
     except CalledProcessError as e:
@@ -104,7 +111,7 @@ def solve_instance_with_fd(
         output = e.output
         _log.info("Solution not found.")
     output = output.decode("utf-8")
-    if save_log_to != "":
+    if save_log_to != None:
         save_downward_log(save_log_to, instance_pddl, output)
     return parse_fd_output(output)
 
@@ -118,7 +125,7 @@ def solve_instance_with_fd_nh(
     time_limit=DEFAULT_MAX_SEARCH_TIME,
     memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
     max_expansions=DEFAULT_MAX_EXPANSIONS,
-    save_log_to=""
+    save_log_to=None
 ):
     """
     Tries to solve a PDDL instance with the torch_sampling_network.
