@@ -26,7 +26,7 @@ def create_train_directory(args, config_in_foldername=False):
     sep = "."
     dirname = f"{args.output_folder}/nfd_train{sep}{args.samples.name.split('/')[-1]}"
     if args.seed != -1:
-        dirname += f"{sep}ns_{args.seed}"
+        dirname += f"{sep}ns{args.seed}"
     if config_in_foldername:
         dirname += f"{sep}{args.output_layer}_{args.activation}_hid{args.hidden_layers}"
         if args.weight_decay > 0:
