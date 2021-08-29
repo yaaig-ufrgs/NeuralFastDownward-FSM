@@ -14,6 +14,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_LEARNING_RATE,
     DEFAULT_MAX_EPOCHS,
     DEFAULT_MAX_TRAINING_TIME,
+    DEFAULT_DOMAIN_PDDL,
     DEFAULT_SEARCH_ALGORITHM,
     DEFAULT_HEURISTIC,
     DEFAULT_UNARY_THRESHOLD,
@@ -145,15 +146,17 @@ def get_test_args():
         help="Path to training folder with trained model."
     )
     parser.add_argument(
-        "domain_pddl",
-        type=str,
-        help="Path to domain PDDL."
-    )
-    parser.add_argument(
         "problem_pddls",
         type=str,
         nargs="+",
         help="Path to problems PDDL."
+    )
+    parser.add_argument(
+        "-d",
+        "--domain_pddl",
+        type=str,
+        default=DEFAULT_DOMAIN_PDDL,
+        help="Path to domain PDDL. (default: problem_folder/domain.pddl)"
     )
     parser.add_argument(
         "-a",

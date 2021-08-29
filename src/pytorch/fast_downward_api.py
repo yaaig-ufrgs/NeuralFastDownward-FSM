@@ -3,6 +3,7 @@ from os import path, makedirs
 from subprocess import check_output, CalledProcessError
 from re import compile, findall
 from src.pytorch.utils.default_args import (
+    DEFAULT_DOMAIN_PDDL,
     DEFAULT_SEARCH_ALGORITHM,
     DEFAULT_HEURISTIC,
     DEFAULT_MAX_SEARCH_TIME,
@@ -86,26 +87,20 @@ def solve_instance_with_fd(
     domain_pddl,
     instance_pddl,
     opts="astar(lmcut())",
-    # time_limit=DEFAULT_MAX_SEARCH_TIME,
     memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
     save_log_to=""
 ):
     try:
-        output = check_output(
-            [
-                _FD,
-                # "--search-time-limit",
-                # str(time_limit),
-                "--search-memory-limit",
-                str(memory_limit),
-                domain_pddl,
-                instance_pddl,
-                "--search",
-                opts,
-            ]
-        )
+        cl = [_FD, "--search-memory-limit", str(memory_limit), instance_pddl, "--search", opts]
+        if domain_pddl != DEFAULT_DOMAIN_PDDL:
+            cl.insert(3, domain_pddl)
+        output = check_output(cl)
         _log.info("Solution found.")
     except CalledProcessError as e:
+        if e.returncode != 12:
+            if e.returncode == 36:
+                _log.error("Could not find domain file using automatic naming rules.")
+            return {"search_state" : f"downward returned {e.returncode}"}
         output = e.output
         _log.info("Solution not found.")
     output = output.decode("utf-8")
