@@ -29,17 +29,21 @@ def get_datetime():
 def get_fixed_max_epochs(dirname):
     with open("reference/epochs.csv", "r") as f:
         for line in f.readlines():
-            l = line.split(",")
-            if l[0] in dirname:
-                return int(l[1])
+            values = line.split(",")
+            match = True
+            for v in values[:-1]:
+                if v not in dirname:
+                    match = False
+            if match:
+                return int(values[-1])
     return DEFAULT_MAX_EPOCHS
 
 def get_fixed_max_expansions(dirname):
     with open("reference/expanded_states.csv", "r") as f:
         for line in f.readlines():
-            l = line.split(",")
-            if l[0] in dirname:
-                return int(l[1])
+            values = line.split(",")
+            if values[0] in dirname:
+                return int(values[1])
     return DEFAULT_MAX_EXPANSIONS
 
 def create_train_directory(args, config_in_foldername=False):
