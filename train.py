@@ -10,7 +10,11 @@ from src.pytorch.k_fold_training_data import KFoldTrainingData
 from src.pytorch.model import HNN
 from src.pytorch.train_workflow import TrainWorkflow
 from src.pytorch.log import setup_full_logging
-from src.pytorch.utils.helpers import logging_train_config, create_train_directory
+from src.pytorch.utils.helpers import (
+    logging_train_config,
+    create_train_directory,
+    get_fixed_max_epochs
+)
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
 
@@ -29,6 +33,8 @@ def train_main(args):
     if len(args.hidden_units) not in [0, 1, args.hidden_layers]:
         _log.error("Invalid hidden_units length.")
         return
+    if args.max_epochs == -1:
+        args.max_epochs = get_fixed_max_epochs(dirname)
 
     logging_train_config(args, dirname)
 

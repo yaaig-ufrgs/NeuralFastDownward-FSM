@@ -83,7 +83,7 @@ def get_train_args():
         "--max-epochs",
         type=int,
         default=DEFAULT_MAX_EPOCHS,
-        help="Maximum number of epochs to train each fold. (default: %(default)s)"
+        help="Maximum number of epochs to train each fold (or -1 for fixed value). (default: %(default)s)"
     )
     parser.add_argument(
         "-t",
@@ -198,7 +198,7 @@ def get_test_args():
         "--max-expansions",
         type=int,
         default=DEFAULT_MAX_EXPANSIONS,
-        help="Maximum expanded states for each search. (default: %(default)s)"
+        help="Maximum expanded states for each search (or -1 for fixed value). (default: %(default)s)"
     )
     parser.add_argument(
         "-pt",

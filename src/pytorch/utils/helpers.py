@@ -7,7 +7,11 @@ from json import dump, load
 from os import path, makedirs
 from datetime import datetime
 from statistics import median, mean
-from src.pytorch.utils.default_args import DEFAULT_RANDOM_SEED
+from src.pytorch.utils.default_args import (
+    DEFAULT_RANDOM_SEED,
+    DEFAULT_MAX_EPOCHS,
+    DEFAULT_MAX_EXPANSIONS
+)
 
 _log = logging.getLogger(__name__)
 
@@ -21,6 +25,22 @@ def to_onehot(n: int, max_value: int) -> [int]:
 
 def get_datetime():
     return datetime.now().isoformat().replace('-', '.').replace(':', '.')
+
+def get_fixed_max_epochs(dirname):
+    with open("reference/epochs.csv", "r") as f:
+        for line in f.readlines():
+            l = line.split(",")
+            if l[0] in dirname:
+                return int(l[1])
+    return DEFAULT_MAX_EPOCHS
+
+def get_fixed_max_expansions(dirname):
+    with open("reference/expanded_states.csv", "r") as f:
+        for line in f.readlines():
+            l = line.split(",")
+            if l[0] in dirname:
+                return int(l[1])
+    return DEFAULT_MAX_EXPANSIONS
 
 def create_train_directory(args, config_in_foldername=False):
     sep = "."

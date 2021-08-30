@@ -9,6 +9,7 @@ from src.pytorch.utils.helpers import (
     logging_test_config,
     create_test_directory,
     logging_test_statistics,
+    get_fixed_max_expansions
 )
 from src.pytorch.utils.parse_args import get_test_args
 
@@ -17,6 +18,10 @@ _log = logging.getLogger(__name__)
 def test_main(args):
     dirname = create_test_directory(args)
     setup_full_logging(dirname)
+
+    if args.max_expansions == -1:
+        args.max_expansions = get_fixed_max_expansions(dirname)
+
     logging_test_config(args, dirname)
 
     if args.heuristic == "nn":
