@@ -24,11 +24,11 @@ run_experiment() {
         prob_file=${file#*${PROBLEM}/*}
         if [ $(($COUNTER%$max_per_thread)) = 0 ]; then
             THREAD_ID=$((THREAD_ID+1))
-            tsp taskset -c ${THREAD_ID} ./train-and-test.sh "-o regression -f 1 -hl 1 -hu 16 -t 1800 -a sigmoid -s $net_seed $file" \
-                 "results/nfd_train.${prob_file}.ns${net_seed}/ ../downward-benchmarks/${PROBLEM}/${prob}.pddl -t 300 -a eager_greedy"
+            tsp taskset -c ${THREAD_ID} ./train-and-test.sh "-o regression -f 1 -hl 1 -hu 16 -t 99999 -e -1 -a sigmoid -s $net_seed $file" \
+                 "results/nfd_train.${prob_file}.ns${net_seed}/ ../downward-benchmarks/${PROBLEM}/${prob}.pddl -t 99999 -e -1 -a eager_greedy -pt all"
         else
-            tsp -D $((COUNTER-1)) taskset -c ${THREAD_ID} ./train-and-test.sh "-o regression -f 1 -hl 1 -hu 16 -t 1800 -a sigmoid -s $net_seed $file" \
-                 "results/nfd_train.${prob_file}.ns${net_seed}/ ../downward-benchmarks/${PROBLEM}/${prob}.pddl -t 300 -a eager_greedy"
+            tsp -D $((COUNTER-1)) taskset -c ${THREAD_ID} ./train-and-test.sh "-o regression -f 1 -hl 1 -hu 16 -t 99999 -e -1 -a sigmoid -s $net_seed $file" \
+                 "results/nfd_train.${prob_file}.ns${net_seed}/ ../downward-benchmarks/${PROBLEM}/${prob}.pddl -t 99999 -e -1 -a eager_greedy -pt all"
         fi
 
         COUNTER=$((COUNTER+1))
