@@ -1,5 +1,6 @@
 **/*.tmp
 .idea/
+.vscode/
 /**/cmake-build-debug
 /builds/
 /experiments/issue*/.venv/
@@ -9,3 +10,4 @@
 /output.sas
 /sas_plan*
 __pycache__/
+results/
