@@ -64,6 +64,5 @@ class HNN(nn.Module):
                 x = self.dropout(x)
 
         if self.linear_output:
-            print("here")
             return self.opt(x)
         return self.output_activation(self.opt(x))
