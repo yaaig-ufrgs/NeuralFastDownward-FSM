@@ -56,6 +56,9 @@ class HNN(nn.Module):
             self.output_activation = torch.sigmoid
         elif output_layer == "one-hot":
             self.output_activation = torch.softmax
+        else:
+            raise NotImplementedError(f"{output_layer} not implemented for output layer!")
+
 
     def forward(self, x):
         for h in self.hid:
