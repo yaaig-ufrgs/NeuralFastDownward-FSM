@@ -13,12 +13,13 @@ from src.pytorch.log import setup_full_logging
 from src.pytorch.utils.helpers import (
     logging_train_config,
     create_train_directory,
-    get_fixed_max_epochs
+    get_fixed_max_epochs,
 )
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
 
 _log = logging.getLogger(__name__)
+
 
 def train_main(args):
     if args.seed != -1:
@@ -38,15 +39,17 @@ def train_main(args):
 
     logging_train_config(args, dirname)
 
-    kfold = KFoldTrainingData(args.samples,
+    kfold = KFoldTrainingData(
+        args.samples,
         batch_size=args.batch_size,
         num_folds=args.num_folds,
         output_layer=args.output_layer,
         shuffle=args.shuffle,
-        seed=args.seed)
+        seed=args.seed,
+    )
 
     train_timer = Timer(args.max_training_time).start()
-    best_fold = {"fold" : -1, "val_loss" : float("inf")}
+    best_fold = {"fold": -1, "val_loss": float("inf")}
 
     for fold_idx in range(args.num_folds):
         _log.info(
@@ -77,7 +80,8 @@ def train_main(args):
             optimizer=torch.optim.Adam(
                 model.parameters(),
                 lr=args.learning_rate,
-                weight_decay=args.weight_decay)
+                weight_decay=args.weight_decay,
+            ),
         )
 
         fold_val_loss = train_wf.run(train_timer, validation=True)
@@ -93,9 +97,7 @@ def train_main(args):
 
         train_wf.save_traced_model(f"{dirname}/models/traced_{fold_idx}.pt")
         if train_timer.check_timeout():
-            _log.info(
-                f"Maximum training time reached. Stopping training."
-            )
+            _log.info(f"Maximum training time reached. Stopping training.")
             break
 
     _log.info("Finishing training.")
@@ -108,12 +110,10 @@ def train_main(args):
         )
         copyfile(
             f"{dirname}/models/traced_{best_fold['fold']}.pt",
-            f"{dirname}/models/traced_best_val_loss.pt"
+            f"{dirname}/models/traced_best_val_loss.pt",
         )
     except:
-        _log.error(
-            f"Failed to save best fold."
-        )
+        _log.error(f"Failed to save best fold.")
 
     _log.info("Training complete!")
 

@@ -20,11 +20,13 @@ class InstanceDataset(Dataset):
             self.hvalues = torch.tensor(hvalues, dtype=torch.float32).unsqueeze(1)
         elif output_layer == "prefix":
             self.hvalues = torch.tensor(
-                [to_prefix(n, self.domain_max_value) for n in hvalues], dtype=torch.float32
+                [to_prefix(n, self.domain_max_value) for n in hvalues],
+                dtype=torch.float32,
             )
         elif output_layer == "one-hot":
             self.hvalues = torch.tensor(
-                [to_onehot(n, self.domain_max_value) for n in hvalues], dtype=torch.float32
+                [to_onehot(n, self.domain_max_value) for n in hvalues],
+                dtype=torch.float32,
             )
         else:
             raise RuntimeError(f"Invalid output layer: {output_layer}")
@@ -55,7 +57,7 @@ def load_training_state_value_pairs(samples_file: str) -> ([([int], int)], int):
     domain_max_value = 0
     lines = samples_file.readlines()[2:]
     for line in lines:
-        if line[0] != '#':
+        if line[0] != "#":
             l = line.split("\n")[0].split(";")
             state = []
             for i in range(1, len(l)):

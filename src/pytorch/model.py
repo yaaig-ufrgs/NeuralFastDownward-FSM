@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn as nn
 
@@ -25,24 +24,24 @@ class HNN(nn.Module):
         self.linear_output = linear_output
 
         hu = [input_units]
-        if len(hidden_units) == 0: # scalable
+        if len(hidden_units) == 0:  # scalable
             unit_diff = input_units - output_units
-            step = int(unit_diff / (hidden_layers+1))
+            step = int(unit_diff / (hidden_layers + 1))
             for i in range(self.hidden_layers):
-                hu.append(input_units-(i+1)*step)
-        elif len(hidden_units) == 1: # all the same
+                hu.append(input_units - (i + 1) * step)
+        elif len(hidden_units) == 1:  # all the same
             hu += hidden_units * self.hidden_layers
         else:
             hu += hidden_units
 
         self.hid = nn.ModuleList()
         for i in range(self.hidden_layers):
-            self.hid.append(nn.Linear(hu[i], hu[i+1]))
+            self.hid.append(nn.Linear(hu[i], hu[i + 1]))
         self.opt = nn.Linear(hu[-1], output_units)
 
         if self.dropout_rate > 0:
             self.dropout = nn.Dropout(self.dropout_rate, inplace=False)
-        
+
         if activation == "sigmoid":
             self.activation = torch.sigmoid
         elif activation == "relu":
@@ -57,8 +56,9 @@ class HNN(nn.Module):
         elif output_layer == "one-hot":
             self.output_activation = torch.softmax
         else:
-            raise NotImplementedError(f"{output_layer} not implemented for output layer!")
-
+            raise NotImplementedError(
+                f"{output_layer} not implemented for output layer!"
+            )
 
     def forward(self, x):
         for h in self.hid:

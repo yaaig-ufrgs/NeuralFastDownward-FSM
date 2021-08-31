@@ -9,31 +9,30 @@ from src.pytorch.utils.default_args import (
     DEFAULT_MAX_SEARCH_TIME,
     DEFAULT_MAX_SEARCH_MEMORY,
     DEFAULT_MAX_EXPANSIONS,
-    DEFAULT_UNARY_THRESHOLD
+    DEFAULT_UNARY_THRESHOLD,
 )
 
 _log = logging.getLogger(__name__)
 
 _FD = "./fast-downward.py"
 _FD_EXIT_CODE = {
-    0  : "success",
-    1  : "search plan found and out of memory",
-    2  : "search plan found and out of time",
-    3  : "search plan found and out of time & memory",
-    11 : "search unsolvable",
-    12 : "search unsolvable incomplete",
-    22 : "search out of memory",
-    23 : "search out of time",
-    24 : "search out of memory and time"
+    0: "success",
+    1: "search plan found and out of memory",
+    2: "search plan found and out of time",
+    3: "search plan found and out of time & memory",
+    11: "search unsolvable",
+    12: "search unsolvable incomplete",
+    22: "search out of memory",
+    23: "search out of time",
+    24: "search out of memory and time",
 }
+
 
 def parse_fd_output(output: str):
     # Remove \n to use in re.
     output = output.replace("\n", " ")
     re_plan = findall(
-        r".*Plan length: (\d+) step\(s\)..*"
-        r".*Plan cost: (\d+).*",
-        output
+        r".*Plan length: (\d+) step\(s\)..*" r".*Plan cost: (\d+).*", output
     )
     re_states = findall(
         r".*Expanded (\d+) state\(s\)..*"
@@ -41,16 +40,15 @@ def parse_fd_output(output: str):
         r".*Evaluated (\d+) state\(s\)..*"
         r".*Generated (\d+) state\(s\)..*"
         r".*Dead ends: (\d+) state\(s\)..*",
-        output
+        output,
     )
-    re_time = findall(
-        r".*Search time: (.+?)s.*"
-        r".*Total time: (.+?)s.*",
-        output
-    )
+    re_time = findall(r".*Search time: (.+?)s.*" r".*Total time: (.+?)s.*", output)
     exit_code = int(findall(r".*search exit code: (\d+).*", output)[0])
-    results = {"search_state" : _FD_EXIT_CODE[exit_code] \
-        if exit_code in _FD_EXIT_CODE else f"unknown exit code {exit_code}"}
+    results = {
+        "search_state": _FD_EXIT_CODE[exit_code]
+        if exit_code in _FD_EXIT_CODE
+        else f"unknown exit code {exit_code}"
+    }
     # Possible exit codes 12
     if exit_code in [0, 12]:
         if exit_code == 12:
@@ -68,10 +66,11 @@ def parse_fd_output(output: str):
         results["dead_ends"] = re_states[0][4]
         results["search_time"] = re_time[0][0]
         results["expansion_rate"] = round(
-            float(results["expanded"])/float(results["search_time"]),
-            4)
+            float(results["expanded"]) / float(results["search_time"]), 4
+        )
         results["total_time"] = re_time[0][1]
     return results
+
 
 def save_downward_log(folder, instance_pddl, output):
     downward_logs = f"{folder}/downward_logs"
@@ -83,15 +82,23 @@ def save_downward_log(folder, instance_pddl, output):
         f.write(output)
     _log.info(f"Downward log saved to {filename}")
 
+
 def solve_instance_with_fd(
     domain_pddl,
     instance_pddl,
     opts="astar(lmcut())",
     memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
-    save_log_to=None
+    save_log_to=None,
 ):
     try:
-        cl = [_FD, "--search-memory-limit", str(memory_limit), instance_pddl, "--search", opts]
+        cl = [
+            _FD,
+            "--search-memory-limit",
+            str(memory_limit),
+            instance_pddl,
+            "--search",
+            opts,
+        ]
         if domain_pddl != DEFAULT_DOMAIN_PDDL:
             cl.insert(3, domain_pddl)
         if save_log_to != None:
@@ -107,13 +114,14 @@ def solve_instance_with_fd(
         if e.returncode != 12:
             if e.returncode == 36:
                 _log.error("Could not find domain file using automatic naming rules.")
-            return {"search_state" : f"downward returned {e.returncode}"}
+            return {"search_state": f"downward returned {e.returncode}"}
         output = e.output
         _log.info("Solution not found.")
     output = output.decode("utf-8")
     if save_log_to != None:
         save_downward_log(save_log_to, instance_pddl, output)
     return parse_fd_output(output)
+
 
 def solve_instance_with_fd_nh(
     domain_pddl,
@@ -125,15 +133,17 @@ def solve_instance_with_fd_nh(
     time_limit=DEFAULT_MAX_SEARCH_TIME,
     memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
     max_expansions=DEFAULT_MAX_EXPANSIONS,
-    save_log_to=None
+    save_log_to=None,
 ):
     """
     Tries to solve a PDDL instance with the torch_sampling_network.
     """
 
     if heuristic == "nn":
-        opt_network = f"torch_sampling_network(path={traced_model}," \
+        opt_network = (
+            f"torch_sampling_network(path={traced_model},"
             f"unary_threshold={unary_threshold})"
+        )
         opt_heuristic = f"nh({opt_network})"
     else:
         opt_heuristic = f"{heuristic}()"
@@ -142,9 +152,9 @@ def solve_instance_with_fd_nh(
         opt_heuristic = f"[{opt_heuristic}]"
 
     opts = f"{search_algorithm}({opt_heuristic}"
-    if time_limit != float('inf'):
+    if time_limit != float("inf"):
         opts += f", max_time={time_limit}"
-    if max_expansions != float('inf'):
+    if max_expansions != float("inf"):
         opts += f", max_expansions={max_expansions}"
     opts += ")"
 

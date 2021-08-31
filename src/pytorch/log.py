@@ -4,6 +4,7 @@ import sys
 
 _log = logging.getLogger(__name__)
 
+
 def setup_logging_config(log_level=logging.INFO, filename=None):
     """
     Setup basic logging config.
@@ -30,6 +31,7 @@ def setup_logging_config(log_level=logging.INFO, filename=None):
     root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(file_handler)
     root_logger.addHandler(stream_handler)
+
 
 def setup_full_logging(
     full_experiment_dir: str,

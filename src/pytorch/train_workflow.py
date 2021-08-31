@@ -107,8 +107,10 @@ class TrainWorkflow:
                         break
 
                 last_val_loss = cur_val_loss
-                _log.info(f"Epoch {t} | avg_train_loss={cur_train_loss:>7f} "
-                                    f"| avg_val_loss={cur_val_loss:>7f}")
+                _log.info(
+                    f"Epoch {t} | avg_train_loss={cur_train_loss:>7f} "
+                    f"| avg_val_loss={cur_val_loss:>7f}"
+                )
             else:
                 _log.info(f"Epoch {t} | avg_train_loss={cur_train_loss:>7f}")
 

@@ -9,11 +9,12 @@ from src.pytorch.utils.helpers import (
     logging_test_config,
     create_test_directory,
     logging_test_statistics,
-    get_fixed_max_expansions
+    get_fixed_max_expansions,
 )
 from src.pytorch.utils.parse_args import get_test_args
 
 _log = logging.getLogger(__name__)
+
 
 def test_main(args):
     dirname = create_test_directory(args)
@@ -47,7 +48,9 @@ def test_main(args):
     for model_path in models:
         output = {}
         for i, problem_pddl in enumerate(args.problem_pddls):
-            _log.info(f"Solving instance \"{problem_pddl}\" ({i+1}/{len(args.problem_pddls)})")
+            _log.info(
+                f'Solving instance "{problem_pddl}" ({i+1}/{len(args.problem_pddls)})'
+            )
             output[problem_pddl] = solve_instance_with_fd_nh(
                 domain_pddl=args.domain_pddl,
                 problem_pddl=problem_pddl,
@@ -58,7 +61,7 @@ def test_main(args):
                 time_limit=args.max_search_time,
                 memory_limit=args.max_search_memory,
                 max_expansions=args.max_expansions,
-                save_log_to=dirname
+                save_log_to=dirname,
             )
             _log.info(f"{output[problem_pddl]}")
 
@@ -67,6 +70,7 @@ def test_main(args):
         _log.info(f"Test on model {model_file} complete!")
 
     _log.info("Test complete!")
+
 
 if __name__ == "__main__":
     test_main(get_test_args())
