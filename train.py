@@ -62,7 +62,8 @@ def train_main(args):
             hidden_layers=args.hidden_layers,
             activation=args.activation,
             output_layer=args.output_layer,
-            dropout_rate=args.dropout_rate
+            dropout_rate=args.dropout_rate,
+            linear_output=args.linear_output,
         ).to(torch.device("cpu"))
 
         if fold_idx == 0:

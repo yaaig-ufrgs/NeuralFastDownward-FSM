@@ -141,8 +141,10 @@ def solve_instance_with_fd_nh(
     if search_algorithm == "eager_greedy":
         opt_heuristic = f"[{opt_heuristic}]"
 
-    opts = f"{search_algorithm}({opt_heuristic}, max_time={time_limit}"
-    if max_expansions != float("inf"):
+    opts = f"{search_algorithm}({opt_heuristic}"
+    if time_limit != float('inf'):
+        opts += f", max_time={time_limit}"
+    if max_expansions != float('inf'):
         opts += f", max_expansions={max_expansions}"
     opts += ")"
 

@@ -3,6 +3,7 @@ from pathlib import Path
 
 from src.pytorch.utils.default_args import (
     DEFAULT_OUTPUT_LAYER,
+    DEFAULT_LINEAR_OUTPUT,
     DEFAULT_NUM_FOLDS,
     DEFAULT_HIDDEN_LAYERS,
     DEFAULT_HIDDEN_UNITS,
@@ -39,6 +40,13 @@ def get_train_args():
         choices=["regression", "prefix", "one-hot"],
         default=DEFAULT_OUTPUT_LAYER,
         help="Network output layer type. (default: %(default)s)"
+    )
+    parser.add_argument(
+        "-lo",
+        "--linear-output",
+        type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+        default=DEFAULT_LINEAR_OUTPUT,
+        help="Use linear output in the output layer (True) or use an activation (False). (default: %(default)s)"
     )
     parser.add_argument(
         "-f",

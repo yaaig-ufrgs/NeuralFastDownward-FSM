@@ -1,3 +1,4 @@
+
 import torch
 import torch.nn as nn
 
@@ -12,6 +13,7 @@ class HNN(nn.Module):
         activation: str,
         output_layer: str,
         dropout_rate: float,
+        linear_output: bool,
     ):
         super(HNN, self).__init__()
         self.input_units = input_units
@@ -20,6 +22,7 @@ class HNN(nn.Module):
         self.hidden_layers = hidden_layers
         self.dropout_rate = dropout_rate
         self.output_layer = output_layer
+        self.linear_output = linear_output
 
         hu = [input_units]
         if len(hidden_units) == 0: # scalable
@@ -47,13 +50,20 @@ class HNN(nn.Module):
         else:
             raise NotImplementedError(f"{activation} function not implemented!")
 
+        if output_layer == "regression":
+            self.output_activation = torch.relu
+        elif output_layer == "prefix":
+            self.output_activation = torch.sigmoid
+        elif output_layer == "one-hot":
+            self.output_activation = torch.softmax
+
     def forward(self, x):
         for h in self.hid:
             x = self.activation(h(x))
             if self.dropout_rate > 0:
                 x = self.dropout(x)
 
-        if self.output_layer == "regression":
+        if self.linear_output:
+            print("here")
             return self.opt(x)
-        return self.activation(self.opt(x))
-        # return torch.flatten(self.opt(x))
+        return self.output_activation(self.opt(x))

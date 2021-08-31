@@ -88,6 +88,7 @@ def logging_train_config(args, dirname, json=True):
     args_dic = {
         "samples" : args.samples.name,
         "output_layer" : args.output_layer,
+        "linear_output" : args.linear_output,
         "num_folds" : args.num_folds,
         "hidden_layers" : args.hidden_layers,
         "hidden_units": args.hidden_units if len(args.hidden_units) > 1
