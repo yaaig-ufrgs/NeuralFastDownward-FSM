@@ -196,6 +196,15 @@ def logging_test_statistics(
             results["statistics"][model]["mdn_plan_length"] = round(
                 median(rlist[x]), decimal_places
             )
+        elif x == "initial_h":
+            for i in range(len(rlist[x])):
+                rlist[x][i] = int(rlist[x][i])
+            results["statistics"][model]["avg_initial_h"] = round(
+                mean(rlist[x]), decimal_places
+            )
+            results["statistics"][model]["mdn_initial_h"] = round(
+                median(rlist[x]), decimal_places
+            )
         elif x == "expansion_rate":
             for i in range(len(rlist[x])):
                 rlist[x][i] = float(rlist[x][i])

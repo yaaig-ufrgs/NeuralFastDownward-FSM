@@ -1,7 +1,7 @@
 import logging
 from os import path, makedirs
 from subprocess import check_output, CalledProcessError
-from re import compile, findall
+from re import compile, findall, match
 from src.pytorch.utils.default_args import (
     DEFAULT_DOMAIN_PDDL,
     DEFAULT_SEARCH_ALGORITHM,
@@ -31,6 +31,9 @@ _FD_EXIT_CODE = {
 def parse_fd_output(output: str):
     # Remove \n to use in re.
     output = output.replace("\n", " ")
+    re_initial_h = match(
+        r".*Initial heuristic value for .*?: (\d+)", output
+    )
     re_plan = findall(
         r".*Plan length: (\d+) step\(s\)..*" r".*Plan cost: (\d+).*", output
     )
@@ -59,6 +62,7 @@ def parse_fd_output(output: str):
         if exit_code == 0:
             results["plan_length"] = re_plan[0][0]
             results["plan_cost"] = re_plan[0][1]
+        results["initial_h"] = re_initial_h.group(1)
         results["expanded"] = re_states[0][0]
         results["reopened"] = re_states[0][1]
         results["evaluated"] = re_states[0][2]
