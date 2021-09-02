@@ -3,6 +3,7 @@ Simple auxiliary functions.
 """
 
 import logging
+import matplotlib.pyplot as plt
 from json import dump, load
 from os import path, makedirs
 from datetime import datetime
@@ -14,7 +15,7 @@ from src.pytorch.utils.default_args import (
 )
 
 _log = logging.getLogger(__name__)
-
+logging.getLogger('matplotlib.font_manager').disabled = True
 
 def to_prefix(n: int, max_value: int) -> [int]:
     max_value += 1
@@ -253,5 +254,11 @@ def save_pred_y_csv(data: dict, csv_filename: str):
         for key in data.keys():
             f.write("%s,%s,%s\n" % (key, data[key][0], data[key][1]))
 
-def save_pred_y_scatter(data: dict, dirname: str):
-    pass
+
+def save_pred_y_scatter(data: dict, plot_filename: str):
+    pred = [data[key][0] for key in data]
+    y = [data[key][1] for key in data]
+    plt.scatter(y, pred)
+    plt.xlabel("h^sample")
+    plt.ylabel("h^NN")
+    plt.savefig(plot_filename)

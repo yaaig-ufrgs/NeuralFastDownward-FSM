@@ -125,6 +125,10 @@ def train_main(args):
     except:
         _log.error(f"Failed to save csv file.")
 
+    if args.scatter_plot:
+        _log.info(f"Saving scatter plot to {dirname}/pred_y.png")
+        save_pred_y_scatter(train_wf.pred_y_values, f"{dirname}/pred_y.png")
+
     _log.info("Training complete!")
 
 if __name__ == "__main__":

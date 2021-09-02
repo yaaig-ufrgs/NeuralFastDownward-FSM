@@ -25,6 +25,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_OUTPUT_FOLDER,
     DEFAULT_RANDOM_SEED,
     DEFAULT_TEST_MODEL,
+    DEFAULT_SCATTER_PLOT,
 )
 
 
@@ -143,6 +144,13 @@ def get_train_args():
         type=int,
         default=DEFAULT_RANDOM_SEED,
         help="Random seed to be used. Defaults to no seed. (default: random)",
+    )
+    parser.add_argument(
+        "-sp",
+        "--scatter-plot",
+        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        default=DEFAULT_SCATTER_PLOT,
+        help="Create a scatter plot with predicted, y values. (default: %(default)s)",
     )
 
     return parser.parse_args()
