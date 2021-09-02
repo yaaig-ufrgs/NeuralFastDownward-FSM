@@ -4,6 +4,7 @@ Simple auxiliary functions.
 
 import logging
 import matplotlib.pyplot as plt
+import numpy as np
 from json import dump, load
 from os import path, makedirs
 from datetime import datetime
@@ -259,10 +260,20 @@ def save_y_pred_scatter(data: dict, plot_filename: str):
     real = [data[key][0] for key in data]
     pred = [data[key][1] for key in data]
 
-    plt.scatter(real, pred)
-    plt.xlabel("h^sample")
-    plt.ylabel("h^NN")
-    plt.xlim(min(min(real), min(pred)), max(max(real), max(pred)))
-    plt.ylim(min(min(real), min(pred)), max(max(real), max(pred)))
+    fig, ax = plt.subplots()
+    ax.scatter(real, pred, s=2, alpha=0.35, c="red", zorder=10)
 
-    plt.savefig(plot_filename)
+    lims = [
+        np.min([ax.get_xlim(), ax.get_ylim()]),  # min of both axes
+        np.max([ax.get_xlim(), ax.get_ylim()]),  # max of both axes
+    ]
+
+    ax.plot(lims, lims, 'k-', alpha=0.80, zorder=0)
+    ax.set_aspect('equal')
+    ax.set_xlim(lims)
+    ax.set_ylim(lims)
+
+    ax.set_xlabel("h^sample")
+    ax.set_ylabel("h^NN")
+
+    fig.savefig(plot_filename, dpi=300)
