@@ -129,6 +129,7 @@ def train_main(args):
         _log.info(f"Saving scatter plot to {dirname}/pred_y.png")
         save_y_pred_scatter(train_wf.y_pred_values, f"{dirname}/pred_y.png")
 
+    #print(train_wf.y_pred_values)
     _log.info("Training complete!")
 
 if __name__ == "__main__":

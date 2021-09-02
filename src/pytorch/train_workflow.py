@@ -125,10 +125,9 @@ class TrainWorkflow:
             for X, y in self.train_dataloader:
                 pred = self.model(X)
                 x_lst = X.tolist()
-                y_lst = y.tolist()
                 for i, _ in enumerate(x_lst):
                     x_int = [int(x) for x in x_lst[i]]
                     x_str = ''.join(str(e) for e in x_int)
-                    self.y_pred_values[x_str] = (int(y_lst[i][0]), int(pred[0]))
+                    self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
 
         return cur_val_loss if validation else None
