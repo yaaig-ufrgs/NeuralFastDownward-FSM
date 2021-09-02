@@ -10,6 +10,7 @@ from src.pytorch.utils.helpers import (
     create_test_directory,
     logging_test_statistics,
     get_fixed_max_expansions,
+    remove_temporary_files,
 )
 from src.pytorch.utils.parse_args import get_test_args
 
@@ -69,6 +70,7 @@ def test_main(args):
         logging_test_statistics(args, dirname, model_file, output)
         _log.info(f"Test on model {model_file} complete!")
 
+    remove_temporary_files(dirname)
     _log.info("Test complete!")
 
 

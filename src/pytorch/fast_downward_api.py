@@ -25,6 +25,7 @@ _FD_EXIT_CODE = {
     22: "search out of memory",
     23: "search out of time",
     24: "search out of memory and time",
+    36: "domain file not found",
 }
 
 
@@ -118,7 +119,10 @@ def solve_instance_with_fd(
         if e.returncode != 12:
             if e.returncode == 36:
                 _log.error("Could not find domain file using automatic naming rules.")
-            return {"search_state": f"downward returned {e.returncode}"}
+            return {"search_state": _FD_EXIT_CODE[e.returncode]
+                if e.returncode in _FD_EXIT_CODE
+                else f"unknown exit code {e.returncode}"
+            }
         output = e.output
         _log.info("Solution not found.")
     output = output.decode("utf-8")
