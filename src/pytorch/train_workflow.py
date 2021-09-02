@@ -25,7 +25,7 @@ class TrainWorkflow:
         self.max_epochs = max_epochs
         self.optimizer = optimizer
         self.loss_fn = loss_fn
-        self.pred_y_values = {} #{state: (pred, y)} of the last epoch
+        self.y_pred_values = {} #{state: (y, pred)} of the last epoch
 
     def train_loop(self):
         # size = len(self.train_dataloader.dataset)
@@ -124,12 +124,11 @@ class TrainWorkflow:
         with torch.no_grad():
             for X, y in self.train_dataloader:
                 pred = self.model(X)
-                #x_str = ''.join(str(x) for x in X)
                 x_lst = X.tolist()
                 y_lst = y.tolist()
                 for i, _ in enumerate(x_lst):
                     x_int = [int(x) for x in x_lst[i]]
                     x_str = ''.join(str(e) for e in x_int)
-                    self.pred_y_values[x_str] = (int(pred[0]), int(y_lst[i][0]))
+                    self.y_pred_values[x_str] = (int(y_lst[i][0]), int(pred[0]))
 
         return cur_val_loss if validation else None

@@ -14,8 +14,8 @@ from src.pytorch.utils.helpers import (
     logging_train_config,
     create_train_directory,
     get_fixed_max_epochs,
-    save_pred_y_csv,
-    save_pred_y_scatter,
+    save_y_pred_csv,
+    save_y_pred_scatter,
 )
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
@@ -121,13 +121,13 @@ def train_main(args):
         _log.info(
             f"Saving state,pred,y csv file to {dirname}/heuristic_pred.csv"
         )
-        save_pred_y_csv(train_wf.pred_y_values, f"{dirname}/heuristic_pred.csv")
+        save_y_pred_csv(train_wf.y_pred_values, f"{dirname}/heuristic_pred.csv")
     except:
         _log.error(f"Failed to save csv file.")
 
     if args.scatter_plot:
         _log.info(f"Saving scatter plot to {dirname}/pred_y.png")
-        save_pred_y_scatter(train_wf.pred_y_values, f"{dirname}/pred_y.png")
+        save_y_pred_scatter(train_wf.y_pred_values, f"{dirname}/pred_y.png")
 
     _log.info("Training complete!")
 

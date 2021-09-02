@@ -150,7 +150,7 @@ def get_train_args():
         "--scatter-plot",
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
         default=DEFAULT_SCATTER_PLOT,
-        help="Create a scatter plot with predicted, y values. (default: %(default)s)",
+        help="Create a scatter plot with y, predicted values. (default: %(default)s)",
     )
 
     return parser.parse_args()

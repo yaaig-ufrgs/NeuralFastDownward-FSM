@@ -248,16 +248,16 @@ def logging_test_statistics(
         save_json(test_results_filename, results)
 
 
-def save_pred_y_csv(data: dict, csv_filename: str):
+def save_y_pred_csv(data: dict, csv_filename: str):
     with open(csv_filename, "w") as f:
-        f.write("state,pred,y\n")
+        f.write("state,y,pred\n")
         for key in data.keys():
             f.write("%s,%s,%s\n" % (key, data[key][0], data[key][1]))
 
 
-def save_pred_y_scatter(data: dict, plot_filename: str):
-    pred = [data[key][0] for key in data]
-    y = [data[key][1] for key in data]
+def save_y_pred_scatter(data: dict, plot_filename: str):
+    pred = [data[key][1] for key in data]
+    y = [data[key][0] for key in data]
     plt.scatter(y, pred)
     plt.xlabel("h^sample")
     plt.ylabel("h^NN")
