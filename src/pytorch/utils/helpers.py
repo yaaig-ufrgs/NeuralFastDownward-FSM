@@ -256,9 +256,13 @@ def save_y_pred_csv(data: dict, csv_filename: str):
 
 
 def save_y_pred_scatter(data: dict, plot_filename: str):
+    real = [data[key][0] for key in data]
     pred = [data[key][1] for key in data]
-    y = [data[key][0] for key in data]
-    plt.scatter(y, pred)
+
+    plt.scatter(real, pred)
     plt.xlabel("h^sample")
     plt.ylabel("h^NN")
+    plt.xlim(min(min(real), min(pred)), max(max(real), max(pred)))
+    plt.ylim(min(min(real), min(pred)), max(max(real), max(pred)))
+
     plt.savefig(plot_filename)
