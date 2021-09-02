@@ -14,6 +14,8 @@ from src.pytorch.utils.helpers import (
     logging_train_config,
     create_train_directory,
     get_fixed_max_epochs,
+    save_pred_y_csv,
+    save_pred_y_scatter,
 )
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
@@ -115,8 +117,15 @@ def train_main(args):
     except:
         _log.error(f"Failed to save best fold.")
 
-    _log.info("Training complete!")
+    try:
+        _log.info(
+            f"Saving state,pred,y csv file to {dirname}/heuristic_pred.csv"
+        )
+        save_pred_y_csv(train_wf.pred_y_values, f"{dirname}/heuristic_pred.csv")
+    except:
+        _log.error(f"Failed to save csv file.")
 
+    _log.info("Training complete!")
 
 if __name__ == "__main__":
     train_main(get_train_args())
