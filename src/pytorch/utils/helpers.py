@@ -245,3 +245,13 @@ def logging_test_statistics(
 
     if save_file:
         save_json(test_results_filename, results)
+
+
+def save_pred_y_csv(data: dict, csv_filename: str):
+    with open(csv_filename, "w") as f:
+        f.write("state,pred,y\n")
+        for key in data.keys():
+            f.write("%s,%s,%s\n" % (key, data[key][0], data[key][1]))
+
+def save_pred_y_scatter(data: dict, dirname: str):
+    pass
