@@ -4,7 +4,12 @@
 Merge two csv files (hnn and another heuristic), merge them,
 and make a scatter plot.
 
-Usage: $ $ ./scatter_plot.py [csv_dir] [experiment_dirs]
+Usage: $ ./scatter_plot.py plot_filename compared_heuristic [experiment_dirs]
+
+Example: $ ./scatter_plot.py someplotname h\* results/nfd_train.fukunaga_probBLOCKS-12-0_dfs_fs_500x200_ss2.ns2
+
+Beware: make sure you have only one nfd_test.N with a problem_instance.csv inside it.
+
 """
 
 from sys import argv
@@ -38,7 +43,7 @@ def merge_csv(a: str, b: str) -> dict:
     return filtered_merged_data
 
 
-def plot_scatter(data: dict, compared_heuristic, instance: str, filename: str):
+def plot_scatter(data: dict, compared_heuristic, filename: str):
     hnn = [data[key][0] for key in data]
     h = [data[key][1] for key in data]
 
@@ -54,11 +59,7 @@ def plot_scatter(data: dict, compared_heuristic, instance: str, filename: str):
     ax.set_aspect('equal')
     ax.set_xlim(lims)
     ax.set_ylim(lims)
-    #ax.set_title("h^nn vs. " + compared_heuristic)
-    ax.set_title(instance)
-
-    if compared_heuristic == "hstar":
-        compared_heuristic = "h*"
+    ax.set_title("h^nn vs. " + compared_heuristic)
 
     ax.set_xlabel(compared_heuristic)
     ax.set_ylabel("h^NN")
@@ -66,23 +67,16 @@ def plot_scatter(data: dict, compared_heuristic, instance: str, filename: str):
     fig.savefig(filename, dpi=300)
 
 
-csv_dir = argv[1]
-if csv_dir[-1] != "/":
-    csv_dir += "/"
-compared_heuristic = csv_dir.split('/')[-2]
-
-for exp_dir in argv[2:]:
+plot_filename = argv[1]
+compared_heuristic = argv[2]
+for exp_dir in argv[3:]:
     if exp_dir[-1] != "/":
         exp_dir += "/"
-
-    problem_name = '_'.join(exp_dir.split('/')[-2].split('_')[2:4])
     csv_hnn = glob.glob(exp_dir + "heuristic_pred.csv")
-    csv_h = glob.glob(csv_dir + problem_name + ".csv")
-
+    data = {} # {state: (h1, h2)}
+    csv_h = glob.glob(exp_dir+"tests/*/*.csv")
     if len(csv_h) == 0 or len(csv_hnn) == 0:
         continue
-
     merged = merge_csv(csv_hnn[0], csv_h[0])
-    plot_filename = "hnn_vs_" + compared_heuristic + "_" + problem_name
-    plot_scatter(merged, compared_heuristic, problem_name, exp_dir+plot_filename)
+    plot_scatter(merged, compared_heuristic, exp_dir+plot_filename)
     print("OK")
