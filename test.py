@@ -58,6 +58,7 @@ def test_main(args):
                 traced_model=model_path,
                 search_algorithm=args.search_algorithm,
                 heuristic=args.heuristic,
+                heuristic_multiplier=args.heuristic_multiplier,
                 unary_threshold=args.unary_threshold,
                 time_limit=args.max_search_time,
                 memory_limit=args.max_search_memory,

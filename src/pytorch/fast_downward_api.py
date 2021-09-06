@@ -10,6 +10,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_MAX_SEARCH_MEMORY,
     DEFAULT_MAX_EXPANSIONS,
     DEFAULT_UNARY_THRESHOLD,
+    DEFAULT_HEURISTIC_MULTIPLIER,
 )
 
 _log = logging.getLogger(__name__)
@@ -137,6 +138,7 @@ def solve_instance_with_fd_nh(
     traced_model,
     search_algorithm=DEFAULT_SEARCH_ALGORITHM,
     heuristic=DEFAULT_HEURISTIC,
+    heuristic_multiplier=DEFAULT_HEURISTIC_MULTIPLIER,
     unary_threshold=DEFAULT_UNARY_THRESHOLD,
     time_limit=DEFAULT_MAX_SEARCH_TIME,
     memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
@@ -150,6 +152,7 @@ def solve_instance_with_fd_nh(
     if heuristic == "nn":
         opt_network = (
             f"torch_sampling_network(path={traced_model},"
+            f"multiplier={heuristic_multiplier},"
             f"unary_threshold={unary_threshold})"
         )
         opt_heuristic = f"nh({opt_network})"

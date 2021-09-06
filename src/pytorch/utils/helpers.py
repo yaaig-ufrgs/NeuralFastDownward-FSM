@@ -127,6 +127,7 @@ def logging_test_config(args, dirname, save_file=True):
         "problems_pddl": args.problem_pddls,
         "search_algorithm": args.search_algorithm,
         "heuristic": args.heuristic,
+        "heuritic_multiplier": args.heuristic_multiplier,
         "max_search_time": f"{args.max_search_time}s",
         "max_search_memory": f"{args.max_search_memory} MB",
         "max_expansions": str(args.max_expansions),

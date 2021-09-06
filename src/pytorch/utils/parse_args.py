@@ -26,6 +26,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_RANDOM_SEED,
     DEFAULT_TEST_MODEL,
     DEFAULT_SCATTER_PLOT,
+    DEFAULT_HEURISTIC_MULTIPLIER
 )
 
 
@@ -184,6 +185,13 @@ def get_test_args():
         choices=["nn", "add", "blind", "ff", "goalcount", "hmax", "lmcut"],
         default=DEFAULT_HEURISTIC,
         help="Heuristic to be used in the search. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-hm",
+        "--heuristic-multiplier",
+        type=int,
+        default=DEFAULT_HEURISTIC_MULTIPLIER,
+        help="Value to multiply the output heuristic with. (default: %(default)s)",
     )
     parser.add_argument(
         "-u",
