@@ -4,7 +4,11 @@
 Merge two csv files (hnn and another heuristic), merge them,
 and make a scatter plot.
 
-Usage: $ $ ./scatter_plot.py [csv_dir] [experiment_dirs]
+Usage:    $ ./scatter_plot.py [csv_dir] [hnn_csv_dir]
+Example:  $ ./scatter_plot.py ../../NeuralFastDownward-results/heuristics/state-value-pairs/goalcount/ \
+            ../../NeuralFastDownward-results/heuristics/state-value-pairs/nn/*
+
+Save location: experiment (not csv) directory. Some gambiarra was made but it works.
 """
 
 from sys import argv
@@ -63,7 +67,17 @@ def plot_scatter(data: dict, compared_heuristic, instance: str, filename: str):
     ax.set_xlabel(compared_heuristic)
     ax.set_ylabel("h^NN")
 
-    fig.savefig(filename, dpi=300)
+    filename_split = filename.split('/')
+    domain = filename_split[-1].split('_')[3]
+    exp_dir = filename_split[-2]
+    results_dir = '/'.join(filename_split[0:3])
+    out_dir = glob.glob(results_dir+"/fukunaga/regression-hl1-hu16-relu/"+domain+"/"+exp_dir)[0]
+    filename = filename_split[-1]
+
+    fig.savefig(out_dir+"/"+filename, dpi=300)
+    plt.clf()
+    plt.close(fig)
+    print("Saved to: "+out_dir+"/"+filename)
 
 
 csv_dir = argv[1]
@@ -83,6 +97,11 @@ for exp_dir in argv[2:]:
         continue
 
     merged = merge_csv(csv_hnn[0], csv_h[0])
+
+    if len(merged) == 0:
+        continue
+
     plot_filename = "hnn_vs_" + compared_heuristic + "_" + problem_name
     plot_scatter(merged, compared_heuristic, problem_name, exp_dir+plot_filename)
-    print("OK")
+
+print("Done!")
