@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 
 """
-Merge three csv files (hnn, h*, goalcount), merge them,
-and make box plot.
+Merge sets of three csv files (hnn, h*, goalcount) and make box plots.
 
-Usage: $ $ ./box_plot.py [hastar_csv_dir] [goalcount_csv_dir] [experiment_dirs]
+Requirements:   matplotlib numpy pandas seaborn
+
+Usage:          $ ./box_plot.py [hastar_csv_dir] [goalcount_csv_dir] [hnn_csv_dir]
+
+Example:        $ ./box_plot.py ../../NeuralFastDownward-results/heuristics/state-value-pairs/hstar/ \
+                  ../../NeuralFastDownward-results/heuristics/state-value-pairs/goalcount/ \
+                  ../../NeuralFastDownward-results/heuristics/state-value-pairs/nn/*
+
+Save location: experiment (not csv) directory. Some gambiarra was made but it works.
+
+Beware: it may take some time.
 """
 
 from sys import argv
@@ -51,6 +60,7 @@ def merge_csv(hnn: str, hstar: str, goalcount) -> dict:
 
 
 def plot_scatter(data: dict, instance: str, filename: str):
+    # https://wellsr.com/python/how-to-make-seaborn-boxplots-in-python/
     hnn = [data[key][0] for key in data]
     hstar = [data[key][1] for key in data]
     goalcount = [data[key][2] for key in data]
@@ -67,11 +77,24 @@ def plot_scatter(data: dict, instance: str, filename: str):
     # | 4        |     7-4     |       hnn      |
     # | ...      |     ...     |       ...      |
 
-    #df = pd.DataFrame(list(zip(hstar, hnn_sub_exact, goalcount_sub_exact)), columns =['h*', 'hnn-h*', 'goalcount-h*'])
-    # https://wellsr.com/python/how-to-make-seaborn-boxplots-in-python/
-    #print(df)
+    df_sub_hnn = pd.DataFrame(list(zip(hstar, hnn_sub_exact)), columns =['h*', 'heuristic - h*']).assign(heuristic="hnn")
+    df_sub_gc = pd.DataFrame(list(zip(hstar, goalcount_sub_exact)), columns =['h*', 'heuristic - h*']).assign(heuristic="goalcount")
+    cdf = pd.concat([df_sub_hnn, df_sub_gc])
+    #print(cdf)
 
+    ax = sns.boxplot(x="h*", y="heuristic - h*", hue="heuristic", data=cdf, fliersize=2)  # RUN PLOT   
 
+    # Gambiarra below.
+    filename_split = filename.split('/')
+    domain = filename_split[-1].split('_')[4]
+    exp_dir = filename_split[-2]
+    results_dir = '/'.join(filename_split[0:3])
+    out_dir = glob.glob(results_dir+"/fukunaga/regression-hl1-hu16-relu/"+domain+"/"+exp_dir)[0]
+    filename = filename_split[-1]
+
+    ax.figure.savefig(out_dir+"/"+filename, dpi=300)
+    plt.clf()
+    print("Saved to: "+out_dir+"/"+filename)
 
 
 hstar_dir = argv[1]
@@ -91,10 +114,16 @@ for exp_dir in argv[3:]:
     csv_hstar = glob.glob(hstar_dir + problem_name + ".csv")
     csv_goalcount = glob.glob(goalcount_dir + problem_name + ".csv")
 
+    # Ignore instances that don't have all the statistics.
     if len(csv_hstar) == 0 or len(csv_hnn) == 0 or len(csv_goalcount) == 0:
         continue
 
     merged = merge_csv(csv_hnn[0], csv_hstar[0], csv_goalcount[0])
-    plot_filename = "hnn_vs_hstar_vs_gc_" + problem_name
+
+    if len(merged) == 0:
+        continue
+
+    plot_filename = "box_hstar_hnn_gc_" + problem_name
     plot_scatter(merged, problem_name, exp_dir+plot_filename)
-    print("OK")
+
+print("Done!")
