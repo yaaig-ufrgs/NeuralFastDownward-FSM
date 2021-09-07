@@ -70,8 +70,7 @@ void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
 
     if (!blind) {
         // Regression (tensor.size(1) == 1) or Classification (tensor.size(1) > 1).
-        last_h = tensor.size(1) == 1 ? unary_output[0] : unary_to_value(unary_output);
-        last_h *= heuristic_multiplier;
+        last_h = tensor.size(1) == 1 ? unary_output[0]*heuristic_multiplier : unary_to_value(unary_output);
         last_h_batch.push_back(last_h);
         /* Batch testing does not work.
         auto accessor = tensor.accessor<float, 2>();

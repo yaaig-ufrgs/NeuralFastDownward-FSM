@@ -128,7 +128,7 @@ def get_train_args():
     parser.add_argument(
         "-sh",
         "--shuffle",
-        type=int,
+        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
         default=DEFAULT_SHUFFLE,
         help="Shuffle the training data. (default: %(default)s)",
     )

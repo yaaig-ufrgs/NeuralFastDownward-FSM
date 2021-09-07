@@ -513,7 +513,7 @@ bool sample_next_state_with_depth_first_search(
     previous_state = move(current_state);
     vector<OperatorID> applicable_operators;
     generator.generate_applicable_ops(previous_state, applicable_operators);
-    rng.shuffle(applicable_operators);
+    // rng.shuffle(applicable_operators);
 
     while ((unsigned)idx_op < applicable_operators.size()){
         S candidate_state = construct_candidate(previous_state, applicable_operators[idx_op]);

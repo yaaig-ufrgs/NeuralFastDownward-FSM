@@ -55,15 +55,15 @@ class KFoldTrainingData:
         for i in range(self.num_folds):
             training_set, test_set = [], []
 
-            for j in range(len(self.state_value_pairs)):
-                if self.num_folds == 1:
-                    train_split = 0.8
-                    train_size = int(train_split * len(self.state_value_pairs))
-                    val_size = len(self.state_value_pairs) - train_size
-                    training_set, test_set = random_split(
-                        self.state_value_pairs, [train_size, val_size]
-                    )
-                else:
+            if self.num_folds == 1:
+                train_split = 0.8
+                train_size = int(train_split * len(self.state_value_pairs))
+                val_size = len(self.state_value_pairs) - train_size
+                training_set, test_set = random_split(
+                    self.state_value_pairs, [train_size, val_size]
+                )
+            else:
+                for j in range(len(self.state_value_pairs)):
                     if int(j / instances_per_fold) == i:
                         test_set.append(self.state_value_pairs[j])
                     else:
