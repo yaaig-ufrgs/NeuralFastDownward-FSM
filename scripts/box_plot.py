@@ -82,8 +82,6 @@ def plot_scatter(data: dict, instance: str, filename: str):
     cdf = pd.concat([df_sub_hnn, df_sub_gc])
     #print(cdf)
 
-    ax = sns.boxplot(x="h*", y="heuristic - h*", hue="heuristic", data=cdf, fliersize=2)  # RUN PLOT   
-
     # Gambiarra below.
     filename_split = filename.split('/')
     domain = filename_split[-1].split('_')[4]
@@ -92,6 +90,7 @@ def plot_scatter(data: dict, instance: str, filename: str):
     out_dir = glob.glob(results_dir+"/fukunaga/regression-hl1-hu16-relu/"+domain+"/"+exp_dir)[0]
     filename = filename_split[-1]
 
+    ax = sns.boxplot(x="h*", y="heuristic - h*", hue="heuristic", data=cdf, fliersize=2).set_title(instance)
     ax.figure.savefig(out_dir+"/"+filename, dpi=300)
     plt.clf()
     print("Saved to: "+out_dir+"/"+filename)
