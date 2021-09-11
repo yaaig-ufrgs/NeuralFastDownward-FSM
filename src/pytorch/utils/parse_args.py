@@ -26,6 +26,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_RANDOM_SEED,
     DEFAULT_TEST_MODEL,
     DEFAULT_SCATTER_PLOT,
+    DEFAULT_SCATTER_PLOT_N_EPOCHS,
     DEFAULT_HEURISTIC_MULTIPLIER
 )
 
@@ -150,9 +151,17 @@ def get_train_args():
         "-sp",
         "--scatter-plot",
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
-        default=DEFAULT_SCATTER_PLOT,
+        default=DEFAULT_SCATTER_PLOT_N_EPOCHS,
         help="Create a scatter plot with y, predicted values. (default: %(default)s)",
     )
+    parser.add_argument(
+        "-spn",
+        "--plot-n-epochs",
+        type=int,
+        default=DEFAULT_SCATTER_PLOT_N_EPOCHS,
+        help="Do a scatter plot every n epochs. If -1, plot only after training. (default: %(default)s)",
+    )
+
 
     return parser.parse_args()
 

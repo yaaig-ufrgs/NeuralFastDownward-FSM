@@ -5,6 +5,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from src.pytorch.model import HNN
+from src.pytorch.utils.helpers import save_y_pred_scatter
 
 _log = logging.getLogger(__name__)
 
@@ -16,6 +17,8 @@ class TrainWorkflow:
         train_dataloader: DataLoader,
         val_dataloader: DataLoader,
         max_epochs: int,
+        plot_n_epochs: int,
+        dirname: str,
         optimizer: optim.Optimizer,
         loss_fn: nn = nn.MSELoss(),
     ):
@@ -23,6 +26,8 @@ class TrainWorkflow:
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
         self.max_epochs = max_epochs
+        self.plot_n_epochs = plot_n_epochs
+        self.dirname = dirname
         self.optimizer = optimizer
         self.loss_fn = loss_fn
         self.y_pred_values = {} #{state: (y, pred)} of the last epoch
@@ -88,12 +93,34 @@ class TrainWorkflow:
         traced_model = torch.jit.trace(self.model, example_input)
         traced_model.save(filename)
 
+    def save_scatter_plot(self, t: int):
+        for X, y in self.train_dataloader:
+            pred = self.model(X)
+            x_lst = X.tolist()
+
+            for i, _ in enumerate(x_lst):
+                x_int = [int(x) for x in x_lst[i]]
+                x_str = ''.join(str(e) for e in x_int)
+                self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+
+        if t != -1:
+            save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}")
+            self.y_pred_values.clear()
+        else:
+            _log.info(f"Saving post-training scatter plot to {self.dirname}/plots.")
+            save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}")
+
+
     def run(self, train_timer, validation=True):
         last_val_loss = 0
         max_epochs_without_improving = 100
         count = 0
         for t in range(self.max_epochs):
             cur_train_loss = self.train_loop()
+
+            if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
+                self.save_scatter_plot(t)
+
             if validation:
                 cur_val_loss = self.val_loop()
                 if (last_val_loss - cur_val_loss) > 0.01:
@@ -121,13 +148,8 @@ class TrainWorkflow:
             if t == self.max_epochs - 1:
                 _log.info("Done!")
 
+        # Post-training scatter plot.
         with torch.no_grad():
-            for X, y in self.train_dataloader:
-                pred = self.model(X)
-                x_lst = X.tolist()
-                for i, _ in enumerate(x_lst):
-                    x_int = [int(x) for x in x_lst[i]]
-                    x_str = ''.join(str(e) for e in x_int)
-                    self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+            self.save_scatter_plot(-1)
 
         return cur_val_loss if validation else None

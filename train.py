@@ -79,6 +79,8 @@ def train_main(args):
             train_dataloader=train_dataloader,
             val_dataloader=val_dataloader,
             max_epochs=args.max_epochs,
+            plot_n_epochs=args.plot_n_epochs,
+            dirname=dirname,
             optimizer=torch.optim.Adam(
                 model.parameters(),
                 lr=args.learning_rate,
@@ -119,17 +121,12 @@ def train_main(args):
 
     try:
         _log.info(
-            f"Saving state,pred,y csv file to {dirname}/heuristic_pred.csv"
+            f"Saving post-training state,pred,y csv file to {dirname}/heuristic_pred.csv"
         )
         save_y_pred_csv(train_wf.y_pred_values, f"{dirname}/heuristic_pred.csv")
     except:
         _log.error(f"Failed to save csv file.")
 
-    if args.scatter_plot:
-        _log.info(f"Saving scatter plot to {dirname}/scatter_y_pred.png")
-        save_y_pred_scatter(train_wf.y_pred_values, f"{dirname}/scatter_y_pred.png")
-
-    #print(train_wf.y_pred_values)
     _log.info("Training complete!")
 
 if __name__ == "__main__":

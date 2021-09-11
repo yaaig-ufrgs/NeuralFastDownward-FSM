@@ -259,7 +259,18 @@ def save_y_pred_csv(data: dict, csv_filename: str):
         for key in data.keys():
             f.write("%s,%s,%s\n" % (key, data[key][0], data[key][1]))
 
-def save_y_pred_scatter(data: dict, plot_filename: str):
+def save_y_pred_scatter(data: dict, t: int, directory: str):
+    if t == -1:
+        t = "final"
+
+    plots_folder = directory+"/plots"
+    if not path.exists(plots_folder):
+        makedirs(plots_folder)
+
+    dir_split = directory.split('/')[-1].split('_')
+    seeds = dir_split[-1].replace('.', '_')[0:7]
+    plot_filename = '_'.join(dir_split[2:-1]) + "_" + seeds + "_epoch_" + str(t)
+
     real = [data[key][0] for key in data]
     pred = [data[key][1] for key in data]
 
@@ -278,5 +289,9 @@ def save_y_pred_scatter(data: dict, plot_filename: str):
 
     ax.set_xlabel("h^sample")
     ax.set_ylabel("h^NN")
+    ax.set_title(plot_filename)
 
-    fig.savefig(plot_filename, dpi=300)
+    fig.savefig(plots_folder+"/"+plot_filename)
+
+    plt.clf()
+    plt.close(fig)
