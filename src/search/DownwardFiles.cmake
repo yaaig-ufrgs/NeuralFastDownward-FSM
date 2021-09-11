@@ -631,6 +631,14 @@ fast_downward_plugin(
 )
 
 fast_downward_plugin(
+    NAME SAMPLING_HEURISTIC
+    HELP "The sampling heuristic"
+    SOURCES
+        heuristics/sampling_heuristic
+    DEPENDS TASK_PROPERTIES
+)
+
+fast_downward_plugin(
     NAME POLICIES
     HELP "The heuristic preferred operators policy"
     SOURCES
