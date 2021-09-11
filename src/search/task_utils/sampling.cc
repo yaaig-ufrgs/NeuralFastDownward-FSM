@@ -504,7 +504,7 @@ bool sample_next_state_with_depth_first_search(
         S &pre_previous_state,
         int &idx_op,
         const G &generator,
-        utils::RandomNumberGenerator &rng,
+        //utils::RandomNumberGenerator &rng,
         const function<S (const S &, const OperatorID &)> &construct_candidate,
         const function<bool (S &)> *is_dead_end = nullptr,
         const function<bool (S &)> *is_valid_state = nullptr) {
@@ -535,7 +535,7 @@ S sample_with_depth_first_search(
         const S &state,
         int &idx_op,
         const G &generator,
-        utils::RandomNumberGenerator &rng,
+        //utils::RandomNumberGenerator &rng,
         const function<S (const S &, const OperatorID &)> &construct_candidate,
         const function<bool (S &)> *is_dead_end = nullptr,
         const function<bool (S &)> *is_valid_state = nullptr) {
@@ -550,7 +550,7 @@ S sample_with_depth_first_search(
             pre_previous_state,
             idx_op,
             generator,
-            rng,
+            //rng,
             construct_candidate,
             is_dead_end,
             is_valid_state)) {
@@ -565,7 +565,7 @@ static PartialAssignment sample_partial_assignment_with_depth_first_search(
     const RegressionTaskProxy &regression_task_proxy, const PartialAssignment &goals,
     const predecessor_generator::PredecessorGenerator &predecessor_generator,
     int &idx_op,
-    utils::RandomNumberGenerator &rng,
+    //utils::RandomNumberGenerator &rng,
     const ValidStateDetector & is_valid_state,
     const PartialDeadEndDetector &is_dead_end) {
 
@@ -581,7 +581,7 @@ static PartialAssignment sample_partial_assignment_with_depth_first_search(
             goals,
             idx_op,
             predecessor_generator,
-            rng,
+            //rng,
             construct_candidate,
             &is_dead_end,
             &is_valid_state
@@ -611,7 +611,7 @@ PartialAssignment DFSSampler::sample_state_length(
         goals,
         *predecessor_generator,
         idx_op,
-        rng,
+        //rng,
         is_valid_state,
         is_dead_end);
 }
