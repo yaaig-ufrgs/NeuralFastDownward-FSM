@@ -17,11 +17,13 @@ namespace utils {
 RandomNumberGenerator::RandomNumberGenerator() {
     unsigned int secs = static_cast<unsigned int>(
         chrono::system_clock::now().time_since_epoch().count());
-    seed(secs + get_process_id());
+    seed_value = secs + get_process_id();
+    seed(seed_value);
 }
 
 RandomNumberGenerator::RandomNumberGenerator(int seed_) {
-    seed(seed_);
+    seed_value = seed_;
+    seed(seed_value);
 }
 
 RandomNumberGenerator::RandomNumberGenerator(std::mt19937 &rng) : rng(rng) {
@@ -29,8 +31,9 @@ RandomNumberGenerator::RandomNumberGenerator(std::mt19937 &rng) : rng(rng) {
 
 RandomNumberGenerator::~RandomNumberGenerator() { }
 
-void RandomNumberGenerator::seed(int seed) {
-    rng.seed(seed);
+void RandomNumberGenerator::seed(int seed_) {
+    seed_value = seed_;
+    rng.seed(seed_value);
 }
 
 vector<int> RandomNumberGenerator::choose_n_of_N(int n, int N) {

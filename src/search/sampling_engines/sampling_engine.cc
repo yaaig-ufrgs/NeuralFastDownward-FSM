@@ -128,17 +128,18 @@ void SamplingEngine::add_sampling_options(options::OptionParser &parser) {
         "techniques",
         "List of sampling technique definitions to use",
         "[]");
-    parser.add_option<bool>("shuffle_techniques",
-            "Instead of using one sampling technique after each other,"
-            "for each task to generate a sampling technique is randomly chosen with"
-            "their probability proportional to the remaining tasks of that technique.",
-            "false");
+    parser.add_option<bool>(
+        "shuffle_techniques",
+        "Instead of using one sampling technique after each other,"
+        "for each task to generate a sampling technique is randomly chosen with"
+        "their probability proportional to the remaining tasks of that technique.",
+        "false");
     parser.add_option<int> (
         "sample_cache_size",
         "If more than sample_cache_size samples are cached, then the entries "
-         "are written to disk and the cache is emptied. When sampling "
-         "finishes, all remaining cached samples are written to disk. If "
-         "running out of memory, the current cache is lost.", 
+        "are written to disk and the cache is emptied. When sampling "
+        "finishes, all remaining cached samples are written to disk. If "
+        "running out of memory, the current cache is lost.", 
         "5000");
     parser.add_option<bool>(
         "iterate_sample_files",
@@ -157,8 +158,7 @@ void SamplingEngine::add_sampling_options(options::OptionParser &parser) {
         "Maximum number of sample files which will be written to disk."
         " After writing that many files, the search will terminate. Use -1 "
         "for unlimited.",
-        "-1"
-            );
+        "-1");
     parser.add_option<bool>(
         "prune_duplicates",
         "Store every sample only once. If the cache size is restricted,"

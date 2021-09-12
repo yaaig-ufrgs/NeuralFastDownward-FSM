@@ -10,6 +10,7 @@ namespace utils {
 class RandomNumberGenerator {
     // Mersenne Twister random number generator.
     std::mt19937 rng;
+    int seed_value;
 
 public:
     RandomNumberGenerator(); // Seed with a value depending on time and process ID.
@@ -19,7 +20,8 @@ public:
     RandomNumberGenerator &operator=(const RandomNumberGenerator &) = delete;
     ~RandomNumberGenerator();
 
-    void seed(int seed);
+    void seed(int seed_);
+    int get_seed() { return seed_value; }
 
     // Return random double in [0..1).
     double operator()() {
