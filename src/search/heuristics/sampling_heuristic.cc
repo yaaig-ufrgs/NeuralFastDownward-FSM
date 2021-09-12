@@ -26,7 +26,6 @@ SamplingHeuristic::SamplingHeuristic(const Options &opts)
             continue;
         int cut = sample.find(";");
         string state = sample.substr(cut+1);
-        state.erase(remove(state.begin(), state.end(), ';'), state.end());
         int value = stoi(sample.substr(0, cut));
         h[state] = value;
     }
