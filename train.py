@@ -16,6 +16,7 @@ from src.pytorch.utils.helpers import (
     get_fixed_max_epochs,
     save_y_pred_csv,
     save_y_pred_scatter,
+    save_gif_from_plots,
 )
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
@@ -127,7 +128,17 @@ def train_main(args):
     except:
         _log.error(f"Failed to save csv file.")
 
+    if args.scatter_plot and args.plot_n_epochs != -1:
+        try:
+            _log.info(
+                f"Saving plot GIF to {dirname}/plots/"
+            )
+            save_gif_from_plots(dirname)
+        except:
+            _log.error(f"Failed making plot GIF.")
+       
     _log.info("Training complete!")
+
 
 if __name__ == "__main__":
     train_main(get_train_args())

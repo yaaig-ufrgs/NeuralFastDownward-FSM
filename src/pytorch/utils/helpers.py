@@ -2,8 +2,11 @@
 Simple auxiliary functions.
 """
 
+import os
 import logging
 import matplotlib.pyplot as plt
+import imageio
+import glob
 import numpy as np
 from json import dump, load
 from os import path, makedirs, remove
@@ -17,6 +20,7 @@ from src.pytorch.utils.default_args import (
 
 _log = logging.getLogger(__name__)
 logging.getLogger('matplotlib.font_manager').disabled = True
+logging.getLogger('PIL').setLevel(logging.WARNING)
 
 def to_prefix(n: int, max_value: int) -> [int]:
     max_value += 1
@@ -295,3 +299,14 @@ def save_y_pred_scatter(data: dict, t: int, directory: str):
 
     plt.clf()
     plt.close(fig)
+
+def save_gif_from_plots(directory: str):
+    dir_split = directory.split('/')[-1].split('_')
+    seeds = dir_split[-1].replace('.', '_')[0:7]
+    gif_filename = '_'.join(dir_split[2:-1]) + "_" + seeds
+    plot_files = sorted(glob.glob(directory+"/plots/*"), key=os.path.getmtime)
+
+    with imageio.get_writer(f'{directory}/plots/{gif_filename}.gif', mode='I') as writer:
+        for f in plot_files:
+            image = imageio.imread(f)
+            writer.append_data(image)
