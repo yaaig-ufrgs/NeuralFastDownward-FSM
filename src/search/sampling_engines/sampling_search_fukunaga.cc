@@ -37,15 +37,9 @@ string SamplingSearchFukunaga::sample_file_header() const {
 }
 
 vector<string> SamplingSearchFukunaga::extract_samples() {
-    vector<string> samples;
-    for (std::shared_ptr<PartialAssignment>& task: sampling_technique::modified_tasks) {
-        ostringstream oss;
-
-        if (store_plan_cost) {
-            oss << task->estimated_heuristic << field_separator;
-        }
-
-        if (store_state) {
+    unordered_map<string,int> state_value_pairs;
+    if (match_heuristics) {
+        for (std::shared_ptr<PartialAssignment>& task: sampling_technique::modified_tasks) {
             vector<int> values;
             if (use_full_state) {
                 State s = task->get_full_state(true, *rng).second;
@@ -54,13 +48,35 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
             } else {
                 values = task->get_values();
             }
-            for (const FactPair &fp: relevant_facts) {
-                // if (values[fp.var] == fp.value)
-                    // oss << this->task->get_fact_name(fp) << state_separator;
-                oss << (values[fp.var] == fp.value ? 1 : 0);
-            }
-            oss << field_separator;
+            string state_str = "";
+            for (const FactPair &fp: relevant_facts)
+                state_str += (values[fp.var] == fp.value ? '1' : '0');
+            if (state_value_pairs.count(state_str) == 0)
+                state_value_pairs[state_str] = task->estimated_heuristic;
+            else if (task->estimated_heuristic < state_value_pairs[state_str])
+                state_value_pairs[state_str] = task->estimated_heuristic;
         }
+    }
+    vector<string> samples;
+    for (std::shared_ptr<PartialAssignment>& task: sampling_technique::modified_tasks) {
+        vector<int> values;
+        if (use_full_state) {
+            State s = task->get_full_state(true, *rng).second;
+            s.unpack();
+            values = s.get_values();
+        } else {
+            values = task->get_values();
+        }
+        string state_str = "";
+        for (const FactPair &fp: relevant_facts)
+            state_str += (values[fp.var] == fp.value ? '1' : '0');
+
+        ostringstream oss;
+
+        if (store_plan_cost)
+            oss << (match_heuristics ? state_value_pairs[state_str] : task->estimated_heuristic) << field_separator;
+        if (store_state)
+            oss << state_str << field_separator;
 
         string s = oss.str();
         s.pop_back();
@@ -75,6 +91,7 @@ SamplingSearchFukunaga::SamplingSearchFukunaga(const options::Options &opts)
       store_plan_cost(opts.get<bool>("store_plan_cost")),
       store_state(opts.get<bool>("store_state")),
       use_full_state(opts.get<bool>("use_full_state")),
+      match_heuristics(opts.get<bool>("match_heuristics")),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       header(construct_header()){
 }
@@ -99,6 +116,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_fukunaga(OptionParser &pa
     parser.add_option<bool>(
             "use_full_state",
             "Transform partial assignment to full state.",
+            "false");
+    parser.add_option<bool>(
+            "match_heuristics",
+            "Identical states receive the best heuristic value assigned between them.",
             "false");
 
     SearchEngine::add_options_to_parser(parser);

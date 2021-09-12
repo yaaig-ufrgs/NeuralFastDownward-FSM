@@ -24,6 +24,7 @@ protected:
     const bool store_plan_cost;
     const bool store_state;
     const bool use_full_state;
+    const bool match_heuristics;
     const std::vector<FactPair> relevant_facts;
     const std::string header;
 
