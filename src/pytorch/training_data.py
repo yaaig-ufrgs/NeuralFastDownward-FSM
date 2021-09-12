@@ -59,15 +59,12 @@ def load_training_state_value_pairs(samples_file: str) -> ([([int], int)], int):
     for line in lines:
         if line[0] != "#":
             l = line.split("\n")[0].split(";")
-            state = []
-            for i in range(1, len(l)):
-                state.append(int(l[i]))
+            state = [int(i) for i in l[1]]
             state_value_pairs.append((state, int(l[0])))
             if state_value_pairs[-1][1] > domain_max_value:
                 domain_max_value = state_value_pairs[-1][1]
 
     return state_value_pairs, domain_max_value
-
 
 def generate_optimal_state_value_pairs(domain, problems):
     """
