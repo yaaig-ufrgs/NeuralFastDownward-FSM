@@ -502,9 +502,9 @@ bool sample_next_state_with_depth_first_search(
         S &current_state,
         S &previous_state,
         S &pre_previous_state,
+        int &rng_seed,
         int &idx_op,
         const G &generator,
-        //utils::RandomNumberGenerator &rng,
         const function<S (const S &, const OperatorID &)> &construct_candidate,
         const function<bool (S &)> *is_dead_end = nullptr,
         const function<bool (S &)> *is_valid_state = nullptr) {
@@ -513,7 +513,9 @@ bool sample_next_state_with_depth_first_search(
     previous_state = move(current_state);
     vector<OperatorID> applicable_operators;
     generator.generate_applicable_ops(previous_state, applicable_operators);
-    // rng.shuffle(applicable_operators);
+
+    utils::RandomNumberGenerator rng(rng_seed);
+    rng.shuffle(applicable_operators);
 
     while ((unsigned)idx_op < applicable_operators.size()){
         S candidate_state = construct_candidate(previous_state, applicable_operators[idx_op]);
@@ -533,6 +535,7 @@ bool sample_next_state_with_depth_first_search(
 template<typename S, typename G>
 S sample_with_depth_first_search(
         const S &state,
+        int &rng_seed,
         int &idx_op,
         const G &generator,
         //utils::RandomNumberGenerator &rng,
@@ -548,9 +551,9 @@ S sample_with_depth_first_search(
             current_state,
             previous_state,
             pre_previous_state,
+            rng_seed,
             idx_op,
             generator,
-            //rng,
             construct_candidate,
             is_dead_end,
             is_valid_state)) {
@@ -564,8 +567,8 @@ S sample_with_depth_first_search(
 static PartialAssignment sample_partial_assignment_with_depth_first_search(
     const RegressionTaskProxy &regression_task_proxy, const PartialAssignment &goals,
     const predecessor_generator::PredecessorGenerator &predecessor_generator,
+    int &rng_seed,
     int &idx_op,
-    //utils::RandomNumberGenerator &rng,
     const ValidStateDetector & is_valid_state,
     const PartialDeadEndDetector &is_dead_end) {
 
@@ -579,9 +582,9 @@ static PartialAssignment sample_partial_assignment_with_depth_first_search(
     };
     return sample_with_depth_first_search(
             goals,
+            rng_seed,
             idx_op,
             predecessor_generator,
-            //rng,
             construct_candidate,
             &is_dead_end,
             &is_valid_state
@@ -603,6 +606,7 @@ DFSSampler::~DFSSampler() {
 
 PartialAssignment DFSSampler::sample_state_length(
     const PartialAssignment &goals,
+    int &rng_seed,
     int &idx_op,
     const ValidStateDetector &is_valid_state,
     const PartialDeadEndDetector &is_dead_end) const {
@@ -610,8 +614,8 @@ PartialAssignment DFSSampler::sample_state_length(
         regression_task_proxy,
         goals,
         *predecessor_generator,
+        rng_seed,
         idx_op,
-        //rng,
         is_valid_state,
         is_dead_end);
 }
