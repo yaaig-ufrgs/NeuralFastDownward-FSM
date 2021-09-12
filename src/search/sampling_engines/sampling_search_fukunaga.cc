@@ -59,8 +59,6 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
                     // oss << this->task->get_fact_name(fp) << state_separator;
                 oss << (values[fp.var] == fp.value ? 1 : 0);
             }
-
-            oss.seekp(-1, oss.cur);
             oss << field_separator;
         }
 
