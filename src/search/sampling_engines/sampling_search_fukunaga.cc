@@ -37,9 +37,61 @@ string SamplingSearchFukunaga::sample_file_header() const {
 }
 
 vector<string> SamplingSearchFukunaga::extract_samples() {
-    unordered_map<string,int> state_value_pairs;
-    if (match_heuristics) {
-        for (std::shared_ptr<PartialAssignment>& task: sampling_technique::modified_tasks) {
+    // unordered_map<string,int> state_value_pairs;
+    // if (match_heuristics) {
+    //     for (std::shared_ptr<PartialAssignment>& task: sampling_technique::modified_tasks) {
+    //         vector<int> values;
+    //         if (use_full_state) {
+    //             State s = task->get_full_state(true, *rng).second;
+    //             s.unpack();
+    //             values = s.get_values();
+    //         } else {
+    //             values = task->get_values();
+    //         }
+    //         string state_str = "";
+    //         for (const FactPair &fp: relevant_facts)
+    //             state_str += (values[fp.var] == fp.value ? '1' : '0');
+    //         if (state_value_pairs.count(state_str) == 0)
+    //             state_value_pairs[state_str] = task->estimated_heuristic;
+    //         else if (task->estimated_heuristic < state_value_pairs[state_str])
+    //             state_value_pairs[state_str] = task->estimated_heuristic;
+    //     }
+    // }
+    // vector<string> samples;
+    // for (std::shared_ptr<PartialAssignment>& task: sampling_technique::modified_tasks) {
+    //     vector<int> values;
+    //     if (use_full_state) {
+    //         State s = task->get_full_state(true, *rng).second;
+    //         s.unpack();
+    //         values = s.get_values();
+    //     } else {
+    //         values = task->get_values();
+    //     }
+    //     string state_str = "";
+    //     for (const FactPair &fp: relevant_facts)
+    //         state_str += (values[fp.var] == fp.value ? '1' : '0');
+
+    //     ostringstream oss;
+
+    //     if (store_plan_cost)
+    //         oss << (match_heuristics ? state_value_pairs[state_str] : task->estimated_heuristic) << field_separator;
+    //     if (store_state)
+    //         oss << state_str << field_separator;
+
+    //     string s = oss.str();
+    //     s.pop_back();
+
+    //     samples.push_back(s);
+    // }
+    vector<string> samples;
+    for (std::shared_ptr<PartialAssignment>& task: sampling_technique::modified_tasks) {
+        ostringstream oss;
+
+        if (store_plan_cost) {
+            oss << task->estimated_heuristic << field_separator;
+        }
+
+        if (store_state) {
             vector<int> values;
             if (use_full_state) {
                 State s = task->get_full_state(true, *rng).second;
@@ -48,40 +100,35 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
             } else {
                 values = task->get_values();
             }
-            string state_str = "";
-            for (const FactPair &fp: relevant_facts)
-                state_str += (values[fp.var] == fp.value ? '1' : '0');
-            if (state_value_pairs.count(state_str) == 0)
-                state_value_pairs[state_str] = task->estimated_heuristic;
-            else if (task->estimated_heuristic < state_value_pairs[state_str])
-                state_value_pairs[state_str] = task->estimated_heuristic;
+            for (const FactPair &fp: relevant_facts) {
+                // if (values[fp.var] == fp.value)
+                    // oss << this->task->get_fact_name(fp) << state_separator;
+                oss << (values[fp.var] == fp.value ? 1 : 0);
+            }
+            oss << field_separator;
         }
-    }
-    vector<string> samples;
-    for (std::shared_ptr<PartialAssignment>& task: sampling_technique::modified_tasks) {
-        vector<int> values;
-        if (use_full_state) {
-            State s = task->get_full_state(true, *rng).second;
-            s.unpack();
-            values = s.get_values();
-        } else {
-            values = task->get_values();
-        }
-        string state_str = "";
-        for (const FactPair &fp: relevant_facts)
-            state_str += (values[fp.var] == fp.value ? '1' : '0');
-
-        ostringstream oss;
-
-        if (store_plan_cost)
-            oss << (match_heuristics ? state_value_pairs[state_str] : task->estimated_heuristic) << field_separator;
-        if (store_state)
-            oss << state_str << field_separator;
 
         string s = oss.str();
         s.pop_back();
 
         samples.push_back(s);
+    }
+    if (match_heuristics) {
+        unordered_map<string,int> pairs;
+        string state;
+        int h, cut;
+        for (string& s : samples) {
+            cut = s.find_first_of(";");
+            h = stoi(s.substr(0, cut));
+            string state = s.substr(cut+1);
+            if (pairs.count(state) == 0 || h < pairs[state])
+                pairs[state] = h;
+        }
+        for (string& s : samples) {
+            cut = s.find_first_of(";");
+            string state = s.substr(cut+1);
+            s = to_string(pairs[state]) + ";" + state;
+        }
     }
     return samples;
 }

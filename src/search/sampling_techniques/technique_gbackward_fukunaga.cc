@@ -107,7 +107,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
         stack<pair<PartialAssignment,int>> stack;
         int idx_op = 0;
         while (samples.size() < (unsigned)samples_per_search) {
-            int dfs_seed = (bias_reload_counter * samples_per_search + partial_assignment.estimated_heuristic) + rng->get_seed() * 1000;
+            int dfs_seed = (bias_reload_counter * samples_per_search + partial_assignment.estimated_heuristic) +
+                           (rng->get_seed() * ((searches+1) * samples_per_search));
             PartialAssignment new_partial_assignment = dfss->sample_state_length(
                 partial_assignment,
                 dfs_seed,
