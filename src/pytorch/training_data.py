@@ -66,7 +66,6 @@ def load_training_state_value_pairs(samples_file: str) -> ([([int], int)], int):
 
     return state_value_pairs, domain_max_value
 
-
 def generate_optimal_state_value_pairs(domain, problems):
     """
     Generates the state value pair from a set of problems.
