@@ -94,21 +94,22 @@ class TrainWorkflow:
         traced_model.save(filename)
 
     def save_scatter_plot(self, t: int):
-        for X, y in self.train_dataloader:
-            pred = self.model(X)
-            x_lst = X.tolist()
+        with torch.no_grad():
+            for X, y in self.train_dataloader:
+                pred = self.model(X)
+                x_lst = X.tolist()
 
-            for i, _ in enumerate(x_lst):
-                x_int = [int(x) for x in x_lst[i]]
-                x_str = ''.join(str(e) for e in x_int)
-                self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+                for i, _ in enumerate(x_lst):
+                    x_int = [int(x) for x in x_lst[i]]
+                    x_str = ''.join(str(e) for e in x_int)
+                    self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
 
-        if t != -1:
-            save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}")
-            self.y_pred_values.clear()
-        else:
-            _log.info(f"Saving post-training scatter plot to {self.dirname}/plots.")
-            save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}")
+            if t != -1:
+                save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}")
+                self.y_pred_values.clear()
+            else:
+                _log.info(f"Saving post-training scatter plot to {self.dirname}/plots.")
+                save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}")
 
 
     def run(self, train_timer, validation=True):
@@ -149,7 +150,6 @@ class TrainWorkflow:
                 _log.info("Done!")
 
         # Post-training scatter plot.
-        with torch.no_grad():
-            self.save_scatter_plot(-1)
+        self.save_scatter_plot(-1)
 
         return cur_val_loss if validation else None
