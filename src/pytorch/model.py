@@ -13,6 +13,7 @@ class HNN(nn.Module):
         output_layer: str,
         dropout_rate: float,
         linear_output: bool,
+        use_bias: bool,
     ):
         super(HNN, self).__init__()
         self.input_units = input_units
@@ -36,8 +37,8 @@ class HNN(nn.Module):
 
         self.hid = nn.ModuleList()
         for i in range(self.hidden_layers):
-            self.hid.append(nn.Linear(hu[i], hu[i + 1]))
-        self.opt = nn.Linear(hu[-1], output_units)
+            self.hid.append(nn.Linear(hu[i], hu[i + 1], bias=use_bias))
+        self.opt = nn.Linear(hu[-1], output_units, bias=use_bias)
 
         if self.dropout_rate > 0:
             self.dropout = nn.Dropout(self.dropout_rate, inplace=False)
@@ -60,6 +61,16 @@ class HNN(nn.Module):
                 f"{output_layer} not implemented for output layer!"
             )
 
+        #self.initialize_weights()
+
+
+    #def initialize_weights(self):
+    #    for m in self.modules():
+    #        if isinstance(m, nn.Linear):
+    #            nn.init.kaiming_uniform_(m.weight)
+    #            if m.bias is not None:
+    #                nn.init.constant_(m.bias, 0)
+                    
     def forward(self, x):
         for h in self.hid:
             x = self.activation(h(x))

@@ -12,6 +12,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_WEIGHT_DECAY,
     DEFAULT_DROPOUT_RATE,
     DEFAULT_SHUFFLE,
+    DEFAULT_BIAS,
     DEFAULT_LEARNING_RATE,
     DEFAULT_MAX_EPOCHS,
     DEFAULT_MAX_TRAINING_TIME,
@@ -132,6 +133,13 @@ def get_train_args():
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
         default=DEFAULT_SHUFFLE,
         help="Shuffle the training data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-bi",
+        "--bias",
+        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        default=DEFAULT_BIAS,
+        help="Use bias or not. (default: %(default)s)",
     )
     parser.add_argument(
         "-of",
