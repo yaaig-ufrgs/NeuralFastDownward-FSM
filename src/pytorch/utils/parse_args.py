@@ -28,7 +28,9 @@ from src.pytorch.utils.default_args import (
     DEFAULT_TEST_MODEL,
     DEFAULT_SCATTER_PLOT,
     DEFAULT_SCATTER_PLOT_N_EPOCHS,
-    DEFAULT_HEURISTIC_MULTIPLIER
+    DEFAULT_HEURISTIC_MULTIPLIER,
+    DEFAULT_WEIGHTS_METHOD,
+    DEFAULT_WEIGHTS_SEED,
 )
 
 
@@ -169,7 +171,20 @@ def get_train_args():
         default=DEFAULT_SCATTER_PLOT_N_EPOCHS,
         help="Do a scatter plot every n epochs. If -1, plot only after training. (default: %(default)s)",
     )
-
+    parser.add_argument(
+        "-wm",
+        "--weights-method",
+        choices=["none", "sqrt_k", "1", "xavier_uniform", "xavier_normal"],
+        default=DEFAULT_WEIGHTS_METHOD,
+        help="Inicialization of network weights. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-ws",
+        "--weights-seed",
+        type=int,
+        default=DEFAULT_WEIGHTS_SEED,
+        help="Random seed to be used. Defaults to no seed. (default: %(default)s)",
+    )
 
     return parser.parse_args()
 

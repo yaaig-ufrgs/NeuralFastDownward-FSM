@@ -1,5 +1,8 @@
+from src.pytorch.utils.default_args import DEFAULT_WEIGHTS_METHOD
 import torch
 import torch.nn as nn
+import random
+from math import sqrt
 
 # H(euristic) Neural Network
 class HNN(nn.Module):
@@ -14,6 +17,8 @@ class HNN(nn.Module):
         dropout_rate: float,
         linear_output: bool,
         use_bias: bool,
+        weights_method: str,
+        weights_seed: int,
     ):
         super(HNN, self).__init__()
         self.input_units = input_units
@@ -61,15 +66,47 @@ class HNN(nn.Module):
                 f"{output_layer} not implemented for output layer!"
             )
 
-        #self.initialize_weights()
+        if weights_method != DEFAULT_WEIGHTS_METHOD:
+            self.initialize_weights(weights_method, weights_seed)
 
 
-    #def initialize_weights(self):
-    #    for m in self.modules():
-    #        if isinstance(m, nn.Linear):
-    #            nn.init.kaiming_uniform_(m.weight)
-    #            if m.bias is not None:
-    #                nn.init.constant_(m.bias, 0)
+    def initialize_weights(self, method, seed):
+        random.seed(seed)
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                if method == "sqrt_k":
+                    k = 1.0/m.in_features
+                    a, b = -sqrt(k), sqrt(k)
+                    nn.init.uniform_(m.weight, a, b)
+                    nn.init.uniform_(m.bias, a, b)
+                elif method == "1":
+                    a, b = -1.0, 1.0
+                    nn.init.uniform_(m.weight, a, b)
+                    nn.init.uniform_(m.bias, a, b)
+                elif "xavier" in method:
+                    gain = 1.0
+
+                    fan_in, fan_out = nn.init._calculate_fan_in_and_fan_out(m.weight)
+                    std = gain * sqrt(2.0 / float(fan_in+fan_out))
+                    if "uniform" in method:
+                        a = sqrt(3.0) * std
+                        with torch.no_grad():
+                            nn.init.uniform_(m.weight, -a, a)
+                    elif "normal" in method:
+                        with torch.no_grad():
+                            nn.init.normal_(m.weight, 0.0, std)
+                    
+                    fan_in, fan_out = nn.init._calculate_fan_in_and_fan_out(m.bias)
+                    std = gain * sqrt(2.0 / float(fan_in+fan_out))
+                    if "uniform" in method:
+                        a = sqrt(3.0) * std
+                        with torch.no_grad():
+                            nn.init.uniform_(m.bias, -a, a)
+                    elif "normal" in method:
+                        with torch.no_grad():
+                            nn.init.normal_(m.bias, 0.0, std)
+                else:
+                    raise NotImplementedError(f"Weights method {method} not implemented!")
                     
     def forward(self, x):
         for h in self.hid:

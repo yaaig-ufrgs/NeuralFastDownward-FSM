@@ -71,6 +71,8 @@ def train_main(args):
             dropout_rate=args.dropout_rate,
             linear_output=args.linear_output,
             use_bias=args.bias,
+            weights_method=args.weights_method,
+            weights_seed=args.weights_seed,
         ).to(torch.device("cpu"))
 
         if fold_idx == 0:
