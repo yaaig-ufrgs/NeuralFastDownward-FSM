@@ -70,44 +70,56 @@ class HNN(nn.Module):
             self.initialize_weights(weights_method, weights_seed)
 
 
+    def set_random(self, type, tensor, a, b):
+        dim = len(tensor.size())
+        with torch.no_grad():
+            for i in range(len(tensor)):
+                if dim == 1:
+                    if type == "uniform":
+                        tensor[i] = random.uniform(a, b)
+                    elif type == "normal":
+                        tensor[i] = random.normalvariate(a, b)
+                else:
+                    for j in range(len(tensor[i])):
+                        if type == "uniform":
+                            tensor[i][j] = random.uniform(a, b)
+                        elif type == "normal":
+                            tensor[i][j] = random.normalvariate(a, b)
+
+
     def initialize_weights(self, method, seed):
+        bias_zero = ["xavier_uniform", "xavier_normal"]
         random.seed(seed)
         for m in self.modules():
             if isinstance(m, nn.Linear):
                 if method == "sqrt_k":
+                    type = "uniform"
                     k = 1.0/m.in_features
                     a, b = -sqrt(k), sqrt(k)
-                    nn.init.uniform_(m.weight, a, b)
-                    nn.init.uniform_(m.bias, a, b)
                 elif method == "1":
+                    type = "uniform"
                     a, b = -1.0, 1.0
-                    nn.init.uniform_(m.weight, a, b)
-                    nn.init.uniform_(m.bias, a, b)
                 elif "xavier" in method:
                     gain = 1.0
-
                     fan_in, fan_out = nn.init._calculate_fan_in_and_fan_out(m.weight)
                     std = gain * sqrt(2.0 / float(fan_in+fan_out))
                     if "uniform" in method:
+                        type = "uniform"
                         a = sqrt(3.0) * std
-                        with torch.no_grad():
-                            nn.init.uniform_(m.weight, -a, a)
+                        a, b = -a, a
                     elif "normal" in method:
-                        with torch.no_grad():
-                            nn.init.normal_(m.weight, 0.0, std)
-                    
-                    fan_in, fan_out = nn.init._calculate_fan_in_and_fan_out(m.bias)
-                    std = gain * sqrt(2.0 / float(fan_in+fan_out))
-                    if "uniform" in method:
-                        a = sqrt(3.0) * std
-                        with torch.no_grad():
-                            nn.init.uniform_(m.bias, -a, a)
-                    elif "normal" in method:
-                        with torch.no_grad():
-                            nn.init.normal_(m.bias, 0.0, std)
+                        type = "normal"
+                        a, b = 0.0, std
                 else:
                     raise NotImplementedError(f"Weights method {method} not implemented!")
-                    
+
+                self.set_random(type, m.weight, a, b)
+                if method in bias_zero:
+                    torch.nn.init.zeros_(m.bias)
+                else:
+                    self.set_random(type, m.bias, a, b)
+
+
     def forward(self, x):
         for h in self.hid:
             x = self.activation(h(x))
