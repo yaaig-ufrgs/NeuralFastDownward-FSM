@@ -3,8 +3,10 @@ import imageio
 import glob
 import logging
 import csv
-from os import path, makedirs, remove
+import pandas as pd
+import seaborn as sns
 import numpy as np
+from os import path, makedirs, remove
 
 _log = logging.getLogger(__name__)
 logging.getLogger('matplotlib.font_manager').disabled = True
@@ -49,14 +51,8 @@ def save_y_pred_scatter(data: dict, t: int, directory: str):
     plt.clf()
     plt.close(fig)
 
-def save_box_plot(directory: str):
-    """
-    Creates a box plot with hnn, h* and goalcount (when possible, i.e. all the data is available).
-    """
-    pass
 
-
-def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h):
+def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h: str) -> dict:
     """
     Creates a scatter plot with hnn and some other heuristic (if data for it is available).
     """
@@ -114,6 +110,43 @@ def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h):
     plt.clf()
     plt.close(fig)
 
+    return data
+
+
+def save_box_plot(directory: str, data: dict, csv_h: str):
+    """
+    Creates a box plot with hnn, h* and goalcount (when possible, i.e. all the data is available).
+    """
+    with open(csv_h, "r") as f:
+        reader = csv.reader(f)
+        next(reader, None)
+        for row in reader:
+            state = row[0]
+            h = row[1]
+            if state in data:
+                #merged_data[state][2] = int(h)
+                data[state].append(int(h))
+
+    hnn = [data[key][0] for key in data]
+    goalcount = [data[key][1] for key in data]
+    hstar = [data[key][2] for key in data]
+
+    hnn_sub_exact = [a - b for a, b in zip(hnn, hstar)]
+    goalcount_sub_exact = [a - b for a, b in zip(goalcount, hstar)]
+
+    df_sub_hnn = pd.DataFrame(list(zip(hstar, hnn_sub_exact)), columns =['h*', 'heuristic - h*']).assign(heuristic="hnn")
+    df_sub_gc = pd.DataFrame(list(zip(hstar, goalcount_sub_exact)), columns =['h*', 'heuristic - h*']).assign(heuristic="goalcount")
+    cdf = pd.concat([df_sub_hnn, df_sub_gc])
+
+    dir_split = directory.split('/')[-2].split('_')
+    seeds = dir_split[-1].replace('.', '_')[0:7]
+    plot_name = '_'.join(dir_split[2:-1]) + "_" + seeds
+    plot_filename = "box_" + plot_name
+
+    ax = sns.boxplot(x="h*", y="heuristic - h*", hue="heuristic", data=cdf, fliersize=2).set_title(plot_name)
+    ax.figure.savefig(directory+"/"+plot_filename)
+    plt.clf()
+
 
 def save_gif_from_plots(directory: str):
     """
@@ -131,6 +164,7 @@ def save_gif_from_plots(directory: str):
         for f in plot_files:
             image = imageio.imread(f)
             writer.append_data(image)
+
 
 def remove_intermediate_plots(plots_dir: str):
    """

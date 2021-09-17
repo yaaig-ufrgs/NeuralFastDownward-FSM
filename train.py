@@ -21,6 +21,7 @@ from src.pytorch.utils.helpers import (
 from src.pytorch.utils.plot import (
     save_y_pred_scatter,
     save_h_pred_scatter,
+    save_box_plot,
     save_gif_from_plots,
     remove_intermediate_plots,
 )
@@ -130,29 +131,34 @@ def train_main(args):
     except:
         _log.error(f"Failed to save best fold.")
 
+
+    ### SAVE HEURISTIC_PRED.CSV
     heuristic_pred_file = f"{dirname}/heuristic_pred.csv"
 
     try:
         _log.info(
-            f"Saving post-training state,pred,y csv file to {dirname}/heuristic_pred.csv"
+            f"Saving post-training state,pred,y csv file to heuristic_pred.csv"
         )
         save_y_pred_csv(train_wf.y_pred_values, heuristic_pred_file)
     except:
         _log.error(f"Failed to save csv file.")
 
+
+    ### PLOTTING
     plots_dir = f"{dirname}/plots"
 
     if args.scatter_plot and args.plot_n_epochs != -1:
         try:
             _log.info(
-                f"Saving scatter plot GIF to {plots_dir}"
+                f"Saving scatter plot GIF."
             )
             save_gif_from_plots(plots_dir)
             remove_intermediate_plots(plots_dir)
         except:
             _log.error(f"Failed making plot GIF.")
        
-    _log.info("Training complete!")
+    problem_name = '_'.join(dirname.split('/')[-1].split('_')[2:4])
+    data = {}
 
     if args.compare_csv_dir != "" and os.path.isfile(heuristic_pred_file):
         csv_dir = args.compare_csv_dir
@@ -161,15 +167,32 @@ def train_main(args):
         problem_name = '_'.join(dirname.split('/')[-1].split('_')[2:4])
         csv_h = glob.glob(csv_dir + problem_name + ".csv")
 
-        try:
-            _log.info(
-                f"Saving h^nn vs. h scatter plot to {plots_dir}"
-            )
-            save_h_pred_scatter(plots_dir, heuristic_pred_file, csv_h[0])
-        except:
-            _log.error(f"Failed making hnn vs. h scatter plot.")
+        if len(csv_h) > 0:
+            try:
+                _log.info(
+                    f"Saving h^nn vs. h scatter plot."
+                )
+                data = save_h_pred_scatter(plots_dir, heuristic_pred_file, csv_h[0])
+            except:
+                _log.error(f"Failed making hnn vs. h scatter plot.")
+
+    if len(data) > 0 and args.hstar_csv_dir != "":
+        csv_dir = args.hstar_csv_dir
+        if csv_dir[-1] != "/":
+            csv_dir += "/"
+        csv_hstar = glob.glob(csv_dir + problem_name + ".csv")
+
+        if len(csv_hstar) > 0:
+            try:
+                _log.info(
+                    f"Saving box plot."
+                )
+                save_box_plot(plots_dir, data, csv_hstar[0])
+            except:
+                _log.error(f"Failed making box plot.")
 
 
+    _log.info("Training complete!")
 
 
 if __name__ == "__main__":
