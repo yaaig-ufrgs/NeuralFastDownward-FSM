@@ -5,7 +5,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from src.pytorch.model import HNN
-from src.pytorch.utils.helpers import save_y_pred_scatter
+from src.pytorch.utils.plot import save_y_pred_scatter
 
 _log = logging.getLogger(__name__)
 

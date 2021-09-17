@@ -15,6 +15,8 @@ from src.pytorch.utils.helpers import (
     create_train_directory,
     get_fixed_max_epochs,
     save_y_pred_csv,
+   )
+from src.pytorch.utils.plot import (
     save_y_pred_scatter,
     save_gif_from_plots,
 )
