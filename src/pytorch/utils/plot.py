@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import imageio
 import glob
 import logging
+import csv
 from os import path, makedirs, remove
 import numpy as np
 
@@ -55,11 +56,64 @@ def save_box_plot(directory: str):
     pass
 
 
-def save_h_pred_scatter(data: dict, directory: str):
+def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h):
     """
     Creates a scatter plot with hnn and some other heuristic (if data for it is available).
     """
-    pass
+    merged_data = {}
+    with open(csv_hnn, "r") as f:
+        reader = csv.reader(f)
+        next(reader, None)
+        for row in reader:
+            state = row[0]
+            h_pred = row[2]
+            merged_data[state] = [int(h_pred), None]
+
+    with open(csv_h, "r") as f:
+        reader = csv.reader(f)
+        next(reader, None)
+        for row in reader:
+            state = row[0]
+            h = row[1]
+            if state in merged_data:
+                merged_data[state][1] = int(h)
+
+    data = {k: v for k, v in merged_data.items() if None not in v}
+
+    hnn = [data[key][0] for key in data]
+    h = [data[key][1] for key in data]
+
+    fig, ax = plt.subplots()
+    ax.scatter(h, hnn, s=2, alpha=0.35, c="red", zorder=10)
+
+    lims = [
+        np.min([ax.get_xlim(), ax.get_ylim()]),  # min of both axes
+        np.max([ax.get_xlim(), ax.get_ylim()]),  # max of both axes
+    ]
+
+    ax.plot(lims, lims, 'k-', alpha=0.80, zorder=0)
+    ax.set_aspect('equal')
+    ax.set_xlim(lims)
+    ax.set_ylim(lims)
+
+    dir_split = directory.split('/')[-2].split('_')
+    seeds = dir_split[-1].replace('.', '_')[0:7]
+    plot_name = '_'.join(dir_split[2:-1]) + "_" + seeds
+
+    ax.set_title(plot_name, fontsize=10)
+
+    compared_heuristic = csv_h.split('/')[-2]
+    if compared_heuristic == "hstar":
+        compared_heuristic = "h*"
+
+    ax.set_xlabel(compared_heuristic)
+    ax.set_ylabel("h^NN")
+
+    plot_filename = "hnn_" + compared_heuristic + "_" + plot_name
+    fig.savefig(directory+"/"+plot_filename)
+    plt.clf()
+    plt.close(fig)
+
 
 def save_gif_from_plots(directory: str):
     """

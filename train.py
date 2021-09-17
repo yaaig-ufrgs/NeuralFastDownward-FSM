@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import os
 import logging
 import random
 import numpy as np
+import glob
 import torch
 from shutil import copyfile
 
@@ -18,6 +20,7 @@ from src.pytorch.utils.helpers import (
    )
 from src.pytorch.utils.plot import (
     save_y_pred_scatter,
+    save_h_pred_scatter,
     save_gif_from_plots,
     remove_intermediate_plots,
 )
@@ -127,19 +130,22 @@ def train_main(args):
     except:
         _log.error(f"Failed to save best fold.")
 
+    heuristic_pred_file = f"{dirname}/heuristic_pred.csv"
+
     try:
         _log.info(
             f"Saving post-training state,pred,y csv file to {dirname}/heuristic_pred.csv"
         )
-        save_y_pred_csv(train_wf.y_pred_values, f"{dirname}/heuristic_pred.csv")
+        save_y_pred_csv(train_wf.y_pred_values, heuristic_pred_file)
     except:
         _log.error(f"Failed to save csv file.")
 
+    plots_dir = f"{dirname}/plots"
+
     if args.scatter_plot and args.plot_n_epochs != -1:
         try:
-            plots_dir = f"{dirname}/plots"
             _log.info(
-                f"Saving plot GIF to {plots_dir}"
+                f"Saving scatter plot GIF to {plots_dir}"
             )
             save_gif_from_plots(plots_dir)
             remove_intermediate_plots(plots_dir)
@@ -147,6 +153,23 @@ def train_main(args):
             _log.error(f"Failed making plot GIF.")
        
     _log.info("Training complete!")
+
+    if args.compare_csv_dir != "" and os.path.isfile(heuristic_pred_file):
+        csv_dir = args.compare_csv_dir
+        if csv_dir[-1] != "/":
+            csv_dir += "/"
+        problem_name = '_'.join(dirname.split('/')[-1].split('_')[2:4])
+        csv_h = glob.glob(csv_dir + problem_name + ".csv")
+
+        try:
+            _log.info(
+                f"Saving h^nn vs. h scatter plot to {plots_dir}"
+            )
+            save_h_pred_scatter(plots_dir, heuristic_pred_file, csv_h[0])
+        except:
+            _log.error(f"Failed making hnn vs. h scatter plot.")
+
+
 
 
 if __name__ == "__main__":

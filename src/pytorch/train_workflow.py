@@ -156,6 +156,6 @@ class TrainWorkflow:
                     x_str = ''.join(str(e) for e in x_int)
                     self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
 
-            _log.info(f"Saving post-training scatter plot to {self.dirname}/plots")
+            _log.info(f"Saving post-training scatter plot.")
             save_y_pred_scatter(self.y_pred_values, -1, f"{self.dirname}/plots")
 

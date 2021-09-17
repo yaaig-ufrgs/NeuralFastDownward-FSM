@@ -32,6 +32,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_HEURISTIC_MULTIPLIER,
     DEFAULT_WEIGHTS_METHOD,
     DEFAULT_WEIGHTS_SEED,
+    DEFAULT_COMPARED_HEURISTIC_CSV_DIR,
 )
 
 
@@ -192,6 +193,13 @@ def get_train_args():
         type=int,
         default=DEFAULT_WEIGHTS_SEED,
         help="Random seed to be used. Defaults to no seed. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-cdir",
+        "--compare-csv-dir",
+        type=str,
+        default=DEFAULT_COMPARED_HEURISTIC_CSV_DIR,
+        help="Directory with CSV data to compare h^nn against; used for plotting. (default: %(default)s)",
     )
 
     return parser.parse_args()
