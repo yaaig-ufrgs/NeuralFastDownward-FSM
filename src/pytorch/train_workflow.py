@@ -105,11 +105,11 @@ class TrainWorkflow:
                     self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
 
             if t != -1:
-                save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}")
+                save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}/plots")
                 self.y_pred_values.clear()
             else:
-                _log.info(f"Saving post-training scatter plot to {self.dirname}/plots.")
-                save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}")
+                _log.info(f"Saving post-training scatter plot to {self.dirname}/plots")
+                save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}/plots")
 
 
     def run(self, train_timer, validation=True):

@@ -19,6 +19,7 @@ from src.pytorch.utils.helpers import (
 from src.pytorch.utils.plot import (
     save_y_pred_scatter,
     save_gif_from_plots,
+    remove_intermediate_plots,
 )
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
@@ -135,10 +136,12 @@ def train_main(args):
 
     if args.scatter_plot and args.plot_n_epochs != -1:
         try:
+            plots_dir = f"{dirname}/plots"
             _log.info(
-                f"Saving plot GIF to {dirname}/plots/"
+                f"Saving plot GIF to {plots_dir}"
             )
-            save_gif_from_plots(dirname)
+            save_gif_from_plots(plots_dir)
+            remove_intermediate_plots(plots_dir)
         except:
             _log.error(f"Failed making plot GIF.")
        

@@ -13,13 +13,14 @@ def save_y_pred_scatter(data: dict, t: int, directory: str):
     if t == -1:
         t = "final"
 
-    plots_folder = directory+"/plots"
-    if not path.exists(plots_folder):
-        makedirs(plots_folder)
+    if not path.exists(directory):
+        makedirs(directory)
 
-    dir_split = directory.split('/')[-1].split('_')
+    #dir_split = directory.split('/')[-1].split('_')
+    dir_split = directory.split('/')[-2].split('_')
     seeds = dir_split[-1].replace('.', '_')[0:7]
-    plot_filename = '_'.join(dir_split[2:-1]) + "_" + seeds + "_epoch_" + str(t)
+    plot_title = '_'.join(dir_split[2:-1]) + "_" + seeds
+    plot_filename = plot_title + "_epoch_" + str(t)
 
     real = [data[key][0] for key in data]
     pred = [data[key][1] for key in data]
@@ -39,20 +40,49 @@ def save_y_pred_scatter(data: dict, t: int, directory: str):
 
     ax.set_xlabel("h^sample")
     ax.set_ylabel("h^NN")
-    ax.set_title(plot_filename, fontsize=10)
+    epoch = "\nepoch " + str(t)
+    ax.set_title(plot_title+epoch, fontsize=10)
 
-    fig.savefig(plots_folder+"/"+plot_filename)
+    fig.savefig(directory+"/"+plot_filename)
 
     plt.clf()
     plt.close(fig)
 
+def save_box_plot(directory: str):
+    """
+    Creates a box plot with hnn, h* and goalcount (when possible, i.e. all the data is available).
+    """
+    pass
+
+
+def save_h_pred_scatter(data: dict, directory: str):
+    """
+    Creates a scatter plot with hnn and some other heuristic (if data for it is available).
+    """
+    pass
+
 def save_gif_from_plots(directory: str):
-    dir_split = directory.split('/')[-1].split('_')
+    """
+    Creates a scatter plot gif showing the evolution of the hnn in comparison
+    to the sample heuristic.
+    Only works if you have the arg -spn set up during training.
+    """
+
+    dir_split = directory.split('/')[-2].split('_')
     seeds = dir_split[-1].replace('.', '_')[0:7]
     gif_filename = '_'.join(dir_split[2:-1]) + "_" + seeds
-    plot_files = sorted(glob.glob(directory+"/plots/*"), key=path.getmtime)
+    plot_files = sorted(glob.glob(directory+"/*"), key=path.getmtime)
 
-    with imageio.get_writer(f'{directory}/plots/{gif_filename}.gif', mode='I') as writer:
+    with imageio.get_writer(f'{directory}/{gif_filename}.gif', mode='I') as writer:
         for f in plot_files:
             image = imageio.imread(f)
             writer.append_data(image)
+
+def remove_intermediate_plots(plots_dir: str):
+   """
+   Removes the intermediate plots used to create the plot gif.
+   """
+   if path.exists(plots_dir):
+       intermediate_plots = glob.glob(plots_dir+"/*_epoch_*[0-9]*.png")
+       for plot in intermediate_plots:
+           remove(plot)
