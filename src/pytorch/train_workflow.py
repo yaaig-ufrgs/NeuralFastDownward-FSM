@@ -54,7 +54,7 @@ class TrainWorkflow:
 
         return train_loss / num_batches
 
-    def val_loop(self):
+    def val_loop(self, t: int):
         # size = len(self.val_dataloader.dataset)
         num_batches = len(self.val_dataloader)
         val_loss = 0
@@ -63,6 +63,17 @@ class TrainWorkflow:
             for X, y in self.val_dataloader:
                 pred = self.model(X)
                 val_loss += self.loss_fn(pred, y).item()
+
+                if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
+                    x_lst = X.tolist()
+                    for i, _ in enumerate(x_lst):
+                        x_int = [int(x) for x in x_lst[i]]
+                        x_str = ''.join(str(e) for e in x_int)
+                        self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+
+            if len(self.y_pred_values) > 0:
+                save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}/plots")
+                self.y_pred_values.clear()
 
         return val_loss / num_batches
 
@@ -93,25 +104,6 @@ class TrainWorkflow:
         traced_model = torch.jit.trace(self.model, example_input)
         traced_model.save(filename)
 
-    def save_scatter_plot(self, t: int):
-        with torch.no_grad():
-            for X, y in self.train_dataloader:
-                pred = self.model(X)
-                x_lst = X.tolist()
-
-                for i, _ in enumerate(x_lst):
-                    x_int = [int(x) for x in x_lst[i]]
-                    x_str = ''.join(str(e) for e in x_int)
-                    self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
-
-            if t != -1:
-                save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}/plots")
-                self.y_pred_values.clear()
-            else:
-                _log.info(f"Saving post-training scatter plot to {self.dirname}/plots")
-                save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}/plots")
-
-
     def run(self, train_timer, validation=True):
         last_val_loss = 0
         max_epochs_without_improving = 100
@@ -119,11 +111,8 @@ class TrainWorkflow:
         for t in range(self.max_epochs):
             cur_train_loss = self.train_loop()
 
-            if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
-                self.save_scatter_plot(t)
-
             if validation:
-                cur_val_loss = self.val_loop()
+                cur_val_loss = self.val_loop(t)
                 if (last_val_loss - cur_val_loss) > 0.01:
                     count = 0
                 else:
@@ -150,6 +139,22 @@ class TrainWorkflow:
                 _log.info("Done!")
 
         # Post-training scatter plot.
-        self.save_scatter_plot(-1)
+        self.save_post_scatter_plot()
 
         return cur_val_loss if validation else None
+
+    def save_post_scatter_plot(self):
+        with torch.no_grad():
+            self.y_pred_values.clear()
+            for X, y in self.train_dataloader:
+                pred = self.model(X)
+                x_lst = X.tolist()
+
+                for i, _ in enumerate(x_lst):
+                    x_int = [int(x) for x in x_lst[i]]
+                    x_str = ''.join(str(e) for e in x_int)
+                    self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+
+            _log.info(f"Saving post-training scatter plot to {self.dirname}/plots")
+            save_y_pred_scatter(self.y_pred_values, -1, f"{self.dirname}/plots")
+
