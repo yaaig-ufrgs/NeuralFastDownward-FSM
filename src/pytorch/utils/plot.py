@@ -12,18 +12,17 @@ _log = logging.getLogger(__name__)
 logging.getLogger('matplotlib.font_manager').disabled = True
 logging.getLogger('PIL').setLevel(logging.WARNING)
 
-def save_y_pred_scatter(data: dict, t: int, directory: str):
+def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str):
     if t == -1:
         t = "final"
 
     if not path.exists(directory):
         makedirs(directory)
 
-    #dir_split = directory.split('/')[-1].split('_')
     dir_split = directory.split('/')[-2].split('_')
     seeds = dir_split[-1].replace('.', '_')[0:7]
     plot_title = '_'.join(dir_split[2:-1]) + "_" + seeds
-    plot_filename = plot_title + "_epoch_" + str(t)
+    plot_filename = f"{plot_title}_epoch_{str(t)}_{fold_idx}" 
 
     real = [data[key][0] for key in data]
     pred = [data[key][1] for key in data]
@@ -148,7 +147,7 @@ def save_box_plot(directory: str, data: dict, csv_h: str):
     plt.clf()
 
 
-def save_gif_from_plots(directory: str):
+def save_gif_from_plots(directory: str, fold_idx: int):
     """
     Creates a scatter plot gif showing the evolution of the hnn in comparison
     to the sample heuristic.
@@ -158,7 +157,7 @@ def save_gif_from_plots(directory: str):
     dir_split = directory.split('/')[-2].split('_')
     seeds = dir_split[-1].replace('.', '_')[0:7]
     gif_filename = '_'.join(dir_split[2:-1]) + "_" + seeds
-    plot_files = sorted(glob.glob(directory+"/*"), key=path.getmtime)
+    plot_files = sorted(glob.glob(f"{directory}/*{fold_idx}.png"), key=path.getmtime)
 
     with imageio.get_writer(f'{directory}/{gif_filename}.gif', mode='I') as writer:
         for f in plot_files:
@@ -166,11 +165,15 @@ def save_gif_from_plots(directory: str):
             writer.append_data(image)
 
 
-def remove_intermediate_plots(plots_dir: str):
+def remove_intermediate_plots(plots_dir: str, fold_idx: int):
    """
    Removes the intermediate plots used to create the plot gif.
    """
    if path.exists(plots_dir):
-       intermediate_plots = glob.glob(plots_dir+"/*_epoch_*[0-9]*.png")
-       for plot in intermediate_plots:
+       plots = glob.glob(plots_dir+"/*.png")
+       for plot in plots:
+           plot_split = plot.split('_')
+           idx = int(plot_split[-1].split('.')[0])
+           if idx == fold_idx and plot_split[-2] == "final":
+               continue
            remove(plot)

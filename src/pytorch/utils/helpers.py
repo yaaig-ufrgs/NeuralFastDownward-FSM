@@ -3,6 +3,7 @@ Simple auxiliary functions.
 """
 
 import logging
+import glob
 from json import dump, load
 from os import path, makedirs, remove
 from datetime import datetime
@@ -247,8 +248,8 @@ def logging_test_statistics(
     if save_file:
         save_json(test_results_filename, results)
 
-def remove_temporary_files(dirname: str):
-    output_sas = f"{dirname}/output.sas"
+def remove_temporary_files(directory: str):
+    output_sas = f"{directory}/output.sas"
     if path.exists(output_sas):
         remove(output_sas)
 
@@ -257,3 +258,11 @@ def save_y_pred_csv(data: dict, csv_filename: str):
         f.write("state,y,pred\n")
         for key in data.keys():
             f.write("%s,%s,%s\n" % (key, data[key][0], data[key][1]))
+
+def remove_csv_except_best(directory: str, fold_idx: int):
+    csv_files = glob.glob(directory+"/*.csv")
+    for f in csv_files:
+        f_split = f.split('_')
+        idx = int(f_split[-1].split('.')[0])
+        if idx != fold_idx:
+            remove(f)

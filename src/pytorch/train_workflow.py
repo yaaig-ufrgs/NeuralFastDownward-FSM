@@ -56,7 +56,7 @@ class TrainWorkflow:
 
         return train_loss / num_batches
 
-    def val_loop(self, t: int):
+    def val_loop(self, t: int, fold_idx: int):
         # size = len(self.val_dataloader.dataset)
         num_batches = len(self.val_dataloader)
         val_loss = 0
@@ -74,7 +74,7 @@ class TrainWorkflow:
                         self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
 
             if len(self.y_pred_values) > 0:
-                save_y_pred_scatter(self.y_pred_values, t, f"{self.dirname}/plots")
+                save_y_pred_scatter(self.y_pred_values, t, fold_idx, f"{self.dirname}/plots")
                 self.y_pred_values.clear()
 
         return val_loss / num_batches
@@ -106,14 +106,14 @@ class TrainWorkflow:
         traced_model = torch.jit.trace(self.model, example_input)
         traced_model.save(filename)
 
-    def run(self, train_timer, validation=True):
+    def run(self, fold_idx, train_timer, validation=True):
         last_val_loss = 0
         count = 0
         for t in range(self.max_epochs):
             cur_train_loss = self.train_loop()
 
             if validation:
-                cur_val_loss = self.val_loop(t)
+                cur_val_loss = self.val_loop(t, fold_idx)
                 if (last_val_loss - cur_val_loss) > 0.01:
                     count = 0
                 else:
@@ -140,11 +140,11 @@ class TrainWorkflow:
                 _log.info("Done!")
 
         # Post-training scatter plot.
-        self.save_post_scatter_plot()
+        self.save_post_scatter_plot(fold_idx)
 
         return cur_val_loss if validation else None
 
-    def save_post_scatter_plot(self):
+    def save_post_scatter_plot(self, fold_idx: int):
         with torch.no_grad():
             self.y_pred_values.clear()
             for X, y in self.train_dataloader:
@@ -157,5 +157,5 @@ class TrainWorkflow:
                     self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
 
             _log.info(f"Saving post-training scatter plot.")
-            save_y_pred_scatter(self.y_pred_values, -1, f"{self.dirname}/plots")
+            save_y_pred_scatter(self.y_pred_values, -1, fold_idx, f"{self.dirname}/plots")
 

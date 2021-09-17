@@ -17,6 +17,7 @@ from src.pytorch.utils.helpers import (
     create_train_directory,
     get_fixed_max_epochs,
     save_y_pred_csv,
+    remove_csv_except_best,
    )
 from src.pytorch.utils.plot import (
     save_y_pred_scatter,
@@ -29,7 +30,6 @@ from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
 
 _log = logging.getLogger(__name__)
-
 
 def train_main(args):
     if args.seed != -1:
@@ -100,9 +100,12 @@ def train_main(args):
             ),
         )
 
-        fold_val_loss = train_wf.run(train_timer, validation=True)
+        fold_val_loss = train_wf.run(fold_idx, train_timer, validation=True)
+
+        heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
 
         if fold_val_loss < best_fold["val_loss"]:
+            save_y_pred_csv(train_wf.y_pred_values, heuristic_pred_file)
             _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
             best_fold["fold"] = fold_idx
             best_fold["val_loss"] = fold_val_loss
@@ -119,6 +122,9 @@ def train_main(args):
     _log.info("Finishing training.")
     _log.info(f"Elapsed time: {train_timer.current_time()}")
 
+    remove_csv_except_best(dirname, best_fold['fold'])
+    os.rename(f"{dirname}/heuristic_pred_{best_fold['fold']}.csv", f"{dirname}/heuristic_pred.csv")
+
     try:
         _log.info(
             f"Saving traced_{best_fold['fold']}.pt as best "
@@ -131,19 +137,6 @@ def train_main(args):
     except:
         _log.error(f"Failed to save best fold.")
 
-
-    ### SAVE HEURISTIC_PRED.CSV
-    heuristic_pred_file = f"{dirname}/heuristic_pred.csv"
-
-    try:
-        _log.info(
-            f"Saving post-training state,pred,y csv file to heuristic_pred.csv"
-        )
-        save_y_pred_csv(train_wf.y_pred_values, heuristic_pred_file)
-    except:
-        _log.error(f"Failed to save csv file.")
-
-
     ### PLOTTING
     plots_dir = f"{dirname}/plots"
 
@@ -152,11 +145,12 @@ def train_main(args):
             _log.info(
                 f"Saving scatter plot GIF."
             )
-            save_gif_from_plots(plots_dir)
-            remove_intermediate_plots(plots_dir)
+            save_gif_from_plots(plots_dir, best_fold['fold'])
+            remove_intermediate_plots(plots_dir, best_fold['fold'])
         except:
             _log.error(f"Failed making plot GIF.")
        
+    heuristic_pred_file = f"{dirname}/heuristic_pred.csv"
     problem_name = '_'.join(dirname.split('/')[-1].split('_')[2:4])
     data = {}
 
