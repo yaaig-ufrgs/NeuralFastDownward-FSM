@@ -87,6 +87,7 @@ def train_main(args):
             val_dataloader=val_dataloader,
             max_epochs=args.max_epochs,
             plot_n_epochs=args.plot_n_epochs,
+            max_epochs_not_improving = args.max_epochs_not_improving,
             dirname=dirname,
             optimizer=torch.optim.Adam(
                 model.parameters(),

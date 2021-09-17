@@ -15,6 +15,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_BIAS,
     DEFAULT_LEARNING_RATE,
     DEFAULT_MAX_EPOCHS,
+    DEFAULT_MAX_EPOCHS_NOT_IMPROVING,
     DEFAULT_MAX_TRAINING_TIME,
     DEFAULT_DOMAIN_PDDL,
     DEFAULT_SEARCH_ALGORITHM,
@@ -99,6 +100,13 @@ def get_train_args():
         type=int,
         default=DEFAULT_MAX_EPOCHS,
         help="Maximum number of epochs to train each fold (or -1 for fixed value). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-en",
+        "--max-epochs-not-improving",
+        type=int,
+        default=DEFAULT_MAX_EPOCHS_NOT_IMPROVING,
+        help="Stop training if loss does not improve after n epochs (-1 to disable). (default: %(default)s)",
     )
     parser.add_argument(
         "-t",

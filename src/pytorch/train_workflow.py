@@ -18,6 +18,7 @@ class TrainWorkflow:
         val_dataloader: DataLoader,
         max_epochs: int,
         plot_n_epochs: int,
+        max_epochs_not_improving: int,
         dirname: str,
         optimizer: optim.Optimizer,
         loss_fn: nn = nn.MSELoss(),
@@ -27,6 +28,7 @@ class TrainWorkflow:
         self.val_dataloader = val_dataloader
         self.max_epochs = max_epochs
         self.plot_n_epochs = plot_n_epochs
+        self.max_epochs_not_improving = max_epochs_not_improving
         self.dirname = dirname
         self.optimizer = optimizer
         self.loss_fn = loss_fn
@@ -106,7 +108,6 @@ class TrainWorkflow:
 
     def run(self, train_timer, validation=True):
         last_val_loss = 0
-        max_epochs_without_improving = 100
         count = 0
         for t in range(self.max_epochs):
             cur_train_loss = self.train_loop()
@@ -117,10 +118,10 @@ class TrainWorkflow:
                     count = 0
                 else:
                     count += 1
-                    if count >= max_epochs_without_improving:
+                    if self.max_epochs_not_improving != -1 and count >= self.max_epochs_not_improving:
                         _log.info(
                             f"The loss on the validation data didn't improve "
-                            f"in {max_epochs_without_improving} epochs."
+                            f"in {self.max_epochs_not_improving} epochs."
                         )
                         break
 
