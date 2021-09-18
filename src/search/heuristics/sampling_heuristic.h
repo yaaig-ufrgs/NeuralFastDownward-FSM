@@ -12,6 +12,9 @@ using namespace std;
 namespace sampling_heuristic {
 class SamplingHeuristic : public Heuristic {
     const std::vector<FactPair> relevant_facts;
+    const int heuristic_shift;
+    const int heuristic_multiplier;
+    const bool goal_aware;
     unordered_map<string,int> h;
     utils::RandomNumberGenerator rng;
 protected:

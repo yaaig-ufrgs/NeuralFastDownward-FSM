@@ -16,7 +16,10 @@ using namespace std;
 namespace sampling_heuristic {
 SamplingHeuristic::SamplingHeuristic(const Options &opts)
     : Heuristic(opts),
-      relevant_facts(task_properties::get_strips_fact_pairs(task.get())) {
+      relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
+      heuristic_shift(opts.get<int>("shift")),
+      heuristic_multiplier(opts.get<int>("multiplier")),
+      goal_aware(opts.get<bool>("goal_aware")) {
     utils::g_log << "Initializing sampling heuristic..." << endl;
     rng.seed(0);
     string sample;
@@ -37,6 +40,8 @@ SamplingHeuristic::~SamplingHeuristic() {
 
 int SamplingHeuristic::compute_heuristic(const State &ancestor_state) {
     State state = convert_ancestor_state(ancestor_state);
+    if (task_properties::is_goal_state(task_proxy, state))
+        return 0;
     const vector<int> &values = state.get_values();
     vector<char> boolean_state(static_cast<long>(relevant_facts.size()));
     size_t idx = 0;
@@ -56,7 +61,11 @@ int SamplingHeuristic::compute_heuristic(const State &ancestor_state) {
             matched.push_back(s);
         }
     }
-    return matched[rng(matched.size())].second;
+    float sum = 0;
+    for (auto& s : matched)
+        sum += s.second;
+    int h = (sum / matched.size()) * heuristic_multiplier + heuristic_shift;
+    return h == 0 && goal_aware ? 1 : h;
 }
 
 static shared_ptr<Heuristic> _parse(OptionParser &parser) {
@@ -68,7 +77,26 @@ static shared_ptr<Heuristic> _parse(OptionParser &parser) {
     Heuristic::add_options_to_parser(parser);
     parser.add_option<string>(
             "sample_file",
-            "Path to the samples file.");
+            "Path to the samples file."
+    );
+    parser.add_option<int>(
+            "shift",
+            "shift the predicted heuristic value (useful, if the model"
+            "output is expected to be negative up to a certain bound.",
+            "0"
+    );
+    parser.add_option<int>(
+            "multiplier",
+            "Multiply the predicted (and shifted) heuristic value (useful, if "
+            "the model predicts small float values, but heuristics have to be "
+            "integers",
+            "1"
+    );
+    parser.add_option<bool>(
+            "goal_aware",
+            "Defines whether the heuristic will be goal aware.",
+            "false"
+    );
 
     Options opts = parser.parse();
     if (parser.dry_run())
