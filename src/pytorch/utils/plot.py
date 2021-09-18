@@ -145,6 +145,7 @@ def save_box_plot(directory: str, data: dict, csv_h: str):
     ax = sns.boxplot(x="h*", y="heuristic - h*", hue="heuristic", data=cdf, fliersize=2).set_title(plot_name)
     ax.figure.savefig(directory+"/"+plot_filename)
     plt.clf()
+    plt.close(ax.figure)
 
 
 def save_gif_from_plots(directory: str, fold_idx: int):
