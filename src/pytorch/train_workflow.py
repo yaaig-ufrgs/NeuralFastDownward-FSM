@@ -34,7 +34,7 @@ class TrainWorkflow:
         self.loss_fn = loss_fn
         self.y_pred_values = {} #{state: (y, pred)} of the last epoch
 
-    def train_loop(self):
+    def train_loop(self, t: int, fold_idx: int):
         # size = len(self.train_dataloader.dataset)
         num_batches = len(self.train_dataloader)
         train_loss = 0
@@ -54,9 +54,21 @@ class TrainWorkflow:
             # Update parameters.
             self.optimizer.step()
 
+            if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
+                x_lst = X.tolist()
+                for i, _ in enumerate(x_lst):
+                    x_int = [int(x) for x in x_lst[i]]
+                    x_str = ''.join(str(e) for e in x_int)
+                    self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+
+        if len(self.y_pred_values) > 0:
+            save_y_pred_scatter(self.y_pred_values, t, fold_idx, f"{self.dirname}/plots")
+            self.y_pred_values.clear()
+
+
         return train_loss / num_batches
 
-    def val_loop(self, t: int, fold_idx: int):
+    def val_loop(self):
         # size = len(self.val_dataloader.dataset)
         num_batches = len(self.val_dataloader)
         val_loss = 0
@@ -65,17 +77,6 @@ class TrainWorkflow:
             for X, y in self.val_dataloader:
                 pred = self.model(X)
                 val_loss += self.loss_fn(pred, y).item()
-
-                if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
-                    x_lst = X.tolist()
-                    for i, _ in enumerate(x_lst):
-                        x_int = [int(x) for x in x_lst[i]]
-                        x_str = ''.join(str(e) for e in x_int)
-                        self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
-
-            if len(self.y_pred_values) > 0:
-                save_y_pred_scatter(self.y_pred_values, t, fold_idx, f"{self.dirname}/plots")
-                self.y_pred_values.clear()
 
         return val_loss / num_batches
 
@@ -110,10 +111,10 @@ class TrainWorkflow:
         last_val_loss = 0
         count = 0
         for t in range(self.max_epochs):
-            cur_train_loss = self.train_loop()
+            cur_train_loss = self.train_loop(t, fold_idx)
 
             if validation:
-                cur_val_loss = self.val_loop(t, fold_idx)
+                cur_val_loss = self.val_loop()
                 if (last_val_loss - cur_val_loss) > 0.01:
                     count = 0
                 else:
