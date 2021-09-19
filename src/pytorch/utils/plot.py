@@ -20,7 +20,8 @@ def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str):
         makedirs(directory)
 
     dir_split = directory.split('/')[-2].split('_')
-    seeds = dir_split[-1].replace('.', '_')[0:7]
+    seeds = dir_split[-1].split('.')
+    seeds = seeds[0] + "_" + seeds[1]
     plot_title = '_'.join(dir_split[2:-1]) + "_" + seeds
     plot_filename = f"{plot_title}_epoch_{str(t)}_{fold_idx}" 
 
@@ -92,7 +93,8 @@ def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h: str) -> dict:
     ax.set_ylim(lims)
 
     dir_split = directory.split('/')[-2].split('_')
-    seeds = dir_split[-1].replace('.', '_')[0:7]
+    seeds = dir_split[-1].split('.')
+    seeds = seeds[0] + "_" + seeds[1]
     plot_name = '_'.join(dir_split[2:-1]) + "_" + seeds
 
     ax.set_title(plot_name, fontsize=10)
@@ -138,7 +140,8 @@ def save_box_plot(directory: str, data: dict, csv_h: str):
     cdf = pd.concat([df_sub_hnn, df_sub_gc])
 
     dir_split = directory.split('/')[-2].split('_')
-    seeds = dir_split[-1].replace('.', '_')[0:7]
+    seeds = dir_split[-1].split('.')
+    seeds = seeds[0] + "_" + seeds[1]
     plot_name = '_'.join(dir_split[2:-1]) + "_" + seeds
     plot_filename = "box_" + plot_name
 
@@ -156,7 +159,8 @@ def save_gif_from_plots(directory: str, fold_idx: int):
     """
 
     dir_split = directory.split('/')[-2].split('_')
-    seeds = dir_split[-1].replace('.', '_')[0:7]
+    seeds = dir_split[-1].split('.')
+    seeds = seeds[0] + "_" + seeds[1]
     gif_filename = '_'.join(dir_split[2:-1]) + "_" + seeds
     plot_files = sorted(glob.glob(f"{directory}/*{fold_idx}.png"), key=path.getmtime)
 
