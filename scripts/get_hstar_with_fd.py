@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # usage: ./get_hstar_with_fd.py sample problem_pddl
-#   e.g. ./get_hstar_with_fd.py ../samples/fukunaga_blocks_probBLOCKS-4-0_dfs_fs_500x200_ss1 ../tasks/IPC/blocks/probBLOCKS-4-1.pddl
+#   e.g. ./get_hstar_with_fd.py ../samples/fukunaga_blocks_probBLOCKS-4-0_dfs_fs_500x200_ss1 ../tasks/IPC/blocks/probBLOCKS-4-0.pddl
 
 """
 Expected problem_pddl format:
@@ -38,6 +38,7 @@ atoms = samples[1]
 if atoms[-1] == "\n":
     atoms = atoms[:-1]
 
+total = len(samples)
 hstar = {}
 for i, sample in enumerate(samples):
     if sample[0] == "#":
@@ -49,23 +50,36 @@ for i, sample in enumerate(samples):
         continue
 
     try:
-        pddl[-3] = "(:init " + check_output(["./boolean2state.py", atoms, sample]).decode("utf-8")[:-1] + ")\n"
+        output = "(:init " + check_output(["./boolean2state.py", atoms, sample]).decode("utf-8")[:-1] + ")\n"
+        for j in range(len(pddl)):
+            if ":init" in pddl[j] or ":INIT" in pddl[j]:
+                pddl[j] = output
+                while ":goal" not in pddl[j+1] and ":GOAL" not in pddl[j+1]:
+                    pddl.remove(pddl[j+1])
+                break
     except CalledProcessError as e:
-        print("Error with {sample}: {e}")
+        print(f"Error with {sample}: {e} (1)")
+        continue
 
     with open("problem.pddl", "w") as f:
         for line in pddl:
             f.write(line)
 
-    # Run FD with astar+lmcut to get h*
-    output = check_output([FD, "problem.pddl", "--search", "astar(lmcut())"]).decode("utf-8")
-    
+    try:
+        # Run FD with astar+lmcut to get h*
+        output = check_output([FD, "problem.pddl", "--search", "astar(lmcut())"]).decode("utf-8")
+    except CalledProcessError as e:
+        print(f"Error with {sample}: {e} (2)")
+        continue
+
     try:
         re_cost = findall(r".*Plan length: (\d+) step\(s\)..*", output)
         assert len(re_cost) == 1
         hstar[sample] = re_cost[0]
+        print(f"[{i}/{total}] {sample}: {hstar[sample]}")
     except Exception as e:
-        print("Error with {sample}: {e}")
+        print(f"Error with {sample}: {e} (3)")
+        continue
 
 for file in ["domain.pddl", "problem.pddl", "sas_plan"]:
     remove(file)
