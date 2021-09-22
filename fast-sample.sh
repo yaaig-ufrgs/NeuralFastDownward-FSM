@@ -57,7 +57,6 @@ if [ $METHOD = "fukunaga" ]; then
                     --search "sampling_search_fukunaga(astar(lmcut(transform=sampling_transform()), transform=sampling_transform()), \
                     techniques=[gbackward_fukunaga(searches=$SEARCHES, samples_per_search=$SAMPLES_PER_SEARCH, \
                     technique=$TEHNIQUE, random_seed=$seed)], state_representation=$STATE_REPRESENTATION, random_seed=$seed, match_heuristics=$MATCH_HEURISTICS)"
-                exit 0
             done
         fi
     done
