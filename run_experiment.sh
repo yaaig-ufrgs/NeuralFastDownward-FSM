@@ -4,19 +4,18 @@
 # Requirements: tsp, taskset
 #
 # Usage:
-# $ ./run_experiment.sh [fukunaga|ferber] [500x200|30K|100K] [change_all|fixed_net|fixed_sample|single] cores
+# $ ./run_experiment.sh [fukunaga|ferber] [dfs|rw] [fs|ps|us] [500x200|30K|100K] [change_all|fixed_net|fixed_sample|single] cores
 #
 # Example:
-# $ ./run_experiment.sh fukunaga 500x200 single 10
+# $ ./run_experiment.sh fukunaga dfs fs 500x200 single 10
 
-# run_general <sample_seed> <net_seed> <rw|dfs> <thread> <runs>
+# run_general <sample_seed> <net_seed> <thread> <runs>
 run_experiment() {
     sample_seed=$1
     net_seed=$2
-    sample_type=$3
-    cores=$4
-    runs=$5
-    files=(samples/${TECHNIQUE}_*_*_${sample_type}_fs_${SAMPLE_SIZE}_ss${sample_seed})
+    cores=$3
+    runs=$4
+    files=(samples/${METHOD}_*_*_${TECHNIQUE}_${STATE_REPRESENTATION}_${SAMPLE_SIZE}_ss${sample_seed})
     files_len=$((${#files[@]}*${runs}))
     max_per_thread=$((($files_len+$cores-1)/$cores))
     for file in ${files[@]} ; do
@@ -38,60 +37,44 @@ run_experiment() {
     done
 }
 
-TECHNIQUE=$1
-SAMPLE_SIZE=$2
-EXPERIMENT=$3
-CORES=$4
+METHOD=$1
+TECHNIQUE=$2
+STATE_REPRESENTATION=$3
+SAMPLE_SIZE=$4
+EXPERIMENT=$5
+CORES=$6
 SEED="1" # for fixed seed experiments
 
 tsp -K
 tsp -S $CORES
 
-if [ $TECHNIQUE = "fukunaga" ]; then
+if [ $METHOD = "fukunaga" ]; then
 
     THREAD_ID=-1
     COUNTER=0
 
     if [ $EXPERIMENT = "single" ]; then
         # run_experiment <sample_seed> <net_seed> <sample_type> <thread>
-        run_experiment 1 1 "dfs" $CORES 1
+        run_experiment 1 1 $CORES 1
     elif [ $EXPERIMENT = "fixed_net" ]; then
         # TODO: for 1..5, dfs rw
-        run_experiment 1 $SEED "rw" $CORES 10
-        run_experiment 2 $SEED "rw" $CORES 10
-        run_experiment 3 $SEED "rw" $CORES 10
-        run_experiment 4 $SEED "rw" $CORES 10
-        run_experiment 5 $SEED "rw" $CORES 10
-
-        run_experiment 1 $SEED "dfs" $CORES 10
-        run_experiment 2 $SEED "dfs" $CORES 10
-        run_experiment 3 $SEED "dfs" $CORES 10
-        run_experiment 4 $SEED "dfs" $CORES 10
-        run_experiment 5 $SEED "dfs" $CORES 10
+        # run_experiment 1 $SEED $CORES 5
+        run_experiment 2 $SEED $CORES 4
+        run_experiment 3 $SEED $CORES 4
+        run_experiment 4 $SEED $CORES 4
+        run_experiment 5 $SEED $CORES 4
     elif [ $EXPERIMENT = "fixed_sample" ]; then
-        run_experiment $SEED 1 "rw" $CORES 10
-        run_experiment $SEED 2 "rw" $CORES 10
-        run_experiment $SEED 3 "rw" $CORES 10
-        run_experiment $SEED 4 "rw" $CORES 10
-        run_experiment $SEED 5 "rw" $CORES 10
-
-        run_experiment $SEED 1 "dfs" $CORES 10
-        run_experiment $SEED 2 "dfs" $CORES 10
-        run_experiment $SEED 3 "dfs" $CORES 10
-        run_experiment $SEED 4 "dfs" $CORES 10
-        run_experiment $SEED 5 "dfs" $CORES 10
+        # run_experiment $SEED 1 $CORES 5
+        run_experiment $SEED 2 $CORES 4
+        run_experiment $SEED 3 $CORES 4
+        run_experiment $SEED 4 $CORES 4
+        run_experiment $SEED 5 $CORES 4
     elif [ $EXPERIMENT = "change_all" ]; then
-        run_experiment 1 1 "rw" $CORES 10
-        run_experiment 2 2 "rw" $CORES 10
-        run_experiment 3 3 "rw" $CORES 10
-        run_experiment 4 4 "rw" $CORES 10
-        run_experiment 5 5 "rw" $CORES 10
-
-        run_experiment 1 1 "dfs" $CORES 10
-        run_experiment 2 2 "dfs" $CORES 10
-        run_experiment 3 3 "dfs" $CORES 10
-        run_experiment 4 4 "dfs" $CORES 10
-        run_experiment 5 5 "dfs" $CORES 10
+        # run_experiment 1 1 $CORES 5
+        run_experiment 2 2 $CORES 4
+        run_experiment 3 3 $CORES 4
+        run_experiment 4 4 $CORES 4
+        run_experiment 5 5 $CORES 4
     fi
 else
     echo "TODO FERBER"
