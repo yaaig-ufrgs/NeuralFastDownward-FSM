@@ -23,8 +23,11 @@ string SamplingSearchFukunaga::construct_header() const {
     }
     if (store_state) {
         oss << "#<State>=";
-        for (const FactPair &fp: relevant_facts) {
-            oss << task->get_fact_name(fp) << state_separator;
+        for (unsigned i = 0; i < relevant_facts.size(); i++) {
+            if ((state_representation == "undefined") &&
+                (i == 0 || relevant_facts[i].var != relevant_facts[i-1].var))
+                oss << "Atom undefined()" << state_separator;
+            oss << task->get_fact_name(relevant_facts[i]) << state_separator;
         }
         oss.seekp(-1,oss.cur);
     }
@@ -38,26 +41,27 @@ string SamplingSearchFukunaga::sample_file_header() const {
 
 vector<string> SamplingSearchFukunaga::extract_samples() {
     vector<string> samples;
-    for (std::shared_ptr<PartialAssignment>& task: sampling_technique::modified_tasks) {
+    for (std::shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         ostringstream oss;
 
         if (store_plan_cost) {
-            oss << task->estimated_heuristic << field_separator;
+            oss << partialAssignment->estimated_heuristic << field_separator;
         }
 
         if (store_state) {
             vector<int> values;
-            if (use_full_state) {
-                State s = task->get_full_state(true, *rng).second;
+            if (state_representation == "complete") {
+                State s = partialAssignment->get_full_state(true, *rng).second;
                 s.unpack();
                 values = s.get_values();
-            } else {
-                values = task->get_values();
+            } else if (state_representation == "partial" || state_representation == "undefined") {
+                values = partialAssignment->get_values();
             }
-            for (const FactPair &fp: relevant_facts) {
-                // if (values[fp.var] == fp.value)
-                    // oss << this->task->get_fact_name(fp) << state_separator;
-                oss << (values[fp.var] == fp.value ? 1 : 0);
+            for (unsigned i = 0; i < relevant_facts.size(); i++) {
+                if ((state_representation == "undefined") &&
+                    (i == 0 || relevant_facts[i].var != relevant_facts[i-1].var))
+                    oss << (values[relevant_facts[i].var] == PartialAssignment::UNASSIGNED);
+                oss << (values[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
             }
             oss << field_separator;
         }
@@ -91,12 +95,11 @@ SamplingSearchFukunaga::SamplingSearchFukunaga(const options::Options &opts)
     : SamplingSearchBase(opts),
       store_plan_cost(opts.get<bool>("store_plan_cost")),
       store_state(opts.get<bool>("store_state")),
-      use_full_state(opts.get<bool>("use_full_state")),
+      state_representation(opts.get<string>("state_representation")),
       match_heuristics(opts.get<bool>("match_heuristics")),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       header(construct_header()){
 }
-
 
 static shared_ptr<SearchEngine> _parse_sampling_search_fukunaga(OptionParser &parser) {
     parser.document_synopsis("Sampling Search Manager", "");
@@ -114,10 +117,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_fukunaga(OptionParser &pa
             "store_state",
             "Store every state along the plan",
             "true");
-    parser.add_option<bool>(
-            "use_full_state",
-            "Transform partial assignment to full state.",
-            "false");
+    parser.add_option<string>(
+            "state_representation",
+            "State facts representation format (complete, partial, or undefined).",
+            "complete");
     parser.add_option<bool>(
             "match_heuristics",
             "Identical states receive the best heuristic value assigned between them.",
