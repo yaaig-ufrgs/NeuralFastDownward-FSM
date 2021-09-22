@@ -17,7 +17,7 @@ class DFSSampler;
 namespace sampling_technique {
 class TechniqueGBackwardFukunaga : public SamplingTechnique {
 protected:
-    const bool use_dfs;
+    const std::string technique;
     const bool wrap_partial_assignment;
     const bool deprioritize_undoing_steps;
     const bool is_valid_walk;

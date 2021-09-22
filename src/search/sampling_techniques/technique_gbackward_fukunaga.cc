@@ -39,7 +39,7 @@ const string &TechniqueGBackwardFukunaga::get_name() const {
 
 TechniqueGBackwardFukunaga::TechniqueGBackwardFukunaga(const options::Options &opts)
         : SamplingTechnique(opts),
-          use_dfs(opts.get<bool>("use_dfs")),
+          technique(opts.get<string>("technique")),
           wrap_partial_assignment(opts.get<bool>("wrap_partial_assignment")),
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
           is_valid_walk(opts.get<bool>("is_valid_walk")),
@@ -55,9 +55,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
     if (seed_task != last_task) {
         regression_task_proxy = make_shared<RegressionTaskProxy>(*seed_task);
         state_registry = make_shared<StateRegistry>(task_proxy);
-        if (use_dfs)
+        if (technique == "dfs")
             dfss = make_shared<sampling::DFSSampler>(*regression_task_proxy, *rng);
-        else
+        else if (technique == "rw")
             rrws = make_shared<sampling::RandomRegressionWalkSampler>(*regression_task_proxy, *rng);
     }
     bias_reload_counter++;
@@ -103,7 +103,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
         make_shared<PartialAssignment>(partial_assignment)
     };
 
-    if (use_dfs) { // sample with DFS
+    if (technique == "dfs") {
         stack<pair<PartialAssignment,int>> stack;
         int idx_op = 0;
         while (samples.size() < (unsigned)samples_per_search) {
@@ -140,7 +140,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
                 idx_op++; // If same node, use next operator
             }
         }
-    } else { // sample with random walk
+    } else if (technique == "rw") {
         int max_attempts = 100, attempts = 0;
         while (samples.size() < (unsigned)samples_per_search) {
             PartialAssignment new_partial_assignment = rrws->sample_state_length(
@@ -171,10 +171,10 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
 static shared_ptr<TechniqueGBackwardFukunaga> _parse_technique_gbackward_fukunaga(
         options::OptionParser &parser) {
     SamplingTechnique::add_options_to_parser(parser);
-    parser.add_option<bool>(
-            "use_dfs",
-            "Use a depth-first-search-based sampling strategy instead of random walk.",
-            "false"
+    parser.add_option<string>(
+            "technique",
+            "Search technique (dfs, rw).",
+            "rw"
     );
     parser.add_option<bool>(
             "wrap_partial_assignment",

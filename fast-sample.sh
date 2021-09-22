@@ -18,12 +18,12 @@ SAMPLES_PER_SEARCH=$5
 N_SEEDS=$6
 PROBLEM_DIR=$7
 OUTPUT_DIR=$8
-USE_DFS="true"
 STATE_REPRESENTATION="complete"
 MATCH_HEURISTICS="true"
 
-if [ $TECHNIQUE = "rw" ]; then
-    USE_DFS="false"
+if [ ! $TECHNIQUE = "rw" ] && [ ! $TECHNIQUE = "dfs" ]; then
+    echo "Invalid search technique. Choose between rw (random walk) or dfs (depth-first search)."
+    exit 1
 fi
 
 if [ $STATE = "fs" ] || [ $STATE = "complete" ]; then
@@ -56,7 +56,7 @@ if [ $METHOD = "fukunaga" ]; then
                     --build release $file \
                     --search "sampling_search_fukunaga(astar(lmcut(transform=sampling_transform()), transform=sampling_transform()), \
                     techniques=[gbackward_fukunaga(searches=$SEARCHES, samples_per_search=$SAMPLES_PER_SEARCH, \
-                    use_dfs=$USE_DFS, random_seed=$seed)], state_representation=$STATE_REPRESENTATION, random_seed=$seed, match_heuristics=$MATCH_HEURISTICS)"
+                    technique=$TEHNIQUE, random_seed=$seed)], state_representation=$STATE_REPRESENTATION, random_seed=$seed, match_heuristics=$MATCH_HEURISTICS)"
                 exit 0
             done
         fi
