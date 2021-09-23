@@ -20,9 +20,9 @@ run_experiment() {
     max_per_thread=$((($files_len+$cores-1)/$cores))
     for file in ${files[@]} ; do
         problem_file=${file#*"samples"/*}
-        domain=${problem_file##${TECHNIQUE}_}
+        domain=${problem_file##${METHOD}_}
         domain=${domain%%_*}
-        problem=${problem_file##${TECHNIQUE}_${domain}_}
+        problem=${problem_file##${METHOD}_${domain}_}
         problem=${problem%%_*}
         if [ $(($COUNTER%$max_per_thread)) = 0 ]; then
             THREAD_ID=$((THREAD_ID+1))
