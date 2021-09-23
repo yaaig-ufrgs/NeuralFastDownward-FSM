@@ -25,6 +25,7 @@ from os import remove
 FD = ("." if "scripts" in argv[0] else "..") + "/fast-downward.py"
 
 samples_file = argv[1]
+samples_name = samples_file.split('/')[-1]
 problem_pddl_file = argv[2]
 domain_pddl_file = f"{'/'.join(problem_pddl_file.split('/')[:-1])}/domain.pddl"
 copyfile(domain_pddl_file, "domain.pddl")
@@ -61,7 +62,16 @@ for i, sample in enumerate(samples):
 
     try:
         # Run FD with astar+lmcut to get h*
-        output = check_output([FD, "problem.pddl", "--search", "astar(lmcut())"])
+        output = check_output([
+            FD,
+            "--sas-file",
+            f"output_{samples_name}.sas",
+            "--plan-file",
+            f"sas_plan_{samples_name}",
+            "problem.pddl",
+            "--search",
+            "astar(lmcut())"
+        ])
     except CalledProcessError as e:
         if e.returncode == 12: # no solution
             output = e.output
@@ -86,7 +96,7 @@ for i, sample in enumerate(samples):
 for file in ["domain.pddl", "problem.pddl", "sas_plan"]:
     remove(file)
 
-with open(f"hstar_{samples_file.split('/')[-1]}", "w") as f:
+with open(f"hstar_{samples_name}", "w") as f:
     f.write("sample,hstar\n")
     for h in hstar:
         f.write(f"{h},{hstar[h]}\n")
