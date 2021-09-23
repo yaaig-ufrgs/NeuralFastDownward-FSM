@@ -25,10 +25,14 @@ from os import remove
 FD = ("." if "scripts" in argv[0] else "..") + "/fast-downward.py"
 
 samples_file = argv[1]
-samples_name = samples_file.split('/')[-1]
 problem_pddl_file = argv[2]
 domain_pddl_file = f"{'/'.join(problem_pddl_file.split('/')[:-1])}/domain.pddl"
-copyfile(domain_pddl_file, "domain.pddl")
+
+samples_name = samples_file.split('/')[-1]
+problem = f"problem_{samples_name}.pddl"
+domain = f"domain_{samples_name}.pddl"
+
+copyfile(domain_pddl_file, domain)
 
 with open(problem_pddl_file,) as f:
     pddl = f.readlines()
@@ -56,7 +60,7 @@ for i, sample in enumerate(samples):
         print(f"Error with {sample}: {e} (1)")
         continue
 
-    with open("problem.pddl", "w") as f:
+    with open(problem, "w") as f:
         for line in pddl:
             f.write(line)
 
@@ -68,7 +72,8 @@ for i, sample in enumerate(samples):
             f"output_{samples_name}.sas",
             "--plan-file",
             f"sas_plan_{samples_name}",
-            "problem.pddl",
+            domain,
+            problem,
             "--search",
             "astar(lmcut())"
         ])
@@ -93,7 +98,7 @@ for i, sample in enumerate(samples):
         print(f"Error with {sample}: {e} (3)")
         continue
 
-for file in ["domain.pddl", "problem.pddl", "sas_plan"]:
+for file in [domain, problem, f"output_{samples_name}.sas", f"sas_plan_{samples_name}"]:
     remove(file)
 
 with open(f"hstar_{samples_name}", "w") as f:
