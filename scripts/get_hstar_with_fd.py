@@ -33,18 +33,12 @@ with open(problem_pddl_file,) as f:
     pddl = f.readlines()
 with open(samples_file,) as f:
     samples = f.readlines()
-
-atoms = samples[1]
-if atoms[-1] == "\n":
-    atoms = atoms[:-1]
+atoms = samples[1][:-1]
+samples = [sample[:-1] if sample[-1] == "\n" else sample for sample in samples if sample[0] != "#"]
 
 total = len(samples)
 hstar = {}
 for i, sample in enumerate(samples):
-    if sample[0] == "#":
-        continue
-    if sample[-1] == "\n":
-        sample = sample[:-1]
     _, sample = sample.split(";")
     if sample in hstar:
         continue
@@ -67,16 +61,24 @@ for i, sample in enumerate(samples):
 
     try:
         # Run FD with astar+lmcut to get h*
-        output = check_output([FD, "problem.pddl", "--search", "astar(lmcut())"]).decode("utf-8")
+        output = check_output([FD, "problem.pddl", "--search", "astar(lmcut())"])
     except CalledProcessError as e:
-        print(f"Error with {sample}: {e} (2)")
-        continue
+        if e.returncode == 12: # no solution
+            output = e.output
+        else:
+            print(f"Error with {sample}: {e} (2)")
+            continue
 
     try:
-        re_cost = findall(r".*Plan length: (\d+) step\(s\)..*", output)
-        assert len(re_cost) == 1
-        hstar[sample] = re_cost[0]
-        print(f"[{i}/{total}] {sample}: {hstar[sample]}")
+        output = output.decode("utf-8")
+        if "Completely explored state space -- no solution!" in output:
+            cost = -1
+        else:
+            re_cost = findall(r".*Plan length: (\d+) step\(s\)..*", output)
+            assert len(re_cost) == 1
+            cost = re_cost[0]
+        hstar[sample] = cost
+        print(f"[{i+1}/{total}] {sample}: {hstar[sample]}")
     except Exception as e:
         print(f"Error with {sample}: {e} (3)")
         continue
