@@ -151,7 +151,9 @@ def train_main(args):
             _log.error(f"Failed making plot GIF.")
        
     heuristic_pred_file = f"{dirname}/heuristic_pred.csv"
-    problem_name = '_'.join(dirname.split('/')[-1].split('_')[2:4])
+    dir_split = dirname.split('/')[-1].split('_')
+    problem_name = '_'.join(dir_split[2:4])
+    sample_seed = dir_split[-1].split('.')[0]
     data = {}
 
     if args.compare_csv_dir != "" and os.path.isfile(heuristic_pred_file):
@@ -174,7 +176,7 @@ def train_main(args):
         csv_dir = args.hstar_csv_dir
         if csv_dir[-1] != "/":
             csv_dir += "/"
-        csv_hstar = glob.glob(csv_dir + problem_name + ".csv")
+        csv_hstar = glob.glob(f"{csv_dir}*{problem_name}**{sample_seed}*.csv")
 
         if len(csv_hstar) > 0:
             try:

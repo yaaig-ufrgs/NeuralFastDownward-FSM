@@ -12,6 +12,13 @@ _log = logging.getLogger(__name__)
 logging.getLogger('matplotlib.font_manager').disabled = True
 logging.getLogger('PIL').setLevel(logging.WARNING)
 
+def get_plot_title(directory: str):
+    dir_split = directory.split('/')[-2].split('_')
+    seeds = dir_split[-1].split('.')
+    seeds = seeds[0] + "_" + seeds[1] if len(seeds) > 1 else seeds[0]
+    plot_title = '_'.join(dir_split[2:-1]) + "_" + seeds
+    return plot_title
+
 def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str):
     if t == -1:
         t = "final"
@@ -19,10 +26,7 @@ def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str):
     if not path.exists(directory):
         makedirs(directory)
 
-    dir_split = directory.split('/')[-2].split('_')
-    seeds = dir_split[-1].split('.')
-    seeds = seeds[0] + "_" + seeds[1]
-    plot_title = '_'.join(dir_split[2:-1]) + "_" + seeds
+    plot_title = get_plot_title(directory)
     plot_filename = f"{plot_title}_epoch_{str(t)}_{fold_idx}" 
 
     real = [data[key][0] for key in data]
@@ -92,10 +96,7 @@ def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h: str) -> dict:
     ax.set_xlim(lims)
     ax.set_ylim(lims)
 
-    dir_split = directory.split('/')[-2].split('_')
-    seeds = dir_split[-1].split('.')
-    seeds = seeds[0] + "_" + seeds[1]
-    plot_name = '_'.join(dir_split[2:-1]) + "_" + seeds
+    plot_name = get_plot_title(directory)
 
     ax.set_title(plot_name, fontsize=10)
 
@@ -139,10 +140,7 @@ def save_box_plot(directory: str, data: dict, csv_h: str):
     df_sub_gc = pd.DataFrame(list(zip(hstar, goalcount_sub_exact)), columns =['h*', 'heuristic - h*']).assign(heuristic="goalcount")
     cdf = pd.concat([df_sub_hnn, df_sub_gc])
 
-    dir_split = directory.split('/')[-2].split('_')
-    seeds = dir_split[-1].split('.')
-    seeds = seeds[0] + "_" + seeds[1]
-    plot_name = '_'.join(dir_split[2:-1]) + "_" + seeds
+    plot_name = get_plot_title(directory)
     plot_filename = "box_" + plot_name
 
     ax = sns.boxplot(x="h*", y="heuristic - h*", hue="heuristic", data=cdf, fliersize=2).set_title(plot_name)
@@ -158,10 +156,7 @@ def save_gif_from_plots(directory: str, fold_idx: int):
     Only works if you have the arg -spn set up during training.
     """
 
-    dir_split = directory.split('/')[-2].split('_')
-    seeds = dir_split[-1].split('.')
-    seeds = seeds[0] + "_" + seeds[1]
-    gif_filename = '_'.join(dir_split[2:-1]) + "_" + seeds
+    gif_filename = get_plot_title(directory)
     plot_files = sorted(glob.glob(f"{directory}/*{fold_idx}.png"), key=path.getmtime)
 
     with imageio.get_writer(f'{directory}/{gif_filename}.gif', mode='I') as writer:
