@@ -25,6 +25,7 @@ protected:
     const bool store_state;
     const std::string state_representation;
     const bool match_heuristics;
+    const int assignments_by_undefined_state;
     const std::vector<FactPair> relevant_facts;
     const std::string header;
 

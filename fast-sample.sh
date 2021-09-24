@@ -3,7 +3,7 @@
 # Generate sample states from a set of instances.
 #
 # Usage:
-# $ ./fast-sample.sh [fukunaga|ferber] [rw|dfs] [fs|ps] searches samples_per_search n_seeds problem_dir output_dir
+# $ ./fast-sample.sh [fukunaga|ferber] [rw|dfs] [fs|ps|us|as] searches samples_per_search n_seeds problem_dir output_dir
 # $ ./fast-sample.sh rsl [countAdds|countDels|countBoth] num_train_states num_demos max_len_demos sample_percentage check_state_invars n_seeds problem_dir output_dir
 #
 # Example:
@@ -14,7 +14,7 @@
 METHOD=$1
 TECHNIQUE=$2
 #OUTPUT_DIR=$8
-OUTPUT_DIR=${@:$#} 
+OUTPUT_DIR=${@:$#}
 
 if [ ! -d $OUTPUT_DIR ]; then
     mkdir $OUTPUT_DIR
@@ -29,6 +29,7 @@ if [ $METHOD = "fukunaga" ] || [ $METHOD = "ferber" ]; then
 
     STATE_REPRESENTATION="complete"
     MATCH_HEURISTICS="true"
+    ASSIGNMENTS_BY_US=10
 
     if [ ! $TECHNIQUE = "rw" ] && [ ! $TECHNIQUE = "dfs" ]; then
         echo "Invalid search technique. Choose between rw (random walk) or dfs (depth-first search)."
@@ -62,7 +63,8 @@ if [ $METHOD = "fukunaga" ] || [ $METHOD = "ferber" ]; then
                         --build release $file \
                         --search "sampling_search_fukunaga(astar(lmcut(transform=sampling_transform()), transform=sampling_transform()), \
                         techniques=[gbackward_fukunaga(searches=$SEARCHES, samples_per_search=$SAMPLES_PER_SEARCH, \
-                        technique=$TECHNIQUE, random_seed=$seed)], state_representation=$STATE_REPRESENTATION, random_seed=$seed, match_heuristics=$MATCH_HEURISTICS)"
+                        technique=$TECHNIQUE, random_seed=$seed)], state_representation=$STATE_REPRESENTATION, \
+                        random_seed=$seed, match_heuristics=$MATCH_HEURISTICS, assignments_by_undefined_state=$ASSIGNMENTS_BY_US)"
                 done
             fi
         done
