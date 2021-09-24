@@ -43,7 +43,7 @@ class Simulator():
         # Initialise atoms to ints
         for atom_index, atoms in lpvariables.enumerate():
             atom = Atom(atoms.symbol, atoms.binding)
-            print("\'{}\'".format(atom))
+            #print("\'{}\'".format(atom))
             self.atomToInt[str(atom)] = nAtoms
             self.intToAtom[nAtoms] = atom
             nAtoms += 1
@@ -198,12 +198,12 @@ class Simulator():
         is_in_atoms = np.isin(self.state_mutexes, listOfAtoms)
         sumOfGroups = np.sum(is_in_atoms, axis=1)
         list_of_mutex_sets = []
-        print(is_in_atoms.shape[0])
+        #print(is_in_atoms.shape[0])
         for i in range(is_in_atoms.shape[0]):
             if sumOfGroups[i] > 1:
                 atomsInGroup = list(self.state_mutexes[i][np.nonzero(is_in_atoms[i])])
                 list_of_mutex_sets.append(atomsInGroup)
-        print(list_of_mutex_sets)
+        #print(list_of_mutex_sets)
         return list_of_mutex_sets
 
     # returns random valid action for use by the explicit search
@@ -257,7 +257,7 @@ class Simulator():
         atomsAlwaysInPlan = set()
         for atom in unwrap_conjunction_or_atom(formula):
             atomsAlwaysInPlan.add(str(atom))
-        print("goal formula {}".format(formula))
+        #print("goal formula {}".format(formula))
         for step in range(planLength):
             actionsToSelectFrom = []
             startTimeactions = time.perf_counter()
@@ -268,7 +268,7 @@ class Simulator():
             maxTime1 = 0
             maxTime2 = 0
             maxTime3 =0
-            print("branching factor is {}".format(self.maxBranchingFactor))
+            #print("branching factor is {}".format(self.maxBranchingFactor))
             for operatorNum in range(self.maxBranchingFactor):
                 operator = self.intToOps[operatorNum]
                 operator_is_consistent = None
@@ -337,8 +337,8 @@ class Simulator():
                         if str(atom) in self.atomToInt.keys():
                             atomsForNewFormula.add(str(atom))
                     candidateOpsNFormulas.append((operator, atomsForNewFormula))
-            print("end time to preimage actions {}".format(time.perf_counter() - startTime))
-            print("number of canidate actions {}".format(len(candidateOpsNFormulas)))
+            #print("end time to preimage actions {}".format(time.perf_counter() - startTime))
+            #print("number of canidate actions {}".format(len(candidateOpsNFormulas)))
             startTime = time.perf_counter()
             if len(candidateOpsNFormulas) > 0:
                 max_unique_atoms = None
@@ -366,7 +366,7 @@ class Simulator():
                 for atomS in best_formula:
                     best_formula_atoms.append(self.intToAtom[self.atomToInt[atomS]])
                 formula = land(*best_formula_atoms, flat=True)
-                print("op {}, unique atoms {}".format(bestOp, max_unique_atoms, formula))
+                #print("op {}, unique atoms {}".format(bestOp, max_unique_atoms, formula))
                 planFormulas.append(copy.deepcopy(formula))
                 plan.append(str(bestOp))
                 for atom in unwrap_conjunction_or_atom(formula):
@@ -374,5 +374,5 @@ class Simulator():
                 atomsAlwaysInPlan = set(atom for atom in atomsAlwaysInPlan if self.intToAtom[self.atomToInt[atom]] in unwrap_conjunction_or_atom(formula))
             else:
                 break
-            print("end time to select best action {}".format(time.perf_counter() - startTime))
+            #print("end time to select best action {}".format(time.perf_counter() - startTime))
         return plan

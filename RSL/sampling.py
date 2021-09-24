@@ -12,19 +12,20 @@ import gc
 import random
 from util import fix_seed_and_possibly_rerun
 
-def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, trial, maxLenOfDemo, num_demos, seed, random_sample_percentage, regression_method):
+def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, maxLenOfDemo, num_demos, seed, random_sample_percentage, regression_method):
     startTime = time.perf_counter()
-    print("seed is {}".format(seed))
+    print("> Sampling for {}".format(instance))
+    print("> Seed is {}".format(seed))
     random.seed(seed)
     np.random.seed(seed)
 
     instance_split = instance.split('/')
     instance_name = instance_split[-1].split('.')[0]
-    instance_domain = instance_split[-2] + "/domain.pddl"
+    instance_domain = '/'.join(instance_split[:-1]) + "/domain.pddl"
     instance_mutexes = instance + ".mutexes"
 
     env = Simulator(instance_domain, instance, None, seed)
-    with open('blocks/blocks_probBLOCKS-4-0.pddl.mutexes', 'rb') as input:
+    with open(instance_mutexes, 'rb') as input:
         state_mutexes = pickle.load(input)
 
     state_mutexes_for_environment = []
@@ -41,9 +42,9 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, trial, max
     allPlansPreimages = []
     maxPlanLength = 0
     startTime_get_demos = time.perf_counter()
-    print(env.atomToInt)
+    #print(env.atomToInt)
     for demoNum in range(num_demos):
-        print("get demo {}".format(demoNum))
+        #print("get demo {}".format(demoNum))
         env.reset_to_initial_state()
         plan = env.get_random_regression_plan(maxLenOfDemo, regression_method)
         maxPlanLength = max(len(plan), maxPlanLength)
@@ -57,7 +58,7 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, trial, max
         env.set_state_mutexes(state_mutexes_for_environment)
 
         for op in plan:
-            print(op)
+            #print(op)
             formula = env.preimage_set(copy.deepcopy(formula), op)
             formulaInts = set()
             for atom in formula:
@@ -75,7 +76,7 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, trial, max
             maxLength = len(preImagedSets)
 
     numTrainStatesPerPreimage = int(numTrainStates / maxLength)  # maxLength = number of pre image steps
-    print(numTrainStatesPerPreimage)
+    #print(numTrainStatesPerPreimage)
 
     heurValue = 0
     maxDemoLengthNotMet = True
@@ -91,7 +92,7 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, trial, max
                 preImageSetsCurrent.append(preImagedSets[heurValue])
 
         if maxDemoLengthNotMet:
-            print("getting data for heur {}".format(heurValue))
+            #print("getting data for heur {}".format(heurValue))
             sampledStates = []
             sampledStateHeur = []
             maxTime1 = 0
@@ -150,14 +151,14 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, trial, max
             maxTime3 += time.perf_counter() - startTime
             startTime = time.perf_counter()
         #print("a {} b {} c {}".format(maxTime1, maxTime2, maxTime3))
-    print("got data now checking what label")
+    #print("got data now checking what label")
     # Check which preimage set sampled state is in starting from goal backwards
     endTime_sample_states = time.perf_counter()
     startTime_check_state_membership = time.perf_counter()
 
     sampledStateHeurAll = []
     numberChecked = 0
-    print("checking membership")
+    #print("checking membership")
     for state in sampledStatesAll:
         numberChecked += 1
         heur = 0
@@ -174,23 +175,24 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, trial, max
         if not foundPreImage: # if not in any preimage just assign highest heur value (highest preimage heur + 1)
             sampledStateHeurAll.append(heur)
         if numberChecked % 100 == 0:
-            print(numberChecked)
+            pass
+            #print(numberChecked)
 
     gc.collect()
     endTime_check_state_membership = time.perf_counter()
     startTime_check_train_NN = time.perf_counter()
 
-    print("len states: ", len(sampledStatesAll))
-    print("len heurs:  ", len(sampledStateHeurAll))
+    #print("len states: ", len(sampledStatesAll))
+    #print("len heurs:  ", len(sampledStateHeurAll))
 
-    print(sampledStatesAll[0])
-    print(sampledStateHeurAll[0])
+    #print(sampledStatesAll[0])
+    #print(sampledStateHeurAll[0])
 
     sample_filename = f"rsl_{instance_name}_{regression_method}_{numTrainStates}_ss{seed}"
     csv_file = out_dir+"/"+sample_filename
-    print(f"Saving sampled states to {csv_file}")
+    print(f"> Saving sampled states to {csv_file}")
     with open(csv_file, "w") as f:
-        f.write("#cost;state")
+        f.write("#cost;state\n")
         for i in range(len(sampledStatesAll)):
             f.write("%s;%s\n" % (sampledStateHeurAll[i], ''.join(map(str, sampledStatesAll[i]))))
 
@@ -214,13 +216,12 @@ if __name__ == '__main__':
         parser.add_argument('--num_train_states', type=int, default=10000)
         parser.add_argument('--check_state_invars', type=str2bool, nargs='?',
                         const=True, default=False)
-        parser.add_argument('--trialNum', type=int, default=0)
         parser.add_argument('--num_demos', type=int, default=1)
-        parser.add_argument('--maxLenOfDemo', type=int, default=1)
+        parser.add_argument('--max_len_demo', type=int, default=1)
         parser.add_argument('--seed', type=int, default=1)
         parser.add_argument('--random_sample_percentage', type=int, default=0)
         parser.add_argument('--regression_method', default=None)
 
         args = parser.parse_args()
-        #rsl_sampling(args.out_dir, args.instance, args.num_train_states, args.check_state_invars, args.trialNum, args.maxLenOfDemo, args.num_demos, args.seed, args.random_sample_percentage, args.regression_method)
-        rsl_sampling("samples", "blocks/blocks_probBLOCKS-4-0.pddl", 100000, True, 0, 200, 1, 2, 50, "countBoth")
+        rsl_sampling(args.out_dir, args.instance, args.num_train_states, args.check_state_invars, args.max_len_demo, args.num_demos, args.seed, args.random_sample_percentage, args.regression_method)
+        #rsl_sampling("samples", "blocks/blocks_probBLOCKS-4-0.pddl", 100000, True, 200, 1, 2, 50, "countBoth")
