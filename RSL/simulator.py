@@ -15,7 +15,8 @@ import numpy as np
 import copy
 import time
 
-class Simulator():
+
+class Simulator:
     def __init__(self, domainFile, instanceFile, state_mutexes=None, seed=1337):
         random.seed(seed)
         self.domainFile = domainFile
@@ -23,7 +24,9 @@ class Simulator():
         self.reader.parse_domain(domainFile)
         self.reader.parse_instance(instanceFile)
         self.problem = self.reader.problem
-        self.model = GroundForwardSearchModel(self.problem, ground_problem_schemas_into_plain_operators(self.problem))
+        self.model = GroundForwardSearchModel(
+            self.problem, ground_problem_schemas_into_plain_operators(self.problem)
+        )
         self.opsToInt = {}
         self.intToOps = {}
         self.atomToInt = {}
@@ -43,7 +46,7 @@ class Simulator():
         # Initialise atoms to ints
         for atom_index, atoms in lpvariables.enumerate():
             atom = Atom(atoms.symbol, atoms.binding)
-            #print("\'{}\'".format(atom))
+            # print("\'{}\'".format(atom))
             self.atomToInt[str(atom)] = nAtoms
             self.intToAtom[nAtoms] = atom
             nAtoms += 1
@@ -61,7 +64,7 @@ class Simulator():
                 group = []
                 maxLength = max(maxLength, len(mutexGroup))
                 for atom in mutexGroup:
-                    if atom != '<none of those>':
+                    if atom != "<none of those>":
                         group.append(self.atomToInt[atom])
                 self.state_mutexes.append(group)
             for group_indx in range(len(self.state_mutexes)):
@@ -71,15 +74,18 @@ class Simulator():
         else:
             self.state_mutexes = None
 
-
     def getGroundedDicts(self):
         return self.opsToInt, self.atomToInt
 
-    def fwd_step (self, op):
-        assert not self.model.is_goal(self.state)  # Should not call step if already at goal.
+    def fwd_step(self, op):
+        assert not self.model.is_goal(
+            self.state
+        )  # Should not call step if already at goal.
         op = self.intToOps[op]
-        self.state = progress(self.state, op) # TODO Need to check operator is applicable
-        #print("operator {} new state {}".format(op, self.state))
+        self.state = progress(
+            self.state, op
+        )  # TODO Need to check operator is applicable
+        # print("operator {} new state {}".format(op, self.state))
         reward = -1
         done = self.model.is_goal(self.state)
         return self.binaryState(self.state), reward, done
@@ -131,7 +137,7 @@ class Simulator():
         try:
             atoms = state.as_atoms()
         except:
-            atoms = state # Not a model object and just a list of atoms
+            atoms = state  # Not a model object and just a list of atoms
         for atom in atoms:
             if binaryString == "":
                 binaryString = "{}".format(atom)
@@ -140,7 +146,9 @@ class Simulator():
         return binaryString
 
     def preimage_set(self, formula, operator):
-        operator = self.intToOps[self.opsToInt[operator]] # Get operator object if string
+        operator = self.intToOps[
+            self.opsToInt[operator]
+        ]  # Get operator object if string
 
         # Delete add effects
         for eff in operator.effects:
@@ -152,7 +160,7 @@ class Simulator():
             formula.add(atom)
         return formula
 
-    def check_for_state_invariant(self, atom, formula, notIncludingAtoms = []):
+    def check_for_state_invariant(self, atom, formula, notIncludingAtoms=[]):
         if atom in unwrap_conjunction_or_atom(formula):
             return False
         atomString = str(atom).replace(",", ", ")
@@ -176,7 +184,9 @@ class Simulator():
 
     def check_for_state_invariant_atoms_list(self, atom, listOfAtoms):
         for mutexGroup in self.state_mutexes_string:
-            if atom in mutexGroup and any(atom_b in mutexGroup for atom_b in listOfAtoms):
+            if atom in mutexGroup and any(
+                atom_b in mutexGroup for atom_b in listOfAtoms
+            ):
                 return True
         return False
 
@@ -198,16 +208,18 @@ class Simulator():
         is_in_atoms = np.isin(self.state_mutexes, listOfAtoms)
         sumOfGroups = np.sum(is_in_atoms, axis=1)
         list_of_mutex_sets = []
-        #print(is_in_atoms.shape[0])
+        # print(is_in_atoms.shape[0])
         for i in range(is_in_atoms.shape[0]):
             if sumOfGroups[i] > 1:
                 atomsInGroup = list(self.state_mutexes[i][np.nonzero(is_in_atoms[i])])
                 list_of_mutex_sets.append(atomsInGroup)
-        #print(list_of_mutex_sets)
+        # print(list_of_mutex_sets)
         return list_of_mutex_sets
 
     # returns random valid action for use by the explicit search
-    def check_for_valid_reg_operators_according_to_SING_def(self, state, operatorsAlreadyTried):
+    def check_for_valid_reg_operators_according_to_SING_def(
+        self, state, operatorsAlreadyTried
+    ):
         operatorNums = list(range(self.maxBranchingFactor))
         random.shuffle(operatorNums)
         for operatorNum in operatorNums:
@@ -227,12 +239,14 @@ class Simulator():
                     delEffects.add(self.atomToInt[strAtom])
 
             for atom in unwrap_conjunction_or_atom(operator.precondition):
-                if str(atom) in self.atomToInt.keys(): # if non static fluent
+                if str(atom) in self.atomToInt.keys():  # if non static fluent
                     preconidtions.add(self.atomToInt[str(atom)])
             trueAtoms = set()
             for nonzeroval in np.nonzero(state)[0]:
                 trueAtoms.add(nonzeroval)
-            if trueAtoms.issuperset(preconidtions.union(addEffects).difference(delEffects)):
+            if trueAtoms.issuperset(
+                preconidtions.union(addEffects).difference(delEffects)
+            ):
                 return operator
         return None
 
@@ -243,11 +257,10 @@ class Simulator():
                 strAtom = str(eff.atom)
                 state[self.atomToInt[strAtom]] = 0
 
-            if isinstance(eff, DelEffect): # Add del effects
+            if isinstance(eff, DelEffect):  # Add del effects
                 strAtom = str(eff.atom)
                 state[self.atomToInt[strAtom]] = 1
         return state
-
 
     def get_random_regression_plan(self, planLength, regression_method):
         formula = copy.deepcopy(self.problem.goal)
@@ -257,18 +270,20 @@ class Simulator():
         atomsAlwaysInPlan = set()
         for atom in unwrap_conjunction_or_atom(formula):
             atomsAlwaysInPlan.add(str(atom))
-        #print("goal formula {}".format(formula))
+        # print("goal formula {}".format(formula))
         for step in range(planLength):
             actionsToSelectFrom = []
             startTimeactions = time.perf_counter()
             atomsInFormulaStr = set()
             for atom in unwrap_conjunction_or_atom(formula):
                 atomsInFormulaStr.add(str(atom))
-            current_mutexes_with_formula = self.get_state_mutexes_in_set(atomsInFormulaStr)
+            current_mutexes_with_formula = self.get_state_mutexes_in_set(
+                atomsInFormulaStr
+            )
             maxTime1 = 0
             maxTime2 = 0
-            maxTime3 =0
-            #print("branching factor is {}".format(self.maxBranchingFactor))
+            maxTime3 = 0
+            # print("branching factor is {}".format(self.maxBranchingFactor))
             for operatorNum in range(self.maxBranchingFactor):
                 operator = self.intToOps[operatorNum]
                 operator_is_consistent = None
@@ -283,13 +298,18 @@ class Simulator():
                         if strAtom in atomsInFormulaStr:
                             operator_is_consistent = True
                     if isinstance(eff, DelEffect):
-                        if str(eff.atom) in atomsInFormulaStr:  # not in original definition but makes stronger
+                        if (
+                            str(eff.atom) in atomsInFormulaStr
+                        ):  # not in original definition but makes stronger
                             operator_is_consistent = False
                             break
                 maxTime1 += time.perf_counter() - startTime
                 startTime = time.perf_counter()
 
-                if operator_is_consistent != False and len(addEffects.intersection(current_mutexes_with_formula)) > 0:
+                if (
+                    operator_is_consistent != False
+                    and len(addEffects.intersection(current_mutexes_with_formula)) > 0
+                ):
                     operator_is_consistent = False
                 maxTime2 += time.perf_counter() - startTime
                 startTime = time.perf_counter()
@@ -307,7 +327,9 @@ class Simulator():
                     for atom in unwrap_conjunction_or_atom(formula):
                         if str(atom) not in addEffects:
                             forCheckingMutexes.add(self.atomToInt[str(atom)])
-                    if self.check_for_state_mutexes_in_a_set_of_atoms(list(forCheckingMutexes)):
+                    if self.check_for_state_mutexes_in_a_set_of_atoms(
+                        list(forCheckingMutexes)
+                    ):
                         operator_is_consistent = False
                 maxTime3 += time.perf_counter() - startTime
 
@@ -337,8 +359,8 @@ class Simulator():
                         if str(atom) in self.atomToInt.keys():
                             atomsForNewFormula.add(str(atom))
                     candidateOpsNFormulas.append((operator, atomsForNewFormula))
-            #print("end time to preimage actions {}".format(time.perf_counter() - startTime))
-            #print("number of canidate actions {}".format(len(candidateOpsNFormulas)))
+            # print("end time to preimage actions {}".format(time.perf_counter() - startTime))
+            # print("number of canidate actions {}".format(len(candidateOpsNFormulas)))
             startTime = time.perf_counter()
             if len(candidateOpsNFormulas) > 0:
                 max_unique_atoms = None
@@ -346,14 +368,22 @@ class Simulator():
                 best_formula = None
                 for operator, temp_formula in candidateOpsNFormulas:
                     num_unique_atoms = 0
-                    if regression_method == "countAdds" or regression_method == "countBoth":
+                    if (
+                        regression_method == "countAdds"
+                        or regression_method == "countBoth"
+                    ):
                         for atom in temp_formula:
                             if atom not in atomsInPlan:
                                 num_unique_atoms += 1
-                    if regression_method == "countDels" or regression_method == "countBoth":
+                    if (
+                        regression_method == "countDels"
+                        or regression_method == "countBoth"
+                    ):
                         for atom in atomsAlwaysInPlan:
                             if atom not in temp_formula:
-                                num_unique_atoms += 1 # atom has never been deleted in plan thus far
+                                num_unique_atoms += (
+                                    1  # atom has never been deleted in plan thus far
+                                )
                     if bestOp is None:
                         bestOp = operator
                         best_formula = temp_formula
@@ -366,13 +396,18 @@ class Simulator():
                 for atomS in best_formula:
                     best_formula_atoms.append(self.intToAtom[self.atomToInt[atomS]])
                 formula = land(*best_formula_atoms, flat=True)
-                #print("op {}, unique atoms {}".format(bestOp, max_unique_atoms, formula))
+                # print("op {}, unique atoms {}".format(bestOp, max_unique_atoms, formula))
                 planFormulas.append(copy.deepcopy(formula))
                 plan.append(str(bestOp))
                 for atom in unwrap_conjunction_or_atom(formula):
                     atomsInPlan.add(str(atom))
-                atomsAlwaysInPlan = set(atom for atom in atomsAlwaysInPlan if self.intToAtom[self.atomToInt[atom]] in unwrap_conjunction_or_atom(formula))
+                atomsAlwaysInPlan = set(
+                    atom
+                    for atom in atomsAlwaysInPlan
+                    if self.intToAtom[self.atomToInt[atom]]
+                    in unwrap_conjunction_or_atom(formula)
+                )
             else:
                 break
-            #print("end time to select best action {}".format(time.perf_counter() - startTime))
+            # print("end time to select best action {}".format(time.perf_counter() - startTime))
         return plan

@@ -3,6 +3,7 @@
 import sys
 import os
 
+
 def fix_seed_and_possibly_rerun():
     """
     Make sure the environment variable `PYTHONHASHSEED` is set to 1 so that the order of some of the problem's
@@ -19,21 +20,23 @@ def fix_seed_and_possibly_rerun():
         return False
 
     # Otherwise we print a warning and re-run the process with a fixed hash seed envvar.
-    print('\n' + "*" * 80)
+    print("\n" + "*" * 80)
     print("WARNING! Fixing PYTHONHASHSEED to 1 to obtain more reliable results")
-    print("*" * 80 + '\n', flush=True)
+    print("*" * 80 + "\n", flush=True)
     # We simply set the environment variable and re-call ourselves.
     import subprocess
+
     env = dict(os.environ)
-    env.update(PYTHONHASHSEED='1')
-    try :
+    env.update(PYTHONHASHSEED="1")
+    try:
         subprocess.call(["python3"] + sys.argv, env=env)
-    except FileNotFoundError :
+    except FileNotFoundError:
         subprocess.call(["python"] + sys.argv, env=env)
     return True
 
+
 def get_seed():
     try:
-        return int(os.environ['PYTHONHASHSEED'])
+        return int(os.environ["PYTHONHASHSEED"])
     except KeyError as _:
         return None

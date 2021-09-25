@@ -12,59 +12,91 @@ import gc
 import random
 from util import fix_seed_and_possibly_rerun
 
-def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, maxLenOfDemo, num_demos, seed, random_sample_percentage, regression_method):
+
+def rsl_sampling(
+    out_dir,
+    instance,
+    numTrainStates,
+    checkStateInvars,
+    maxLenOfDemo,
+    num_demos,
+    seed,
+    random_sample_percentage,
+    regression_method,
+):
     startTime = time.perf_counter()
     print("> Sampling for {}".format(instance))
     print("> Seed is {}".format(seed))
     random.seed(seed)
     np.random.seed(seed)
 
-    instance_split = instance.split('/')
-    instance_name = instance_split[-1].split('.')[0]
-    instance_domain = '/'.join(instance_split[:-1]) + "/domain.pddl"
+    instance_split = instance.split("/")
+    instance_name = instance_split[-1].split(".")[0]
+    instance_domain = "/".join(instance_split[:-1]) + "/domain.pddl"
     instance_mutexes = instance + ".mutexes"
 
+    # Instantiates the "Simulator" and loads the mutexes for an instance.
+    # A "Simulator" instance performs various functions imported from the "Tarski" library, and acts kind of
+    # like a black box (but not really).
     env = Simulator(instance_domain, instance, None, seed)
-    with open(instance_mutexes, 'rb') as input:
+    with open(instance_mutexes, "rb") as input:
         state_mutexes = pickle.load(input)
 
     state_mutexes_for_environment = []
+
+    # A mutex group is a group of variable/value pairs of which no two can be simultaneously true.
     for mutex_group in state_mutexes:
         mutex_group_set = set()
+        # Add each atom [format: on(a,b), holding(i), etc.] of the mutex group to mutex_group_set.
         for atom in mutex_group:
             mutex_group_set.add(atom.replace(", ", ","))
+        # Append the current mutex_group_set to the state_mutexes list.
         state_mutexes_for_environment.append(mutex_group_set)
     env.set_state_mutexes(state_mutexes_for_environment)
 
-    sampledStatesAll = []
-    sampledStateHeurAll = []
+    sampledStatesAll = []    # List of sampled states.
+    sampledStateHeurAll = [] # List of estimated heuristics for each sampled state.
 
+    # An "image" of a function is the set of all output values it may produce.
+    # A "preimage" (inverse image) are a set of values that can produce an image (intuitive explanation).
+    # e.g. f(x) = x^2, the preimage of {4} is {-2, 2}, i.e., the "Xs".
+
+    # A state S_i-1 that can reach S_i is a "preimage" of S_i.
     allPlansPreimages = []
     maxPlanLength = 0
     startTime_get_demos = time.perf_counter()
-    #print(env.atomToInt)
+    # print(env.atomToInt)
+
+    # num_demos will basically dictate the number of regressions to perform.
     for demoNum in range(num_demos):
-        #print("get demo {}".format(demoNum))
+        # print("get demo {}".format(demoNum))
         env.reset_to_initial_state()
+        # Gets a plan from a regression with a certain maximum_length and regression method (countBoth, countDel, count Add).
+        # countAdd: count the number of atoms that are true in a partial state for the first time.
+        # countDel: count the number of atoms that have become undetermined but were true for all previously generated partial states.
+        # countBoth: countAdd + countDel.
+        # randomWalk (none?): randomly select actions for which applying the regression aperator is valid. μ = 0.
         plan = env.get_random_regression_plan(maxLenOfDemo, regression_method)
         maxPlanLength = max(len(plan), maxPlanLength)
 
         formula = copy.deepcopy(set(unwrap_conjunction_or_atom(env.problem.goal)))
         formulaInts = set()
         for atom in formula:
+            # In the simulator, each atom has an integer corresponding to it, e.g. on(d,c) -> 36, on(a,g) -> 63 
             formulaInts.add(env.atomToInt[str(atom)])
 
+        # [({on(b,a), on(g,i), on(j,e), on(h,b), on(e,h), on(d,c), on(a,g), on(c,f), on(f,j)}, {0, 64, 98, 36, 5, 75, 44, 56, 63})] 
         preImageFormulas = [(formula, formulaInts)]
         env.set_state_mutexes(state_mutexes_for_environment)
 
         for op in plan:
-            #print(op)
+            # print(op)
             formula = env.preimage_set(copy.deepcopy(formula), op)
             formulaInts = set()
             for atom in formula:
                 if str(atom) in env.atomToInt.keys():
                     #print(atom)
-                #else:
+                    # else:
                     formulaInts.add(env.atomToInt[str(atom)])
             preImageFormulas.append((formula, formulaInts))
         allPlansPreimages.append(preImageFormulas)
@@ -75,13 +107,14 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, maxLenOfDe
         if len(preImagedSets) > maxLength:
             maxLength = len(preImagedSets)
 
-    numTrainStatesPerPreimage = int(numTrainStates / maxLength)  # maxLength = number of pre image steps
-    #print(numTrainStatesPerPreimage)
+    numTrainStatesPerPreimage = int(
+        numTrainStates / maxLength
+    )  # maxLength = number of pre image steps
 
     heurValue = 0
     maxDemoLengthNotMet = True
     preImageSetsCurrent = []
-    #preImageOrginialSets = []
+    # preImageOrginialSets = []
     while maxDemoLengthNotMet:
         # append all demos sets together that have heur = to current heur
         maxDemoLengthNotMet = False
@@ -92,7 +125,7 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, maxLenOfDe
                 preImageSetsCurrent.append(preImagedSets[heurValue])
 
         if maxDemoLengthNotMet:
-            #print("getting data for heur {}".format(heurValue))
+            # print("getting data for heur {}".format(heurValue))
             sampledStates = []
             sampledStateHeur = []
             maxTime1 = 0
@@ -100,12 +133,15 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, maxLenOfDe
             maxTime3 = 0
             for state_num in range(numTrainStatesPerPreimage):  # X samples from each BDD
                 startTime = time.perf_counter()
-                randHeurSet, randHeurSetInts  = random.choice(preImageSetsCurrent)
-                if random.random() > random_sample_percentage/100: # sample random every second data point
+                # randHeurSet: {on(g,i), on(f,j), on(j,e), on(b,a), on(e,h), on(h,b), on(d,c), on(a,g), on(c,f)}
+                # randHeurSetInts: {0, 64, 98, 36, 5, 75, 44, 56, 63}
+                randHeurSet, randHeurSetInts = random.choice(preImageSetsCurrent)
+                if (random.random() > random_sample_percentage / 100):  # sample random every second data point
                     assignedIndexes = list(randHeurSetInts)
                 else:
                     assignedIndexes = []
 
+                # Random binary state.
                 state = np.random.randint(0, 2, size=env.numAtoms)
 
                 for atom_indx in assignedIndexes:
@@ -113,12 +149,23 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, maxLenOfDe
                 maxTime1 += time.perf_counter() - startTime
                 startTime = time.perf_counter()
 
+                # A state invariant is a logical formula over the fluents of a state that must hold
+                # in every state that may belong to a solution path (Alcázar and Torralba, 2015).
                 if checkStateInvars:
-                    trueAtoms = np.nonzero(state)[0]
-                    numGroups = env.state_mutexes.shape[0]
-                    groupOrder = list(range(numGroups))
+                    trueAtoms = np.nonzero(state)[0] # Return the indices of the elements that are non-zero.
+                    numGroups = env.state_mutexes.shape[0] # e.g. 32
+                    groupOrder = list(range(numGroups)) # e.g. [0, 1, 2, ..., 31]
                     random.shuffle(groupOrder)
-                    intersections = np.hstack((env.state_mutexes, np.tile(trueAtoms, (env.state_mutexes.shape[0])).reshape((env.state_mutexes.shape[0], trueAtoms.shape[0]))))
+
+                    # I think this is for getting the mutexes in the for below.
+                    intersections = np.hstack( # Stack arrays in sequence horizontally (column wise).
+                        (
+                            env.state_mutexes,
+                            np.tile(trueAtoms, (env.state_mutexes.shape[0])).reshape(
+                                (env.state_mutexes.shape[0], trueAtoms.shape[0])
+                            ),
+                        )
+                    )
                     intersections.sort(axis=1)
 
                     indexOfIntersection = intersections[:, 1:] == intersections[:, :-1]
@@ -126,7 +173,8 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, maxLenOfDe
                     indexOfIntersection = allnegOnes & indexOfIntersection
 
                     for mutexListIndx in groupOrder:
-                        mutexList = intersections[mutexListIndx][:-1][indexOfIntersection[mutexListIndx]]#np.intersect1d(env.state_mutexes[mutexListIndx], trueAtoms, assume_unique = True)
+                        mutexList = intersections[mutexListIndx][:-1][indexOfIntersection[mutexListIndx]]
+                        # np.intersect1d(env.state_mutexes[mutexListIndx], trueAtoms, assume_unique = True)
 
                         if len(mutexList) > 1:
                             assignedOne = False
@@ -140,9 +188,11 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, maxLenOfDe
                                         state[atomIndx] = 0
                             if not assignedOne and len(areOnes) > 0:
                                 state[random.choice(areOnes)] = 1
+
                 maxTime2 += time.perf_counter() - startTime
                 startTime = time.perf_counter()
-                sampledStates.append(state)  # Can just give heuristic from preimage sampled from as an upper bound
+
+                sampledStates.append(state) # Can just give heuristic from preimage sampled from as an upper bound
                 sampledStateHeur.append(heurValue)
 
             sampledStatesAll.extend(sampledStates)
@@ -150,15 +200,15 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, maxLenOfDe
             heurValue += 1
             maxTime3 += time.perf_counter() - startTime
             startTime = time.perf_counter()
-        #print("a {} b {} c {}".format(maxTime1, maxTime2, maxTime3))
-    #print("got data now checking what label")
+        # print("a {} b {} c {}".format(maxTime1, maxTime2, maxTime3))
+    # print("got data now checking what label")
     # Check which preimage set sampled state is in starting from goal backwards
     endTime_sample_states = time.perf_counter()
     startTime_check_state_membership = time.perf_counter()
 
     sampledStateHeurAll = []
     numberChecked = 0
-    #print("checking membership")
+    # print("checking membership")
     for state in sampledStatesAll:
         numberChecked += 1
         heur = 0
@@ -166,62 +216,83 @@ def rsl_sampling(out_dir, instance, numTrainStates, checkStateInvars, maxLenOfDe
         setOfStateIndxs = set(state.nonzero()[0])
         while not foundPreImage and heur < maxLength:
             for preImagedSets in allPlansPreimages:
-                if len(preImagedSets) > heur and preImagedSets[heur][1].issubset(setOfStateIndxs):
+                if len(preImagedSets) > heur and preImagedSets[heur][1].issubset(
+                    setOfStateIndxs
+                ):
                     sampledStateHeurAll.append(heur)
                     foundPreImage = True
                     break
             heur += 1
 
-        if not foundPreImage: # if not in any preimage just assign highest heur value (highest preimage heur + 1)
+        if (
+            not foundPreImage
+        ):  # if not in any preimage just assign highest heur value (highest preimage heur + 1)
             sampledStateHeurAll.append(heur)
         if numberChecked % 100 == 0:
             pass
-            #print(numberChecked)
+            # print(numberChecked)
 
     gc.collect()
     endTime_check_state_membership = time.perf_counter()
     startTime_check_train_NN = time.perf_counter()
 
-    #print("len states: ", len(sampledStatesAll))
-    #print("len heurs:  ", len(sampledStateHeurAll))
+    # print("len states: ", len(sampledStatesAll))
+    # print("len heurs:  ", len(sampledStateHeurAll))
 
-    #print(sampledStatesAll[0])
-    #print(sampledStateHeurAll[0])
+    # print(sampledStatesAll[0])
+    # print(sampledStateHeurAll[0])
 
-    sample_filename = f"rsl_{instance_name}_{regression_method}_{numTrainStates}_ss{seed}"
-    csv_file = out_dir+"/"+sample_filename
+    sample_filename = (
+        f"rsl_{instance_name}_{regression_method}_{numTrainStates}_ss{seed}"
+    )
+    csv_file = out_dir + "/" + sample_filename
     print(f"> Saving sampled states to {csv_file}")
     with open(csv_file, "w") as f:
         f.write("#cost;state\n")
         for i in range(len(sampledStatesAll)):
-            f.write("%s;%s\n" % (sampledStateHeurAll[i], ''.join(map(str, sampledStatesAll[i]))))
+            f.write(
+                "%s;%s\n"
+                % (sampledStateHeurAll[i], "".join(map(str, sampledStatesAll[i])))
+            )
+
 
 def str2bool(v):
     if isinstance(v, bool):
         return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+    if v.lower() in ("yes", "true", "t", "y", "1"):
         return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+    elif v.lower() in ("no", "false", "f", "n", "0"):
         return False
     else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+        raise argparse.ArgumentTypeError("Boolean value expected.")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     if not fix_seed_and_possibly_rerun():
         parser = argparse.ArgumentParser()
 
-        parser.add_argument('--out_dir', default="samples")
-        parser.add_argument('--instance', default=None)
-        parser.add_argument('--one_step_method', default=None)
-        parser.add_argument('--num_train_states', type=int, default=10000)
-        parser.add_argument('--check_state_invars', type=str2bool, nargs='?',
-                        const=True, default=False)
-        parser.add_argument('--num_demos', type=int, default=1)
-        parser.add_argument('--max_len_demo', type=int, default=1)
-        parser.add_argument('--seed', type=int, default=1)
-        parser.add_argument('--random_sample_percentage', type=int, default=0)
-        parser.add_argument('--regression_method', default=None)
+        parser.add_argument("--out_dir", default="samples")
+        parser.add_argument("--instance", default=None)
+        parser.add_argument("--one_step_method", default=None)
+        parser.add_argument("--num_train_states", type=int, default=10000)
+        parser.add_argument(
+            "--check_state_invars", type=str2bool, nargs="?", const=True, default=False
+        )
+        parser.add_argument("--num_demos", type=int, default=1)
+        parser.add_argument("--max_len_demo", type=int, default=1)
+        parser.add_argument("--seed", type=int, default=1)
+        parser.add_argument("--random_sample_percentage", type=int, default=0)
+        parser.add_argument("--regression_method", default=None)
 
         args = parser.parse_args()
-        rsl_sampling(args.out_dir, args.instance, args.num_train_states, args.check_state_invars, args.max_len_demo, args.num_demos, args.seed, args.random_sample_percentage, args.regression_method)
-        #rsl_sampling("samples", "blocks/blocks_probBLOCKS-4-0.pddl", 100000, True, 200, 1, 2, 50, "countBoth")
+        rsl_sampling(
+            args.out_dir,
+            args.instance,
+            args.num_train_states,
+            args.check_state_invars,
+            args.max_len_demo,
+            args.num_demos,
+            args.seed,
+            args.random_sample_percentage,
+            args.regression_method,
+        )
