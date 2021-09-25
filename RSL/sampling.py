@@ -67,7 +67,7 @@ def rsl_sampling(
     startTime_get_demos = time.perf_counter()
     # print(env.atomToInt)
 
-    # num_demos will basically dictate the number of regressions to perform.
+    # num_demos will basically dictate the number of rollouts to perform.
     for demoNum in range(num_demos):
         # print("get demo {}".format(demoNum))
         env.reset_to_initial_state()
