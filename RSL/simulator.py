@@ -268,18 +268,20 @@ class Simulator:
         planFormulas = [copy.deepcopy(formula)]
         atomsInPlan = set()
         atomsAlwaysInPlan = set()
+
         for atom in unwrap_conjunction_or_atom(formula):
             atomsAlwaysInPlan.add(str(atom))
+
         # print("goal formula {}".format(formula))
         for step in range(planLength):
             actionsToSelectFrom = []
             startTimeactions = time.perf_counter()
             atomsInFormulaStr = set()
+
             for atom in unwrap_conjunction_or_atom(formula):
                 atomsInFormulaStr.add(str(atom))
-            current_mutexes_with_formula = self.get_state_mutexes_in_set(
-                atomsInFormulaStr
-            )
+            current_mutexes_with_formula = self.get_state_mutexes_in_set(atomsInFormulaStr)
+
             maxTime1 = 0
             maxTime2 = 0
             maxTime3 = 0
@@ -289,28 +291,29 @@ class Simulator:
                 operator_is_consistent = None
                 addEffects = set()
                 startTime = time.perf_counter()
+
                 for eff in operator.effects:
                     if isinstance(eff, AddEffect):  # Add effects that cause invariant
                         strAtom = str(eff.atom)
                         addEffects.add(strAtom)
+
                         if operator_is_consistent is None:
                             operator_is_consistent = False
+
                         if strAtom in atomsInFormulaStr:
                             operator_is_consistent = True
+
                     if isinstance(eff, DelEffect):
-                        if (
-                            str(eff.atom) in atomsInFormulaStr
-                        ):  # not in original definition but makes stronger
+                        if (str(eff.atom) in atomsInFormulaStr):  # not in original definition but makes stronger
                             operator_is_consistent = False
                             break
+
                 maxTime1 += time.perf_counter() - startTime
                 startTime = time.perf_counter()
 
-                if (
-                    operator_is_consistent != False
-                    and len(addEffects.intersection(current_mutexes_with_formula)) > 0
-                ):
+                if (operator_is_consistent != False and len(addEffects.intersection(current_mutexes_with_formula)) > 0):
                     operator_is_consistent = False
+
                 maxTime2 += time.perf_counter() - startTime
                 startTime = time.perf_counter()
 
@@ -321,12 +324,15 @@ class Simulator:
                 if operator_is_consistent:
                     # print("operator {} is consistent before checking pre conditions".format(operatorNum))
                     forCheckingMutexes = set()
+
                     for atom in unwrap_conjunction_or_atom(operator.precondition):
                         if str(atom) in self.atomToInt.keys():
                             forCheckingMutexes.add(self.atomToInt[str(atom)])
+
                     for atom in unwrap_conjunction_or_atom(formula):
                         if str(atom) not in addEffects:
                             forCheckingMutexes.add(self.atomToInt[str(atom)])
+
                     if self.check_for_state_mutexes_in_a_set_of_atoms(
                         list(forCheckingMutexes)
                     ):
@@ -336,6 +342,7 @@ class Simulator:
                 if not operator_is_consistent:
                     # print("operator {} is not consistent".format(operatorNum))
                     continue
+
                 actionsToSelectFrom.append(operator)
             # print("end time to get relevant actions {}".format(time.perf_counter() - startTimeactions))
             # print("a {}, b {}, c {}".format(maxTime1, maxTime2, maxTime3))
@@ -345,8 +352,10 @@ class Simulator:
             if len(actionsToSelectFrom) > 0:
                 random.shuffle(actionsToSelectFrom)
                 formulaS = set()
+
                 for atom in unwrap_conjunction_or_atom(formula):
                     formulaS.add(str(atom))
+
                 for operator in actionsToSelectFrom:
                     # Delete add effects
                     atomsForNewFormula = formulaS.copy()
@@ -359,6 +368,7 @@ class Simulator:
                         if str(atom) in self.atomToInt.keys():
                             atomsForNewFormula.add(str(atom))
                     candidateOpsNFormulas.append((operator, atomsForNewFormula))
+
             # print("end time to preimage actions {}".format(time.perf_counter() - startTime))
             # print("number of canidate actions {}".format(len(candidateOpsNFormulas)))
             startTime = time.perf_counter()
@@ -368,39 +378,41 @@ class Simulator:
                 best_formula = None
                 for operator, temp_formula in candidateOpsNFormulas:
                     num_unique_atoms = 0
-                    if (
-                        regression_method == "countAdds"
-                        or regression_method == "countBoth"
-                    ):
+
+                    if (regression_method == "countAdds" or regression_method == "countBoth"):
                         for atom in temp_formula:
                             if atom not in atomsInPlan:
                                 num_unique_atoms += 1
-                    if (
-                        regression_method == "countDels"
-                        or regression_method == "countBoth"
-                    ):
+
+                    if (regression_method == "countDels" or regression_method == "countBoth"):
                         for atom in atomsAlwaysInPlan:
                             if atom not in temp_formula:
                                 num_unique_atoms += (
                                     1  # atom has never been deleted in plan thus far
                                 )
+
                     if bestOp is None:
                         bestOp = operator
                         best_formula = temp_formula
                         max_unique_atoms = num_unique_atoms
+
                     elif max_unique_atoms < num_unique_atoms:
                         bestOp = operator
                         best_formula = temp_formula
                         max_unique_atoms = num_unique_atoms
+
                 best_formula_atoms = []
                 for atomS in best_formula:
                     best_formula_atoms.append(self.intToAtom[self.atomToInt[atomS]])
+
                 formula = land(*best_formula_atoms, flat=True)
                 # print("op {}, unique atoms {}".format(bestOp, max_unique_atoms, formula))
                 planFormulas.append(copy.deepcopy(formula))
                 plan.append(str(bestOp))
+
                 for atom in unwrap_conjunction_or_atom(formula):
                     atomsInPlan.add(str(atom))
+
                 atomsAlwaysInPlan = set(
                     atom
                     for atom in atomsAlwaysInPlan
