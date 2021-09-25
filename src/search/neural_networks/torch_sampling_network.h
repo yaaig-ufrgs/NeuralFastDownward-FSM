@@ -9,9 +9,10 @@ namespace neural_networks {
 
 class TorchSamplingNetwork : public TorchNetwork {
 protected:
-    const std::vector<FactPair> relevant_facts;
     const int heuristic_shift;
     const int heuristic_multiplier;
+    const std::vector<FactPair> relevant_facts;
+    const std::vector<int> default_input_values;
     const bool blind;
     const double unary_threshold;
 

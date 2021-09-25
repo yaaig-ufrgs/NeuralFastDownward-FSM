@@ -13,16 +13,57 @@
 #include <string>
 
 using namespace std;
+
+vector<string> get_facts(vector<string> facts) {
+    if (facts.size() == 1 && facts[0].rfind("file ", 0) == 0){
+        vector<string> loaded_facts;
+        ifstream myfile (facts[0].substr(5));
+        cout << facts[0].substr(5) << endl;
+        string line;
+        if (myfile.is_open()) {
+            while (getline (myfile,line, ';')) {
+                cout << line << endl;
+                loaded_facts.push_back(line);
+            }
+            myfile.close();
+        }
+        return loaded_facts;
+    } else {
+        return facts;
+    }
+}
+
+vector<string> get_defaults(vector<string> defaults) {
+    if (defaults.size() == 1 && defaults[0].rfind("file ", 0) == 0){
+        vector<string> loaded_defaults;
+        ifstream myfile (defaults[0].substr(5));
+        string line;
+        if (myfile.is_open()) {
+            while (getline (myfile,line, ';')) {
+                loaded_defaults.push_back(line);
+            }
+            myfile.close();
+        }
+        return loaded_defaults;
+    } else {
+        return defaults;
+    }
+}
+
+
 namespace neural_networks {
 
 TorchSamplingNetwork::TorchSamplingNetwork(const Options &opts)
     : TorchNetwork(opts),
-      relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
-      // Check _parse() to set these values:
+      //relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       heuristic_shift(opts.get<int>("shift")),
       heuristic_multiplier(opts.get<int>("multiplier")),
+      relevant_facts(get_fact_mapping(task.get(), get_facts(opts.get_list<string>("facts")))),
+      default_input_values(get_default_inputs(get_defaults(opts.get_list<string>("defaults")))),
       blind(opts.get<bool>("blind")),
-      unary_threshold(opts.get<double>("unary_threshold")) {}
+      unary_threshold(opts.get<double>("unary_threshold")) {
+    check_facts_and_default_inputs(relevant_facts, default_input_values);
+}
 
 TorchSamplingNetwork::~TorchSamplingNetwork() {}
 
@@ -56,9 +97,15 @@ vector<at::Tensor> TorchSamplingNetwork::get_input_tensors(const State &state) {
 
     at::Tensor tensor = torch::ones({1, static_cast<long>(relevant_facts.size())});
     auto accessor = tensor.accessor<float, 2>();
+
     size_t idx = 0;
     for (const FactPair &fp: relevant_facts) {
-        accessor[0][idx++] = values[fp.var] == fp.value;
+        if (fp == FactPair::no_fact) {
+            accessor[0][idx] = default_input_values[idx];
+        } else {
+          accessor[0][idx] = values[fp.var] == fp.value;
+        }
+        idx++;
     }
     return {tensor};
 }
@@ -103,7 +150,7 @@ void TorchSamplingNetwork::clear_output() {
 
 static shared_ptr<neural_networks::AbstractNetwork> _parse(OptionParser &parser) {
     parser.document_synopsis(
-        "Torch State Network",
+        "Torch Sampling Network",
         "Takes a trained PyTorch model and evaluates it on a given state."
         "The output is read as and provided as a heuristic.");
     neural_networks::TorchNetwork::add_options_to_parser(parser);
@@ -116,6 +163,16 @@ static shared_ptr<neural_networks::AbstractNetwork> _parse(OptionParser &parser)
             "Multiply the predicted (and shifted) heuristic value (useful, if "
             "the model predicts small float values, but heuristics have to be "
             "integers", "1");
+    parser.add_list_option<string>(
+            "facts",
+            "if the SAS facts after translation can differ from the facts"
+            "during training (e.g. some are pruned or their order changed),"
+            "provide here the order of facts during training.",
+            "[]");
+    parser.add_list_option<string>(
+            "defaults",
+            "Default values for the facts given in option 'facts'",
+            "[]");
     parser.add_option<bool>(
             "blind",
             "Use heuristic = 0 to simulate a blind search.", "false");
