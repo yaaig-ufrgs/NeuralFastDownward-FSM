@@ -99,10 +99,13 @@ def rsl_sampling(
                     # else:
                     formulaInts.add(env.atomToInt[str(atom)])
             preImageFormulas.append((formula, formulaInts))
+
         allPlansPreimages.append(preImageFormulas)
+
     endTime_get_demos = time.perf_counter()
     startTime_sample_states = time.perf_counter()
     maxLength = 0
+
     for preImagedSets in allPlansPreimages:
         if len(preImagedSets) > maxLength:
             maxLength = len(preImagedSets)
@@ -192,12 +195,21 @@ def rsl_sampling(
                 maxTime2 += time.perf_counter() - startTime
                 startTime = time.perf_counter()
 
+                # "RSL uses the tightest upper bound found for the state's goal distance derived through the
+                # partial states visited by a number of regressions. As RSL searches and labels goal distance
+                # estimates over partial states, it samples many different training states from each partial state."
+
                 sampledStates.append(state) # Can just give heuristic from preimage sampled from as an upper bound
+
+                # labeled heuristic = distance to the closest state set in R to the goal according to the regression.
                 sampledStateHeur.append(heurValue)
 
             sampledStatesAll.extend(sampledStates)
             sampledStateHeurAll.extend(sampledStateHeur)
+
+            # heuristic value is incremented on each while iteration, until len(preImagedSets) <= heurValue: 
             heurValue += 1
+
             maxTime3 += time.perf_counter() - startTime
             startTime = time.perf_counter()
         # print("a {} b {} c {}".format(maxTime1, maxTime2, maxTime3))
@@ -274,14 +286,14 @@ if __name__ == "__main__":
         parser.add_argument("--out_dir", default="samples")
         parser.add_argument("--instance", default=None)
         parser.add_argument("--one_step_method", default=None)
-        parser.add_argument("--num_train_states", type=int, default=10000)
+        parser.add_argument("--num_train_states", type=int, default=10000) # Nt
         parser.add_argument(
             "--check_state_invars", type=str2bool, nargs="?", const=True, default=False
         )
-        parser.add_argument("--num_demos", type=int, default=1)
-        parser.add_argument("--max_len_demo", type=int, default=1)
+        parser.add_argument("--num_demos", type=int, default=1) # Nr
+        parser.add_argument("--max_len_demo", type=int, default=1) # L
         parser.add_argument("--seed", type=int, default=1)
-        parser.add_argument("--random_sample_percentage", type=int, default=0)
+        parser.add_argument("--random_sample_percentage", type=int, default=0) # Pr
         parser.add_argument("--regression_method", default=None)
 
         args = parser.parse_args()

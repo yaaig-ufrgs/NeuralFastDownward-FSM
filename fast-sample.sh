@@ -86,6 +86,12 @@ elif [ $METHOD = "rsl" ]; then
         prob_name=${prob_name%%.pddl*}
         if [ $prob_name != "domain" ]; then
             for seed in $(seq 1 $N_SEEDS); do
+                # Best config according to RSL paper:
+                # num_train_states (Nt):   100000 states
+                # num_demos (Nr):          5 rollouts
+                # max_len_demo (L):        500 regression applications
+                # sample_percentage (Pr):  50
+                # According to run_remote_RSL.py, check_state_invars is set to True.
                 ./RSL/sampling.py --out_dir $OUTPUT_DIR --instance $file --num_train_states $NUM_TRAIN_STATES \
                                   --num_demos $NUM_DEMOS --max_len_demo $MAX_LEN_DEMO --seed $seed \
                                   --random_sample_percentage $SAMPLE_PERCENTAGE \
