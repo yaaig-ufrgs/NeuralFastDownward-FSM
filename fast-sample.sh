@@ -89,7 +89,7 @@ elif [ $METHOD = "rsl" ]; then
                 ./RSL/sampling.py --out_dir $OUTPUT_DIR --instance $file --num_train_states $NUM_TRAIN_STATES \
                                   --num_demos $NUM_DEMOS --max_len_demo $MAX_LEN_DEMO --seed $seed \
                                   --random_sample_percentage $SAMPLE_PERCENTAGE \
-                                  --regression_method $TECHNIQUE
+                                  --regression_method $TECHNIQUE --check_state_invars $CHECK_STATE_INVARS
             done
         fi
     done
