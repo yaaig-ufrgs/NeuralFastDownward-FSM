@@ -65,7 +65,7 @@ class TrainWorkflow:
                         pred_h = prefix_to_h(pred[i].tolist())
                         self.y_pred_values[x_str] = (y_h, pred_h)
                     else: # Regression
-                        self.y_pred_values[x_str] = (y[i][0], int(pred[i][0]))
+                        self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
 
         if len(self.y_pred_values) > 0:
             save_y_pred_scatter(self.y_pred_values, t, fold_idx, f"{self.dirname}/plots")
@@ -165,7 +165,7 @@ class TrainWorkflow:
                         pred_h = prefix_to_h(pred[i].tolist())
                         self.y_pred_values[x_str] = (y_h, pred_h)
                     else: # Regression
-                        self.y_pred_values[x_str] = (y[i][0], int(pred[i][0]))
+                        self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
 
             _log.info(f"Saving post-training scatter plot.")
             save_y_pred_scatter(self.y_pred_values, -1, fold_idx, f"{self.dirname}/plots")
