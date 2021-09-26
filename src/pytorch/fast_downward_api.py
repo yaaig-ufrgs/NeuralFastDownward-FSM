@@ -150,10 +150,12 @@ def solve_instance_with_fd_nh(
     """
 
     if heuristic == "nn":
+        undefined_input = "true" if "_us_" in traced_model else "false"
         opt_network = (
             f"torch_sampling_network(path={traced_model},"
             f"multiplier={heuristic_multiplier},"
-            f"unary_threshold={unary_threshold})"
+            f"unary_threshold={unary_threshold},"
+            f"undefined_input={undefined_input})"
         )
         opt_heuristic = f"nh({opt_network})"
     else:
