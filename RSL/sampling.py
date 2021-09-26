@@ -31,6 +31,7 @@ def rsl_sampling(
     np.random.seed(seed)
 
     instance_split = instance.split("/")
+    domain = instance_split[-2]
     instance_name = instance_split[-1].split(".")[0]
     instance_domain = "/".join(instance_split[:-1]) + "/domain.pddl"
     instance_mutexes = instance + ".mutexes"
@@ -249,15 +250,17 @@ def rsl_sampling(
     startTime_check_train_NN = time.perf_counter()
 
     sampling_filename = (
-        f"rsl_{instance_name}_{regression_method}_{numTrainStates}_ss{seed}"
+        f"rsl_{domain}_{instance_name}_{regression_method}_{numTrainStates}_ss{seed}"
     )
+    if out_dir[-1] != "/":
+        out_dir += "/"
 
     save_sampling(sampling_filename, out_dir, sampledStatesAll, sampledStateHeurAll)
     save_facts_order_and_default_values(sampling_filename, out_dir, env.getGroundedDicts())
    
 
 def save_sampling(sampling_filename, out_dir, sampledStatesAll, sampledStateHeurAll):
-    out_file = out_dir + "/" + sampling_filename
+    out_file = out_dir + sampling_filename
     print(f"> Saving sampled states to {out_file}")
     with open(out_file, "w") as f:
         f.write("#cost;state\n")
@@ -281,8 +284,8 @@ def save_facts_order_and_default_values(filename, out_dir, env):
     string_atom_order += ""
     string_defaults += ""
 
-    out_file_facts = out_dir + "/" + filename + "_facts.txt"
-    out_file_defaults = out_dir + "/" + filename + "_defaults.txt"
+    out_file_facts = out_dir + filename + "_facts.txt"
+    out_file_defaults = out_dir + filename + "_defaults.txt"
     with open(out_file_facts, "w") as f:
         f.write(string_atom_order)
     with open(out_file_defaults, "w") as text_file:
