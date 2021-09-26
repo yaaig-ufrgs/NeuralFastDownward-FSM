@@ -15,6 +15,7 @@ protected:
     const std::vector<int> default_input_values;
     const bool blind;
     const double unary_threshold;
+    const bool undefined_input;
 
     int last_h = Heuristic::NO_VALUE;
     std::vector<int> last_h_batch;

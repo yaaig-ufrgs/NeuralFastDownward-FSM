@@ -61,7 +61,8 @@ TorchSamplingNetwork::TorchSamplingNetwork(const Options &opts)
       relevant_facts(get_fact_mapping(task.get(), get_facts(opts.get_list<string>("facts")))),
       default_input_values(get_default_inputs(get_defaults(opts.get_list<string>("defaults")))),
       blind(opts.get<bool>("blind")),
-      unary_threshold(opts.get<double>("unary_threshold")) {
+      unary_threshold(opts.get<double>("unary_threshold")),
+      undefined_input(opts.get<bool>("undefined_input")) {
     check_facts_and_default_inputs(relevant_facts, default_input_values);
 }
 
@@ -95,15 +96,20 @@ vector<at::Tensor> TorchSamplingNetwork::get_input_tensors(const State &state) {
     state.unpack();
     const vector<int> &values = state.get_values();
 
-    at::Tensor tensor = torch::ones({1, static_cast<long>(relevant_facts.size())});
+    unsigned size = relevant_facts.size();
+    if (undefined_input)
+        size += relevant_facts[relevant_facts.size()-1].var + 1;
+    at::Tensor tensor = torch::ones({1, static_cast<long>(size)});
     auto accessor = tensor.accessor<float, 2>();
 
     size_t idx = 0;
-    for (const FactPair &fp: relevant_facts) {
-        if (fp == FactPair::no_fact) {
+    for (unsigned i = 0; i < relevant_facts.size(); i++) {
+        if (relevant_facts[i] == FactPair::no_fact) {
             accessor[0][idx] = default_input_values[idx];
         } else {
-          accessor[0][idx] = values[fp.var] == fp.value;
+            if (undefined_input && (i == 0 || relevant_facts[i].var != relevant_facts[i-1].var))
+                accessor[0][idx++] = values[relevant_facts[i].var] == PartialAssignment::UNASSIGNED;
+            accessor[0][idx] = values[relevant_facts[i].var] == relevant_facts[i].value;
         }
         idx++;
     }
@@ -117,7 +123,7 @@ void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
 
     if (!blind) {
         // Regression (tensor.size(1) == 1) or Classification (tensor.size(1) > 1).
-        last_h = tensor.size(1) == 1 ? unary_output[0]*heuristic_multiplier : unary_to_value(unary_output);
+        last_h = tensor.size(1) == 1 ? (unary_output[0]+heuristic_shift)*heuristic_multiplier : unary_to_value(unary_output);
         last_h_batch.push_back(last_h);
         /* Batch testing does not work.
         auto accessor = tensor.accessor<float, 2>();
@@ -157,12 +163,14 @@ static shared_ptr<neural_networks::AbstractNetwork> _parse(OptionParser &parser)
     parser.add_option<int>(
             "shift",
             "shift the predicted heuristic value (useful, if the model"
-            "output is expected to be negative up to a certain bound.", "0");
+            "output is expected to be negative up to a certain bound.",
+            "0");
     parser.add_option<int>(
             "multiplier",
             "Multiply the predicted (and shifted) heuristic value (useful, if "
             "the model predicts small float values, but heuristics have to be "
-            "integers", "1");
+            "integers",
+            "1");
     parser.add_list_option<string>(
             "facts",
             "if the SAS facts after translation can differ from the facts"
@@ -175,10 +183,16 @@ static shared_ptr<neural_networks::AbstractNetwork> _parse(OptionParser &parser)
             "[]");
     parser.add_option<bool>(
             "blind",
-            "Use heuristic = 0 to simulate a blind search.", "false");
+            "Use heuristic = 0 to simulate a blind search.",
+            "false");
     parser.add_option<double>(
             "unary_threshold",
-            "Threshold to use when interpreting unary heuristic values to a single value.", "0.01");
+            "Threshold to use when interpreting unary heuristic values to a single value.",
+            "0.01");
+    parser.add_option<bool>(
+            "undefined_input",
+            "Add neurons to undefined facts on input.",
+            "false");
 
     Options opts = parser.parse();
 
