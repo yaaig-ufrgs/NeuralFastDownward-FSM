@@ -34,6 +34,8 @@ from src.pytorch.utils.default_args import (
     DEFAULT_WEIGHTS_SEED,
     DEFAULT_COMPARED_HEURISTIC_CSV_DIR,
     DEFAULT_HSTAR_CSV_DIR,
+    DEFAULT_FACTS_FILE,
+    DEFAULT_DEF_VALUES_FILE,
 )
 
 
@@ -284,4 +286,19 @@ def get_test_args():
         default=DEFAULT_TEST_MODEL,
         help="Model(s) used for testing. (default: %(default)s)",
     )
+    parser.add_argument(
+        "-ffile",
+        "--facts-file",
+        type=str,
+        default=DEFAULT_FACTS_FILE,
+        help="Order of facts during sampling. (default: %(defaults)s)",
+    )
+    parser.add_argument(
+        "-dfile",
+        "--defaults-file",
+        type=str,
+        default=DEFAULT_DEF_VALUES_FILE,
+        help="Default values for facts given with `ffile`. (default: %(defaults)s)",
+    )
+
     return parser.parse_args()

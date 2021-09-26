@@ -63,6 +63,8 @@ def test_main(args):
                 time_limit=args.max_search_time,
                 memory_limit=args.max_search_memory,
                 max_expansions=args.max_expansions,
+                facts_file=args.facts_file,
+                defaults_file=args.defaults_file,
                 save_log_to=dirname,
             )
             _log.info(f"{output[problem_pddl]}")

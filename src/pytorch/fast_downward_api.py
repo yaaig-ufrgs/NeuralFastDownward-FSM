@@ -11,6 +11,8 @@ from src.pytorch.utils.default_args import (
     DEFAULT_MAX_EXPANSIONS,
     DEFAULT_UNARY_THRESHOLD,
     DEFAULT_HEURISTIC_MULTIPLIER,
+    DEFAULT_FACTS_FILE,
+    DEFAULT_DEF_VALUES_FILE,
 )
 
 _log = logging.getLogger(__name__)
@@ -143,17 +145,24 @@ def solve_instance_with_fd_nh(
     time_limit=DEFAULT_MAX_SEARCH_TIME,
     memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
     max_expansions=DEFAULT_MAX_EXPANSIONS,
+    facts_file=DEFAULT_FACTS_FILE,
+    defaults_file=DEFAULT_DEF_VALUES_FILE,
     save_log_to=None,
 ):
     """
     Tries to solve a PDDL instance with the torch_sampling_network.
     """
 
+    facts = "[]" if facts_file == "" else f"[file {facts_file}]" 
+    defaults = "[]" if defaults_file == "" else f"[file {defaults_file}]" 
+
     if heuristic == "nn":
         undefined_input = "true" if "_us_" in traced_model else "false"
         opt_network = (
             f"torch_sampling_network(path={traced_model},"
             f"multiplier={heuristic_multiplier},"
+            f"facts={facts},"
+            f"defaults={defaults},"
             f"unary_threshold={unary_threshold},"
             f"undefined_input={undefined_input})"
         )
