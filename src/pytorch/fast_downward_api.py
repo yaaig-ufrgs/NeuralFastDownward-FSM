@@ -153,10 +153,9 @@ def solve_instance_with_fd_nh(
     Tries to solve a PDDL instance with the torch_sampling_network.
     """
 
-    facts = "[]" if facts_file == "" else f"[file {facts_file}]" 
-    defaults = "[]" if defaults_file == "" else f"[file {defaults_file}]" 
-
     if heuristic == "nn":
+        facts = "[]" if facts_file == "" else f"[file {facts_file}]" 
+        defaults = "[]" if defaults_file == "" else f"[file {defaults_file}]" 
         undefined_input = "true" if "_us_" in traced_model else "false"
         opt_network = (
             f"torch_sampling_network(path={traced_model},"
