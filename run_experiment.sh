@@ -58,10 +58,10 @@ run_experiment_rsl() {
         if [ $(($COUNTER%$max_per_thread)) = 0 ]; then
             THREAD_ID=$((THREAD_ID+1))
             tsp taskset -c ${THREAD_ID} ./train-and-test.sh "-o regression -f 1 -hl 1 -hu 16 -t 99999 -e -1 -a relu -s $net_seed $file" \
-                "results/nfd_train.${problem_file}.ns${net_seed}/ tasks/IPC/${domain}/${problem}.pddl -ffile {facts} -dfile {defaults} -t 99999 -e -1 -a eager_greedy -pt all"
+                "results/nfd_train.${problem_file}.ns${net_seed}/ tasks/IPC/${domain}/${problem}.pddl -ffile ${facts} -dfile ${defaults} -t 99999 -e -1 -a eager_greedy -pt all"
        else
             tsp -D $((COUNTER-1)) taskset -c ${THREAD_ID} ./train-and-test.sh "-o regression -f 1 -hl 1 -hu 16 -t 99999 -e -1 -a relu -s $net_seed $file" \
-                "results/nfd_train.${problem_file}.ns${net_seed}/ tasks/IPC/${domain}/${problem}.pddl -ffile {facts} -dfile {defaults} -t 99999 -e -1 -a eager_greedy -pt all"
+                "results/nfd_train.${problem_file}.ns${net_seed}/ tasks/IPC/${domain}/${problem}.pddl -ffile ${facts} -dfile ${defaults} -t 99999 -e -1 -a eager_greedy -pt all"
         fi
 
         COUNTER=$((COUNTER+1))
