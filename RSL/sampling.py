@@ -248,24 +248,45 @@ def rsl_sampling(
     endTime_check_state_membership = time.perf_counter()
     startTime_check_train_NN = time.perf_counter()
 
-    # print("len states: ", len(sampledStatesAll))
-    # print("len heurs:  ", len(sampledStateHeurAll))
-
-    # print(sampledStatesAll[0])
-    # print(sampledStateHeurAll[0])
-
-    sample_filename = (
+    sampling_filename = (
         f"rsl_{instance_name}_{regression_method}_{numTrainStates}_ss{seed}"
     )
-    csv_file = out_dir + "/" + sample_filename
-    print(f"> Saving sampled states to {csv_file}")
-    with open(csv_file, "w") as f:
+
+    save_sampling(sampling_filename, out_dir, sampledStatesAll, sampledStateHeurAll)
+    save_facts_order_and_default_values(sampling_filename, out_dir, env.getGroundedDicts())
+   
+
+def save_sampling(sampling_filename, out_dir, sampledStatesAll, sampledStateHeurAll):
+    out_file = out_dir + "/" + sampling_filename
+    print(f"> Saving sampled states to {out_file}")
+    with open(out_file, "w") as f:
         f.write("#cost;state\n")
         for i in range(len(sampledStatesAll)):
             f.write(
                 "%s;%s\n"
                 % (sampledStateHeurAll[i], "".join(map(str, sampledStatesAll[i])))
             )
+
+
+def save_facts_order_and_default_values(filename, out_dir, env):
+    string_atom_order = ""
+    string_defaults = ""
+
+    for key, item in enumerate(env[1]):
+        string_atom_order += "Atom " + item + ";"
+        string_defaults += "0;"
+
+    string_atom_order = string_atom_order[:-1]
+    string_defaults = string_defaults[:-1]
+    string_atom_order += ""
+    string_defaults += ""
+
+    out_file_facts = out_dir + "/" + filename + "_facts.txt"
+    out_file_defaults = out_dir + "/" + filename + "_defaults.txt"
+    with open(out_file_facts, "w") as f:
+        f.write(string_atom_order)
+    with open(out_file_defaults, "w") as text_file:
+        text_file.write(string_defaults)
 
 
 def str2bool(v):
