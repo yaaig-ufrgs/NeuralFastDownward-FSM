@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 
 from src.pytorch.model import HNN
 from src.pytorch.utils.plot import save_y_pred_scatter
+from src.pytorch.utils.helpers import prefix_to_h
 
 _log = logging.getLogger(__name__)
 
@@ -59,7 +60,12 @@ class TrainWorkflow:
                 for i, _ in enumerate(x_lst):
                     x_int = [int(x) for x in x_lst[i]]
                     x_str = ''.join(str(e) for e in x_int)
-                    self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+                    if len(y[i]) > 1: # Prefix (unary encoding)
+                        y_h = prefix_to_h(y[i].tolist())
+                        pred_h = prefix_to_h(pred[i].tolist())
+                        self.y_pred_values[x_str] = (y_h, pred_h)
+                    else: # Regression
+                        self.y_pred_values[x_str] = (y[i][0], int(pred[i][0]))
 
         if len(self.y_pred_values) > 0:
             save_y_pred_scatter(self.y_pred_values, t, fold_idx, f"{self.dirname}/plots")
@@ -151,11 +157,15 @@ class TrainWorkflow:
             for X, y in self.train_dataloader:
                 pred = self.model(X)
                 x_lst = X.tolist()
-
                 for i, _ in enumerate(x_lst):
                     x_int = [int(x) for x in x_lst[i]]
                     x_str = ''.join(str(e) for e in x_int)
-                    self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+                    if len(y[i]) > 1: # Prefix (unary encoding)
+                        y_h = prefix_to_h(y[i].tolist())
+                        pred_h = prefix_to_h(pred[i].tolist())
+                        self.y_pred_values[x_str] = (y_h, pred_h)
+                    else: # Regression
+                        self.y_pred_values[x_str] = (y[i][0], int(pred[i][0]))
 
             _log.info(f"Saving post-training scatter plot.")
             save_y_pred_scatter(self.y_pred_values, -1, fold_idx, f"{self.dirname}/plots")

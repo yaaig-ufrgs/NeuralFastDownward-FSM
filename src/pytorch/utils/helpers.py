@@ -24,6 +24,14 @@ def to_onehot(n: int, max_value: int) -> [int]:
     max_value += 1
     return [1 if i == n else 0 for i in range(max_value)]
 
+def prefix_to_h(prefix: [int], threshold: float = 0.01) -> int:
+    last_h = len(prefix) - 1
+    for i in range(len(prefix)):
+        if float(prefix[i]) < threshold:
+            last_h = i - 1
+            break
+    return last_h
+
 def get_datetime():
     return datetime.now().isoformat().replace("-", ".").replace(":", ".")
 
