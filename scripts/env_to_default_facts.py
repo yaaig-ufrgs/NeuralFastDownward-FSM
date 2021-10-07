@@ -18,10 +18,12 @@ def gen_default_facts(data):
         directory = '/'.join(d_split[:-1])
         file = d_split[-1]
         problem = file.split('-')
-        #print(problem[0])
-        if problem[0] == 'blocks':
-            problem_name = "blocks_probBLOCKS-" + '-'.join(problem[2:])[:-4]
 
+        if problem[0] == 'blocks':
+            if problem[2] == 'B':
+                problem_name = "blocks_probBLOCKS-" + '-'.join(problem[3:])[:-4]
+            else:
+                problem_name = "blocks_probBLOCKS-" + '-'.join(problem[2:])[:-4]
         else:
             problem_name = file[:-4]
 

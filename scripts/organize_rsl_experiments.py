@@ -17,10 +17,12 @@ def create_train_dir(data):
         directory = '/'.join(d_split[:-1])
         file = d_split[-1]
         problem = file.split('-')
-        #print(problem[0])
-        if problem[0] == 'blocks':
-            problem_name = "blocks_probBLOCKS-" + '-'.join(problem[2:])[:-3]
 
+        if problem[0] == 'blocks':
+            if problem[2] == 'B':
+                problem_name = "blocks_probBLOCKS-" + '-'.join(problem[3:])[:-3]
+            else:
+                problem_name = "blocks_probBLOCKS-" + '-'.join(problem[2:])[:-3]
         else:
             problem_name = file[:-3]
 
