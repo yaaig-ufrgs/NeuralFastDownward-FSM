@@ -26,8 +26,10 @@ protected:
     const std::string state_representation;
     const bool match_heuristics;
     const int assignments_by_undefined_state;
+    const int contrasting_samples;
     const std::vector<FactPair> relevant_facts;
     const std::string header;
+    std::shared_ptr<utils::RandomNumberGenerator> rng;
 
     virtual std::vector<std::string> extract_samples() override;
     virtual std::string construct_header() const;

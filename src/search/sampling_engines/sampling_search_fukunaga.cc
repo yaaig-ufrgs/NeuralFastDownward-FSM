@@ -42,11 +42,17 @@ string SamplingSearchFukunaga::sample_file_header() const {
 vector<string> SamplingSearchFukunaga::extract_samples() {
     vector<string> samples;
     int rand_value = 0;
+    int max_h = 0;
+
     for (std::shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         ostringstream oss;
 
+        int h = partialAssignment->estimated_heuristic;
+        if (h > max_h)
+            max_h = h;
+
         if (store_plan_cost && state_representation != "assign_undefined")
-            oss << partialAssignment->estimated_heuristic << field_separator;
+            oss << h << field_separator;
 
         if (store_state) {
             vector<int> values;
@@ -95,6 +101,38 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
             }
         }
     }
+
+    if (contrasting_samples > 0) {
+        assert(state_representation != "assign_undefined");
+
+        const size_t n_atoms = sampling_technique::modified_tasks[0]->get_values().size();
+        PartialAssignment pa(
+            *sampling_technique::modified_tasks[0],
+            vector<int>(n_atoms, PartialAssignment::UNASSIGNED)
+        );
+
+        int random_samples = sampling_technique::modified_tasks.size() * contrasting_samples / 100;
+        while (random_samples > 0) {
+            pair<bool,State> fs = pa.get_full_state(true, *rng);
+            if (!fs.first)
+                continue;
+            State s = fs.second;
+            s.unpack();
+            vector<int> values = s.get_values();
+
+            ostringstream oss;
+            oss << (max_h + 1) << field_separator;
+            for (unsigned i = 0; i < relevant_facts.size(); i++) {
+                if ((state_representation == "undefined") &&
+                    (i == 0 || relevant_facts[i].var != relevant_facts[i-1].var))
+                    oss << (values[relevant_facts[i].var] == PartialAssignment::UNASSIGNED);
+                oss << (values[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
+            }
+            samples.push_back(oss.str());
+            random_samples--;
+        }
+    }
+
     if (match_heuristics) {
         unordered_map<string,int> pairs;
         string state;
@@ -122,8 +160,10 @@ SamplingSearchFukunaga::SamplingSearchFukunaga(const options::Options &opts)
       state_representation(opts.get<string>("state_representation")),
       match_heuristics(opts.get<bool>("match_heuristics")),
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
+      contrasting_samples(opts.get<int>("contrasting_samples")),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
-      header(construct_header()){
+      header(construct_header()),
+      rng(utils::parse_rng_from_options(opts)) {
 }
 
 static shared_ptr<SearchEngine> _parse_sampling_search_fukunaga(OptionParser &parser) {
@@ -154,6 +194,11 @@ static shared_ptr<SearchEngine> _parse_sampling_search_fukunaga(OptionParser &pa
             "assignments_by_undefined_state",
             "Number of states generated from each undefined state (only with assign_undefined).",
             "10"
+    );
+    parser.add_option<int>(
+            "contrasting_samples",
+            "Generate new random samples with h = L+1. (Percentage of those obtained with the search).",
+            "0"
     );
 
     SearchEngine::add_options_to_parser(parser);

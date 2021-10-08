@@ -30,6 +30,7 @@ if [ $METHOD = "fukunaga" ] || [ $METHOD = "ferber" ]; then
     STATE_REPRESENTATION="complete"
     MATCH_HEURISTICS="true"
     ASSIGNMENTS_BY_US=10
+    CONTRASTING_SAMPLES=0
 
     if [ ! $TECHNIQUE = "rw" ] && [ ! $TECHNIQUE = "dfs" ]; then
         echo "Invalid search technique. Choose between rw (random walk) or dfs (depth-first search)."
@@ -64,7 +65,8 @@ if [ $METHOD = "fukunaga" ] || [ $METHOD = "ferber" ]; then
                         --search "sampling_search_fukunaga(astar(lmcut(transform=sampling_transform()), transform=sampling_transform()), \
                         techniques=[gbackward_fukunaga(searches=$SEARCHES, samples_per_search=$SAMPLES_PER_SEARCH, \
                         technique=$TECHNIQUE, random_seed=$seed)], state_representation=$STATE_REPRESENTATION, \
-                        random_seed=$seed, match_heuristics=$MATCH_HEURISTICS, assignments_by_undefined_state=$ASSIGNMENTS_BY_US)"
+                        random_seed=$seed, match_heuristics=$MATCH_HEURISTICS, assignments_by_undefined_state=$ASSIGNMENTS_BY_US, \
+                        contrasting_samples=$CONTRASTING_SAMPLES)"
                 done
             fi
         done
