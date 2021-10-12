@@ -22,7 +22,7 @@ count=0
 # don't count domain.pddl and atoms.json
 for value in "${task_files[@]}" ; do
     f="$(cut -d '/' -f7 <<< ${value})"
-    if [ $f = "atoms.json" ] || [ $f = "domain.pddl" ] ; then
+    if [ $f = "atoms.json" ] || [ $f = "domain.pddl" ] || [ $f = "data_set_sizes.json" ] ; then
         count=$((count+1))
     fi
 done
@@ -32,6 +32,7 @@ task_files_len=$(((${#task_files[@]}-$count)*${runs}))
 max_per_thread=$((($task_files_len+$CORES-1)/$CORES))
 COUNTER=0
 THREAD_ID=-1
+#c=0
 
 for file in ${task_files[@]} ; do
     echo $file
@@ -39,7 +40,7 @@ for file in ${task_files[@]} ; do
     domain="$(cut -d '/' -f4 <<< ${file})"
     problem="$(cut -d '/' -f6 <<< ${file})"
     pddl="$(cut -d '/' -f7 <<< ${file})"
-    if [ $pddl = "atoms.json" ] || [ $pddl = "domain.pddl" ] ; then
+    if [ $pddl = "atoms.json" ] || [ $pddl = "domain.pddl" ] || [ $f = "data_set_sizes.json" ] ; then
         continue
     fi
     instance_trained_on="${domain}-${problem}"
@@ -62,5 +63,6 @@ for file in ${task_files[@]} ; do
         tsp -D $((COUNTER-1)) taskset -c ${THREAD_ID} ./test.py ${train_dir} ${file} -ffile ${facts} -dfile ${defaults} -t 360 -a eager_greedy -pt best
     fi
 
+    #c=$((c+1))
     COUNTER=$((COUNTER+1))
 done
