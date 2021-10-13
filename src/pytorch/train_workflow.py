@@ -131,7 +131,7 @@ class TrainWorkflow:
                     count_no_conv += 1
                     if self.max_epochs_no_convergence != -1 and count_no_conv >= self.max_epochs_no_convergence:
                         _log.info(
-                            f"The network failed to converge to a value in "
+                            f"The network failed to converge to a value "
                             f"in {self.max_epochs_no_convergence} epochs. Restarting from scratch..."
                         )
                         need_restart = True
