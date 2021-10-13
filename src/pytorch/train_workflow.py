@@ -31,6 +31,7 @@ class TrainWorkflow:
         self.max_epochs = max_epochs
         self.plot_n_epochs = plot_n_epochs
         self.max_epochs_not_improving = max_epochs_not_improving
+        self.max_epochs_no_convergence = max_epochs_no_convergence
         self.dirname = dirname
         self.optimizer = optimizer
         self.loss_fn = loss_fn
@@ -117,11 +118,24 @@ class TrainWorkflow:
     def run(self, fold_idx, train_timer, validation=True):
         last_val_loss = 0
         count = 0
+        count_no_conv = 0
+        need_restart = False
+        loss_first_epoch = 0
         for t in range(self.max_epochs):
             cur_train_loss = self.train_loop(t, fold_idx)
 
             if validation:
                 cur_val_loss = self.val_loop()
+                loss_first_epoch = cur_val_loss if t == 0 else loss_first_epoch
+                if cur_val_loss == loss_first_epoch:
+                    count_no_conv += 1
+                    if self.max_epochs_no_convergence != -1 and count_no_conv >= self.max_epochs_no_convergence:
+                        _log.info(
+                            f"The network failed to converge to a value in "
+                            f"in {self.max_epochs_no_convergence} epochs. Restarting from scratch..."
+                        )
+                        need_restart = True
+                        break
                 if (last_val_loss - cur_val_loss) > 0.01:
                     count = 0
                 else:
@@ -150,7 +164,7 @@ class TrainWorkflow:
         # Post-training scatter plot.
         self.save_post_scatter_plot(fold_idx)
 
-        return cur_val_loss if validation else None
+        return (cur_val_loss if validation else None), need_restart
 
     def save_post_scatter_plot(self, fold_idx: int):
         with torch.no_grad():

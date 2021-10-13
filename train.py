@@ -61,52 +61,55 @@ def train_main(args):
     train_timer = Timer(args.max_training_time).start()
     best_fold = {"fold": -1, "val_loss": float("inf")}
 
+    num_retries = 0
     for fold_idx in range(args.num_folds):
         _log.info(
             f"Running training workflow for fold {fold_idx+1} out "
             f"of {args.num_folds}"
         )
+
         train_dataloader, val_dataloader = kfold.get_fold(fold_idx)
 
-        #need_restart = True
+        need_restart = True
+        while need_restart:
+            model = HNN(
+                input_units=train_dataloader.dataset.x_shape()[1],
+                hidden_units=args.hidden_units,
+                output_units=train_dataloader.dataset.y_shape()[1],
+                hidden_layers=args.hidden_layers,
+                activation=args.activation,
+                output_layer=args.output_layer,
+                dropout_rate=args.dropout_rate,
+                linear_output=args.linear_output,
+                use_bias=args.bias,
+                use_bias_output=args.bias_output,
+                weights_method=args.weights_method,
+                weights_seed=args.weights_seed,
+            ).to(torch.device("cpu"))
 
-        #while need_restart:
-        model = HNN(
-            input_units=train_dataloader.dataset.x_shape()[1],
-            hidden_units=args.hidden_units,
-            output_units=train_dataloader.dataset.y_shape()[1],
-            hidden_layers=args.hidden_layers,
-            activation=args.activation,
-            output_layer=args.output_layer,
-            dropout_rate=args.dropout_rate,
-            linear_output=args.linear_output,
-            use_bias=args.bias,
-            use_bias_output=args.bias_output,
-            weights_method=args.weights_method,
-            weights_seed=args.weights_seed,
-        ).to(torch.device("cpu"))
+            if fold_idx == 0:
+                _log.info(model)
 
-        if fold_idx == 0:
-            _log.info(model)
+            train_wf = TrainWorkflow(
+                model=model,
+                train_dataloader=train_dataloader,
+                val_dataloader=val_dataloader,
+                max_epochs=args.max_epochs,
+                plot_n_epochs=args.plot_n_epochs,
+                max_epochs_not_improving = args.max_epochs_not_improving,
+                max_epochs_no_convergence = args.restart_no_conv,
+                dirname=dirname,
+                optimizer=torch.optim.Adam(
+                    model.parameters(),
+                    lr=args.learning_rate,
+                    weight_decay=args.weight_decay,
+                ),
+            )
 
-        train_wf = TrainWorkflow(
-            model=model,
-            train_dataloader=train_dataloader,
-            val_dataloader=val_dataloader,
-            max_epochs=args.max_epochs,
-            plot_n_epochs=args.plot_n_epochs,
-            max_epochs_not_improving = args.max_epochs_not_improving,
-            max_epochs_no_convergence = args.restart_no_conv,
-            dirname=dirname,
-            optimizer=torch.optim.Adam(
-                model.parameters(),
-                lr=args.learning_rate,
-                weight_decay=args.weight_decay,
-            ),
-        )
-
-        fold_val_loss = train_wf.run(fold_idx, train_timer, validation=True)
-        #need_restart = False
+            fold_val_loss, restart_flag = train_wf.run(fold_idx, train_timer, validation=True)
+            need_restart = restart_flag
+            if need_restart == True:
+                num_retries += 1
 
         heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
 
@@ -127,6 +130,7 @@ def train_main(args):
 
     _log.info("Finishing training.")
     _log.info(f"Elapsed time: {train_timer.current_time()}")
+    _log.info(f"Restarts needed: {num_retries}")
 
     remove_csv_except_best(dirname, best_fold['fold'])
     os.rename(f"{dirname}/heuristic_pred_{best_fold['fold']}.csv", f"{dirname}/heuristic_pred.csv")
