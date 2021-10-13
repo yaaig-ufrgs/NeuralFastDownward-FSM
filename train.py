@@ -68,6 +68,9 @@ def train_main(args):
         )
         train_dataloader, val_dataloader = kfold.get_fold(fold_idx)
 
+        #need_restart = True
+
+        #while need_restart:
         model = HNN(
             input_units=train_dataloader.dataset.x_shape()[1],
             hidden_units=args.hidden_units,
@@ -78,6 +81,7 @@ def train_main(args):
             dropout_rate=args.dropout_rate,
             linear_output=args.linear_output,
             use_bias=args.bias,
+            use_bias_output=args.bias_output,
             weights_method=args.weights_method,
             weights_seed=args.weights_seed,
         ).to(torch.device("cpu"))
@@ -92,6 +96,7 @@ def train_main(args):
             max_epochs=args.max_epochs,
             plot_n_epochs=args.plot_n_epochs,
             max_epochs_not_improving = args.max_epochs_not_improving,
+            max_epochs_no_convergence = args.restart_no_conv,
             dirname=dirname,
             optimizer=torch.optim.Adam(
                 model.parameters(),
@@ -101,6 +106,7 @@ def train_main(args):
         )
 
         fold_val_loss = train_wf.run(fold_idx, train_timer, validation=True)
+        #need_restart = False
 
         heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
 

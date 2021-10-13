@@ -13,6 +13,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_DROPOUT_RATE,
     DEFAULT_SHUFFLE,
     DEFAULT_BIAS,
+    DEFAULT_BIAS_OUTPUT,
     DEFAULT_LEARNING_RATE,
     DEFAULT_MAX_EPOCHS,
     DEFAULT_MAX_EPOCHS_NOT_IMPROVING,
@@ -36,6 +37,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_HSTAR_CSV_DIR,
     DEFAULT_FACTS_FILE,
     DEFAULT_DEF_VALUES_FILE,
+    DEFAULT_RESTART_NO_CONV,
 )
 
 
@@ -156,6 +158,13 @@ def get_train_args():
         help="Use bias or not. (default: %(default)s)",
     )
     parser.add_argument(
+        "-biout",
+        "--bias-output",
+        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        default=DEFAULT_BIAS,
+        help="Use bias or not in the output layer. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-of",
         "--output-folder",
         type=Path,
@@ -210,6 +219,13 @@ def get_train_args():
         type=str,
         default=DEFAULT_COMPARED_HEURISTIC_CSV_DIR,
         help="Directory with h* CSV data; used for box plot. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-rst",
+        "--restart-no-conv",
+        type=int,
+        default=DEFAULT_RESTART_NO_CONV,
+        help="Restart after n epochs of non-convergence. (default: %(default)s)",
     )
 
     return parser.parse_args()

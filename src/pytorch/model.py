@@ -17,6 +17,7 @@ class HNN(nn.Module):
         dropout_rate: float,
         linear_output: bool,
         use_bias: bool,
+        use_bias_output: bool,
         weights_method: str,
         weights_seed: int,
     ):
@@ -43,7 +44,11 @@ class HNN(nn.Module):
         self.hid = nn.ModuleList()
         for i in range(self.hidden_layers):
             self.hid.append(nn.Linear(hu[i], hu[i + 1], bias=use_bias))
-        self.opt = nn.Linear(hu[-1], output_units, bias=use_bias)
+
+        # If `use_bias` is set to False, `bias_output` is set to False regardless
+        # of the value in `use_bias_output`.
+        bias_output = False if use_bias == False else use_bias_output
+        self.opt = nn.Linear(hu[-1], output_units, bias=bias_output)
 
         if self.dropout_rate > 0:
             self.dropout = nn.Dropout(self.dropout_rate, inplace=False)

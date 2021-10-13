@@ -20,6 +20,7 @@ class TrainWorkflow:
         max_epochs: int,
         plot_n_epochs: int,
         max_epochs_not_improving: int,
+        max_epochs_no_convergence: int,
         dirname: str,
         optimizer: optim.Optimizer,
         loss_fn: nn = nn.MSELoss(),
