@@ -117,8 +117,17 @@ def logging_train_config(args, dirname, json=True):
         "dropout_rate": args.dropout_rate,
         "shuffle": args.shuffle,
         "bias": args.bias,
+        "normalize_output": args.normalize_output,
         "seed": args.seed if args.seed != DEFAULT_RANDOM_SEED else "random",
         "output_folder": str(args.output_folder),
+        "scatter_plot": args.scatter_plot,
+        "plot_n_epochs": args.plot_n_epochs,
+        "weights_method": args.weights_method,
+        "weights_seed": args.weights_seed,
+        "compare_csv_dir": args.compare_csv_dir,
+        "hstar_csv_dir": args.hstar_csv_dir,
+        "restart_no_conv": args.restart_no_conv,
+        "bias_output": args.bias_output,
     }
 
     _log.info(f"Configuration")
@@ -138,7 +147,11 @@ def logging_test_config(args, dirname, save_file=True):
         "heuritic_multiplier": args.heuristic_multiplier,
         "max_search_time": f"{args.max_search_time}s",
         "max_search_memory": f"{args.max_search_memory} MB",
-        "max_expansions": str(args.max_expansions),
+        "max_expansions": args.max_expansions,
+        "unary_threshold": args.unary_threshold,
+        "test_model": args.test_model,
+        "facts_file": args.facts_file,
+        "defaults_file": args.defaults_file,
     }
     if args.heuristic == "nn":
         args_dic["test_model"] = args.test_model
@@ -149,6 +162,13 @@ def logging_test_config(args, dirname, save_file=True):
 
     if save_file:
         save_json(f"{dirname}/test_args.json", args_dic)
+
+def add_train_arg(dirname, key, value):
+    with open(f"{dirname}/train_args.json", "r") as f:
+        data = load(f)
+    data[key] = value
+    with open(f"{dirname}/train_args.json", "w") as f:
+        dump(data, f, indent=4)
 
 def logging_test_statistics(
     args, dirname, model, output, decimal_places=4, save_file=True

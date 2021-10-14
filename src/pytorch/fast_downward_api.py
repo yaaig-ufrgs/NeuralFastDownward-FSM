@@ -116,6 +116,8 @@ def solve_instance_with_fd(
             cl.insert(2, f"{save_log_to}/output.sas")
             cl.insert(3, "--plan-file")
             cl.insert(4, f"{save_log_to}/sas_plan")
+        _log.info(f"Command line string: {' '.join(cl)}")
+        _log.info(f"Running FastDownward...")
         output = check_output(cl)
         _log.info("Solution found.")
     except CalledProcessError as e:

@@ -16,6 +16,8 @@ protected:
     const bool blind;
     const double unary_threshold;
     const bool undefined_input;
+    bool normalize_output;
+    int max_h;
 
     int last_h = Heuristic::NO_VALUE;
     std::vector<int> last_h_batch;

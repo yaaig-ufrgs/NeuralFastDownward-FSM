@@ -38,6 +38,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_FACTS_FILE,
     DEFAULT_DEF_VALUES_FILE,
     DEFAULT_RESTART_NO_CONV,
+    DEFAULT_NORMALIZE_OUTPUT,
 )
 
 
@@ -227,7 +228,13 @@ def get_train_args():
         default=DEFAULT_RESTART_NO_CONV,
         help="Restart after n epochs of non-convergence. (default: %(default)s)",
     )
-
+    parser.add_argument(
+        "-no",
+        "--normalize-output",
+        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        default=DEFAULT_NORMALIZE_OUTPUT,
+        help="Normalizes the output neuron. (default: %(default)s)",
+    )
     return parser.parse_args()
 
 

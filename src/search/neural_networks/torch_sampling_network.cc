@@ -11,6 +11,7 @@
 #include <fstream>
 #include <memory>
 #include <string>
+#include <fstream>
 
 using namespace std;
 
@@ -64,6 +65,26 @@ TorchSamplingNetwork::TorchSamplingNetwork(const Options &opts)
       unary_threshold(opts.get<double>("unary_threshold")),
       undefined_input(opts.get<bool>("undefined_input")) {
     check_facts_and_default_inputs(relevant_facts, default_input_values);
+
+    // Check if output is normalized
+    normalize_output = false;
+    string path = opts.get<string>("path");
+    string train_args_file = path.substr(0, path.find("/model")) + "/train_args.json";
+    ifstream f(train_args_file);
+    string line;
+    if (f.is_open()) {
+        while(getline(f, line)) {
+            if (line.find("\"normalize_output\": true") != string::npos)
+                normalize_output = true;
+            if (line.find("\"max_h\": ") != string::npos) {
+                max_h = stoi(line.substr(
+                    line.find(": ") + 2,
+                    line[line.size()-1] == ',' ? line.size()-1 : line.size()-2)
+                );
+            }
+        }
+        f.close();
+    }
 }
 
 TorchSamplingNetwork::~TorchSamplingNetwork() {}
@@ -123,8 +144,10 @@ void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
 
     if (!blind) {
         // Regression (tensor.size(1) == 1) or Classification (tensor.size(1) > 1).
-        last_h = tensor.size(1) == 1 ? (unary_output[0]+heuristic_shift)*heuristic_multiplier : unary_to_value(unary_output);
+        double h = normalize_output ? round(unary_output[0]*max_h) : unary_output[0];
+        last_h = tensor.size(1) == 1 ? (h + heuristic_shift) * heuristic_multiplier : unary_to_value(unary_output);
         last_h_batch.push_back(last_h);
+
         /* Batch testing does not work.
         auto accessor = tensor.accessor<float, 2>();
         for (int64_t i = 0; i < tensor.size(0); ++i) {

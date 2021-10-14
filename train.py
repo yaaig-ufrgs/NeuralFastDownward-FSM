@@ -19,6 +19,7 @@ from src.pytorch.utils.helpers import (
     get_fixed_max_epochs,
     save_y_pred_csv,
     remove_csv_except_best,
+    add_train_arg,
    )
 from src.pytorch.utils.plot import (
     save_y_pred_scatter,
@@ -63,7 +64,11 @@ def train_main(args):
             output_layer=args.output_layer,
             shuffle=args.shuffle,
             seed=args.seed,
+            normalize=args.normalize_output,
         )
+        if args.normalize_output:
+            # Add the reference value in train_args.json to denormalize in the test
+            add_train_arg(dirname, "max_h", kfold.domain_max_value)
 
         train_timer = Timer(args.max_training_time).start()
         best_fold = {"fold": -1, "val_loss": float("inf")}
@@ -120,12 +125,7 @@ def train_main(args):
                 _log.info(f"Updated seed: {args.seed}")
                 set_seeds(args.seed)
                 num_retries += 1
-                # Update train_args.json
-                with open(f"{dirname}/train_args.json", "r") as f:
-                    data = json.load(f)
-                data["updated_seed"] = args.seed
-                with open(f"{dirname}/train_args.json", "w") as f:
-                    json.dump(data, f, indent=4)
+                add_train_arg(dirname, "updated_seed", args.seed)
                 break
 
             heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"

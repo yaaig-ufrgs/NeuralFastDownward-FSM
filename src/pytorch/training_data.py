@@ -60,7 +60,7 @@ def load_training_state_value_pairs(samples_file: str) -> ([([int], int)], int):
         if line[0] != "#":
             h, state = line.split("\n")[0].split(";")
             state = [int(s) for s in state]
-            state_value_pairs.append((state, int(h)))
+            state_value_pairs.append([state, int(h)])
             if state_value_pairs[-1][1] > domain_max_value:
                 domain_max_value = state_value_pairs[-1][1]
 
