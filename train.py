@@ -31,12 +31,15 @@ from src.pytorch.utils.timer import Timer
 
 _log = logging.getLogger(__name__)
 
+def set_seeds(seed):
+    torch.manual_seed(seed)
+    torch.use_deterministic_algorithms(True)
+    random.seed(seed)
+    np.random.seed(seed)
+
 def train_main(args):
     if args.seed != -1:
-        torch.manual_seed(args.seed)
-        torch.use_deterministic_algorithms(True)
-        random.seed(args.seed)
-        np.random.seed(args.seed)
+        set_seeds(args.seed)
 
     dirname = create_train_directory(args)
     setup_full_logging(dirname)
@@ -109,6 +112,10 @@ def train_main(args):
             fold_val_loss, restart_flag = train_wf.run(fold_idx, train_timer, validation=True)
             need_restart = restart_flag
             if need_restart == True:
+                # ????
+                args.seed += 100
+                print(args.seed)
+                set_seeds(args.seed)
                 num_retries += 1
 
         heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
