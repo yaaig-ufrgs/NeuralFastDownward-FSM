@@ -30,7 +30,7 @@ if [ $METHOD = "fukunaga" ] || [ $METHOD = "ferber" ]; then
     STATE_REPRESENTATION="complete"
     MATCH_HEURISTICS="true"
     ASSIGNMENTS_BY_US=10
-    CONTRASTING_SAMPLES=0
+    CONTRASTING_SAMPLES=0 # [0..100]%
 
     if [ ! $TECHNIQUE = "rw" ] && [ ! $TECHNIQUE = "dfs" ]; then
         echo "Invalid search technique. Choose between rw (random walk) or dfs (depth-first search)."
@@ -57,7 +57,6 @@ if [ $METHOD = "fukunaga" ] || [ $METHOD = "ferber" ]; then
         for file in ${files[@]}; do
             prob_name=${file#*${PROBLEM_DIR}/};
             prob_name=${prob_name%%.pddl*}
-            echo $prob_name
             if [ $prob_name != "domain" ]; then
                 for seed in $(seq 1 $N_SEEDS); do
                     ./fast-downward.py --plan-file $OUTPUT_DIR/${METHOD}_${domain_name}_${prob_name}_${TECHNIQUE}_${STATE}_${SEARCHES}x${SAMPLES_PER_SEARCH}_ss${seed} \
