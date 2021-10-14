@@ -52,10 +52,10 @@ def load_training_state_value_pairs(samples_file: str) -> ([([int], int)], int):
     Returns a tuple containing a list of state-value pairs
     and the domain max value.
     """
-
     state_value_pairs = []
     domain_max_value = 0
-    lines = samples_file.readlines()[2:]
+    with open(samples_file) as f:
+        lines = f.readlines()
     for line in lines:
         if line[0] != "#":
             h, state = line.split("\n")[0].split(";")

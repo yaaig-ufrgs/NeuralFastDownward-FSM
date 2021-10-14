@@ -162,7 +162,8 @@ class TrainWorkflow:
                 _log.info("Done!")
 
         # Post-training scatter plot.
-        self.save_post_scatter_plot(fold_idx)
+        if not need_restart:
+            self.save_post_scatter_plot(fold_idx)
 
         return (cur_val_loss if validation else None), need_restart
 

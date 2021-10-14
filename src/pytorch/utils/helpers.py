@@ -61,7 +61,7 @@ def get_fixed_max_expansions(dirname):
 
 def create_train_directory(args, config_in_foldername=False):
     sep = "."
-    dirname = f"{args.output_folder}/nfd_train{sep}{args.samples.name.split('/')[-1]}"
+    dirname = f"{args.output_folder}/nfd_train{sep}{args.samples.split('/')[-1]}"
     if args.seed != -1:
         dirname += f"{sep}ns{args.seed}"
     if config_in_foldername:
@@ -99,7 +99,7 @@ def save_json(filename: str, data: list):
 
 def logging_train_config(args, dirname, json=True):
     args_dic = {
-        "samples": args.samples.name,
+        "samples": args.samples,
         "output_layer": args.output_layer,
         "linear_output": args.linear_output,
         "num_folds": args.num_folds,

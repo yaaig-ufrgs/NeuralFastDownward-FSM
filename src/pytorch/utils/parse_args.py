@@ -45,7 +45,7 @@ def get_train_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "samples",
-        type=argparse.FileType("r"),
+        type=str,
         help="Path to file with samples to be used in training.",
     )
     parser.add_argument(

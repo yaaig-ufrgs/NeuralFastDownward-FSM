@@ -6,6 +6,7 @@ import random
 import numpy as np
 import glob
 import torch
+import json
 from shutil import copyfile
 
 from src.pytorch.k_fold_training_data import KFoldTrainingData
@@ -52,29 +53,29 @@ def train_main(args):
 
     logging_train_config(args, dirname)
 
-    kfold = KFoldTrainingData(
-        args.samples,
-        batch_size=args.batch_size,
-        num_folds=args.num_folds,
-        output_layer=args.output_layer,
-        shuffle=args.shuffle,
-        seed=args.seed,
-    )
-
-    train_timer = Timer(args.max_training_time).start()
-    best_fold = {"fold": -1, "val_loss": float("inf")}
-
     num_retries = 0
-    for fold_idx in range(args.num_folds):
-        _log.info(
-            f"Running training workflow for fold {fold_idx+1} out "
-            f"of {args.num_folds}"
+    need_restart = True
+    while need_restart:
+        kfold = KFoldTrainingData(
+            args.samples,
+            batch_size=args.batch_size,
+            num_folds=args.num_folds,
+            output_layer=args.output_layer,
+            shuffle=args.shuffle,
+            seed=args.seed,
         )
 
-        train_dataloader, val_dataloader = kfold.get_fold(fold_idx)
+        train_timer = Timer(args.max_training_time).start()
+        best_fold = {"fold": -1, "val_loss": float("inf")}
 
-        need_restart = True
-        while need_restart:
+        for fold_idx in range(args.num_folds):
+            _log.info(
+                f"Running training workflow for fold {fold_idx+1} out "
+                f"of {args.num_folds}"
+            )
+
+            train_dataloader, val_dataloader = kfold.get_fold(fold_idx)
+
             model = HNN(
                 input_units=train_dataloader.dataset.x_shape()[1],
                 hidden_units=args.hidden_units,
@@ -109,34 +110,40 @@ def train_main(args):
                 ),
             )
 
-            fold_val_loss, restart_flag = train_wf.run(fold_idx, train_timer, validation=True)
-            need_restart = restart_flag
-            if need_restart == True:
+            fold_val_loss, need_restart = train_wf.run(fold_idx, train_timer, validation=True)
+            if need_restart and args.num_folds == 1:
                 # ????
                 # In case of non-convergence, what makes more sense to restart:
                 # - The _whole_ training setup, including data splitting in kfold?
                 # - Or only restart the current fold?
                 args.seed += 100
-                print(args.seed)
+                _log.info(f"Updated seed: {args.seed}")
                 set_seeds(args.seed)
                 num_retries += 1
+                # Update train_args.json
+                with open(f"{dirname}/train_args.json", "r") as f:
+                    data = json.load(f)
+                data["updated_seed"] = args.seed
+                with open(f"{dirname}/train_args.json", "w") as f:
+                    json.dump(data, f, indent=4)
+                break
 
-        heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
+            heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
 
-        if fold_val_loss < best_fold["val_loss"]:
-            save_y_pred_csv(train_wf.y_pred_values, heuristic_pred_file)
-            _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
-            best_fold["fold"] = fold_idx
-            best_fold["val_loss"] = fold_val_loss
-        else:
-            _log.info(
-                f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
-            )
+            if fold_val_loss < best_fold["val_loss"]:
+                save_y_pred_csv(train_wf.y_pred_values, heuristic_pred_file)
+                _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
+                best_fold["fold"] = fold_idx
+                best_fold["val_loss"] = fold_val_loss
+            else:
+                _log.info(
+                    f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
+                )
 
-        train_wf.save_traced_model(f"{dirname}/models/traced_{fold_idx}.pt")
-        if train_timer.check_timeout():
-            _log.info(f"Maximum training time reached. Stopping training.")
-            break
+            train_wf.save_traced_model(f"{dirname}/models/traced_{fold_idx}.pt")
+            if train_timer.check_timeout():
+                _log.info(f"Maximum training time reached. Stopping training.")
+                break
 
     _log.info("Finishing training.")
     _log.info(f"Elapsed time: {train_timer.current_time()}")
