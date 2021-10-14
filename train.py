@@ -113,6 +113,9 @@ def train_main(args):
             need_restart = restart_flag
             if need_restart == True:
                 # ????
+                # In case of non-convergence, what makes more sense to restart:
+                # - The _whole_ training setup, including data splitting in kfold?
+                # - Or only restart the current fold?
                 args.seed += 100
                 print(args.seed)
                 set_seeds(args.seed)
