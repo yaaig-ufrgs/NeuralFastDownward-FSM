@@ -74,6 +74,12 @@ class HNN(nn.Module):
                 f"{output_layer} not implemented for output layer!"
             )
 
+        # Currently for PyTorch 1.9, the default initialization used is Kaiming,
+        # "Setting a=sqrt(5) in kaiming_uniform is the same as initializing with
+        # uniform(-1/sqrt(in_features), 1/sqrt(in_features))"
+        # See:
+        # https://github.com/pytorch/pytorch/blob/master/torch/nn/modules/linear.py#L92
+        # https://github.com/pytorch/pytorch/issues/57109
         if weights_method != DEFAULT_WEIGHTS_METHOD:
             self.initialize_weights(weights_method, weights_seed)
 

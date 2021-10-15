@@ -200,7 +200,7 @@ def get_train_args():
     parser.add_argument(
         "-wm",
         "--weights-method",
-        choices=["none", "sqrt_k", "1", "xavier_uniform", "xavier_normal"],
+        choices=["default", "sqrt_k", "1", "xavier_uniform", "xavier_normal"],
         default=DEFAULT_WEIGHTS_METHOD,
         help="Inicialization of network weights. (default: %(default)s)",
     )
