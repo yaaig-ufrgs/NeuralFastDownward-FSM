@@ -125,7 +125,7 @@ def get_train_args():
     parser.add_argument(
         "-a",
         "--activation",
-        choices=["sigmoid", "relu"],
+        choices=["sigmoid", "relu", "leakyrelu"],
         default=DEFAULT_ACTIVATION,
         help="Activation function for hidden layers. (default: %(default)s)",
     )
@@ -147,6 +147,7 @@ def get_train_args():
     parser.add_argument(
         "-sh",
         "--shuffle",
+        choices=["true", "false"],
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
         default=DEFAULT_SHUFFLE,
         help="Shuffle the training data. (default: %(default)s)",
@@ -154,6 +155,7 @@ def get_train_args():
     parser.add_argument(
         "-bi",
         "--bias",
+        choices=["true", "false"],
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
         default=DEFAULT_BIAS,
         help="Use bias or not. (default: %(default)s)",
@@ -161,6 +163,7 @@ def get_train_args():
     parser.add_argument(
         "-biout",
         "--bias-output",
+        choices=["true", "false"],
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
         default=DEFAULT_BIAS,
         help="Use bias or not in the output layer. (default: %(default)s)",
@@ -182,6 +185,7 @@ def get_train_args():
     parser.add_argument(
         "-sp",
         "--scatter-plot",
+        choices=["true", "false"],
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
         default=DEFAULT_SCATTER_PLOT_N_EPOCHS,
         help="Create a scatter plot with y, predicted values. (default: %(default)s)",
@@ -196,7 +200,7 @@ def get_train_args():
     parser.add_argument(
         "-wm",
         "--weights-method",
-        choices=["none", "sqrt_k", "1", "xavier_uniform", "xavier_normal"],
+        choices=["default", "sqrt_k", "1", "xavier_uniform", "xavier_normal"],
         default=DEFAULT_WEIGHTS_METHOD,
         help="Inicialization of network weights. (default: %(default)s)",
     )
@@ -231,6 +235,7 @@ def get_train_args():
     parser.add_argument(
         "-no",
         "--normalize-output",
+        choices=["true", "false"],
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
         default=DEFAULT_NORMALIZE_OUTPUT,
         help="Normalizes the output neuron. (default: %(default)s)",
