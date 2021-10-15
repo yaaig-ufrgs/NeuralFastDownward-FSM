@@ -54,18 +54,21 @@ class HNN(nn.Module):
             self.dropout = nn.Dropout(self.dropout_rate, inplace=False)
 
         if activation == "sigmoid":
-            self.activation = torch.sigmoid
+            self.activation = nn.functional.sigmoid
         elif activation == "relu":
-            self.activation = torch.relu
+            self.activation = nn.functional.relu
+        elif activation == "leakyrelu":
+            self.activation = nn.functional.leaky_relu
         else:
             raise NotImplementedError(f"{activation} function not implemented!")
 
         if output_layer == "regression":
-            self.output_activation = torch.relu
+            self.output_activation = nn.functional.relu if activation != "leakyrelu" else nn.functional.leaky_relu
+            print(self.output_activation)
         elif output_layer == "prefix":
-            self.output_activation = torch.sigmoid
+            self.output_activation = nn.functional.sigmoid
         elif output_layer == "one-hot":
-            self.output_activation = torch.softmax
+            self.output_activation = nn.functional.softmax
         else:
             raise NotImplementedError(
                 f"{output_layer} not implemented for output layer!"
