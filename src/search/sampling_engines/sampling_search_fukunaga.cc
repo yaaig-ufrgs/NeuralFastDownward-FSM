@@ -129,9 +129,15 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
             vector<int>(n_atoms, PartialAssignment::UNASSIGNED)
         );
 
-        int random_samples = sampling_technique::modified_tasks.size()*2*(contrasting_samples * 0.01);
-        cout << "random_samples=" << random_samples << endl;
-        cout << "samples=" << samples.size() << endl;
+        assert(contrasting_samples >= 0 && contrasting_samples <= 100);
+        int random_samples;
+        if (contrasting_samples == 100) {
+            // TODO: if 100%, skip the samples generation step
+            random_samples = samples.size();
+            samples.clear();
+        } else {
+            random_samples = (sampling_technique::modified_tasks.size() * contrasting_samples) / (100.0 - contrasting_samples);
+        }
         while (random_samples > 0) {
             pair<bool,State> fs = pa.get_full_state(true, *rng);
             if (!fs.first)
