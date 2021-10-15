@@ -3,7 +3,7 @@
 # Generate sample states from a set of instances.
 #
 # Usage:
-# $ ./fast-sample.sh [fukunaga|ferber] [rw|dfs] [fs|ps|us|as] searches samples_per_search n_seeds problem_dir output_dir
+# $ ./fast-sample.sh [fukunaga|ferber] [rw|dfs] [fs|ps|us|as] searches samples_per_search n_seeds problem_dir [cpu_id] output_dir
 # $ ./fast-sample.sh rsl [countAdds|countDels|countBoth] num_train_states num_demos max_len_demos sample_percentage check_state_invars n_seeds problem_dir output_dir
 #
 # Example:
@@ -13,7 +13,6 @@
 
 METHOD=$1
 TECHNIQUE=$2
-#OUTPUT_DIR=$8
 OUTPUT_DIR=${@:$#}
 
 if [ ! -d $OUTPUT_DIR ]; then
@@ -26,6 +25,9 @@ if [ $METHOD = "fukunaga" ] || [ $METHOD = "ferber" ]; then
     SAMPLES_PER_SEARCH=$5
     N_SEEDS=$6
     PROBLEM_DIR=$7
+    if [ "$#" -eq 9 ]; then
+        SET_CPU=" taskset -c $8 "
+    fi
 
     STATE_REPRESENTATION="complete"
     MATCH_HEURISTICS="true"
@@ -59,7 +61,10 @@ if [ $METHOD = "fukunaga" ] || [ $METHOD = "ferber" ]; then
             prob_name=${prob_name%%.pddl*}
             if [ $prob_name != "domain" ]; then
                 for seed in $(seq 1 $N_SEEDS); do
-                    ./fast-downward.py --plan-file $OUTPUT_DIR/${METHOD}_${domain_name}_${prob_name}_${TECHNIQUE}_${STATE}_${SEARCHES}x${SAMPLES_PER_SEARCH}_ss${seed} \
+                    $SET_CPU \
+                    ./fast-downward.py \
+                        --sas-file $OUTPUT_DIR/${METHOD}_${domain_name}_${prob_name}_${TECHNIQUE}_${STATE}_${SEARCHES}x${SAMPLES_PER_SEARCH}_ss${seed}-output.sas \
+                        --plan-file $OUTPUT_DIR/${METHOD}_${domain_name}_${prob_name}_${TECHNIQUE}_${STATE}_${SEARCHES}x${SAMPLES_PER_SEARCH}_ss${seed} \
                         --build release $file \
                         --search "sampling_search_fukunaga(astar(lmcut(transform=sampling_transform()), transform=sampling_transform()), \
                         techniques=[gbackward_fukunaga(searches=$SEARCHES, samples_per_search=$SAMPLES_PER_SEARCH, \
