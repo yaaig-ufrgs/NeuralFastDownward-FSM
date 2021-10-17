@@ -136,6 +136,8 @@ class TrainWorkflow:
                         )
                         need_restart = True
                         break
+                elif loss_first_epoch != 0:
+                    break
                 if (last_val_loss - cur_val_loss) > 0.01:
                     count = 0
                 else:

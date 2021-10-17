@@ -3,6 +3,20 @@ import torch
 import torch.nn as nn
 import random
 from math import sqrt
+import numpy as np
+
+def RAI(fan_in, fan_out):
+    """Randomized asymmetric initializer.
+    It draws samples using RAI where fan_in is the number of input units in the weight
+    tensor and fan_out is the number of output units in the weight tensor.
+    """
+    V = np.random.randn(fan_out, fan_in + 1) * 0.6007 / fan_in ** 0.5
+    for j in range(fan_out):
+        k = np.random.randint(0, high=fan_in + 1)
+        V[j, k] = np.random.beta(2, 1)
+    W = torch.nn.parameter.Parameter(torch.tensor(V[:, :-1], dtype=torch.float32))
+    b = torch.nn.parameter.Parameter(torch.tensor(V[:, -1], dtype=torch.float32))
+    return W, b
 
 # H(euristic) Neural Network
 class HNN(nn.Module):
@@ -64,7 +78,6 @@ class HNN(nn.Module):
 
         if output_layer == "regression":
             self.output_activation = nn.functional.relu if activation != "leakyrelu" else nn.functional.leaky_relu
-            print(self.output_activation)
         elif output_layer == "prefix":
             self.output_activation = nn.functional.sigmoid
         elif output_layer == "one-hot":
@@ -83,7 +96,6 @@ class HNN(nn.Module):
         if weights_method != DEFAULT_WEIGHTS_METHOD:
             self.initialize_weights(weights_method, weights_seed)
 
-
     def set_random(self, type, tensor, a, b):
         dim = len(tensor.size())
         with torch.no_grad():
@@ -100,19 +112,32 @@ class HNN(nn.Module):
                         elif type == "normal":
                             tensor[i][j] = random.normalvariate(a, b)
 
-
     def initialize_weights(self, method, seed):
-        bias_zero = ["xavier_uniform", "xavier_normal"]
+        bias_zero = ["xavier_uniform", "xavier_normal", "kaiming_uniform", "kaiming_normal"]
         random.seed(seed)
         for m in self.modules():
             if isinstance(m, nn.Linear):
-                if method == "sqrt_k":
-                    type = "uniform"
+                if method == "rai":
+                    fan_in, fan_out = nn.init._calculate_fan_in_and_fan_out(m.weight)
+                    m.weight, m.bias = RAI(fan_in, fan_out)
+                elif method == "kaiming_normal":
+                    torch.nn.init.kaiming_normal_(m.weight)
+                    torch.nn.init.zeros_(m.bias)
+                elif method == "kaiming_uniform":
+                    torch.nn.init.kaiming_uniform_(m.weight)
+                    torch.nn.init.zeros_(m.bias)
+                # TODO: Create function for each method
+                elif method == "sqrt_k":
                     k = 1.0/m.in_features
                     a, b = -sqrt(k), sqrt(k)
-                elif method == "1":
                     type = "uniform"
+                    self.set_random(type, m.weight, a, b)
+                    self.set_random(type, m.bias, a, b)
+                elif method == "1":
                     a, b = -1.0, 1.0
+                    type = "uniform"
+                    self.set_random(type, m.weight, a, b)
+                    self.set_random(type, m.bias, a, b)
                 elif "xavier" in method:
                     gain = 1.0
                     fan_in, fan_out = nn.init._calculate_fan_in_and_fan_out(m.weight)
@@ -124,15 +149,10 @@ class HNN(nn.Module):
                     elif "normal" in method:
                         type = "normal"
                         a, b = 0.0, std
-                else:
-                    raise NotImplementedError(f"Weights method {method} not implemented!")
-
-                self.set_random(type, m.weight, a, b)
-                if method in bias_zero:
+                    self.set_random(type, m.weight, a, b)
                     torch.nn.init.zeros_(m.bias)
                 else:
-                    self.set_random(type, m.bias, a, b)
-
+                    raise NotImplementedError(f"Weights method {method} not implemented!")
 
     def forward(self, x):
         for h in self.hid:
