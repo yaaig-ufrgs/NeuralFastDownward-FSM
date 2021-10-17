@@ -113,7 +113,6 @@ class HNN(nn.Module):
                             tensor[i][j] = random.normalvariate(a, b)
 
     def initialize_weights(self, method, seed):
-        bias_zero = ["xavier_uniform", "xavier_normal", "kaiming_uniform", "kaiming_normal"]
         random.seed(seed)
         for m in self.modules():
             if isinstance(m, nn.Linear):
