@@ -145,29 +145,16 @@ void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
     if (!blind) {
         // Regression (tensor.size(1) == 1) or Classification (tensor.size(1) > 1).
         double h = normalize_output ? round(unary_output[0]*max_h) : unary_output[0];
+        // All negative output is zeroed.
+        if (h < 0) {
+            h = 0; 
+        }
         last_h = tensor.size(1) == 1 ? (h + heuristic_shift) * heuristic_multiplier : unary_to_value(unary_output);
         last_h_batch.push_back(last_h);
-
-        /* Batch testing does not work.
-        auto accessor = tensor.accessor<float, 2>();
-        for (int64_t i = 0; i < tensor.size(0); ++i) {
-          //std::vector<float> v(accessor[i][0].data_ptr<float>(), accessor[i][0].data_ptr<float>() + accessor[i][0].numel());
-          last_h = (accessor[i][0]+heuristic_shift) * heuristic_multiplier; // OLD originally the accessor had 2 dims
-          // last_h = (accessor[i] + heuristic_shift) * heuristic_multiplier;
-          //last_h = unary_to_value(accessor[i]) + heuristic_shift * heuristic_multiplier;
-          last_h_batch.push_back(last_h);
-        }
-        */
     }
     else {
         last_h = 0;
         last_h_batch.push_back(last_h);
-        /* Batch not working.
-        for (int64_t i = 0; i < tensor.size(0); ++i) {
-            last_h = 0;
-            last_h_batch.push_back(last_h);
-        }
-        */
     }
 }
 
