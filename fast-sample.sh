@@ -74,7 +74,7 @@ if [ $METHOD = "fukunaga" ] || [ $METHOD = "ferber" ]; then
                 done
             fi
         done
-        rm $OUTPUT_DIR/*-output.sas
+        rm $OUTPUT_DIR/*_${domain_name}_*-output.sas
     else
         echo "TODO FERBER"
     fi
