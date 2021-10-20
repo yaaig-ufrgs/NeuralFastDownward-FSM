@@ -40,7 +40,8 @@ def set_seeds(seed):
     np.random.seed(seed)
 
 def train_main(args):
-    args.weights_seed = args.seed
+    if args.weights_seed == -1:
+        args.weights_seed = args.seed
     if args.seed != -1:
         set_seeds(args.seed)
 
