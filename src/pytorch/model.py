@@ -113,7 +113,8 @@ class HNN(nn.Module):
                             tensor[i][j] = random.normalvariate(a, b)
 
     def initialize_weights(self, method, seed):
-        random.seed(seed)
+        if seed != -1:
+            random.seed(seed)
         for m in self.modules():
             if isinstance(m, nn.Linear):
                 if method == "rai":

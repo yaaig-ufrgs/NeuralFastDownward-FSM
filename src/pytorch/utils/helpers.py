@@ -9,7 +9,6 @@ from os import path, makedirs, remove
 from datetime import datetime
 from statistics import median, mean
 from src.pytorch.utils.default_args import (
-    DEFAULT_RANDOM_SEED,
     DEFAULT_MAX_EPOCHS,
     DEFAULT_MAX_EXPANSIONS,
 )
@@ -109,7 +108,7 @@ def logging_train_config(args, dirname, json=True):
         else (args.hidden_units[0] if len(args.hidden_units) == 1 else "scalable"),
         "batch_size": args.batch_size,
         "learning_rate": args.learning_rate,
-        "max_epochs": args.max_epochs,
+        "max_epochs": args.max_epochs if args.max_epochs != DEFAULT_MAX_EPOCHS else "inf",
         "max_epochs_not_improving": args.max_epochs_not_improving,
         "max_training_time": f"{args.max_training_time}s",
         "activation": args.activation,
@@ -118,15 +117,15 @@ def logging_train_config(args, dirname, json=True):
         "shuffle": args.shuffle,
         "bias": args.bias,
         "normalize_output": args.normalize_output,
-        "seed": args.seed if args.seed != DEFAULT_RANDOM_SEED else "random",
+        "seed": args.seed if args.seed != -1 else "random",
         "output_folder": str(args.output_folder),
-        "scatter_plot": args.scatter_plot,
-        "plot_n_epochs": args.plot_n_epochs,
+        "scatter_plot": args.scatter_plot if args.scatter_plot != -1 else "none",
+        "plot_n_epochs": args.plot_n_epochs if args.plot_n_epochs != -1 else "none",
         "weights_method": args.weights_method,
-        "weights_seed": args.weights_seed,
+        "weights_seed": args.weights_seed if args.weights_seed != -1 else "random",
         "compare_csv_dir": args.compare_csv_dir,
         "hstar_csv_dir": args.hstar_csv_dir,
-        "restart_no_conv": args.restart_no_conv,
+        "restart_no_conv": args.restart_no_conv if args.restart_no_conv != 1 else "none",
         "bias_output": args.bias_output,
     }
 

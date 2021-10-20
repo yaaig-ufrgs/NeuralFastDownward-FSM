@@ -187,7 +187,7 @@ def get_train_args():
         "--scatter-plot",
         choices=["true", "false"],
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
-        default=DEFAULT_SCATTER_PLOT_N_EPOCHS,
+        default=DEFAULT_SCATTER_PLOT,
         help="Create a scatter plot with y, predicted values. (default: %(default)s)",
     )
     parser.add_argument(
@@ -209,7 +209,7 @@ def get_train_args():
         "--weights-seed",
         type=int,
         default=DEFAULT_WEIGHTS_SEED,
-        help="Random seed to be used. Defaults to no seed. (default: %(default)s)",
+        help="Random seed to be used. Defaults to equal to main seed. (default: %(default)s)",
     )
     parser.add_argument(
         "-cdir",
