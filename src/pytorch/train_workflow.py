@@ -89,7 +89,7 @@ class TrainWorkflow:
 
         return val_loss / num_batches
 
-    def save_traced_model(self, filename: str):
+    def save_traced_model(self, filename: str, model="hnn"):
         """
         Saves a traced model to be used by the C++ backend.
         """
@@ -112,7 +112,10 @@ class TrainWorkflow:
         #
         # TorchScript is a domain-specific language for ML, and it is a subset of Python.
 
-        example_input = self.train_dataloader.dataset[0][0]
+        if model == "rsl":
+            example_input = self.train_dataloader.dataset[:10][0]
+        elif model == "hnn":
+            example_input = self.train_dataloader.dataset[0][0]
         traced_model = torch.jit.trace(self.model, example_input)
         traced_model.save(filename)
 
@@ -128,7 +131,7 @@ class TrainWorkflow:
 
             if validation:
                 cur_val_loss = self.val_loop()
-                #print("epoch {} loss {} val loss {}".format(t, cur_train_loss, cur_val_loss))
+                print("epoch {} loss {} val loss {}".format(t, cur_train_loss, cur_val_loss))
                 loss_first_epoch = cur_val_loss if t == 0 else loss_first_epoch
                 if cur_val_loss == loss_first_epoch:
                     count_no_conv += 1

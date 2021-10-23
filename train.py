@@ -236,7 +236,7 @@ def train_nn(args, dirname, patience=None):
                     f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
                 )
 
-            train_wf.save_traced_model(f"{dirname}/models/traced_{fold_idx}.pt")
+            train_wf.save_traced_model(f"{dirname}/models/traced_{fold_idx}.pt", args.model)
             if train_timer.check_timeout():
                 _log.info(f"Maximum training time reached. Stopping training.")
                 break
