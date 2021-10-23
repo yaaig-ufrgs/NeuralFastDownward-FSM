@@ -131,7 +131,7 @@ class TrainWorkflow:
 
             if validation:
                 cur_val_loss = self.val_loop()
-                print("epoch {} loss {} val loss {}".format(t, cur_train_loss, cur_val_loss))
+                #print("epoch {} loss {} val loss {}".format(t, cur_train_loss, cur_val_loss))
                 loss_first_epoch = cur_val_loss if t == 0 else loss_first_epoch
                 if cur_val_loss == loss_first_epoch:
                     count_no_conv += 1
