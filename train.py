@@ -21,7 +21,7 @@ from src.pytorch.utils.helpers import (
     save_y_pred_csv,
     remove_csv_except_best,
     add_train_arg,
-   )
+)
 from src.pytorch.utils.plot import (
     save_y_pred_scatter,
     save_h_pred_scatter,
@@ -33,6 +33,7 @@ from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
 
 _log = logging.getLogger(__name__)
+
 
 def set_seeds(seed):
     torch.manual_seed(seed)
@@ -73,8 +74,11 @@ def train_main(args):
     _log.info(f"Elapsed time: {train_timer.current_time()}")
     _log.info(f"Restarts needed: {num_retries}")
 
-    remove_csv_except_best(dirname, best_fold['fold'])
-    os.rename(f"{dirname}/heuristic_pred_{best_fold['fold']}.csv", f"{dirname}/heuristic_pred.csv")
+    remove_csv_except_best(dirname, best_fold["fold"])
+    os.rename(
+        f"{dirname}/heuristic_pred_{best_fold['fold']}.csv",
+        f"{dirname}/heuristic_pred.csv",
+    )
 
     try:
         _log.info(
@@ -93,32 +97,28 @@ def train_main(args):
 
     if args.scatter_plot and args.plot_n_epochs != -1:
         try:
-            _log.info(
-                f"Saving scatter plot GIF."
-            )
-            save_gif_from_plots(plots_dir, best_fold['fold'])
-            remove_intermediate_plots(plots_dir, best_fold['fold'])
+            _log.info(f"Saving scatter plot GIF.")
+            save_gif_from_plots(plots_dir, best_fold["fold"])
+            remove_intermediate_plots(plots_dir, best_fold["fold"])
         except:
             _log.error(f"Failed making plot GIF.")
-       
+
     heuristic_pred_file = f"{dirname}/heuristic_pred.csv"
-    dir_split = dirname.split('/')[-1].split('_')
-    problem_name = '_'.join(dir_split[2:4])
-    sample_seed = dir_split[-1].split('.')[0]
+    dir_split = dirname.split("/")[-1].split("_")
+    problem_name = "_".join(dir_split[2:4])
+    sample_seed = dir_split[-1].split(".")[0]
     data = {}
 
     if args.compare_csv_dir != "" and os.path.isfile(heuristic_pred_file):
         csv_dir = args.compare_csv_dir
         if csv_dir[-1] != "/":
             csv_dir += "/"
-        problem_name = '_'.join(dirname.split('/')[-1].split('_')[2:4])
+        problem_name = "_".join(dirname.split("/")[-1].split("_")[2:4])
         csv_h = glob.glob(csv_dir + problem_name + ".csv")
 
         if len(csv_h) > 0:
             try:
-                _log.info(
-                    f"Saving h^nn vs. h scatter plot."
-                )
+                _log.info(f"Saving h^nn vs. h scatter plot.")
                 data = save_h_pred_scatter(plots_dir, heuristic_pred_file, csv_h[0])
             except:
                 _log.error(f"Failed making hnn vs. h scatter plot.")
@@ -131,13 +131,10 @@ def train_main(args):
 
         if len(csv_hstar) > 0:
             try:
-                _log.info(
-                    f"Saving box plot."
-                )
+                _log.info(f"Saving box plot.")
                 save_box_plot(plots_dir, data, csv_hstar[0])
             except:
                 _log.error(f"Failed making box plot.")
-
 
     _log.info("Training complete!")
 
@@ -201,8 +198,8 @@ def train_nn(args, dirname, patience=None):
                 val_dataloader=val_dataloader,
                 max_epochs=args.max_epochs,
                 plot_n_epochs=args.plot_n_epochs,
-                max_epochs_not_improving = args.max_epochs_not_improving,
-                max_epochs_no_convergence = args.restart_no_conv,
+                max_epochs_not_improving=args.max_epochs_not_improving,
+                max_epochs_no_convergence=args.restart_no_conv,
                 dirname=dirname,
                 optimizer=torch.optim.Adam(
                     model.parameters(),
@@ -212,7 +209,9 @@ def train_nn(args, dirname, patience=None):
                 patience=patience,
             )
 
-            fold_val_loss, need_restart = train_wf.run(fold_idx, train_timer, validation=True)
+            fold_val_loss, need_restart = train_wf.run(
+                fold_idx, train_timer, validation=True
+            )
             if need_restart and args.num_folds == 1:
                 # In case of non-convergence, what makes more sense to restart:
                 # - The _whole_ training setup, including data splitting in kfold?
@@ -236,12 +235,15 @@ def train_nn(args, dirname, patience=None):
                     f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
                 )
 
-            train_wf.save_traced_model(f"{dirname}/models/traced_{fold_idx}.pt", args.model)
+            train_wf.save_traced_model(
+                f"{dirname}/models/traced_{fold_idx}.pt", args.model
+            )
             if train_timer.check_timeout():
                 _log.info(f"Maximum training time reached. Stopping training.")
                 break
 
     return best_fold, num_retries, train_timer
+
 
 def train_rsl(args, dirname):
     args.num_folds = 1
@@ -284,8 +286,8 @@ def train_rsl(args, dirname):
                 val_dataloader=val_dataloader,
                 max_epochs=1000,
                 plot_n_epochs=args.plot_n_epochs,
-                max_epochs_not_improving = -1,
-                max_epochs_no_convergence = args.restart_no_conv,
+                max_epochs_not_improving=-1,
+                max_epochs_no_convergence=args.restart_no_conv,
                 dirname=dirname,
                 optimizer=torch.optim.Adam(
                     model.parameters(),
@@ -294,7 +296,9 @@ def train_rsl(args, dirname):
                 patience=2,
             )
 
-            fold_val_loss, need_restart = train_wf.run(fold_idx, train_timer, validation=True)
+            fold_val_loss, need_restart = train_wf.run(
+                fold_idx, train_timer, validation=True
+            )
             if need_restart and args.num_folds == 1:
                 args.seed += 100
                 _log.info(f"Updated seed: {args.seed}")

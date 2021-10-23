@@ -9,15 +9,17 @@ import numpy as np
 from os import path, makedirs, remove
 
 _log = logging.getLogger(__name__)
-logging.getLogger('matplotlib.font_manager').disabled = True
-logging.getLogger('PIL').setLevel(logging.WARNING)
+logging.getLogger("matplotlib.font_manager").disabled = True
+logging.getLogger("PIL").setLevel(logging.WARNING)
+
 
 def get_plot_title(directory: str):
-    dir_split = directory.split('/')[-2].split('_')
-    seeds = dir_split[-1].split('.')
+    dir_split = directory.split("/")[-2].split("_")
+    seeds = dir_split[-1].split(".")
     seeds = seeds[0] + "_" + seeds[1] if len(seeds) > 1 else seeds[0]
-    plot_title = '_'.join(dir_split[2:-1]) + "_" + seeds
+    plot_title = "_".join(dir_split[2:-1]) + "_" + seeds
     return plot_title
+
 
 def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str):
     if t == -1:
@@ -27,7 +29,7 @@ def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str):
         makedirs(directory)
 
     plot_title = get_plot_title(directory)
-    plot_filename = f"{plot_title}_epoch_{str(t)}_{fold_idx}" 
+    plot_filename = f"{plot_title}_epoch_{str(t)}_{fold_idx}"
 
     real = [data[key][0] for key in data]
     pred = [data[key][1] for key in data]
@@ -40,17 +42,17 @@ def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str):
         np.max([ax.get_xlim(), ax.get_ylim()]),  # max of both axes
     ]
 
-    ax.plot(lims, lims, 'k-', alpha=0.80, zorder=0)
-    ax.set_aspect('equal')
+    ax.plot(lims, lims, "k-", alpha=0.80, zorder=0)
+    ax.set_aspect("equal")
     ax.set_xlim(lims)
     ax.set_ylim(lims)
 
     ax.set_xlabel("h^sample")
     ax.set_ylabel("h^NN")
     epoch = "\nepoch " + str(t)
-    ax.set_title(plot_title+epoch, fontsize=10)
+    ax.set_title(plot_title + epoch, fontsize=10)
 
-    fig.savefig(directory+"/"+plot_filename)
+    fig.savefig(directory + "/" + plot_filename)
 
     plt.clf()
     plt.close(fig)
@@ -91,8 +93,8 @@ def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h: str) -> dict:
         np.max([ax.get_xlim(), ax.get_ylim()]),  # max of both axes
     ]
 
-    ax.plot(lims, lims, 'k-', alpha=0.80, zorder=0)
-    ax.set_aspect('equal')
+    ax.plot(lims, lims, "k-", alpha=0.80, zorder=0)
+    ax.set_aspect("equal")
     ax.set_xlim(lims)
     ax.set_ylim(lims)
 
@@ -100,7 +102,7 @@ def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h: str) -> dict:
 
     ax.set_title(plot_name, fontsize=10)
 
-    compared_heuristic = csv_h.split('/')[-2]
+    compared_heuristic = csv_h.split("/")[-2]
     if compared_heuristic == "hstar":
         compared_heuristic = "h*"
 
@@ -108,7 +110,7 @@ def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h: str) -> dict:
     ax.set_ylabel("h^NN")
 
     plot_filename = "hnn_" + compared_heuristic + "_" + plot_name
-    fig.savefig(directory+"/"+plot_filename)
+    fig.savefig(directory + "/" + plot_filename)
     plt.clf()
     plt.close(fig)
 
@@ -126,7 +128,7 @@ def save_box_plot(directory: str, data: dict, csv_h: str):
             state = row[0]
             h = row[1]
             if state in data:
-                #merged_data[state][2] = int(h)
+                # merged_data[state][2] = int(h)
                 data[state].append(int(h))
 
     hnn = [data[key][0] for key in data]
@@ -136,15 +138,21 @@ def save_box_plot(directory: str, data: dict, csv_h: str):
     hnn_sub_exact = [a - b for a, b in zip(hnn, hstar)]
     goalcount_sub_exact = [a - b for a, b in zip(goalcount, hstar)]
 
-    df_sub_hnn = pd.DataFrame(list(zip(hstar, hnn_sub_exact)), columns =['h*', 'heuristic - h*']).assign(heuristic="hnn")
-    df_sub_gc = pd.DataFrame(list(zip(hstar, goalcount_sub_exact)), columns =['h*', 'heuristic - h*']).assign(heuristic="goalcount")
+    df_sub_hnn = pd.DataFrame(
+        list(zip(hstar, hnn_sub_exact)), columns=["h*", "heuristic - h*"]
+    ).assign(heuristic="hnn")
+    df_sub_gc = pd.DataFrame(
+        list(zip(hstar, goalcount_sub_exact)), columns=["h*", "heuristic - h*"]
+    ).assign(heuristic="goalcount")
     cdf = pd.concat([df_sub_hnn, df_sub_gc])
 
     plot_name = get_plot_title(directory)
     plot_filename = "box_" + plot_name
 
-    ax = sns.boxplot(x="h*", y="heuristic - h*", hue="heuristic", data=cdf, fliersize=2).set_title(plot_name)
-    ax.figure.savefig(directory+"/"+plot_filename)
+    ax = sns.boxplot(
+        x="h*", y="heuristic - h*", hue="heuristic", data=cdf, fliersize=2
+    ).set_title(plot_name)
+    ax.figure.savefig(directory + "/" + plot_filename)
     plt.clf()
     plt.close(ax.figure)
 
@@ -159,21 +167,21 @@ def save_gif_from_plots(directory: str, fold_idx: int):
     gif_filename = get_plot_title(directory)
     plot_files = sorted(glob.glob(f"{directory}/*{fold_idx}.png"), key=path.getmtime)
 
-    with imageio.get_writer(f'{directory}/{gif_filename}.gif', mode='I') as writer:
+    with imageio.get_writer(f"{directory}/{gif_filename}.gif", mode="I") as writer:
         for f in plot_files:
             image = imageio.imread(f)
             writer.append_data(image)
 
 
 def remove_intermediate_plots(plots_dir: str, fold_idx: int):
-   """
-   Removes the intermediate plots used to create the plot gif.
-   """
-   if path.exists(plots_dir):
-       plots = glob.glob(plots_dir+"/*.png")
-       for plot in plots:
-           plot_split = plot.split('_')
-           idx = int(plot_split[-1].split('.')[0])
-           if idx == fold_idx and plot_split[-2] == "final":
-               continue
-           remove(plot)
+    """
+    Removes the intermediate plots used to create the plot gif.
+    """
+    if path.exists(plots_dir):
+        plots = glob.glob(plots_dir + "/*.png")
+        for plot in plots:
+            plot_split = plot.split("_")
+            idx = int(plot_split[-1].split(".")[0])
+            if idx == fold_idx and plot_split[-2] == "final":
+                continue
+            remove(plot)

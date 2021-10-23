@@ -35,9 +35,7 @@ _FD_EXIT_CODE = {
 def parse_fd_output(output: str):
     # Remove \n to use in re.
     output = output.replace("\n", " ")
-    re_initial_h = match(
-        r".*Initial heuristic value for .*?: (\d+)", output
-    )
+    re_initial_h = match(r".*Initial heuristic value for .*?: (\d+)", output)
     re_plan = findall(
         r".*Plan length: (\d+) step\(s\)..*" r".*Plan cost: (\d+).*", output
     )
@@ -124,7 +122,8 @@ def solve_instance_with_fd(
         if e.returncode != 12:
             if e.returncode == 36:
                 _log.error("Could not find domain file using automatic naming rules.")
-            return {"search_state": _FD_EXIT_CODE[e.returncode]
+            return {
+                "search_state": _FD_EXIT_CODE[e.returncode]
                 if e.returncode in _FD_EXIT_CODE
                 else f"unknown exit code {e.returncode}"
             }
@@ -156,8 +155,8 @@ def solve_instance_with_fd_nh(
     """
 
     if heuristic == "nn":
-        facts = "[]" if facts_file == "" else f"[file {facts_file}]" 
-        defaults = "[]" if defaults_file == "" else f"[file {defaults_file}]" 
+        facts = "[]" if facts_file == "" else f"[file {facts_file}]"
+        defaults = "[]" if defaults_file == "" else f"[file {defaults_file}]"
         undefined_input = "true" if "_us_" in traced_model else "false"
         opt_network = (
             f"torch_sampling_network(path={traced_model},"

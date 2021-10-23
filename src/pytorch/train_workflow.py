@@ -24,7 +24,7 @@ class TrainWorkflow:
         dirname: str,
         optimizer: optim.Optimizer,
         loss_fn: nn = nn.MSELoss(),
-        patience: int = None, # RSL
+        patience: int = None,  # RSL
     ):
         self.model = model
         self.train_dataloader = train_dataloader
@@ -37,7 +37,7 @@ class TrainWorkflow:
         self.optimizer = optimizer
         self.loss_fn = loss_fn
         self.patience = patience
-        self.y_pred_values = {} #{state: (y, pred)} of the last epoch
+        self.y_pred_values = {}  # {state: (y, pred)} of the last epoch
 
     def train_loop(self, t: int, fold_idx: int):
         # size = len(self.train_dataloader.dataset)
@@ -63,16 +63,18 @@ class TrainWorkflow:
                 x_lst = X.tolist()
                 for i, _ in enumerate(x_lst):
                     x_int = [int(x) for x in x_lst[i]]
-                    x_str = ''.join(str(e) for e in x_int)
-                    if len(y[i]) > 1: # Prefix (unary encoding)
+                    x_str = "".join(str(e) for e in x_int)
+                    if len(y[i]) > 1:  # Prefix (unary encoding)
                         y_h = prefix_to_h(y[i].tolist())
                         pred_h = prefix_to_h(pred[i].tolist())
                         self.y_pred_values[x_str] = (y_h, pred_h)
-                    else: # Regression
+                    else:  # Regression
                         self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
 
         if len(self.y_pred_values) > 0:
-            save_y_pred_scatter(self.y_pred_values, t, fold_idx, f"{self.dirname}/plots")
+            save_y_pred_scatter(
+                self.y_pred_values, t, fold_idx, f"{self.dirname}/plots"
+            )
             self.y_pred_values.clear()
 
         return train_loss / num_batches
@@ -131,11 +133,14 @@ class TrainWorkflow:
 
             if validation:
                 cur_val_loss = self.val_loop()
-                #print("epoch {} loss {} val loss {}".format(t, cur_train_loss, cur_val_loss))
+                # print("epoch {} loss {} val loss {}".format(t, cur_train_loss, cur_val_loss))
                 loss_first_epoch = cur_val_loss if t == 0 else loss_first_epoch
                 if cur_val_loss == loss_first_epoch:
                     count_no_conv += 1
-                    if self.max_epochs_no_convergence != -1 and count_no_conv >= self.max_epochs_no_convergence:
+                    if (
+                        self.max_epochs_no_convergence != -1
+                        and count_no_conv >= self.max_epochs_no_convergence
+                    ):
                         _log.info(
                             f"The network failed to converge to a value "
                             f"in {self.max_epochs_no_convergence} epochs. Restarting from scratch..."
@@ -146,7 +151,10 @@ class TrainWorkflow:
                     count = 0
                 else:
                     count += 1
-                    if self.max_epochs_not_improving != -1 and count >= self.max_epochs_not_improving:
+                    if (
+                        self.max_epochs_not_improving != -1
+                        and count >= self.max_epochs_not_improving
+                    ):
                         _log.info(
                             f"The loss on the validation data didn't improve "
                             f"in {self.max_epochs_not_improving} epochs."
@@ -187,14 +195,15 @@ class TrainWorkflow:
                 x_lst = X.tolist()
                 for i, _ in enumerate(x_lst):
                     x_int = [int(x) for x in x_lst[i]]
-                    x_str = ''.join(str(e) for e in x_int)
-                    if len(y[i]) > 1: # Prefix (unary encoding)
+                    x_str = "".join(str(e) for e in x_int)
+                    if len(y[i]) > 1:  # Prefix (unary encoding)
                         y_h = prefix_to_h(y[i].tolist())
                         pred_h = prefix_to_h(pred[i].tolist())
                         self.y_pred_values[x_str] = (y_h, pred_h)
-                    else: # Regression
+                    else:  # Regression
                         self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
 
             _log.info(f"Saving post-training scatter plot.")
-            save_y_pred_scatter(self.y_pred_values, -1, fold_idx, f"{self.dirname}/plots")
-
+            save_y_pred_scatter(
+                self.y_pred_values, -1, fold_idx, f"{self.dirname}/plots"
+            )

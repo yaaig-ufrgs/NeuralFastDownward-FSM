@@ -15,13 +15,16 @@ from src.pytorch.utils.default_args import (
 
 _log = logging.getLogger(__name__)
 
+
 def to_prefix(n: int, max_value: int) -> [int]:
     max_value += 1
     return [1 if i < n else 0 for i in range(max_value)]
 
+
 def to_onehot(n: int, max_value: int) -> [int]:
     max_value += 1
     return [1 if i == n else 0 for i in range(max_value)]
+
 
 def prefix_to_h(prefix: [float], threshold: float = 0.01) -> int:
     last_h = len(prefix) - 1
@@ -31,8 +34,10 @@ def prefix_to_h(prefix: [float], threshold: float = 0.01) -> int:
             break
     return last_h
 
+
 def get_datetime():
     return datetime.now().isoformat().replace("-", ".").replace(":", ".")
+
 
 def get_fixed_max_epochs(dirname):
     with open("reference/epochs.csv", "r") as f:
@@ -46,6 +51,7 @@ def get_fixed_max_epochs(dirname):
     )
     return DEFAULT_MAX_EPOCHS
 
+
 def get_fixed_max_expansions(dirname):
     with open("reference/expanded_states.csv", "r") as f:
         for line in f.readlines():
@@ -57,6 +63,7 @@ def get_fixed_max_expansions(dirname):
         f"Setting to default value ({DEFAULT_MAX_EXPANSIONS})."
     )
     return DEFAULT_MAX_EXPANSIONS
+
 
 def create_train_directory(args, config_in_foldername=False):
     sep = "."
@@ -78,6 +85,7 @@ def create_train_directory(args, config_in_foldername=False):
     makedirs(f"{dirname}/models")
     return dirname
 
+
 def create_test_directory(args):
     sep = "."
     tests_folder = args.train_folder / "tests"
@@ -92,9 +100,11 @@ def create_test_directory(args):
     makedirs(dirname)
     return dirname
 
+
 def save_json(filename: str, data: list):
     with open(filename, "w") as f:
         dump(data, f, indent=4)
+
 
 def logging_train_config(args, dirname, json=True):
     args_dic = {
@@ -108,7 +118,9 @@ def logging_train_config(args, dirname, json=True):
         else (args.hidden_units[0] if len(args.hidden_units) == 1 else "scalable"),
         "batch_size": args.batch_size,
         "learning_rate": args.learning_rate,
-        "max_epochs": args.max_epochs if args.max_epochs != DEFAULT_MAX_EPOCHS else "inf",
+        "max_epochs": args.max_epochs
+        if args.max_epochs != DEFAULT_MAX_EPOCHS
+        else "inf",
         "max_epochs_not_improving": args.max_epochs_not_improving,
         "max_training_time": f"{args.max_training_time}s",
         "activation": args.activation,
@@ -125,7 +137,9 @@ def logging_train_config(args, dirname, json=True):
         "weights_seed": args.weights_seed if args.weights_seed != -1 else "random",
         "compare_csv_dir": args.compare_csv_dir,
         "hstar_csv_dir": args.hstar_csv_dir,
-        "restart_no_conv": args.restart_no_conv if args.restart_no_conv != 1 else "none",
+        "restart_no_conv": args.restart_no_conv
+        if args.restart_no_conv != 1
+        else "none",
         "bias_output": args.bias_output,
     }
 
@@ -135,6 +149,7 @@ def logging_train_config(args, dirname, json=True):
 
     if json:
         save_json(f"{dirname}/train_args.json", args_dic)
+
 
 def logging_test_config(args, dirname, save_file=True):
     args_dic = {
@@ -162,12 +177,14 @@ def logging_test_config(args, dirname, save_file=True):
     if save_file:
         save_json(f"{dirname}/test_args.json", args_dic)
 
+
 def add_train_arg(dirname, key, value):
     with open(f"{dirname}/train_args.json", "r") as f:
         data = load(f)
     data[key] = value
     with open(f"{dirname}/train_args.json", "w") as f:
         dump(data, f, indent=4)
+
 
 def logging_test_statistics(
     args, dirname, model, output, decimal_places=4, save_file=True
@@ -275,10 +292,12 @@ def logging_test_statistics(
     if save_file:
         save_json(test_results_filename, results)
 
+
 def remove_temporary_files(directory: str):
     output_sas = f"{directory}/output.sas"
     if path.exists(output_sas):
         remove(output_sas)
+
 
 def save_y_pred_csv(data: dict, csv_filename: str):
     with open(csv_filename, "w") as f:
@@ -286,13 +305,15 @@ def save_y_pred_csv(data: dict, csv_filename: str):
         for key in data.keys():
             f.write("%s,%s,%s\n" % (key, data[key][0], data[key][1]))
 
+
 def remove_csv_except_best(directory: str, fold_idx: int):
-    csv_files = glob.glob(directory+"/*.csv")
+    csv_files = glob.glob(directory + "/*.csv")
     for f in csv_files:
-        f_split = f.split('_')
-        idx = int(f_split[-1].split('.')[0])
+        f_split = f.split("_")
+        idx = int(f_split[-1].split(".")[0])
         if idx != fold_idx:
             remove(f)
+
 
 def pair_to_lists(pairs):
     X = []

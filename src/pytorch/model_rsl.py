@@ -18,7 +18,8 @@ class Block(nn.Module):
         self.block = nn.Sequential(
             nn.Linear(hidden_size, hidden_size),
             nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size))
+            nn.Linear(hidden_size, hidden_size),
+        )
 
     def forward(self, x):
         identity = x
@@ -34,10 +35,9 @@ class RSL(nn.Module):
     def __init__(self, num_atoms):
         super(RSL, self).__init__()
         self.flatten = nn.Flatten()
-        self.denseLayers = nn.Sequential(nn.Linear(num_atoms, 250),
-                        nn.ReLU(),
-                        nn.Linear(250, 250),
-                        nn.ReLU())
+        self.denseLayers = nn.Sequential(
+            nn.Linear(num_atoms, 250), nn.ReLU(), nn.Linear(250, 250), nn.ReLU()
+        )
         self.resblock = Block(250)
         self.outLayer = nn.Sequential(nn.Linear(250, 1), nn.ReLU())
 

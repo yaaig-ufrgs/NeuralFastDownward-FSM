@@ -46,10 +46,10 @@ class InstanceDataset(Dataset):
         return self.hvalues.shape
 
     def set_x(self, x):
-       self.states = x 
+        self.states = x
 
     def set_y(self, y):
-       self.hvalues = y 
+        self.hvalues = y
 
 
 def load_training_state_value_pairs(samples_file: str) -> ([([int], int)], int):
@@ -71,6 +71,7 @@ def load_training_state_value_pairs(samples_file: str) -> ([([int], int)], int):
                 domain_max_value = state_value_pairs[-1][1]
 
     return state_value_pairs, domain_max_value
+
 
 def generate_optimal_state_value_pairs(domain, problems):
     """
