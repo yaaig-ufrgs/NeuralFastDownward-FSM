@@ -24,6 +24,7 @@ class TrainWorkflow:
         dirname: str,
         optimizer: optim.Optimizer,
         loss_fn: nn = nn.MSELoss(),
+        patience: int = None, # RSL
     ):
         self.model = model
         self.train_dataloader = train_dataloader
@@ -35,6 +36,7 @@ class TrainWorkflow:
         self.dirname = dirname
         self.optimizer = optimizer
         self.loss_fn = loss_fn
+        self.patience = patience
         self.y_pred_values = {} #{state: (y, pred)} of the last epoch
 
     def train_loop(self, t: int, fold_idx: int):
@@ -72,7 +74,6 @@ class TrainWorkflow:
         if len(self.y_pred_values) > 0:
             save_y_pred_scatter(self.y_pred_values, t, fold_idx, f"{self.dirname}/plots")
             self.y_pred_values.clear()
-
 
         return train_loss / num_batches
 
@@ -121,11 +122,13 @@ class TrainWorkflow:
         count_no_conv = 0
         need_restart = False
         loss_first_epoch = 0
+        best_val_loss = None
         for t in range(self.max_epochs):
             cur_train_loss = self.train_loop(t, fold_idx)
 
             if validation:
                 cur_val_loss = self.val_loop()
+                #print("epoch {} loss {} val loss {}".format(t, cur_train_loss, cur_val_loss))
                 loss_first_epoch = cur_val_loss if t == 0 else loss_first_epoch
                 if cur_val_loss == loss_first_epoch:
                     count_no_conv += 1
@@ -145,6 +148,12 @@ class TrainWorkflow:
                             f"The loss on the validation data didn't improve "
                             f"in {self.max_epochs_not_improving} epochs."
                         )
+                        break
+                # RSL-specific below
+                if self.max_epochs_not_improving == -1 and self.patience != None:
+                    if best_val_loss is None or best_val_loss > cur_val_loss:
+                        best_val_loss, best_val_epoch = cur_val_loss, t
+                    if best_val_epoch < t - self.patience:
                         break
 
                 last_val_loss = cur_val_loss

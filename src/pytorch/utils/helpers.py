@@ -293,3 +293,12 @@ def remove_csv_except_best(directory: str, fold_idx: int):
         idx = int(f_split[-1].split('.')[0])
         if idx != fold_idx:
             remove(f)
+
+def pair_to_lists(pairs):
+    X = []
+    Y = []
+    for (x, y) in pairs:
+        X.append(x)
+        Y.append(y)
+
+    return X, Y

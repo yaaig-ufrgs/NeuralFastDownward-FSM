@@ -45,6 +45,12 @@ class InstanceDataset(Dataset):
             return torch.Size([len(self.hvalues), 1])
         return self.hvalues.shape
 
+    def set_x(self, x):
+       self.states = x 
+
+    def set_y(self, y):
+       self.hvalues = y 
+
 
 def load_training_state_value_pairs(samples_file: str) -> ([([int], int)], int):
     """

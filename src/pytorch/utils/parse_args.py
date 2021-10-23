@@ -26,6 +26,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_MAX_SEARCH_MEMORY,
     DEFAULT_MAX_EXPANSIONS,
     DEFAULT_OUTPUT_FOLDER,
+    DEFAULT_MODEL,
     DEFAULT_RANDOM_SEED,
     DEFAULT_TEST_MODEL,
     DEFAULT_SCATTER_PLOT,
@@ -48,6 +49,13 @@ def get_train_args():
         "samples",
         type=str,
         help="Path to file with samples to be used in training.",
+    )
+    parser.add_argument(
+        "-mdl",
+        "--model",
+        choices=["hnn", "rsl"],
+        default=DEFAULT_MODEL,
+        help="Network model to use. (default: %(defaults)s)",
     )
     parser.add_argument(
         "-o",

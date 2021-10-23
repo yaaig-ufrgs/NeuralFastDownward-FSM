@@ -11,6 +11,7 @@ from shutil import copyfile
 
 from src.pytorch.k_fold_training_data import KFoldTrainingData
 from src.pytorch.model import HNN
+from src.pytorch.model_rsl import RSL
 from src.pytorch.train_workflow import TrainWorkflow
 from src.pytorch.log import setup_full_logging
 from src.pytorch.utils.helpers import (
@@ -39,6 +40,7 @@ def set_seeds(seed):
     random.seed(seed)
     np.random.seed(seed)
 
+
 def train_main(args):
     if args.weights_seed == -1:
         args.weights_seed = args.seed
@@ -54,98 +56,18 @@ def train_main(args):
     if args.max_epochs == -1:
         args.max_epochs = get_fixed_max_epochs(dirname)
 
-    logging_train_config(args, dirname)
-
-    num_retries = 0
-    need_restart = True
-    while need_restart:
-        kfold = KFoldTrainingData(
-            args.samples,
-            batch_size=args.batch_size,
-            num_folds=args.num_folds,
-            output_layer=args.output_layer,
-            shuffle=args.shuffle,
-            seed=args.seed,
-            normalize=args.normalize_output,
-        )
-        if args.normalize_output:
-            # Add the reference value in train_args.json to denormalize in the test
-            add_train_arg(dirname, "max_h", kfold.domain_max_value)
-
-        train_timer = Timer(args.max_training_time).start()
-        best_fold = {"fold": -1, "val_loss": float("inf")}
-
-        for fold_idx in range(args.num_folds):
-            _log.info(
-                f"Running training workflow for fold {fold_idx+1} out "
-                f"of {args.num_folds}"
-            )
-
-            train_dataloader, val_dataloader = kfold.get_fold(fold_idx)
-
-            model = HNN(
-                input_units=train_dataloader.dataset.x_shape()[1],
-                hidden_units=args.hidden_units,
-                output_units=train_dataloader.dataset.y_shape()[1],
-                hidden_layers=args.hidden_layers,
-                activation=args.activation,
-                output_layer=args.output_layer,
-                dropout_rate=args.dropout_rate,
-                linear_output=args.linear_output,
-                use_bias=args.bias,
-                use_bias_output=args.bias_output,
-                weights_method=args.weights_method,
-                weights_seed=args.weights_seed,
-            ).to(torch.device("cpu"))
-
-            if fold_idx == 0:
-                _log.info(model)
-
-            train_wf = TrainWorkflow(
-                model=model,
-                train_dataloader=train_dataloader,
-                val_dataloader=val_dataloader,
-                max_epochs=args.max_epochs,
-                plot_n_epochs=args.plot_n_epochs,
-                max_epochs_not_improving = args.max_epochs_not_improving,
-                max_epochs_no_convergence = args.restart_no_conv,
-                dirname=dirname,
-                optimizer=torch.optim.Adam(
-                    model.parameters(),
-                    lr=args.learning_rate,
-                    weight_decay=args.weight_decay,
-                ),
-            )
-
-            fold_val_loss, need_restart = train_wf.run(fold_idx, train_timer, validation=True)
-            if need_restart and args.num_folds == 1:
-                # ????
-                # In case of non-convergence, what makes more sense to restart:
-                # - The _whole_ training setup, including data splitting in kfold?
-                # - Or only restart the current fold?
-                args.seed += 100
-                _log.info(f"Updated seed: {args.seed}")
-                set_seeds(args.seed)
-                num_retries += 1
-                add_train_arg(dirname, "updated_seed", args.seed)
-                break
-
-            heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
-
-            if fold_val_loss < best_fold["val_loss"]:
-                save_y_pred_csv(train_wf.y_pred_values, heuristic_pred_file)
-                _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
-                best_fold["fold"] = fold_idx
-                best_fold["val_loss"] = fold_val_loss
-            else:
-                _log.info(
-                    f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
-                )
-
-            train_wf.save_traced_model(f"{dirname}/models/traced_{fold_idx}.pt")
-            if train_timer.check_timeout():
-                _log.info(f"Maximum training time reached. Stopping training.")
-                break
+    if args.model == "hnn":
+        logging_train_config(args, dirname)
+        best_fold, num_retries, train_timer = train_nn(args, dirname)
+    elif args.model == "rsl":
+        args.num_folds = 1
+        args.shuffle = True
+        args.max_epochs = 1000
+        args.max_epochs_not_improving = -1
+        args.batch_size = 64
+        args.learning_rate = 1e-4
+        logging_train_config(args, dirname)
+        best_fold, num_retries, train_timer = train_nn(args, dirname, patience=2)
 
     _log.info("Finishing training.")
     _log.info(f"Elapsed time: {train_timer.current_time()}")
@@ -218,6 +140,187 @@ def train_main(args):
 
 
     _log.info("Training complete!")
+
+
+def train_nn(args, dirname, patience=None):
+    num_retries = 0
+    need_restart = True
+    while need_restart:
+        kfold = KFoldTrainingData(
+            args.samples,
+            batch_size=args.batch_size,
+            num_folds=args.num_folds,
+            output_layer=args.output_layer,
+            shuffle=args.shuffle,
+            seed=args.seed,
+            normalize=args.normalize_output,
+            model=args.model,
+        )
+        if args.normalize_output:
+            # Add the reference value in train_args.json to denormalize in the test
+            add_train_arg(dirname, "max_h", kfold.domain_max_value)
+
+        train_timer = Timer(args.max_training_time).start()
+        best_fold = {"fold": -1, "val_loss": float("inf")}
+
+        for fold_idx in range(args.num_folds):
+            _log.info(
+                f"Running training workflow for fold {fold_idx+1} out "
+                f"of {args.num_folds}"
+            )
+
+            train_dataloader, val_dataloader = kfold.get_fold(fold_idx)
+
+            if args.model == "hnn":
+                model = HNN(
+                    input_units=train_dataloader.dataset.x_shape()[1],
+                    hidden_units=args.hidden_units,
+                    output_units=train_dataloader.dataset.y_shape()[1],
+                    hidden_layers=args.hidden_layers,
+                    activation=args.activation,
+                    output_layer=args.output_layer,
+                    dropout_rate=args.dropout_rate,
+                    linear_output=args.linear_output,
+                    use_bias=args.bias,
+                    use_bias_output=args.bias_output,
+                    weights_method=args.weights_method,
+                    weights_seed=args.weights_seed,
+                ).to(torch.device("cpu"))
+
+            elif args.model == "rsl":
+                model = RSL(
+                    num_atoms=len(train_dataloader.dataset[0][0]),
+                ).to(torch.device("cpu"))
+
+            if fold_idx == 0:
+                _log.info(model)
+
+            train_wf = TrainWorkflow(
+                model=model,
+                train_dataloader=train_dataloader,
+                val_dataloader=val_dataloader,
+                max_epochs=args.max_epochs,
+                plot_n_epochs=args.plot_n_epochs,
+                max_epochs_not_improving = args.max_epochs_not_improving,
+                max_epochs_no_convergence = args.restart_no_conv,
+                dirname=dirname,
+                optimizer=torch.optim.Adam(
+                    model.parameters(),
+                    lr=args.learning_rate,
+                    weight_decay=args.weight_decay,
+                ),
+                patience=patience,
+            )
+
+            fold_val_loss, need_restart = train_wf.run(fold_idx, train_timer, validation=True)
+            if need_restart and args.num_folds == 1:
+                # In case of non-convergence, what makes more sense to restart:
+                # - The _whole_ training setup, including data splitting in kfold?
+                # - Or only restart the current fold?
+                args.seed += 100
+                _log.info(f"Updated seed: {args.seed}")
+                set_seeds(args.seed)
+                num_retries += 1
+                add_train_arg(dirname, "updated_seed", args.seed)
+                break
+
+            heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
+
+            if fold_val_loss < best_fold["val_loss"]:
+                save_y_pred_csv(train_wf.y_pred_values, heuristic_pred_file)
+                _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
+                best_fold["fold"] = fold_idx
+                best_fold["val_loss"] = fold_val_loss
+            else:
+                _log.info(
+                    f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
+                )
+
+            train_wf.save_traced_model(f"{dirname}/models/traced_{fold_idx}.pt")
+            if train_timer.check_timeout():
+                _log.info(f"Maximum training time reached. Stopping training.")
+                break
+
+    return best_fold, num_retries, train_timer
+
+def train_rsl(args, dirname):
+    args.num_folds = 1
+    args.shuffle = True
+    args.max_epochs = 1000
+    num_retries = 0
+    need_restart = True
+    while need_restart:
+        kfold = KFoldTrainingData(
+            args.samples,
+            batch_size=64,
+            num_folds=args.num_folds,
+            output_layer=args.output_layer,
+            shuffle=args.shuffle,
+            seed=args.seed,
+            normalize=args.normalize_output,
+        )
+
+        train_timer = Timer(args.max_training_time).start()
+        best_fold = {"fold": -1, "val_loss": float("inf")}
+
+        for fold_idx in range(args.num_folds):
+            _log.info(
+                f"Running training workflow for fold {fold_idx+1} out "
+                f"of {args.num_folds}"
+            )
+
+            train_dataloader, val_dataloader = kfold.get_fold(fold_idx)
+
+            model = RSL(
+                num_atoms=train_dataloader.dataset.x_shape()[1],
+            ).to(torch.device("cpu"))
+
+            if fold_idx == 0:
+                _log.info(model)
+
+            train_wf = TrainWorkflow(
+                model=model,
+                train_dataloader=train_dataloader,
+                val_dataloader=val_dataloader,
+                max_epochs=1000,
+                plot_n_epochs=args.plot_n_epochs,
+                max_epochs_not_improving = -1,
+                max_epochs_no_convergence = args.restart_no_conv,
+                dirname=dirname,
+                optimizer=torch.optim.Adam(
+                    model.parameters(),
+                    lr=1e-4,
+                ),
+                patience=2,
+            )
+
+            fold_val_loss, need_restart = train_wf.run(fold_idx, train_timer, validation=True)
+            if need_restart and args.num_folds == 1:
+                args.seed += 100
+                _log.info(f"Updated seed: {args.seed}")
+                set_seeds(args.seed)
+                num_retries += 1
+                add_train_arg(dirname, "updated_seed", args.seed)
+                break
+
+            heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
+
+            if fold_val_loss < best_fold["val_loss"]:
+                save_y_pred_csv(train_wf.y_pred_values, heuristic_pred_file)
+                _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
+                best_fold["fold"] = fold_idx
+                best_fold["val_loss"] = fold_val_loss
+            else:
+                _log.info(
+                    f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
+                )
+
+            train_wf.save_traced_model(f"{dirname}/models/traced_{fold_idx}.pt")
+            if train_timer.check_timeout():
+                _log.info(f"Maximum training time reached. Stopping training.")
+                break
+
+    return best_fold, num_retries, train_timer
 
 
 if __name__ == "__main__":
