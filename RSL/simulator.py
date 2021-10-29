@@ -14,8 +14,9 @@ from tarski.fstrips import AddEffect, DelEffect
 from state_validators import (
     blocks_state_validator,
     npuzzle_state_validator,
-    visitall_state_validator,
+    scanalyzer_state_validator,
     transport_state_validator,
+    visitall_state_validator,
 )
 import numpy as np
 import copy
@@ -52,6 +53,8 @@ class Simulator:
             self.validator = blocks_state_validator(lpvariables)
         elif "npuzzle" in self.domainFile:
             self.validator = npuzzle_state_validator(self.problem.init)
+        elif "scanalyzer" in self.domainFile:
+            self.validator = scanalyzer_state_validator()
         elif "transport" in self.domainFile:
             self.validator = transport_state_validator()
         elif "visitall" in self.domainFile:
@@ -299,7 +302,7 @@ class Simulator:
                 atomsInFormulaStr.add(str(atom))
             current_mutexes_with_formula = self.get_state_mutexes_in_set(atomsInFormulaStr)
 
-            # assert self.validator.is_valid(atomsInFormulaStr)
+            assert self.validator.is_valid(atomsInFormulaStr)
 
             maxTime1 = 0
             maxTime2 = 0

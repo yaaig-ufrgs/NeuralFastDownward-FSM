@@ -120,6 +120,20 @@ class npuzzle_state_validator:
         size = int(sqrt(self.size))
         self.npuzzle = [[None for i in range(size)] for j in range(size) ]
 
+class scanalyzer_state_validator:
+    def __init__(self):
+        pass
+
+    def is_valid(self, state: set):
+        on = []
+        for atom in state:
+            if "on(" in atom:
+                c, _ = atom.split("on(")[1].split(")")[0].split(",")
+                if c in on:
+                    return False
+                on.append(c)
+        return True
+
 class transport_state_validator:
     def __init__(self):
         pass
