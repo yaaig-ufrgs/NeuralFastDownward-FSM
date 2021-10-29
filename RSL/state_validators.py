@@ -120,6 +120,25 @@ class npuzzle_state_validator:
         size = int(sqrt(self.size))
         self.npuzzle = [[None for i in range(size)] for j in range(size) ]
 
+class transport_state_validator:
+    def __init__(self):
+        pass
+
+    def is_valid(self, state: set):
+        location, capacity = [], []
+        for atom in state:
+            if "at(" in atom or "in(" in atom:
+                o, _ = atom.split("at(" if "at(" in atom else "in(")[1].split(")")[0].split(",")
+                if o in location:
+                    return False
+                location.append(o)
+            elif "capacity(" in atom:
+                v, _ = atom.split("capacity(")[1].split(")")[0].split(",")
+                if v in capacity:
+                    return False
+                capacity.append(v)
+        return True
+
 class visitall_state_validator:
     def __init__(self, init_atoms: tarski.model.Model):
         self.nodes = {}

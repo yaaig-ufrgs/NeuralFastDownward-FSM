@@ -15,6 +15,7 @@ from state_validators import (
     blocks_state_validator,
     npuzzle_state_validator,
     visitall_state_validator,
+    transport_state_validator,
 )
 import numpy as np
 import copy
@@ -51,6 +52,8 @@ class Simulator:
             self.validator = blocks_state_validator(lpvariables)
         elif "npuzzle" in self.domainFile:
             self.validator = npuzzle_state_validator(self.problem.init)
+        elif "transport" in self.domainFile:
+            self.validator = transport_state_validator()
         elif "visitall" in self.domainFile:
             self.validator = visitall_state_validator(self.problem.init)
         else:
