@@ -26,14 +26,11 @@ class ValidStatesValidator:
         if self.npuzzle_matrix_has_none():
             return False
 
-        #self.npuzzle = [[8, 1, 2],[0, 4, 3],[7, 6, 5]] # unsolvable example
-        #self.npuzzle = [[1, 8, 2],[0, 4, 3],[7, 6, 5]] # solvable example
         inversions = self.count_inversions([j for sub in self.npuzzle for j in sub])
         self.clear_npuzzle_matrix()
 
         # It is not possible to solve an npuzzle instance if the number of
         # inversions is odd in the input size.
-        # https://www.geeksforgeeks.org/check-instance-8-puzzle-solvable/
         return inversions % 2 == 0
         
     def count_inversions(self, arr):
