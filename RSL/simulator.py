@@ -11,6 +11,11 @@ from tarski.grounding.lp_grounding import ground_problem_schemas_into_plain_oper
 from tarski.search import GroundForwardSearchModel, BreadthFirstSearch
 from tarski.search.model import progress
 from tarski.fstrips import AddEffect, DelEffect
+from state_validators import (
+    blocks_state_validator,
+    npuzzle_state_validator,
+    visitall_state_validator,
+)
 import numpy as np
 import copy
 import time
@@ -41,6 +46,15 @@ class Simulator:
         self.state = self.problem.init
         self.grounder = LPGroundingStrategy(self.reader.problem, ground_actions=False)
         lpvariables = self.grounder.ground_state_variables()
+
+        if "blocks" in self.domainFile:
+            self.validator = blocks_state_validator(lpvariables)
+        elif "npuzzle" in self.domainFile:
+            self.validator = npuzzle_state_validator(self.problem.init)
+        elif "visitall" in self.domainFile:
+            self.validator = visitall_state_validator(self.problem.init)
+        else:
+            raise NotImplementedError("State validator not implemented for this domain!")
 
         nAtoms = 0
         # Initialise atoms to ints
@@ -282,6 +296,8 @@ class Simulator:
                 atomsInFormulaStr.add(str(atom))
             current_mutexes_with_formula = self.get_state_mutexes_in_set(atomsInFormulaStr)
 
+            # assert self.validator.is_valid(atomsInFormulaStr)
+
             maxTime1 = 0
             maxTime2 = 0
             maxTime3 = 0
@@ -311,8 +327,8 @@ class Simulator:
                 maxTime1 += time.perf_counter() - startTime
                 startTime = time.perf_counter()
 
-                if (operator_is_consistent != False and len(addEffects.intersection(current_mutexes_with_formula)) > 0):
-                    operator_is_consistent = False
+                # if (operator_is_consistent != False and len(addEffects.intersection(current_mutexes_with_formula)) > 0):
+                #     operator_is_consistent = False
 
                 maxTime2 += time.perf_counter() - startTime
                 startTime = time.perf_counter()
@@ -320,24 +336,24 @@ class Simulator:
                 if operator_is_consistent is None:
                     operator_is_consistent = True
 
-                # Check preconditions don't cause invariant
-                if operator_is_consistent:
-                    # print("operator {} is consistent before checking pre conditions".format(operatorNum))
-                    forCheckingMutexes = set()
+                # # Check preconditions don't cause invariant
+                # if operator_is_consistent:
+                #     # print("operator {} is consistent before checking pre conditions".format(operatorNum))
+                #     forCheckingMutexes = set()
 
-                    for atom in unwrap_conjunction_or_atom(operator.precondition):
-                        if str(atom) in self.atomToInt.keys():
-                            forCheckingMutexes.add(self.atomToInt[str(atom)])
+                #     for atom in unwrap_conjunction_or_atom(operator.precondition):
+                #         if str(atom) in self.atomToInt.keys():
+                #             forCheckingMutexes.add(self.atomToInt[str(atom)])
 
-                    for atom in unwrap_conjunction_or_atom(formula):
-                        if str(atom) not in addEffects:
-                            forCheckingMutexes.add(self.atomToInt[str(atom)])
+                #     for atom in unwrap_conjunction_or_atom(formula):
+                #         if str(atom) not in addEffects:
+                #             forCheckingMutexes.add(self.atomToInt[str(atom)])
 
-                    if self.check_for_state_mutexes_in_a_set_of_atoms(
-                        list(forCheckingMutexes)
-                    ):
-                        operator_is_consistent = False
-                maxTime3 += time.perf_counter() - startTime
+                #     if self.check_for_state_mutexes_in_a_set_of_atoms(
+                #         list(forCheckingMutexes)
+                #     ):
+                #         operator_is_consistent = False
+                # maxTime3 += time.perf_counter() - startTime
 
                 if not operator_is_consistent:
                     # print("operator {} is not consistent".format(operatorNum))
@@ -367,7 +383,9 @@ class Simulator:
                     for atom in unwrap_conjunction_or_atom(operator.precondition):
                         if str(atom) in self.atomToInt.keys():
                             atomsForNewFormula.add(str(atom))
-                    candidateOpsNFormulas.append((operator, atomsForNewFormula))
+                    # candidateOpsNFormulas.append((operator, atomsForNewFormula))
+                    if self.validator.is_valid(atomsForNewFormula):
+                        candidateOpsNFormulas.append((operator, atomsForNewFormula))
 
             # print("end time to preimage actions {}".format(time.perf_counter() - startTime))
             # print("number of canidate actions {}".format(len(candidateOpsNFormulas)))
