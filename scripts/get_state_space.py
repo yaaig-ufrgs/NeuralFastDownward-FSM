@@ -2,20 +2,21 @@
 
 """
 Comment lines 172 and 173 of ../src/search/search_egnines/eager_search.cc
-Use: ./get_state_space.py ../tasks/IPC/blocks/*.pddl
+Use: ./get_state_space.py ../tasks/IPC/blocks/probBLOCKS-*-0.pddl
 """
 
 from sys import argv
 from subprocess import check_output, CalledProcessError
 from re import match
+from resource import setrlimit, RLIMIT_AS
 import os
 
 SUCCESS_CODE = 12
-MEMORY_LIMITY_CODE = 22
+MEMORY_LIMIT_CODE = 22
 
 FD = "../fast-downward.py"
-MEMORY_LIMITY = 4000000 # kb
-OUTPUT_FOLDER = "state_spaces"
+MEMORY_LIMIT = 4*1024*1024*1024 # 4 GB
+OUTPUT_FOLDER = "state_space"
 
 def save_output(instance_name: str, output: bytes):
     with open(f"{OUTPUT_FOLDER}/{instance_name}.output", "w") as f:
@@ -38,18 +39,15 @@ if __name__ == "__main__":
     if not os.path.exists(OUTPUT_FOLDER):
         os.makedirs(OUTPUT_FOLDER)
 
-    # try:
-    #     check_output(f"ulimit -v {MEMORY_LIMITY}", shell=True)
-    # except CalledProcessError as e:
-    #     print(f"ulimit -v has already been set to another value! (restart)")
-    #     exit(0)
+    setrlimit(RLIMIT_AS, (MEMORY_LIMIT, MEMORY_LIMIT))
 
     for instance_pddl in argv[1:]:
-        instance_name = instance_pddl.split("/")[-1].split(".pddl")[0]
-        if instance_name == "domain":
+        domain_name, instance_name = instance_pddl.split("/")[-2:]
+        if instance_name == "domain.pddl":
             continue
+        instance_name = f"{domain_name}_{instance_name.split('.pddl')[0]}"
 
-        print(f"{instance_pddl}... ", end="")
+        print(f"{instance_pddl}... ", end="", flush=True)
         try:
             output = check_output([
                 FD,
@@ -62,17 +60,18 @@ if __name__ == "__main__":
                 "eager_greedy([blind_print()])"
             ])
             # We expect error 12, if not, something strange is happening
-            print(f"success? (check output)")
+            print(f"success? (comment lines 172 and 173 of ../src/search/search_egnines/eager_search.cc)")
             save_output(instance_name, output)
         except CalledProcessError as e:
             if e.returncode == SUCCESS_CODE:
                 path = f"{OUTPUT_FOLDER}/{instance_name}.state_space"
                 print(f"ok (saved to {OUTPUT_FOLDER}/{instance_name}.state_space)")
                 save_state_space(instance_name, e.output)
-            elif e.returncode == MEMORY_LIMITY_CODE:
+            elif e.returncode == MEMORY_LIMIT_CODE:
                 print("memory limit")
             else:
                 print(f"unknown error (check output)")
                 save_output(instance_name, e.output)
 
         os.remove(f"{OUTPUT_FOLDER}/{instance_name}_output.sas")
+
