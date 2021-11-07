@@ -9,6 +9,7 @@ from sys import argv
 from subprocess import check_output, CalledProcessError
 from re import match
 from resource import setrlimit, RLIMIT_AS
+from math import ceil
 import os
 
 SUCCESS_CODE = 12
@@ -17,6 +18,19 @@ MEMORY_LIMIT_CODE = 22
 FD = "../fast-downward.py"
 MEMORY_LIMIT = 4*1024*1024*1024 # 4 GB
 OUTPUT_FOLDER = "state_space"
+
+def converter(line_state: str, length: int):
+    decimals = line_state.split(" ")
+    assert ceil(length / 64) == len(decimals)
+    binary = ""
+    for i in range(len(decimals)):
+        b = str(bin(int(decimals[i])))[2:]
+        zeros = 64 - len(b)
+        if i == 0 and length % 64 > 0:
+            zeros = length % 64 - len(b)
+            assert zeros >= 0
+        binary += ("0" * zeros) + b
+    return binary
 
 def save_output(instance_name: str, output: bytes):
     with open(f"{OUTPUT_FOLDER}/{instance_name}.output", "w") as f:
