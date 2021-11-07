@@ -86,6 +86,8 @@ if __name__ == "__main__":
             else:
                 print(f"unknown error (check output)")
                 save_output(instance_name, e.output)
+        except MemoryError as e:
+            print("MemoryError")
 
         os.remove(f"{OUTPUT_FOLDER}/{instance_name}_output.sas")
 
