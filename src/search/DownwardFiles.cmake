@@ -567,6 +567,14 @@ fast_downward_plugin(
 )
 
 fast_downward_plugin(
+    NAME BLIND_PRINT_SEARCH_HEURISTIC
+    HELP "The 'blind print search' heuristic"
+    SOURCES
+        heuristics/blind_print_search_heuristic
+    DEPENDS TASK_PROPERTIES
+)
+
+fast_downward_plugin(
     NAME CONTEXT_ENHANCED_ADDITIVE_HEURISTIC
     HELP "The context-enhanced additive heuristic"
     SOURCES
