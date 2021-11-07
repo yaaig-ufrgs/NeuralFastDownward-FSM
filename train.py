@@ -41,7 +41,6 @@ def set_seeds(seed):
     random.seed(seed)
     np.random.seed(seed)
 
-
 def train_main(args):
     if args.weights_seed == -1:
         args.weights_seed = args.seed
@@ -57,18 +56,10 @@ def train_main(args):
     if args.max_epochs == -1:
         args.max_epochs = get_fixed_max_epochs(dirname)
 
-    if args.model == "hnn":
-        logging_train_config(args, dirname)
-        best_fold, num_retries, train_timer = train_nn(args, dirname)
-    elif args.model == "rsl":
-        args.num_folds = 1
-        args.shuffle = True
-        args.max_epochs = 1000
-        args.max_epochs_not_improving = -1
-        args.batch_size = 64
-        args.learning_rate = 1e-4
-        logging_train_config(args, dirname)
-        best_fold, num_retries, train_timer = train_nn(args, dirname, patience=2)
+    logging_train_config(args, dirname)
+
+    ### TRAINING ###
+    best_fold, num_retries, train_timer = train_nn(args, dirname)
 
     _log.info("Finishing training.")
     _log.info(f"Elapsed time: {train_timer.current_time()}")
@@ -92,7 +83,7 @@ def train_main(args):
     except:
         _log.error(f"Failed to save best fold.")
 
-    ### PLOTTING
+    ### PLOTTING ###
     plots_dir = f"{dirname}/plots"
 
     if args.scatter_plot and args.plot_n_epochs != -1:
@@ -168,26 +159,20 @@ def train_nn(args, dirname, patience=None):
 
             train_dataloader, val_dataloader = kfold.get_fold(fold_idx)
 
-            if args.model == "hnn":
-                model = HNN(
-                    input_units=train_dataloader.dataset.x_shape()[1],
-                    hidden_units=args.hidden_units,
-                    output_units=train_dataloader.dataset.y_shape()[1],
-                    hidden_layers=args.hidden_layers,
-                    activation=args.activation,
-                    output_layer=args.output_layer,
-                    dropout_rate=args.dropout_rate,
-                    linear_output=args.linear_output,
-                    use_bias=args.bias,
-                    use_bias_output=args.bias_output,
-                    weights_method=args.weights_method,
-                    weights_seed=args.weights_seed,
-                ).to(torch.device("cpu"))
-
-            elif args.model == "rsl":
-                model = RSL(
-                    num_atoms=len(train_dataloader.dataset[0][0]),
-                ).to(torch.device("cpu"))
+            model = HNN(
+                input_units=train_dataloader.dataset.x_shape()[1],
+                hidden_units=args.hidden_units,
+                output_units=train_dataloader.dataset.y_shape()[1],
+                hidden_layers=args.hidden_layers,
+                activation=args.activation,
+                output_layer=args.output_layer,
+                dropout_rate=args.dropout_rate,
+                linear_output=args.linear_output,
+                use_bias=args.bias,
+                use_bias_output=args.bias_output,
+                weights_method=args.weights_method,
+                weights_seed=args.weights_seed,
+            ).to(torch.device("cpu"))
 
             if fold_idx == 0:
                 _log.info(model)
@@ -198,7 +183,6 @@ def train_nn(args, dirname, patience=None):
                 val_dataloader=val_dataloader,
                 max_epochs=args.max_epochs,
                 plot_n_epochs=args.plot_n_epochs,
-                max_epochs_not_improving=args.max_epochs_not_improving,
                 max_epochs_no_convergence=args.restart_no_conv,
                 dirname=dirname,
                 optimizer=torch.optim.Adam(
@@ -206,13 +190,16 @@ def train_nn(args, dirname, patience=None):
                     lr=args.learning_rate,
                     weight_decay=args.weight_decay,
                 ),
-                patience=patience,
+                patience=args.patience,
             )
 
             fold_val_loss, need_restart = train_wf.run(
                 fold_idx, train_timer, validation=True
             )
             if need_restart and args.num_folds == 1:
+                need_restart = False
+                with open("output.txt", "a") as f:
+                    f.write(f"seed {args.seed}\n")
                 # In case of non-convergence, what makes more sense to restart:
                 # - The _whole_ training setup, including data splitting in kfold?
                 # - Or only restart the current fold?

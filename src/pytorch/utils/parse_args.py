@@ -16,7 +16,6 @@ from src.pytorch.utils.default_args import (
     DEFAULT_BIAS_OUTPUT,
     DEFAULT_LEARNING_RATE,
     DEFAULT_MAX_EPOCHS,
-    DEFAULT_MAX_EPOCHS_NOT_IMPROVING,
     DEFAULT_MAX_TRAINING_TIME,
     DEFAULT_DOMAIN_PDDL,
     DEFAULT_SEARCH_ALGORITHM,
@@ -27,6 +26,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_MAX_EXPANSIONS,
     DEFAULT_OUTPUT_FOLDER,
     DEFAULT_MODEL,
+    DEFAULT_PATIENCE,
     DEFAULT_RANDOM_SEED,
     DEFAULT_TEST_MODEL,
     DEFAULT_SCATTER_PLOT,
@@ -56,6 +56,13 @@ def get_train_args():
         choices=["hnn", "rsl"],
         default=DEFAULT_MODEL,
         help="Network model to use. (default: %(defaults)s)",
+    )
+    parser.add_argument(
+        "-pat",
+        "--patience",
+        type=int,
+        default=DEFAULT_PATIENCE,
+        help="Early-stop patience. (default: %(default)s)",
     )
     parser.add_argument(
         "-o",
@@ -115,13 +122,6 @@ def get_train_args():
         type=int,
         default=DEFAULT_MAX_EPOCHS,
         help="Maximum number of epochs to train each fold (or -1 for fixed value). (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-en",
-        "--max-epochs-not-improving",
-        type=int,
-        default=DEFAULT_MAX_EPOCHS_NOT_IMPROVING,
-        help="Stop training if loss does not improve after n epochs (-1 to disable). (default: %(default)s)",
     )
     parser.add_argument(
         "-t",

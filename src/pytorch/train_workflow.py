@@ -19,19 +19,17 @@ class TrainWorkflow:
         val_dataloader: DataLoader,
         max_epochs: int,
         plot_n_epochs: int,
-        max_epochs_not_improving: int,
         max_epochs_no_convergence: int,
         dirname: str,
         optimizer: optim.Optimizer,
         loss_fn: nn = nn.MSELoss(),
-        patience: int = None,  # RSL
+        patience: int = None,
     ):
         self.model = model
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
         self.max_epochs = max_epochs
         self.plot_n_epochs = plot_n_epochs
-        self.max_epochs_not_improving = max_epochs_not_improving
         self.max_epochs_no_convergence = max_epochs_no_convergence
         self.dirname = dirname
         self.optimizer = optimizer
@@ -114,9 +112,9 @@ class TrainWorkflow:
         #
         # TorchScript is a domain-specific language for ML, and it is a subset of Python.
 
-        if model == "rsl":
+        if model == "resnet":
             example_input = self.train_dataloader.dataset[:10][0]
-        elif model == "hnn":
+        elif model == "simple":
             example_input = self.train_dataloader.dataset[0][0]
         traced_model = torch.jit.trace(self.model, example_input)
         traced_model.save(filename)
@@ -147,24 +145,14 @@ class TrainWorkflow:
                         )
                         need_restart = True
                         break
-                if (last_val_loss - cur_val_loss) > 0.01:
-                    count = 0
-                else:
-                    count += 1
-                    if (
-                        self.max_epochs_not_improving != -1
-                        and count >= self.max_epochs_not_improving
-                    ):
-                        _log.info(
-                            f"The loss on the validation data didn't improve "
-                            f"in {self.max_epochs_not_improving} epochs."
-                        )
-                        break
-                # RSL-specific below
-                if self.max_epochs_not_improving == -1 and self.patience != None:
+                if self.patience != None:
                     if best_val_loss is None or best_val_loss > cur_val_loss:
                         best_val_loss, best_val_epoch = cur_val_loss, t
                     if best_val_epoch < t - self.patience:
+                        _log.info(
+                            f"Early stop. "
+                            f"Best epoch: {best_val_epoch}/{t}"
+                        )
                         break
 
                 last_val_loss = cur_val_loss

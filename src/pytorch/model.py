@@ -19,6 +19,30 @@ def RAI(fan_in, fan_out):
     b = torch.nn.parameter.Parameter(torch.tensor(V[:, -1], dtype=torch.float32))
     return W, b
 
+class Block(nn.Module):
+    def __init__(self, hidden_size):
+        """
+        Args:
+            in_channels (int):  Number of input channels.
+            out_channels (int): Number of output channels.
+            stride (int):       Controls the stride.
+        """
+        super(Block, self).__init__()
+
+        self.block = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, hidden_size),
+        )
+
+    def forward(self, x):
+        identity = x
+        out = self.block(x)
+
+        out += identity
+        out = nn.functional.relu(out)
+
+        return out
 
 # H(euristic) Neural Network
 class HNN(nn.Module):
@@ -36,6 +60,7 @@ class HNN(nn.Module):
         use_bias_output: bool,
         weights_method: str,
         weights_seed: int,
+        model: str = "resnet",
     ):
         super(HNN, self).__init__()
         self.input_units = input_units
@@ -45,6 +70,10 @@ class HNN(nn.Module):
         self.dropout_rate = dropout_rate
         self.output_layer = output_layer
         self.linear_output = linear_output
+        self.model = model
+
+        if model == "resnet":
+            self.flatten = nn.Flatten()
 
         hu = [input_units]
         if len(hidden_units) == 0:  # scalable
@@ -60,6 +89,9 @@ class HNN(nn.Module):
         self.hid = nn.ModuleList()
         for i in range(self.hidden_layers):
             self.hid.append(nn.Linear(hu[i], hu[i + 1], bias=use_bias))
+
+        if model == "resnet":
+            self.resblock = Block(hidden_units[0])
 
         # If `use_bias` is set to False, `bias_output` is set to False regardless
         # of the value in `use_bias_output`.
@@ -163,11 +195,22 @@ class HNN(nn.Module):
                     )
 
     def forward(self, x):
-        for h in self.hid:
-            x = self.activation(h(x))
-            if self.dropout_rate > 0:
-                x = self.dropout(x)
+        if self.model == "resnet":
+            x = self.flatten(x)
+            for h in self.hid:
+                x = self.activation(h(x))
+                if self.dropout_rate > 0:
+                    x = self.dropout(x)
+            x = self.resblock(x)
+            out = self.opt(x)
+            return self.output_activation(out)
 
-        if self.linear_output:
-            return self.opt(x)
-        return self.output_activation(self.opt(x))
+        else:
+            for h in self.hid:
+                x = self.activation(h(x))
+                if self.dropout_rate > 0:
+                    x = self.dropout(x)
+
+            if self.linear_output:
+                return self.opt(x)
+            return self.output_activation(self.opt(x))

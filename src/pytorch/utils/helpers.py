@@ -4,6 +4,7 @@ Simple auxiliary functions.
 
 import logging
 import glob
+import numpy as np
 from json import dump, load
 from os import path, makedirs, remove
 from datetime import datetime
@@ -109,6 +110,7 @@ def save_json(filename: str, data: list):
 def logging_train_config(args, dirname, json=True):
     args_dic = {
         "samples": args.samples,
+        "model": args.model,
         "output_layer": args.output_layer,
         "linear_output": args.linear_output,
         "num_folds": args.num_folds,
@@ -121,7 +123,7 @@ def logging_train_config(args, dirname, json=True):
         "max_epochs": args.max_epochs
         if args.max_epochs != DEFAULT_MAX_EPOCHS
         else "inf",
-        "max_epochs_not_improving": args.max_epochs_not_improving,
+        "patience": args.patience,
         "max_training_time": f"{args.max_training_time}s",
         "activation": args.activation,
         "weight_decay": args.weight_decay,
@@ -315,11 +317,11 @@ def remove_csv_except_best(directory: str, fold_idx: int):
             remove(f)
 
 
-def pair_to_lists(pairs):
+def pair_to_arrays(pairs):
     X = []
     Y = []
     for (x, y) in pairs:
         X.append(x)
         Y.append(y)
 
-    return X, Y
+    return np.array(X), np.array(Y)
