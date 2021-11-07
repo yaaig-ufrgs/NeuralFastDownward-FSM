@@ -197,9 +197,6 @@ def train_nn(args, dirname, patience=None):
                 fold_idx, train_timer, validation=True
             )
             if need_restart and args.num_folds == 1:
-                need_restart = False
-                with open("output.txt", "a") as f:
-                    f.write(f"seed {args.seed}\n")
                 # In case of non-convergence, what makes more sense to restart:
                 # - The _whole_ training setup, including data splitting in kfold?
                 # - Or only restart the current fold?
