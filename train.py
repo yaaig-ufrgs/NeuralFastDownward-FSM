@@ -222,8 +222,8 @@ def train_nn(args, dirname, patience=None):
                     f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
                 )
 
-            for param in model.parameters():
-                print(param)
+            #for param in model.parameters():
+            #    print(param)
 
             train_wf.save_traced_model(
                 f"{dirname}/models/traced_{fold_idx}.pt", args.model
