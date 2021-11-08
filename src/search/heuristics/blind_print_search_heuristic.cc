@@ -19,8 +19,13 @@ BlindPrintSearchHeuristic::BlindPrintSearchHeuristic(const Options &opts)
       min_operator_cost(task_properties::get_min_operator_cost(task_proxy)) {
     utils::g_log << "Initializing blind print search heuristic..." << endl;
 
+    int curVar = 0;
     cout << prefix << " ";
     for (unsigned i = 0; i < relevant_facts.size(); i++) {
+        if (curVar != relevant_facts[i].var) {
+            cout << ";";
+            curVar = relevant_facts[i].var;
+        }
         cout << task->get_fact_name(relevant_facts[i]);
         cout << (i < relevant_facts.size()-1 ? ";" : "\n");
     }
@@ -42,6 +47,12 @@ int BlindPrintSearchHeuristic::compute_heuristic(const State &ancestor_state) {
     vector<int> bin;
     for (unsigned i = 0; i < relevant_facts.size(); i++)
         bin.push_back(values[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
+
+    // Print binary state
+    // cout << "# ";
+    // for (unsigned i = 0; i < relevant_facts.size(); i++)
+    //     cout << ((values[relevant_facts[i].var] == relevant_facts[i].value) ? 1 : 0);
+    // cout << endl;
 
     // binary to vector<long long> decimals
     // bin: 111111111110101100101111111010101001101010101010101101010110101001
