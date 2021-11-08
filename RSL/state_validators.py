@@ -1,6 +1,58 @@
-from math import sqrt
+from math import sqrt, ceil
 import tarski
 
+class state_space_validator:
+    def __init__(self, instance_name: str, atoms: tarski.util.SymbolIndex, init_atoms: tarski.model.Model):
+        print(instance_name)
+        domain_name, instance_name = instance_name.split("/")[-2:]
+        state_space_file = f"scripts/state_space/{domain_name}_{instance_name.split('.pddl')[0]}.state_space"
+        try:
+            with open(state_space_file,) as f:
+                lines = [l if l[-1] != "\n" else l[:-1] for l in f.readlines()]
+        except FileNotFoundError:
+            print(f"State space not found: {state_space_file}")
+            exit(0)
+        assert "Atom" in lines[0]
+        self.atoms = [a.split("Atom ")[1].replace(" ", "") for a in lines[0].split(";")]
+        self.states = []
+        for state in lines[1:]:
+            self.states.append(self.converter(state, len(self.atoms)))
+        # Assert that atoms of state space are equals to rsl atoms
+        atoms = [str(a) for a in atoms]
+        for atom in self.atoms:
+            assert atom in atoms
+
+    def is_valid(self, state: set):
+        # there are rsl atoms that do not exist in fd atoms (i.e. blocks on(a,a)),
+        # if it appears in state then state is invalid
+        for atom in state:
+            if atom not in self.atoms:
+                return False
+        s = self.state2bin(state)
+        for state in self.states:
+            if s == state:
+                return True
+        return False
+    
+    def state2bin(self, state: set):
+        b = ""
+        for atom in self.atoms:
+            b += "1" if atom in state else "0"
+        return b
+
+    def converter(self, line_state: str, length: int):
+        decimals = line_state.split(" ")
+        assert ceil(length / 64) == len(decimals)
+        binary = ""
+        for i in range(len(decimals)):
+            b = str(bin(int(decimals[i])))[2:]
+            zeros = 64 - len(b)
+            if i == 0 and length % 64 > 0:
+                zeros = length % 64 - len(b)
+                assert zeros >= 0
+            binary += ("0" * zeros) + b
+        return binary
+    
 class blocks_state_validator:
     def __init__(self, atoms: tarski.util.SymbolIndex):
         self.nodes = {}
@@ -13,6 +65,7 @@ class blocks_state_validator:
         for v in self.nodes:
             self.nodes[v] = ([], [])
         holding = False
+        ontable = []
         for atom in state:
             if "on(" in atom:
                 src, dst = atom.split("on(")[1].split(")")[0].split(",")
@@ -25,6 +78,9 @@ class blocks_state_validator:
                 if holding:
                     return False
                 holding = True
+            if "ontable(" in atom:
+                v = atom.split("ontable(")[1].split(")")[0]
+                ontable.append(v)
         for atom in state:
             if "ontable(" in atom:
                 v = atom.split("ontable(")[1].split(")")[0]
@@ -40,6 +96,8 @@ class blocks_state_validator:
             elif "holding(" in atom:
                 v = atom.split("holding(")[1].split(")")[0]
                 if self.nodes[v][0] != [] or self.nodes[v][1] != []:
+                    return False
+                if v in ontable:
                     return False
         return True
 
