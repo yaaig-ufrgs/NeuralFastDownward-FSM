@@ -15,6 +15,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_BIAS,
     DEFAULT_BIAS_OUTPUT,
     DEFAULT_LEARNING_RATE,
+    DEFAULT_NUM_THREADS,
     DEFAULT_MAX_EPOCHS,
     DEFAULT_MAX_TRAINING_TIME,
     DEFAULT_DOMAIN_PDDL,
@@ -256,6 +257,13 @@ def get_train_args():
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
         default=DEFAULT_NORMALIZE_OUTPUT,
         help="Normalizes the output neuron. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trd",
+        "--num-threads",
+        type=int,
+        default=DEFAULT_NUM_THREADS,
+        help="Number of threads used for intra operations on CPU (PyTorch). (default: %(default)s)",
     )
     return parser.parse_args()
 

@@ -42,6 +42,8 @@ def set_seeds(seed):
     np.random.seed(seed)
 
 def train_main(args):
+    if args.num_threads != -1:
+        torch.set_num_threads(args.num_threads)
     if args.weights_seed == -1:
         args.weights_seed = args.seed
     if args.seed != -1:
@@ -196,6 +198,7 @@ def train_nn(args, dirname, patience=None):
             fold_val_loss, need_restart = train_wf.run(
                 fold_idx, train_timer, validation=True
             )
+
             if need_restart and args.num_folds == 1:
                 # In case of non-convergence, what makes more sense to restart:
                 # - The _whole_ training setup, including data splitting in kfold?
@@ -218,6 +221,9 @@ def train_nn(args, dirname, patience=None):
                 _log.info(
                     f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
                 )
+
+            for param in model.parameters():
+                print(param)
 
             train_wf.save_traced_model(
                 f"{dirname}/models/traced_{fold_idx}.pt", args.model
