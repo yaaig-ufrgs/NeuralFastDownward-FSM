@@ -1,17 +1,20 @@
 from math import sqrt, ceil
 import tarski
-
+from state_space import (
+    get_state_space_from_file,
+    binary_to_fdr_state,
+    check_partial_state_in_valid_states,
+)
 
 class state_space_validator:
     def __init__(
         self,
         instance_name: str,
         atoms: tarski.util.SymbolIndex,
-        init_atoms: tarski.model.Model,
     ):
         print(instance_name)
         domain_name, instance_name = instance_name.split("/")[-2:]
-        state_space_file = f"scripts/state_space/{domain_name}_{instance_name.split('.pddl')[0]}.state_space"
+        state_space_file = f"state_space/{domain_name}_{instance_name.split('.pddl')[0]}.state_space"
         try:
             with open(
                 state_space_file,
@@ -19,12 +22,13 @@ class state_space_validator:
                 lines = [l if l[-1] != "\n" else l[:-1] for l in f.readlines()]
         except FileNotFoundError:
             print(f"State space not found: {state_space_file}")
-            exit(0)
+            return None
         assert "Atom" in lines[0]
-        self.atoms = [a.split("Atom ")[1].replace(" ", "") for a in lines[0].split(";")]
-        self.states = []
-        for state in lines[1:]:
-            self.states.append(self.converter(state, len(self.atoms)))
+        self.atoms = [a.split("Atom ")[1].replace(" ", "") for a in lines[0].split(";") if a != ""]
+        
+        self.valid_states, self.ranges_fdr = get_state_space_from_file(state_space_file)
+        assert self.valid_states != None
+
         # Assert that atoms of state space are equals to rsl atoms
         atoms = [str(a) for a in atoms]
         for atom in self.atoms:
@@ -36,30 +40,14 @@ class state_space_validator:
         for atom in state:
             if atom not in self.atoms:
                 return False
-        s = self.state2bin(state)
-        for state in self.states:
-            if s == state:
-                return True
-        return False
+        fdr = binary_to_fdr_state(self.state2binary(state), self.ranges_fdr)
+        return check_partial_state_in_valid_states(self.valid_states, fdr)        
 
-    def state2bin(self, state: set):
+    def state2binary(self, state: set):
         b = ""
         for atom in self.atoms:
             b += "1" if atom in state else "0"
         return b
-
-    def converter(self, line_state: str, length: int):
-        decimals = line_state.split(" ")
-        assert ceil(length / 64) == len(decimals)
-        binary = ""
-        for i in range(len(decimals)):
-            b = str(bin(int(decimals[i])))[2:]
-            zeros = 64 - len(b)
-            if i == 0 and length % 64 > 0:
-                zeros = length % 64 - len(b)
-                assert zeros >= 0
-            binary += ("0" * zeros) + b
-        return binary
 
 
 class blocks_state_validator:
@@ -152,7 +140,7 @@ class npuzzle_state_validator:
 
         # It is not possible to solve an npuzzle instance if the number of
         # inversions is odd in the input size.
-        return inversions % 2 == 0
+        return inversions % 2 == 1
 
     def count_inversions(self, arr):
         inv_count = 0
@@ -278,14 +266,14 @@ class visitall_state_validator:
                 at_robot = atom.split("at-robot(")[1].split(")")[0]
         if at_robot is not None and not self.visited[at_robot]:
             return False
-        self.dfs(dfs_src)
-        for atom in self.visited:
-            if self.visited[atom]:
-                return False
+        # self.dfs(dfs_src)
+        # for atom in self.visited:
+        #     if self.visited[atom]:
+        #         return False
         return True
 
-    def dfs(self, v):
-        if self.visited[v]:
-            self.visited[v] = False
-            for w in self.nodes[v]:
-                self.dfs(w)
+    # def dfs(self, v):
+    #     if self.visited[v]:
+    #         self.visited[v] = False
+    #         for w in self.nodes[v]:
+    #             self.dfs(w)

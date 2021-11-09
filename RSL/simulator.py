@@ -12,6 +12,7 @@ from tarski.search import GroundForwardSearchModel, BreadthFirstSearch
 from tarski.search.model import progress
 from tarski.fstrips import AddEffect, DelEffect
 from state_validators import (
+    state_space_validator,
     blocks_state_validator,
     npuzzle_state_validator,
     scanalyzer_state_validator,
@@ -21,7 +22,6 @@ from state_validators import (
 import numpy as np
 import copy
 import time
-
 
 class Simulator:
     def __init__(self, domainFile, instanceFile, state_mutexes=None, seed=1337):
@@ -49,6 +49,7 @@ class Simulator:
         self.grounder = LPGroundingStrategy(self.reader.problem, ground_actions=False)
         lpvariables = self.grounder.ground_state_variables()
 
+        self.ss_validator = state_space_validator(instanceFile, lpvariables)
         if "blocks" in self.domainFile:
             self.validator = blocks_state_validator(lpvariables)
         elif "npuzzle" in self.domainFile:
@@ -390,7 +391,14 @@ class Simulator:
                         if str(atom) in self.atomToInt.keys():
                             atomsForNewFormula.add(str(atom))
                     # candidateOpsNFormulas.append((operator, atomsForNewFormula))
-                    if self.validator.is_valid(atomsForNewFormula):
+
+                    is_valid_with_groundtruth_validator = self.validator.is_valid(atomsForNewFormula)
+                    # is_valid_with_state_space_validator = self.ss_validator.is_valid(atomsForNewFormula)
+
+                    # if is_valid_with_groundtruth_validator != is_valid_with_state_space_validator:
+                    #     print(f"contradiction: groundtruth={is_valid_with_groundtruth_validator} state_space={is_valid_with_state_space_validator} state={self.ss_validator.state2binary(atomsForNewFormula)}")
+
+                    if is_valid_with_groundtruth_validator:
                         candidateOpsNFormulas.append((operator, atomsForNewFormula))
 
             # print("end time to preimage actions {}".format(time.perf_counter() - startTime))
