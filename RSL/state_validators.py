@@ -10,7 +10,7 @@ class state_space_validator:
     def __init__(
         self,
         instance_name: str,
-        atoms: tarski.util.SymbolIndex,
+        atoms,
     ):
         instance_name = instance_name.replace("//", "/")
         print(instance_name)
@@ -46,7 +46,7 @@ class state_space_validator:
 
 
 class blocks_state_validator:
-    def __init__(self, atoms: tarski.util.SymbolIndex):
+    def __init__(self, atoms):
         self.nodes = {}
         for atom in [str(a) for a in atoms]:
             if "clear(" in atom:
@@ -97,7 +97,7 @@ class blocks_state_validator:
 
 
 class npuzzle_state_validator:
-    def __init__(self, init_atoms: tarski.model.Model):
+    def __init__(self, init_atoms):
         self.init_atoms = init_atoms
         (
             self.npuzzle,
@@ -210,7 +210,7 @@ class scanalyzer_state_validator:
 
 
 class transport_state_validator:
-    def __init__(self, init_atoms: tarski.model.Model):
+    def __init__(self, init_atoms):
         self.total_capacity = {}
         for atom in [str(atom) for atom in init_atoms.as_atoms()]:
             if "capacity(" in atom:
@@ -237,13 +237,13 @@ class transport_state_validator:
         #             .split(",")
         #         )
         #         if o in location:
-        #             print("A")
+        #             # print("A")
         #             return False
         #         location.append(o)
         #     elif "capacity(" in atom:
         #         v, _ = atom.split("capacity(")[1].split(")")[0].split(",")
         #         if v in capacity:
-        #             print("B")
+        #             # print("B")
         #             return False
         #         capacity.append(v)
         return True

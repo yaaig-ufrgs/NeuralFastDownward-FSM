@@ -47,11 +47,11 @@ class Simulator:
         self.maxBranchingFactor = nOp
         self.state = self.problem.init
         self.grounder = LPGroundingStrategy(self.reader.problem, ground_actions=False)
-        lpvariables = self.grounder.ground_state_variables()
+        self.lpvariables = self.grounder.ground_state_variables()
 
-        self.ss_validator = state_space_validator(instanceFile, lpvariables)
+        self.ss_validator = state_space_validator(instanceFile, self.lpvariables)
         if "blocks" in self.domainFile:
-            self.validator = blocks_state_validator(lpvariables)
+            self.validator = blocks_state_validator(self.lpvariables)
         elif "npuzzle" in self.domainFile:
             self.validator = npuzzle_state_validator(self.problem.init)
         elif "scanalyzer" in self.domainFile:
@@ -65,7 +65,7 @@ class Simulator:
 
         nAtoms = 0
         # Initialise atoms to ints
-        for atom_index, atoms in lpvariables.enumerate():
+        for atom_index, atoms in self.lpvariables.enumerate():
             atom = Atom(atoms.symbol, atoms.binding)
             # print("\'{}\'".format(atom))
             self.atomToInt[str(atom)] = nAtoms
@@ -292,6 +292,9 @@ class Simulator:
 
         for atom in unwrap_conjunction_or_atom(formula):
             atomsAlwaysInPlan.add(str(atom))
+        
+        valid = 0
+        total = 0
 
         # print("goal formula {}".format(formula))
         for step in range(planLength):
@@ -304,6 +307,9 @@ class Simulator:
             current_mutexes_with_formula = self.get_state_mutexes_in_set(atomsInFormulaStr)
 
             assert self.validator.is_valid(atomsInFormulaStr)
+            total += 1
+            if self.ss_validator.is_valid(atomsInFormulaStr):
+                valid += 1
 
             maxTime1 = 0
             maxTime2 = 0
@@ -452,4 +458,6 @@ class Simulator:
             else:
                 break
             # print("end time to select best action {}".format(time.perf_counter() - startTime))
+        
+        print(f"valid/total: {valid}/{total}")
         return plan
