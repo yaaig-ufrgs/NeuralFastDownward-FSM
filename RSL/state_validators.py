@@ -12,6 +12,7 @@ class state_space_validator:
         instance_name: str,
         atoms: tarski.util.SymbolIndex,
     ):
+        instance_name = instance_name.replace("//", "/")
         print(instance_name)
         domain_name, instance_name = instance_name.split("/")[-2:]
         state_space_file = f"state_space/{domain_name}_{instance_name.split('.pddl')[0]}.state_space"
@@ -35,19 +36,13 @@ class state_space_validator:
             assert atom in atoms
 
     def is_valid(self, state: set):
-        # there are rsl atoms that do not exist in fd atoms (i.e. blocks on(a,a)),
-        # if it appears in state then state is invalid
-        for atom in state:
-            if atom not in self.atoms:
-                return False
-        fdr = binary_to_fdr_state(self.state2binary(state), self.ranges_fdr)
-        return check_partial_state_in_valid_states(self.valid_states, fdr)        
-
-    def state2binary(self, state: set):
-        b = ""
-        for atom in self.atoms:
-            b += "1" if atom in state else "0"
-        return b
+        return check_partial_state_in_valid_states(
+            self.valid_states,
+            binary_to_fdr_state(
+                "".join(["1" if atom in state else "0" for atom in self.atoms]),
+                self.ranges_fdr
+            )
+        )
 
 
 class blocks_state_validator:
@@ -68,6 +63,8 @@ class blocks_state_validator:
                 src, dst = atom.split("on(")[1].split(")")[0].split(",")
                 assert src in self.nodes and dst in self.nodes
                 if self.nodes[src][0] != [] or self.nodes[dst][1] != []:
+                    return False
+                if src == dst:
                     return False
                 self.nodes[src][0].append(dst)
                 self.nodes[dst][1].append(src)
@@ -140,7 +137,7 @@ class npuzzle_state_validator:
 
         # It is not possible to solve an npuzzle instance if the number of
         # inversions is odd in the input size.
-        return inversions % 2 == 1
+        return inversions % 2 == 0
 
     def count_inversions(self, arr):
         inv_count = 0
@@ -213,67 +210,48 @@ class scanalyzer_state_validator:
 
 
 class transport_state_validator:
-    def __init__(self):
-        pass
+    def __init__(self, init_atoms: tarski.model.Model):
+        self.total_capacity = {}
+        for atom in [str(atom) for atom in init_atoms.as_atoms()]:
+            if "capacity(" in atom:
+                # capacity(truck-x,capacity-y)
+                truck, atom = atom.split("capacity(")[1].split(",")
+                c = int(atom.split("capacity-")[1].split(")")[0])
+                if truck not in self.total_capacity:
+                    self.total_capacity[truck] = 0
+                self.total_capacity[truck] += c
+            elif "in(" in atom:
+                # in(package-x,truck-y)
+                truck = atom.split(",")[1].split(")")[0]
+                if truck not in self.total_capacity:
+                    self.total_capacity[truck] = 0
+                self.total_capacity[truck] += 1
 
     def is_valid(self, state: set):
-        location, capacity = [], []
-        for atom in state:
-            if "at(" in atom or "in(" in atom:
-                o, _ = (
-                    atom.split("at(" if "at(" in atom else "in(")[1]
-                    .split(")")[0]
-                    .split(",")
-                )
-                if o in location:
-                    return False
-                location.append(o)
-            elif "capacity(" in atom:
-                v, _ = atom.split("capacity(")[1].split(")")[0].split(",")
-                if v in capacity:
-                    return False
-                capacity.append(v)
+        # location, capacity = [], []
+        # for atom in state:
+        #     if "at(" in atom or "in(" in atom:
+        #         o, _ = (
+        #             atom.split("at(" if "at(" in atom else "in(")[1]
+        #             .split(")")[0]
+        #             .split(",")
+        #         )
+        #         if o in location:
+        #             print("A")
+        #             return False
+        #         location.append(o)
+        #     elif "capacity(" in atom:
+        #         v, _ = atom.split("capacity(")[1].split(")")[0].split(",")
+        #         if v in capacity:
+        #             print("B")
+        #             return False
+        #         capacity.append(v)
         return True
 
 
 class visitall_state_validator:
-    def __init__(self, init_atoms: tarski.model.Model):
-        self.nodes = {}
-        self.visited = {}
-        for atom in [str(a) for a in init_atoms.as_atoms()]:
-            if "connected(" in atom:
-                src, dst = atom.split("connected(")[1].split(")")[0].split(",")
-                if src not in self.nodes:
-                    self.nodes[src] = []
-                if dst not in self.nodes:
-                    self.nodes[dst] = []
-                self.nodes[src].append(dst)
+    def __init__(self):
+        pass
 
     def is_valid(self, state: set):
-        for atom in self.nodes:
-            self.visited[atom] = False
-        dfs_src = None
-        at_robot = None
-        for atom in state:
-            if "visited(" in atom:
-                atom = atom.split("visited(")[1].split(")")[0]
-                self.visited[atom] = True
-                if dfs_src is None:
-                    dfs_src = atom
-            if "at-robot(" in atom:
-                if at_robot is not None:
-                    return False
-                at_robot = atom.split("at-robot(")[1].split(")")[0]
-        if at_robot is not None and not self.visited[at_robot]:
-            return False
-        # self.dfs(dfs_src)
-        # for atom in self.visited:
-        #     if self.visited[atom]:
-        #         return False
-        return True
-
-    # def dfs(self, v):
-    #     if self.visited[v]:
-    #         self.visited[v] = False
-    #         for w in self.nodes[v]:
-    #             self.dfs(w)
+        return len([atom for atom in state if "at-robot(" in atom]) <= 1

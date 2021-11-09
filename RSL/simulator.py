@@ -57,9 +57,9 @@ class Simulator:
         elif "scanalyzer" in self.domainFile:
             self.validator = scanalyzer_state_validator()
         elif "transport" in self.domainFile:
-            self.validator = transport_state_validator()
+            self.validator = transport_state_validator(self.problem.init)
         elif "visitall" in self.domainFile:
-            self.validator = visitall_state_validator(self.problem.init)
+            self.validator = visitall_state_validator()
         else:
             raise NotImplementedError("State validator not implemented for this domain!")
 
@@ -393,10 +393,8 @@ class Simulator:
                     # candidateOpsNFormulas.append((operator, atomsForNewFormula))
 
                     is_valid_with_groundtruth_validator = self.validator.is_valid(atomsForNewFormula)
-                    # is_valid_with_state_space_validator = self.ss_validator.is_valid(atomsForNewFormula)
-
-                    # if is_valid_with_groundtruth_validator != is_valid_with_state_space_validator:
-                    #     print(f"contradiction: groundtruth={is_valid_with_groundtruth_validator} state_space={is_valid_with_state_space_validator} state={self.ss_validator.state2binary(atomsForNewFormula)}")
+                    # if is_valid_with_groundtruth_validator != self.ss_validator.is_valid(atomsForNewFormula):
+                    #     print(f"\ncontradiction: groundtruth={is_valid_with_groundtruth_validator} state_space={not is_valid_with_groundtruth_validator} state={atomsForNewFormula}")
 
                     if is_valid_with_groundtruth_validator:
                         candidateOpsNFormulas.append((operator, atomsForNewFormula))
