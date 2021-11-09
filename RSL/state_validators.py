@@ -102,7 +102,7 @@ class npuzzle_state_validator:
         (
             self.npuzzle,
             self.size,
-            self.size_side,
+            self.width,
             self.max_tile,
         ) = self.fill_npuzzle_matrix()
 
@@ -132,20 +132,43 @@ class npuzzle_state_validator:
         if self.npuzzle_matrix_is_not_valid():
             return False
 
-        inversions = self.count_inversions([j for sub in self.npuzzle for j in sub])
+        inversions_ok = self.count_inversions([j for sub in self.npuzzle for j in sub])
         self.clear_npuzzle_matrix()
 
         # It is not possible to solve an npuzzle instance if the number of
         # inversions is odd in the input size.
-        return inversions % 2 == 0
+        return inversions_ok
 
     def count_inversions(self, arr):
         inv_count = 0
         empty_value = 0
+        empty_value_pos = 0
         for i in range(self.size):
+            if arr[i] == 0:
+                empty_value_pos = i
             for j in range(i + 1, self.size):
                 if arr[j] != empty_value and arr[i] != empty_value and arr[i] > arr[j]:
                     inv_count += 1
+
+        # Case 1)
+        # If the width is odd, then every solvable state has an even number of inversions.
+        # Case 2)
+        # If the width is even, then every solvable state has:
+        #    - an even number of inversions if the blank is on an odd numbered row counting from the bottom;
+        #    - an odd number of inversions if the blank is on an even numbered row counting from the bottom;
+
+        if self.width % 2 == 1:
+            return inv_count % 2 == 0
+        else: # Case 2: even width.
+            row_idx = int(empty_value_pos / self.width);
+            row_from_bottom = self.width - row_idx
+
+            if row_from_bottom % 2 == 1:
+                return inv_count % 2 == 0
+            else:
+                return inv_count % 2 == 1
+
+
         return inv_count
 
     def parse_npuzzle_state(self, state):
