@@ -49,7 +49,7 @@ class Simulator:
         self.grounder = LPGroundingStrategy(self.reader.problem, ground_actions=False)
         self.lpvariables = self.grounder.ground_state_variables()
 
-        self.ss_validator = state_space_validator(instanceFile, self.lpvariables)
+        # self.ss_validator = state_space_validator(instanceFile, self.lpvariables)
         if "blocks" in self.domainFile:
             self.validator = blocks_state_validator(self.lpvariables)
         elif "npuzzle" in self.domainFile:
