@@ -82,7 +82,6 @@ class TrainWorkflow:
         # size = len(self.val_dataloader.dataset)
         num_batches = len(self.val_dataloader)
         val_loss = 0
-
         with torch.no_grad():
             for X, y in self.val_dataloader:
                 pred = self.model(X)
@@ -131,8 +130,6 @@ class TrainWorkflow:
         traced_model.save(filename)
 
     def run(self, fold_idx, train_timer, validation=True):
-        # last_val_loss = 0
-        # count = 0
         loss_first_epoch = 0
         best_val_loss = None
         for t in range(self.max_epochs):
@@ -142,7 +139,7 @@ class TrainWorkflow:
                 # print("epoch {} loss {} val loss {}".format(t, cur_train_loss, cur_val_loss))
                 loss_first_epoch = cur_val_loss if t == 0 else loss_first_epoch
                 if self.born_dead():
-                    _log.error("All outputs are 0 (born dead). Restarting training with a new seed...")
+                    _log.warning("All predictions are 0 (born dead). Restarting training with a new seed...")
                     return None, True
                 if self.patience != None:
                     if best_val_loss is None or best_val_loss > cur_val_loss:
@@ -151,13 +148,10 @@ class TrainWorkflow:
 
                     if best_val_epoch < t - self.patience:
                         _log.info(
-                            f"Early stop. "
-                            f"Best epoch: {best_val_epoch}/{t}"
+                            f"Early stop. Best epoch: {best_val_epoch}/{t}"
                         )
                         self.early_stopped = True
                         break
-
-                # last_val_loss = cur_val_loss
                 _log.info(
                     f"Epoch {t} | avg_train_loss={cur_train_loss:>7f} "
                     f"| avg_val_loss={cur_val_loss:>7f}"

@@ -46,7 +46,7 @@ def get_fixed_max_epochs(dirname):
             sample, value = line.split(",")
             if sample in dirname:
                 return int(value)
-    _log.info(
+    _log.warning(
         f"Fixed number of epochs not found. "
         f"Setting to default value ({DEFAULT_MAX_EPOCHS})."
     )
@@ -59,7 +59,7 @@ def get_fixed_max_expansions(dirname):
             sample, value = line.split(",")
             if sample in dirname:
                 return int(value)
-    _log.info(
+    _log.warning(
         f"Fixed maximum expansions not found. "
         f"Setting to default value ({DEFAULT_MAX_EXPANSIONS})."
     )

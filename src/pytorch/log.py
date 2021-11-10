@@ -1,6 +1,12 @@
 import logging
 import os
-import sys
+
+try:
+    import coloredlogs
+    coloredlogs.install()
+    _COLORED = True
+except ImportError as _:
+    _COLORED = False
 
 _log = logging.getLogger(__name__)
 
@@ -11,6 +17,7 @@ def setup_logging_config(log_level=logging.INFO, filename=None):
     """
     # Get root logger and clear existing handlers
     root_logger = logging.getLogger()
+    root_logger.setLevel(logging.DEBUG)
 
     kwargs = {
         "level": log_level,
@@ -22,15 +29,15 @@ def setup_logging_config(log_level=logging.INFO, filename=None):
     file_handler = logging.FileHandler(filename)
     file_handler.setLevel(log_level)
     file_handler.setFormatter(logging.Formatter(kwargs["fmt"], kwargs["datefmt"]))
+    root_logger.addHandler(file_handler)
 
     # Add a StreamHander which logs to the terminal
-    stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.DEBUG)
-    stream_handler.setFormatter(logging.Formatter(kwargs["fmt"], kwargs["datefmt"]))
-
-    root_logger.setLevel(logging.DEBUG)
-    root_logger.addHandler(file_handler)
-    root_logger.addHandler(stream_handler)
+    # If using coloredlogs then the handler has already been added
+    if not _COLORED:
+        stream_handler = logging.StreamHandler()
+        stream_handler.setLevel(logging.DEBUG)
+        stream_handler.setFormatter(logging.Formatter(kwargs["fmt"], kwargs["datefmt"]))
+        root_logger.addHandler(stream_handler)
 
 
 def setup_full_logging(

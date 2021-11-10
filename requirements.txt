@@ -6,3 +6,4 @@ seaborn == 0.11.2
 torch == 1.9.0
 scikit_learn == 0.24.2
 tarski == 0.7.0
+coloredlogs

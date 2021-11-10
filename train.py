@@ -34,7 +34,6 @@ from src.pytorch.utils.timer import Timer
 
 _log = logging.getLogger(__name__)
 
-
 def set_seeds(seed):
     torch.manual_seed(seed)
     torch.use_deterministic_algorithms(True)
@@ -136,8 +135,8 @@ def train_main(args):
 
 def train_nn(args, dirname):
     num_retries = 0
-    need_restart = True
-    while need_restart:
+    born_dead = True
+    while born_dead:
         kfold = KFoldTrainingData(
             args.samples,
             batch_size=args.batch_size,
