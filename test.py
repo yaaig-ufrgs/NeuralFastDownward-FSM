@@ -12,6 +12,11 @@ from src.pytorch.utils.helpers import (
     get_fixed_max_expansions,
     remove_temporary_files,
 )
+from src.pytorch.utils.default_args import (
+    DEFAULT_MAX_EXPANSIONS,
+    DEFAULT_MAX_SEARCH_TIME,
+    DEFAULT_FORCED_MAX_SEARCH_TIME,
+)
 from src.pytorch.utils.parse_args import get_test_args
 
 _log = logging.getLogger(__name__)
@@ -23,6 +28,11 @@ def test_main(args):
 
     if args.max_expansions == -1:
         args.max_expansions = get_fixed_max_expansions(dirname)
+    if args.max_expansions == DEFAULT_MAX_EXPANSIONS and args.max_search_time == DEFAULT_MAX_SEARCH_TIME:
+        args.max_search_time = DEFAULT_FORCED_MAX_SEARCH_TIME
+        _log.warning(f"Neither max expansions nor max search time have been defined. "
+                     f"Setting maximum search time to {DEFAULT_FORCED_MAX_SEARCH_TIME}s.")
+
 
     logging_test_config(args, dirname)
 

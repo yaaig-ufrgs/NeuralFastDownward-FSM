@@ -23,11 +23,15 @@ from src.pytorch.utils.helpers import (
     add_train_arg,
 )
 from src.pytorch.utils.plot import (
-    save_y_pred_scatter,
     save_h_pred_scatter,
     save_box_plot,
     save_gif_from_plots,
     remove_intermediate_plots,
+)
+from src.pytorch.utils.default_args import (
+    DEFAULT_MAX_EPOCHS,
+    DEFAULT_MAX_TRAINING_TIME,
+    DEFAULT_FORCED_MAX_EPOCHS,
 )
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
@@ -58,6 +62,10 @@ def train_main(args):
         return
     if args.max_epochs == -1:
         args.max_epochs = get_fixed_max_epochs(dirname)
+    if args.max_epochs == DEFAULT_MAX_EPOCHS and args.max_training_time == DEFAULT_MAX_TRAINING_TIME:
+        args.max_epochs = DEFAULT_FORCED_MAX_EPOCHS
+        _log.warning(f"Neither max epoch nor max training time have been defined. "
+                     f"Setting maximum epochs to {DEFAULT_FORCED_MAX_EPOCHS}.")
 
     logging_train_config(args, dirname)
 
