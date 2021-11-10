@@ -57,7 +57,7 @@ class Simulator:
         elif "scanalyzer" in self.domainFile:
             self.validator = scanalyzer_state_validator()
         elif "transport" in self.domainFile:
-            self.validator = transport_state_validator(self.problem.init)
+            self.validator = transport_state_validator(self.lpvariables, self.problem.init)
         elif "visitall" in self.domainFile:
             self.validator = visitall_state_validator()
         else:
@@ -292,9 +292,6 @@ class Simulator:
 
         for atom in unwrap_conjunction_or_atom(formula):
             atomsAlwaysInPlan.add(str(atom))
-        
-        valid = 0
-        total = 0
 
         # print("goal formula {}".format(formula))
         for step in range(planLength):
@@ -307,9 +304,6 @@ class Simulator:
             current_mutexes_with_formula = self.get_state_mutexes_in_set(atomsInFormulaStr)
 
             assert self.validator.is_valid(atomsInFormulaStr)
-            total += 1
-            if self.ss_validator.is_valid(atomsInFormulaStr):
-                valid += 1
 
             maxTime1 = 0
             maxTime2 = 0
@@ -399,8 +393,7 @@ class Simulator:
                     # candidateOpsNFormulas.append((operator, atomsForNewFormula))
 
                     is_valid_with_groundtruth_validator = self.validator.is_valid(atomsForNewFormula)
-                    # if is_valid_with_groundtruth_validator != self.ss_validator.is_valid(atomsForNewFormula):
-                    #     print(f"\ncontradiction: groundtruth={is_valid_with_groundtruth_validator} state_space={not is_valid_with_groundtruth_validator} state={atomsForNewFormula}")
+                    # assert is_valid_with_groundtruth_validator == self.ss_validator.is_valid(atomsForNewFormula):
 
                     if is_valid_with_groundtruth_validator:
                         candidateOpsNFormulas.append((operator, atomsForNewFormula))
@@ -459,5 +452,4 @@ class Simulator:
                 break
             # print("end time to select best action {}".format(time.perf_counter() - startTime))
         
-        print(f"valid/total: {valid}/{total}")
         return plan

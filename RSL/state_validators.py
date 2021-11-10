@@ -13,7 +13,6 @@ class state_space_validator:
         atoms,
     ):
         instance_name = instance_name.replace("//", "/")
-        print(instance_name)
         domain_name, instance_name = instance_name.split("/")[-2:]
         state_space_file = f"state_space/{domain_name}_{instance_name.split('.pddl')[0]}.state_space"
         try:
@@ -160,16 +159,14 @@ class npuzzle_state_validator:
         if self.width % 2 == 1:
             return inv_count % 2 == 0
         else: # Case 2: even width.
-            row_idx = int(empty_value_pos / self.width);
+            row_idx = int(empty_value_pos / self.width)
             row_from_bottom = self.width - row_idx
 
             if row_from_bottom % 2 == 1:
                 return inv_count % 2 == 0
             else:
                 return inv_count % 2 == 1
-
-
-        return inv_count
+        # return inv_count
 
     def parse_npuzzle_state(self, state):
         if len(self.goal) != 0 and state != self.goal and len(state) != self.size:
@@ -233,8 +230,18 @@ class scanalyzer_state_validator:
 
 
 class transport_state_validator:
-    def __init__(self, init_atoms):
+    def __init__(self, atoms, init_atoms):
         self.total_capacity = {}
+        self.total_packages = 0
+        truck_ref = None
+        for atom in [str(a) for a in atoms]:
+            if "in(" in atom:
+                _, truck = atom.split("(")[1].split(")")[0].split(",")
+                if truck_ref == None:
+                    truck_ref = truck
+                if truck == truck_ref:
+                    self.total_packages += 1
+
         for atom in [str(atom) for atom in init_atoms.as_atoms()]:
             if "capacity(" in atom:
                 # capacity(truck-x,capacity-y)
@@ -251,25 +258,40 @@ class transport_state_validator:
                 self.total_capacity[truck] += 1
 
     def is_valid(self, state: set):
-        # location, capacity = [], []
-        # for atom in state:
-        #     if "at(" in atom or "in(" in atom:
-        #         o, _ = (
-        #             atom.split("at(" if "at(" in atom else "in(")[1]
-        #             .split(")")[0]
-        #             .split(",")
-        #         )
-        #         if o in location:
-        #             # print("A")
-        #             return False
-        #         location.append(o)
-        #     elif "capacity(" in atom:
-        #         v, _ = atom.split("capacity(")[1].split(")")[0].split(",")
-        #         if v in capacity:
-        #             # print("B")
-        #             return False
-        #         capacity.append(v)
-        return True
+        state_packages = 0
+        location = []
+        state_capacity, capacity = {}, {}
+        for truck in self.total_capacity:
+            state_capacity[truck] = self.total_capacity[truck]
+        for atom in state:
+            if "at(" in atom or "in(" in atom:
+                obj, loc = (
+                    atom.split("at(" if "at(" in atom else "in(")[1]
+                    .split(")")[0]
+                    .split(",")
+                )
+                if obj in location:
+                    return False
+                location.append(obj)
+                if "package" in obj:
+                    state_packages += 1
+                if "in(" in atom:
+                    # loc = truck
+                    state_capacity[loc] -= 1
+            elif "capacity(" in atom:
+                t, c = atom.split("capacity(")[1].split(")")[0].split(",")
+                if t in capacity:
+                    return False
+                capacity[t] = int(c.split("capacity-")[1])
+        missing_packages = state_packages - self.total_packages
+        remaining_capacity = 0
+        for truck in self.total_capacity:
+            if truck in capacity and capacity[truck] != state_capacity[truck]:
+                return False
+            if state_capacity[truck] < 0:
+                return False
+            remaining_capacity += state_capacity[truck]
+        return missing_packages <= remaining_capacity
 
 
 class visitall_state_validator:
