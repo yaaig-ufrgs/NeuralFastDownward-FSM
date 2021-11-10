@@ -2,6 +2,7 @@ import logging
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from copy import deepcopy
 from torch.utils.data import DataLoader
 
 from src.pytorch.model import HNN
@@ -26,6 +27,7 @@ class TrainWorkflow:
         patience: int = None,
     ):
         self.model = model
+        self.best_epoch_model = None
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
         self.max_epochs = max_epochs
@@ -35,6 +37,7 @@ class TrainWorkflow:
         self.optimizer = optimizer
         self.loss_fn = loss_fn
         self.patience = patience
+        self.early_stopped = False
         self.y_pred_values = {}  # {state: (y, pred)} of the last epoch
 
     def train_loop(self, t: int, fold_idx: int):
@@ -116,7 +119,9 @@ class TrainWorkflow:
             example_input = self.train_dataloader.dataset[:10][0]
         elif model == "simple":
             example_input = self.train_dataloader.dataset[0][0]
-        traced_model = torch.jit.trace(self.model, example_input)
+
+        model_save = self.model if not self.early_stopped else self.best_epoch_model
+        traced_model = torch.jit.trace(model_save, example_input)
         traced_model.save(filename)
 
     def run(self, fold_idx, train_timer, validation=True):
@@ -148,11 +153,14 @@ class TrainWorkflow:
                 if self.patience != None:
                     if best_val_loss is None or best_val_loss > cur_val_loss:
                         best_val_loss, best_val_epoch = cur_val_loss, t
+                        self.best_epoch_model = deepcopy(self.model)
+
                     if best_val_epoch < t - self.patience:
                         _log.info(
                             f"Early stop. "
                             f"Best epoch: {best_val_epoch}/{t}"
                         )
+                        self.early_stopped = True
                         break
 
                 last_val_loss = cur_val_loss
