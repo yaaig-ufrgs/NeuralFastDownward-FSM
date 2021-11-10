@@ -67,49 +67,48 @@ class KFoldTrainingData:
         instances_per_fold = int(len(self.state_value_pairs) / self.num_folds)
         for i in range(self.num_folds):
             training_set, test_set = [], []
-            if self.model == "resnet":
-                if self.num_folds == 1:
-                    states, heuristics = pair_to_arrays(self.state_value_pairs)
-                    training_set, test_set = train_test_split(
-                        self.state_value_pairs,
-                        test_size=0.2,
-                        shuffle=self.shuffle,
-                        random_state=self.seed,
-                    )
-
-                else:
-                    for j in range(len(self.state_value_pairs)):
-                        if int(j / instances_per_fold) == i:
-                            test_set.append(self.state_value_pairs[j])
-                        else:
-                            training_set.append(self.state_value_pairs[j])
-
-                #worker_fn = None if self.seed == -1 else seed_worker
-                #g = None if self.seed == -1 else torch.Generator()
-                #if g != None:
-                #    g.manual_seed(self.seed)
-
-                train_dataloader = DataLoader(
-                    dataset=InstanceDataset(
-                        training_set, self.domain_max_value, self.output_layer
-                    ),
-                    batch_size=self.batch_size,
+            if self.num_folds == 1:
+                states, heuristics = pair_to_arrays(self.state_value_pairs)
+                training_set, test_set = train_test_split(
+                    self.state_value_pairs,
+                    test_size=0.2,
                     shuffle=self.shuffle,
-                    num_workers=1,
-                    #worker_init_fn=seed_worker,
-                    #generator=g,
+                    random_state=self.seed,
                 )
-                test_dataloader = DataLoader(
-                    dataset=InstanceDataset(
-                        test_set, self.domain_max_value, self.output_layer
-                    ),
-                    batch_size=self.batch_size,
-                    shuffle=self.shuffle,
-                    num_workers=1,
-                    #worker_init_fn=seed_worker,
-                    #generator=g,
-                )
-                kfolds.append((train_dataloader, test_dataloader))
+
+            else:
+                for j in range(len(self.state_value_pairs)):
+                    if int(j / instances_per_fold) == i:
+                        test_set.append(self.state_value_pairs[j])
+                    else:
+                        training_set.append(self.state_value_pairs[j])
+
+            #worker_fn = None if self.seed == -1 else seed_worker
+            #g = None if self.seed == -1 else torch.Generator()
+            #if g != None:
+            #    g.manual_seed(self.seed)
+
+            train_dataloader = DataLoader(
+                dataset=InstanceDataset(
+                    training_set, self.domain_max_value, self.output_layer
+                ),
+                batch_size=self.batch_size,
+                shuffle=self.shuffle,
+                num_workers=1,
+                #worker_init_fn=seed_worker,
+                #generator=g,
+            )
+            test_dataloader = DataLoader(
+                dataset=InstanceDataset(
+                    test_set, self.domain_max_value, self.output_layer
+                ),
+                batch_size=self.batch_size,
+                shuffle=self.shuffle,
+                num_workers=1,
+                #worker_init_fn=seed_worker,
+                #generator=g,
+            )
+            kfolds.append((train_dataloader, test_dataloader))
 
         return kfolds
 
