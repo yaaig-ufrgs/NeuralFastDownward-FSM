@@ -6,8 +6,8 @@ import random
 import numpy as np
 import glob
 import torch
-import json
 from shutil import copyfile
+from random import randint
 
 from src.pytorch.k_fold_training_data import KFoldTrainingData
 from src.pytorch.model import HNN
@@ -44,10 +44,12 @@ def set_seeds(seed):
 def train_main(args):
     if args.num_threads != -1:
         torch.set_num_threads(args.num_threads)
+    # Seeds
+    if args.seed == -1:
+        args.seed = randint(0, 2**32-1)
     if args.weights_seed == -1:
         args.weights_seed = args.seed
-    if args.seed != -1:
-        set_seeds(args.seed)
+    set_seeds(args.seed)
 
     dirname = create_train_directory(args)
     setup_full_logging(dirname)
@@ -132,7 +134,7 @@ def train_main(args):
     _log.info("Training complete!")
 
 
-def train_nn(args, dirname, patience=None):
+def train_nn(args, dirname):
     num_retries = 0
     need_restart = True
     while need_restart:
@@ -185,7 +187,6 @@ def train_nn(args, dirname, patience=None):
                 val_dataloader=val_dataloader,
                 max_epochs=args.max_epochs,
                 plot_n_epochs=args.plot_n_epochs,
-                max_epochs_no_convergence=args.restart_no_conv,
                 dirname=dirname,
                 optimizer=torch.optim.Adam(
                     model.parameters(),
@@ -195,15 +196,15 @@ def train_nn(args, dirname, patience=None):
                 patience=args.patience,
             )
 
-            fold_val_loss, need_restart = train_wf.run(
+            fold_val_loss, born_dead = train_wf.run(
                 fold_idx, train_timer, validation=True
             )
 
-            if need_restart and args.num_folds == 1:
+            if born_dead and args.num_folds == 1:
                 # In case of non-convergence, what makes more sense to restart:
                 # - The _whole_ training setup, including data splitting in kfold?
                 # - Or only restart the current fold?
-                args.seed += 100
+                args.seed += args.seed_increment_when_born_dead
                 _log.info(f"Updated seed: {args.seed}")
                 set_seeds(args.seed)
                 num_retries += 1

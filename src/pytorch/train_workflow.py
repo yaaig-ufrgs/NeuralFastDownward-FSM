@@ -20,7 +20,6 @@ class TrainWorkflow:
         val_dataloader: DataLoader,
         max_epochs: int,
         plot_n_epochs: int,
-        max_epochs_no_convergence: int,
         dirname: str,
         optimizer: optim.Optimizer,
         loss_fn: nn = nn.MSELoss(),
@@ -32,7 +31,6 @@ class TrainWorkflow:
         self.val_dataloader = val_dataloader
         self.max_epochs = max_epochs
         self.plot_n_epochs = plot_n_epochs
-        self.max_epochs_no_convergence = max_epochs_no_convergence
         self.dirname = dirname
         self.optimizer = optimizer
         self.loss_fn = loss_fn
@@ -91,6 +89,14 @@ class TrainWorkflow:
                 val_loss += self.loss_fn(pred, y).item()
 
         return val_loss / num_batches
+    
+    def born_dead(self):
+        with torch.no_grad():
+            for X, _ in self.val_dataloader:
+                for p in self.model(X):
+                    if float(p) != 0.0:
+                        return False
+        return True
 
     def save_traced_model(self, filename: str, model="hnn"):
         """
@@ -125,31 +131,19 @@ class TrainWorkflow:
         traced_model.save(filename)
 
     def run(self, fold_idx, train_timer, validation=True):
-        last_val_loss = 0
-        count = 0
-        count_no_conv = 0
-        need_restart = False
+        # last_val_loss = 0
+        # count = 0
         loss_first_epoch = 0
         best_val_loss = None
         for t in range(self.max_epochs):
             cur_train_loss = self.train_loop(t, fold_idx)
-
             if validation:
                 cur_val_loss = self.val_loop()
                 # print("epoch {} loss {} val loss {}".format(t, cur_train_loss, cur_val_loss))
                 loss_first_epoch = cur_val_loss if t == 0 else loss_first_epoch
-                if cur_val_loss == loss_first_epoch:
-                    count_no_conv += 1
-                    if (
-                        self.max_epochs_no_convergence != -1
-                        and count_no_conv >= self.max_epochs_no_convergence
-                    ):
-                        _log.info(
-                            f"The network failed to converge to a value "
-                            f"in {self.max_epochs_no_convergence} epochs. Restarting from scratch..."
-                        )
-                        need_restart = True
-                        break
+                if self.born_dead():
+                    _log.error("All outputs are 0 (born dead). Restarting training with a new seed...")
+                    return None, True
                 if self.patience != None:
                     if best_val_loss is None or best_val_loss > cur_val_loss:
                         best_val_loss, best_val_epoch = cur_val_loss, t
@@ -163,7 +157,7 @@ class TrainWorkflow:
                         self.early_stopped = True
                         break
 
-                last_val_loss = cur_val_loss
+                # last_val_loss = cur_val_loss
                 _log.info(
                     f"Epoch {t} | avg_train_loss={cur_train_loss:>7f} "
                     f"| avg_val_loss={cur_val_loss:>7f}"
@@ -178,10 +172,9 @@ class TrainWorkflow:
                 _log.info("Done!")
 
         # Post-training scatter plot.
-        if not need_restart:
-            self.save_post_scatter_plot(fold_idx)
+        self.save_post_scatter_plot(fold_idx)
 
-        return (cur_val_loss if validation else None), need_restart
+        return (cur_val_loss if validation else None), False
 
     def save_post_scatter_plot(self, fold_idx: int):
         with torch.no_grad():

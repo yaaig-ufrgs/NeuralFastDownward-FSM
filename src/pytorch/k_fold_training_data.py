@@ -21,8 +21,6 @@ from src.pytorch.training_data import (
     load_training_state_value_pairs,
 )
 
-from src.pytorch.utils.helpers import pair_to_arrays
-
 _log = logging.getLogger(__name__)
 
 
@@ -68,7 +66,6 @@ class KFoldTrainingData:
         for i in range(self.num_folds):
             training_set, test_set = [], []
             if self.num_folds == 1:
-                states, heuristics = pair_to_arrays(self.state_value_pairs)
                 training_set, test_set = train_test_split(
                     self.state_value_pairs,
                     test_size=0.2,

@@ -13,7 +13,6 @@ from src.pytorch.utils.default_args import (
     DEFAULT_DROPOUT_RATE,
     DEFAULT_SHUFFLE,
     DEFAULT_BIAS,
-    DEFAULT_BIAS_OUTPUT,
     DEFAULT_LEARNING_RATE,
     DEFAULT_NUM_THREADS,
     DEFAULT_MAX_EPOCHS,
@@ -36,11 +35,10 @@ from src.pytorch.utils.default_args import (
     DEFAULT_WEIGHTS_METHOD,
     DEFAULT_WEIGHTS_SEED,
     DEFAULT_COMPARED_HEURISTIC_CSV_DIR,
-    DEFAULT_HSTAR_CSV_DIR,
     DEFAULT_FACTS_FILE,
     DEFAULT_DEF_VALUES_FILE,
-    DEFAULT_RESTART_NO_CONV,
     DEFAULT_NORMALIZE_OUTPUT,
+    DEFAULT_SEED_INCREMENT_WHEN_BORN_DEAD,
 )
 
 
@@ -54,9 +52,9 @@ def get_train_args():
     parser.add_argument(
         "-mdl",
         "--model",
-        choices=["hnn", "rsl"],
+        choices=["hnn", "resnet"],
         default=DEFAULT_MODEL,
-        help="Network model to use. (default: %(defaults)s)",
+        help="Network model to use. (default: %(default)s)",
     )
     parser.add_argument(
         "-pat",
@@ -244,19 +242,19 @@ def get_train_args():
         help="Directory with h* CSV data; used for box plot. (default: %(default)s)",
     )
     parser.add_argument(
-        "-rst",
-        "--restart-no-conv",
-        type=int,
-        default=DEFAULT_RESTART_NO_CONV,
-        help="Restart after n epochs of non-convergence. (default: %(default)s)",
-    )
-    parser.add_argument(
         "-no",
         "--normalize-output",
         choices=["true", "false"],
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
         default=DEFAULT_NORMALIZE_OUTPUT,
         help="Normalizes the output neuron. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-sibd",
+        "--seed-increment-when-born-dead",
+        type=int,
+        default=DEFAULT_SEED_INCREMENT_WHEN_BORN_DEAD,
+        help="Seed increment when the network needs to restart due to born dead. (default: %(default)s)",
     )
     parser.add_argument(
         "-trd",
@@ -344,14 +342,14 @@ def get_test_args():
         "--facts-file",
         type=str,
         default=DEFAULT_FACTS_FILE,
-        help="Order of facts during sampling. (default: %(defaults)s)",
+        help="Order of facts during sampling. (default: %(default)s)",
     )
     parser.add_argument(
         "-dfile",
         "--defaults-file",
         type=str,
         default=DEFAULT_DEF_VALUES_FILE,
-        help="Default values for facts given with `ffile`. (default: %(defaults)s)",
+        help="Default values for facts given with `ffile`. (default: %(default)s)",
     )
 
     return parser.parse_args()

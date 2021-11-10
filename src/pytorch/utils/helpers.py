@@ -111,6 +111,7 @@ def logging_train_config(args, dirname, json=True):
     args_dic = {
         "samples": args.samples,
         "model": args.model,
+        "patience": args.patience,
         "output_layer": args.output_layer,
         "linear_output": args.linear_output,
         "num_folds": args.num_folds,
@@ -120,29 +121,25 @@ def logging_train_config(args, dirname, json=True):
         else (args.hidden_units[0] if len(args.hidden_units) == 1 else "scalable"),
         "batch_size": args.batch_size,
         "learning_rate": args.learning_rate,
-        "max_epochs": args.max_epochs
-        if args.max_epochs != DEFAULT_MAX_EPOCHS
-        else "inf",
-        "patience": args.patience,
+        "max_epochs": args.max_epochs if args.max_epochs != DEFAULT_MAX_EPOCHS else "inf",
         "max_training_time": f"{args.max_training_time}s",
         "activation": args.activation,
         "weight_decay": args.weight_decay,
         "dropout_rate": args.dropout_rate,
         "shuffle": args.shuffle,
         "bias": args.bias,
+        "bias_output": args.bias_output,
         "normalize_output": args.normalize_output,
-        "seed": args.seed if args.seed != -1 else "random",
-        "output_folder": str(args.output_folder),
-        "scatter_plot": args.scatter_plot if args.scatter_plot != -1 else "none",
-        "plot_n_epochs": args.plot_n_epochs if args.plot_n_epochs != -1 else "none",
+        "seed_increment_when_born_dead": args.seed_increment_when_born_dead,
         "weights_method": args.weights_method,
         "weights_seed": args.weights_seed if args.weights_seed != -1 else "random",
-        "compare_csv_dir": args.compare_csv_dir,
-        "hstar_csv_dir": args.hstar_csv_dir,
-        "restart_no_conv": args.restart_no_conv
-        if args.restart_no_conv != 1
-        else "none",
-        "bias_output": args.bias_output,
+        "seed": args.seed if args.seed != -1 else "random",
+        "scatter_plot": args.scatter_plot if args.scatter_plot != -1 else "None",
+        "plot_n_epochs": args.plot_n_epochs if args.plot_n_epochs != -1 else "None",
+        "compare_csv_dir": args.compare_csv_dir if args.compare_csv_dir != "" else "None",
+        "hstar_csv_dir": args.hstar_csv_dir if args.hstar_csv_dir != "" else "None",
+        "num_threads": args.num_threads,
+        "output_folder": str(args.output_folder),
     }
 
     _log.info(f"Configuration")
@@ -315,13 +312,3 @@ def remove_csv_except_best(directory: str, fold_idx: int):
         idx = int(f_split[-1].split(".")[0])
         if idx != fold_idx:
             remove(f)
-
-
-def pair_to_arrays(pairs):
-    X = []
-    Y = []
-    for (x, y) in pairs:
-        X.append(x)
-        Y.append(y)
-
-    return np.array(X), np.array(Y)
