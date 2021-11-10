@@ -39,6 +39,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_DEF_VALUES_FILE,
     DEFAULT_NORMALIZE_OUTPUT,
     DEFAULT_SEED_INCREMENT_WHEN_BORN_DEAD,
+    DEFAULT_SAVE_HEURISTIC_PRED,
 )
 
 
@@ -262,6 +263,13 @@ def get_train_args():
         type=int,
         default=DEFAULT_NUM_THREADS,
         help="Number of threads used for intra operations on CPU (PyTorch). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-hpred",
+        "--save-heuristic-pred",
+        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        default=DEFAULT_SAVE_HEURISTIC_PRED,
+        help="Save a csv file with the expected and network-predicted heuristics for all training samples. (default: %(default)s)",
     )
     return parser.parse_args()
 

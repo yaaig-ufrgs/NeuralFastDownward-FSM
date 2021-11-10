@@ -129,6 +129,9 @@ def train_main(args):
                 save_box_plot(plots_dir, data, csv_hstar[0])
             except:
                 _log.error(f"Failed making box plot.")
+    
+    if not args.save_heuristic_pred:
+        os.remove(heuristic_pred_file)
 
     _log.info("Training complete!")
 
@@ -210,8 +213,8 @@ def train_nn(args, dirname):
                 add_train_arg(dirname, "updated_seed", args.seed)
                 break
 
+            
             heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
-
             if fold_val_loss < best_fold["val_loss"]:
                 save_y_pred_csv(train_wf.y_pred_values, heuristic_pred_file)
                 _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
