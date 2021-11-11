@@ -108,7 +108,10 @@ def save_json(filename: str, data: list):
 
 
 def logging_train_config(args, dirname, json=True):
+    domain, problem = get_problem_by_sample_filename(args.samples)
     args_dic = {
+        "domain": domain,
+        "problem": problem,
         "samples": args.samples,
         "model": args.model,
         "patience": args.patience,
@@ -312,3 +315,8 @@ def remove_csv_except_best(directory: str, fold_idx: int):
         idx = int(f_split[-1].split(".")[0])
         if idx != fold_idx:
             remove(f)
+
+
+def get_problem_by_sample_filename(sample_filename: str):
+    # return (domain, problem)
+    return sample_filename.split("/")[-1].split("_")[1:3]
