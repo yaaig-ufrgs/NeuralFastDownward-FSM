@@ -23,6 +23,7 @@ class TrainWorkflow:
         dirname: str,
         optimizer: optim.Optimizer,
         loss_fn: nn = nn.MSELoss(),
+        check_no_conv: bool = True,
         patience: int = None,
     ):
         self.model = model
@@ -36,6 +37,7 @@ class TrainWorkflow:
         self.loss_fn = loss_fn
         self.patience = patience
         self.early_stopped = False
+        self.check_no_conv = check_no_conv
         self.y_pred_values = {}  # {state: (y, pred)} of the last epoch
 
     def train_loop(self, t: int, fold_idx: int):
@@ -138,9 +140,10 @@ class TrainWorkflow:
                 cur_val_loss = self.val_loop()
                 # print("epoch {} loss {} val loss {}".format(t, cur_train_loss, cur_val_loss))
                 loss_first_epoch = cur_val_loss if t == 0 else loss_first_epoch
-                if self.born_dead():
-                    _log.warning("All predictions are 0 (born dead). Restarting training with a new seed...")
-                    return None, True
+                if self.check_no_conv:
+                    if self.born_dead():
+                        _log.warning("All predictions are 0 (born dead). Restarting training with a new seed...")
+                        return None, True
                 if self.patience != None:
                     if best_val_loss is None or best_val_loss > cur_val_loss:
                         best_val_loss, best_val_epoch = cur_val_loss, t

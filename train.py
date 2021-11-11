@@ -203,6 +203,7 @@ def train_nn(args, dirname):
                     lr=args.learning_rate,
                     weight_decay=args.weight_decay,
                 ),
+                check_no_conv=args.restart_no_conv,
                 patience=args.patience,
             )
 
@@ -211,9 +212,6 @@ def train_nn(args, dirname):
             )
 
             if born_dead and args.num_folds == 1:
-                # In case of non-convergence, what makes more sense to restart:
-                # - The _whole_ training setup, including data splitting in kfold?
-                # - Or only restart the current fold?
                 args.seed += args.seed_increment_when_born_dead
                 _log.info(f"Updated seed: {args.seed}")
                 set_seeds(args.seed)
@@ -221,7 +219,6 @@ def train_nn(args, dirname):
                 add_train_arg(dirname, "updated_seed", args.seed)
                 break
 
-            
             heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
             if fold_val_loss < best_fold["val_loss"]:
                 save_y_pred_csv(train_wf.y_pred_values, heuristic_pred_file)

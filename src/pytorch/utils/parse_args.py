@@ -39,6 +39,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_DEF_VALUES_FILE,
     DEFAULT_NORMALIZE_OUTPUT,
     DEFAULT_SEED_INCREMENT_WHEN_BORN_DEAD,
+    DEFAULT_RESTART_NO_CONV,
     DEFAULT_SAVE_HEURISTIC_PRED,
     DEFAULT_AUTO_TASKS_N,
     DEFAULT_AUTO_TASKS_FOLDER,
@@ -252,6 +253,13 @@ def get_train_args():
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
         default=DEFAULT_NORMALIZE_OUTPUT,
         help="Normalizes the output neuron. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-rst",
+        "--restart-no-conv",
+        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        default=DEFAULT_RESTART_NO_CONV,
+        help="Restarts the network if it won't converge. (default: %(default)s)",
     )
     parser.add_argument(
         "-sibd",
