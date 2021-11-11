@@ -11,6 +11,7 @@ from src.pytorch.utils.helpers import (
     logging_test_statistics,
     get_fixed_max_expansions,
     remove_temporary_files,
+    get_test_tasks_from_problem,
 )
 from src.pytorch.utils.default_args import (
     DEFAULT_MAX_EXPANSIONS,
@@ -33,9 +34,6 @@ def test_main(args):
         _log.warning(f"Neither max expansions nor max search time have been defined. "
                      f"Setting maximum search time to {DEFAULT_FORCED_MAX_SEARCH_TIME}s.")
 
-
-    logging_test_config(args, dirname)
-
     if args.heuristic == "nn":
         models = []
         models_folder = f"{args.train_folder}/models"
@@ -55,6 +53,18 @@ def test_main(args):
             return
     else:
         models = [""]
+    
+    if args.problem_pddls == []:
+        args.problem_pddls = get_test_tasks_from_problem(
+            train_folder=args.train_folder,
+            tasks_folder=args.auto_tasks_folder,
+            n=args.auto_tasks_n,
+            shuffle_seed=args.auto_tasks_seed
+        )
+        if args.problem_pddls == []:
+            return
+
+    logging_test_config(args, dirname)
 
     for model_path in models:
         output = {}

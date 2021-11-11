@@ -4,14 +4,20 @@ Simple auxiliary functions.
 
 import logging
 import glob
-import numpy as np
+import os
+from random import Random
 from json import dump, load
-from os import path, makedirs, remove
 from datetime import datetime
 from statistics import median, mean
 from src.pytorch.utils.default_args import (
+    DEFAULT_AUTO_TASKS_FOLDER,
+    DEFAULT_AUTO_TASKS_N,
+    DEFAULT_AUTO_TASKS_SEED,
     DEFAULT_MAX_EPOCHS,
     DEFAULT_MAX_EXPANSIONS,
+    DEFAULT_AUTO_TASKS_N,
+    DEFAULT_AUTO_TASKS_FOLDER,
+    DEFAULT_AUTO_TASKS_SEED,
 )
 
 _log = logging.getLogger(__name__)
@@ -77,28 +83,28 @@ def create_train_directory(args, config_in_foldername=False):
             dirname += f"_w{args.weight_decay}"
         if args.dropout_rate > 0:
             dirname += f"_d{args.dropout_rate}"
-    if path.exists(dirname):
+    if os.path.exists(dirname):
         i = 2
-        while path.exists(f"{dirname}{sep}{i}"):
+        while os.path.exists(f"{dirname}{sep}{i}"):
             i += 1
         dirname = dirname + f"{sep}{i}"
-    makedirs(dirname)
-    makedirs(f"{dirname}/models")
+    os.makedirs(dirname)
+    os.makedirs(f"{dirname}/models")
     return dirname
 
 
 def create_test_directory(args):
     sep = "."
     tests_folder = args.train_folder / "tests"
-    if not path.exists(tests_folder):
-        makedirs(tests_folder)
+    if not os.path.exists(tests_folder):
+        os.makedirs(tests_folder)
     dirname = f"{tests_folder}/nfd_test"
-    if path.exists(dirname):
+    if os.path.exists(dirname):
         i = 2
-        while path.exists(f"{dirname}{sep}{i}"):
+        while os.path.exists(f"{dirname}{sep}{i}"):
             i += 1
         dirname = dirname + f"{sep}{i}"
-    makedirs(dirname)
+    os.makedirs(dirname)
     return dirname
 
 
@@ -137,10 +143,10 @@ def logging_train_config(args, dirname, json=True):
         "weights_method": args.weights_method,
         "weights_seed": args.weights_seed if args.weights_seed != -1 else "random",
         "seed": args.seed if args.seed != -1 else "random",
-        "scatter_plot": args.scatter_plot if args.scatter_plot != -1 else "None",
-        "plot_n_epochs": args.plot_n_epochs if args.plot_n_epochs != -1 else "None",
-        "compare_csv_dir": args.compare_csv_dir if args.compare_csv_dir != "" else "None",
-        "hstar_csv_dir": args.hstar_csv_dir if args.hstar_csv_dir != "" else "None",
+        "scatter_plot": args.scatter_plot if args.scatter_plot != -1 else None,
+        "plot_n_epochs": args.plot_n_epochs if args.plot_n_epochs != -1 else None,
+        "compare_csv_dir": args.compare_csv_dir if args.compare_csv_dir != "" else None,
+        "hstar_csv_dir": args.hstar_csv_dir if args.hstar_csv_dir != "" else None,
         "num_threads": args.num_threads,
         "output_folder": str(args.output_folder),
     }
@@ -166,11 +172,16 @@ def logging_test_config(args, dirname, save_file=True):
         "max_expansions": args.max_expansions,
         "unary_threshold": args.unary_threshold,
         "test_model": args.test_model,
-        "facts_file": args.facts_file,
-        "defaults_file": args.defaults_file,
+        "facts_file": args.facts_file if args.facts_file != "" else None,
+        "defaults_file": args.defaults_file if args.defaults_file != "" else None,
     }
     if args.heuristic == "nn":
         args_dic["test_model"] = args.test_model
+    if len(args.problem_pddls) == 0 or \
+        (args.auto_tasks_folder in args.problem_pddls[0] and len(args.problem_pddls) <= args.auto_tasks_n):
+        args_dic["auto_tasks_n"] = args.auto_tasks_n
+        args_dic["auto_tasks_folder"] = args.auto_tasks_folder
+        args_dic["auto_tasks_seed"] = args.auto_tasks_seed
 
     _log.info(f"Configuration")
     for a in args_dic:
@@ -192,7 +203,7 @@ def logging_test_statistics(
     args, dirname, model, output, decimal_places=4, save_file=True
 ):
     test_results_filename = f"{dirname}/test_results.json"
-    if path.exists(test_results_filename):
+    if os.path.exists(test_results_filename):
         with open(test_results_filename) as f:
             results = load(f)
     else:
@@ -211,81 +222,82 @@ def logging_test_statistics(
     results["results"][model] = output
     results["statistics"][model] = {}
     rlist = {}
-    for x in results["results"][model][args.problem_pddls[0]]:
-        rlist[x] = [
-            results["results"][model][p][x]
-            for p in results["results"][model]
-            if x in results["results"][model][p]
-        ]
-        if x == "search_state":
+    if len(args.problem_pddls) > 0:
+        for x in results["results"][model][args.problem_pddls[0]]:
             rlist[x] = [
-                results["results"][model][p][x] for p in results["results"][model]
+                results["results"][model][p][x]
+                for p in results["results"][model]
+                if x in results["results"][model][p]
             ]
-            results["statistics"][model]["plans_found"] = rlist[x].count("success")
-            results["statistics"][model]["total_problems"] = len(rlist[x])
-            results["statistics"][model]["coverage"] = round(
-                results["statistics"][model]["plans_found"]
-                / results["statistics"][model]["total_problems"],
-                decimal_places,
-            )
-        elif x == "plan_length":
-            for i in range(len(rlist[x])):
-                rlist[x][i] = int(rlist[x][i])
-            results["statistics"][model]["max_plan_length"] = max(rlist[x])
-            results["statistics"][model]["min_plan_length"] = min(rlist[x])
-            results["statistics"][model]["avg_plan_length"] = round(
-                mean(rlist[x]), decimal_places
-            )
-            if len(rlist[x]) > 1:
-                results["statistics"][model]["mdn_plan_length"] = round(
-                    median(rlist[x]), decimal_places
+            if x == "search_state":
+                rlist[x] = [
+                    results["results"][model][p][x] for p in results["results"][model]
+                ]
+                results["statistics"][model]["plans_found"] = rlist[x].count("success")
+                results["statistics"][model]["total_problems"] = len(rlist[x])
+                results["statistics"][model]["coverage"] = round(
+                    results["statistics"][model]["plans_found"]
+                    / results["statistics"][model]["total_problems"],
+                    decimal_places,
                 )
-        elif x == "initial_h":
-            for i in range(len(rlist[x])):
-                rlist[x][i] = int(rlist[x][i])
-            results["statistics"][model]["avg_initial_h"] = round(
-                mean(rlist[x]), decimal_places
-            )
-            if len(rlist[x]) > 1:
-                results["statistics"][model]["mdn_initial_h"] = round(
-                    median(rlist[x]), decimal_places
+            elif x == "plan_length":
+                for i in range(len(rlist[x])):
+                    rlist[x][i] = int(rlist[x][i])
+                results["statistics"][model]["max_plan_length"] = max(rlist[x])
+                results["statistics"][model]["min_plan_length"] = min(rlist[x])
+                results["statistics"][model]["avg_plan_length"] = round(
+                    mean(rlist[x]), decimal_places
                 )
-        elif x == "expansion_rate":
-            for i in range(len(rlist[x])):
-                rlist[x][i] = float(rlist[x][i])
-            results["statistics"][model]["avg_expansion_rate"] = round(
-                mean(rlist[x]), decimal_places
-            )
-            if len(rlist[x]) > 1:
-                results["statistics"][model]["mdn_expansion_rate"] = round(
-                    median(rlist[x]), decimal_places
+                if len(rlist[x]) > 1:
+                    results["statistics"][model]["mdn_plan_length"] = round(
+                        median(rlist[x]), decimal_places
+                    )
+            elif x == "initial_h":
+                for i in range(len(rlist[x])):
+                    rlist[x][i] = int(rlist[x][i])
+                results["statistics"][model]["avg_initial_h"] = round(
+                    mean(rlist[x]), decimal_places
                 )
-        elif x == "total_time":
-            for i in range(len(rlist[x])):
-                rlist[x][i] = float(rlist[x][i])
-            results["statistics"][model]["total_accumulated_time"] = round(
-                sum(rlist[x]), decimal_places
-            )
-        elif x == "search_time":
-            for i in range(len(rlist[x])):
-                rlist[x][i] = float(rlist[x][i])
-            results["statistics"][model]["avg_search_time"] = round(
-                mean(rlist[x]), decimal_places
-            )
-            if len(rlist[x]) > 1:
-                results["statistics"][model]["mdn_search_time"] = round(
-                    median(rlist[x]), decimal_places
+                if len(rlist[x]) > 1:
+                    results["statistics"][model]["mdn_initial_h"] = round(
+                        median(rlist[x]), decimal_places
+                    )
+            elif x == "expansion_rate":
+                for i in range(len(rlist[x])):
+                    rlist[x][i] = float(rlist[x][i])
+                results["statistics"][model]["avg_expansion_rate"] = round(
+                    mean(rlist[x]), decimal_places
                 )
-        else:
-            for i in range(len(rlist[x])):
-                rlist[x][i] = int(rlist[x][i])
-            results["statistics"][model][f"avg_{x}"] = round(
-                mean(rlist[x]), decimal_places
-            )
-            if len(rlist[x]) > 1:
-                results["statistics"][model][f"mdn_{x}"] = round(
-                    median(rlist[x]), decimal_places
+                if len(rlist[x]) > 1:
+                    results["statistics"][model]["mdn_expansion_rate"] = round(
+                        median(rlist[x]), decimal_places
+                    )
+            elif x == "total_time":
+                for i in range(len(rlist[x])):
+                    rlist[x][i] = float(rlist[x][i])
+                results["statistics"][model]["total_accumulated_time"] = round(
+                    sum(rlist[x]), decimal_places
                 )
+            elif x == "search_time":
+                for i in range(len(rlist[x])):
+                    rlist[x][i] = float(rlist[x][i])
+                results["statistics"][model]["avg_search_time"] = round(
+                    mean(rlist[x]), decimal_places
+                )
+                if len(rlist[x]) > 1:
+                    results["statistics"][model]["mdn_search_time"] = round(
+                        median(rlist[x]), decimal_places
+                    )
+            else:
+                for i in range(len(rlist[x])):
+                    rlist[x][i] = int(rlist[x][i])
+                results["statistics"][model][f"avg_{x}"] = round(
+                    mean(rlist[x]), decimal_places
+                )
+                if len(rlist[x]) > 1:
+                    results["statistics"][model][f"mdn_{x}"] = round(
+                        median(rlist[x]), decimal_places
+                    )
 
     _log.info(f"Training statistics for model {model}")
     for x in results["statistics"][model]:
@@ -297,8 +309,8 @@ def logging_test_statistics(
 
 def remove_temporary_files(directory: str):
     output_sas = f"{directory}/output.sas"
-    if path.exists(output_sas):
-        remove(output_sas)
+    if os.path.exists(output_sas):
+        os.remove(output_sas)
 
 
 def save_y_pred_csv(data: dict, csv_filename: str):
@@ -314,9 +326,38 @@ def remove_csv_except_best(directory: str, fold_idx: int):
         f_split = f.split("_")
         idx = int(f_split[-1].split(".")[0])
         if idx != fold_idx:
-            remove(f)
+            os.remove(f)
 
 
 def get_problem_by_sample_filename(sample_filename: str):
     # return (domain, problem)
     return sample_filename.split("/")[-1].split("_")[1:3]
+
+def get_test_tasks_from_problem(
+    train_folder: str,
+    tasks_folder: str = DEFAULT_AUTO_TASKS_FOLDER,
+    n: int = DEFAULT_AUTO_TASKS_N,
+    shuffle_seed: int = DEFAULT_AUTO_TASKS_SEED
+):
+    with open(f"{train_folder}/train_args.json",) as f:
+        data = load(f)
+    domain = data["domain"]
+    problem = data["problem"]
+    possible_parent_dirs = ["", domain, f"{domain}/moderate", f"{domain}/hard"]
+    dir = None
+    for parent_dir in possible_parent_dirs:
+        candidate_dir = f"{tasks_folder}/{parent_dir}/{problem}"
+        if os.path.isdir(candidate_dir):
+            dir = candidate_dir
+    if dir == None:
+        _log.error(
+            f"No tasks were automatically found from {tasks_folder}. "
+            "Enter tasks manually from the command line or enter the path to the tasks folder (-atf)."
+        )
+        return []
+    pddls = [f"{dir}/{f}" for f in os.listdir(dir) if f[-5:] == ".pddl" and f != "domain.pddl"]
+    Random(shuffle_seed).shuffle(pddls)
+    if len(pddls) < n:
+        _log.warning(f"Not found {n} tasks in {dir}. {len(pddls)} were selected.")
+        return pddls
+    return pddls[:n]

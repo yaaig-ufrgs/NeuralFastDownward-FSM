@@ -40,6 +40,9 @@ from src.pytorch.utils.default_args import (
     DEFAULT_NORMALIZE_OUTPUT,
     DEFAULT_SEED_INCREMENT_WHEN_BORN_DEAD,
     DEFAULT_SAVE_HEURISTIC_PRED,
+    DEFAULT_AUTO_TASKS_N,
+    DEFAULT_AUTO_TASKS_FOLDER,
+    DEFAULT_AUTO_TASKS_SEED,
 )
 
 
@@ -277,10 +280,16 @@ def get_train_args():
 def get_test_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "train_folder", type=Path, help="Path to training folder with trained model."
+        "train_folder",
+        type=Path,
+        help="Path to training folder with trained model."
     )
     parser.add_argument(
-        "problem_pddls", type=str, nargs="+", help="Path to problems PDDL."
+        "problem_pddls",
+        type=str,
+        nargs="*",
+        default=[],
+        help="Path to problems PDDL."
     )
     parser.add_argument(
         "-d",
@@ -359,5 +368,25 @@ def get_test_args():
         default=DEFAULT_DEF_VALUES_FILE,
         help="Default values for facts given with `ffile`. (default: %(default)s)",
     )
-
+    parser.add_argument(
+        "-atn",
+        "--auto-tasks-n",
+        type=int,
+        default=DEFAULT_AUTO_TASKS_N,
+        help="Number of tasks taken automatically. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-atf",
+        "--auto-tasks-folder",
+        type=str,
+        default=DEFAULT_AUTO_TASKS_FOLDER,
+        help="Base folder to search for tasks automatically. (default: %(default)s)"
+    )
+    parser.add_argument(
+        "-ats",
+        "--auto-tasks-seed",
+        type=int,
+        default=DEFAULT_AUTO_TASKS_SEED,
+        help="Seed to shuffle the tasks taken automatically. (default: %(default)s)",
+    )
     return parser.parse_args()
