@@ -12,6 +12,7 @@ from src.pytorch.utils.helpers import (
     get_fixed_max_expansions,
     remove_temporary_files,
     get_test_tasks_from_problem,
+    get_defaults_and_facts_files,
 )
 from src.pytorch.utils.default_args import (
     DEFAULT_MAX_EXPANSIONS,
@@ -33,6 +34,8 @@ def test_main(args):
         args.max_search_time = DEFAULT_FORCED_MAX_SEARCH_TIME
         _log.warning(f"Neither max expansions nor max search time have been defined. "
                      f"Setting maximum search time to {DEFAULT_FORCED_MAX_SEARCH_TIME}s.")
+    if args.samples_dir[-1] != "/":
+        args.samples_dir += "/"
 
     if args.heuristic == "nn":
         models = []
@@ -53,7 +56,9 @@ def test_main(args):
             return
     else:
         models = [""]
-    
+
+    sample_file = str(args.train_folder).split('/')[-1].split('.')[1]
+
     if args.problem_pddls == []:
         args.problem_pddls = get_test_tasks_from_problem(
             train_folder=args.train_folder,
@@ -69,6 +74,12 @@ def test_main(args):
     for model_path in models:
         output = {}
         for i, problem_pddl in enumerate(args.problem_pddls):
+            if args.facts_file == "" and args.defaults_file == "":
+                p_split = problem_pddl.split('/')
+                p_domain = p_split[-4]
+                p_instance = p_split[-2]
+                args.facts_file, args.defaults_file = get_defaults_and_facts_files(args.samples_dir, sample_file)
+
             _log.info(
                 f'Solving instance "{problem_pddl}" ({i+1}/{len(args.problem_pddls)})'
             )

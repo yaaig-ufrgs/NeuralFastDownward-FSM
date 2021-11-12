@@ -44,6 +44,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_AUTO_TASKS_N,
     DEFAULT_AUTO_TASKS_FOLDER,
     DEFAULT_AUTO_TASKS_SEED,
+    DEFAULT_SAMPLES_FOLDER,
 )
 
 
@@ -361,6 +362,13 @@ def get_test_args():
         choices=["all", "best"],
         default=DEFAULT_TEST_MODEL,
         help="Model(s) used for testing. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-sdir",
+        "--samples-dir",
+        type=str,
+        default=DEFAULT_SAMPLES_FOLDER,
+        help="Default samples directory to automatically get facts and defaults files. (default: %(default)s)",
     )
     parser.add_argument(
         "-ffile",

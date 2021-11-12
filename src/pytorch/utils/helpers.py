@@ -361,3 +361,12 @@ def get_test_tasks_from_problem(
         _log.warning(f"Not found {n} tasks in {dir}. {len(pddls)} were selected.")
         return pddls
     return pddls[:n]
+
+def get_defaults_and_facts_files(samples_dir: str, sample_file: str):
+    ffiles = glob.glob(samples_dir + f"{sample_file}_facts.txt")
+    dfiles = glob.glob(samples_dir + f"{sample_file}_defaults.txt")
+    if len(ffiles) > 0 and len(dfiles) > 0:
+        return ffiles[0], dfiles[0]
+    else:
+        _log.error("No default and facts files found.")
+
