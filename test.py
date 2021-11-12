@@ -75,9 +75,6 @@ def test_main(args):
         output = {}
         for i, problem_pddl in enumerate(args.problem_pddls):
             if args.facts_file == "" and args.defaults_file == "":
-                p_split = problem_pddl.split('/')
-                p_domain = p_split[-4]
-                p_instance = p_split[-2]
                 args.facts_file, args.defaults_file = get_defaults_and_facts_files(args.samples_dir, sample_file)
 
             _log.info(
