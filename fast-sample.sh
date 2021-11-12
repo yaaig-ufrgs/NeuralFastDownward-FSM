@@ -85,14 +85,16 @@ elif [ $METHOD = "rsl" ]; then
     SAMPLE_PERCENTAGE=$6
     CHECK_STATE_INVARS=$7
     N_SEEDS=$8
+    #N_SEEDS=5
+    echo $N_SEEDS
     PROBLEM_DIR=$9
     files=($PROBLEM_DIR/*.pddl)
     domain_name=${PROBLEM_DIR##*/}
     for file in ${files[@]}; do
         prob_name=${file#*${PROBLEM_DIR}/};
         prob_name=${prob_name%%.pddl*}
-        if [ $prob_name != "domain" ]; then
-            #for seed in $(seq 1 $N_SEEDS); do
+        if [[ $prob_name != "domain" ]]; then
+            for seed in $(seq 1 $N_SEEDS); do
                 # Best config according to RSL paper:
                 # num_train_states (Nt):   100000 states
                 # num_demos (Nr):          5 rollouts
@@ -101,10 +103,10 @@ elif [ $METHOD = "rsl" ]; then
                 # seed: 80970
                 # According to run_remote_RSL.py, check_state_invars is set to True.
                 ./RSL/sampling.py --out_dir $OUTPUT_DIR --instance $file --num_train_states $NUM_TRAIN_STATES \
-                                  --num_demos $NUM_DEMOS --max_len_demo $MAX_LEN_DEMO --seed 80970 \
+                                  --num_demos $NUM_DEMOS --max_len_demo $MAX_LEN_DEMO --seed $seed \
                                   --random_sample_percentage $SAMPLE_PERCENTAGE \
                                   --regression_method $TECHNIQUE --check_state_invars $CHECK_STATE_INVARS
-            #done
+            done
         fi
     done
 fi

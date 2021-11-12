@@ -48,6 +48,18 @@ if [ $TEST_TYPE = "multi" ] ; then
         if [ $domain = "blocks" ] ; then
             instance_trained_on="blocks_${problem}"
         fi
+        if [ $domain = "npuzzle" ] ; then
+            instance_trained_on="npuzzle_${problem}"
+        fi
+        if [ $domain = "visitall-opt14-strips" ] ; then
+            instance_trained_on="visitall-opt14-strips_${problem}"
+        fi
+        if [ $domain = "scanalyzer-opt11-strips" ] ; then
+            instance_trained_on="scanalyzer-opt11-strips_${problem}"
+        fi
+        if [ $domain = "transport-opt14-strips" ] ; then
+            instance_trained_on="transport-opt14-strips_${problem}"
+        fi
         echo $instance_trained_on
         train_dir=$(find "results/" -maxdepth 1 -name \*${instance_trained_on}\* -type d -print | head -n1)/
         echo $train_dir
@@ -77,6 +89,18 @@ else
     if [ $domain = "blocks" ] ; then
         instance_trained_on="blocks_${problem}"
     fi
+    if [ $domain = "npuzzle" ] ; then
+        instance_trained_on="npuzzle_${problem}"
+    fi
+    if [ $domain = "visitall-opt14-strips" ] ; then
+            instance_trained_on="visitall-opt14-strips_${problem}"
+    fi
+    if [ $domain = "scanalyzer-opt11-strips" ] ; then
+        instance_trained_on="scanalyzer-opt11-strips_${problem}"
+    fi
+    if [ $domain = "transport-opt14-strips" ] ; then
+        instance_trained_on="transport-opt14-strips_${problem}"
+    fi
     echo $instance_trained_on
     train_dir=$(find "results/" -maxdepth 1 -name \*${instance_trained_on}\* -type d -print | head -n1)/
     echo $train_dir
@@ -85,9 +109,9 @@ else
     echo $facts
     echo $defaults
     if [ $CORES = -1 ]; then
-        tsp taskset -c ${THREAD_ID} ./test.py ${train_dir} $TASKS -ffile ${facts} -dfile ${defaults} -t 360 -a eager_greedy -pt best
+        tsp taskset -c ${THREAD_ID} ./test.py ${train_dir} $TASKS -ffile ${facts} -dfile ${defaults} -t 360 -a eager_greedy -pt all
     else
-        tsp -D $CORES taskset -c ${THREAD_ID} ./test.py ${train_dir} $TASKS -ffile ${facts} -dfile ${defaults} -t 360 -a eager_greedy -pt best
+        tsp -D $CORES taskset -c ${THREAD_ID} ./test.py ${train_dir} $TASKS -ffile ${facts} -dfile ${defaults} -t 360 -a eager_greedy -pt all
     fi
     echo ""
 fi

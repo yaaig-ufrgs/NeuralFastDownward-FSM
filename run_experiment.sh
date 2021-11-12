@@ -41,6 +41,8 @@ run_experiment_fukunaga() {
 
 run_experiment_rsl() {
     sample_seed=$1
+    #net_seed=80970
+    #net_seed=1
     net_seed=$2
     cores=$3
     runs=$4
@@ -57,11 +59,9 @@ run_experiment_rsl() {
         problem=${problem%%_*}
         if [ $(($COUNTER%$max_per_thread)) = 0 ]; then
             THREAD_ID=$((THREAD_ID+1))
-            tsp taskset -c ${THREAD_ID} ./train-and-test.sh "-o regression -f 1 -hl 1 -hu 16 -t 99999 -e -1 -a relu -s $net_seed $file" \
-                "results/nfd_train.${problem_file}.ns${net_seed}/ tasks/IPC/${domain}/${problem}.pddl -ffile ${facts} -dfile ${defaults} -t 99999 -e -1 -a eager_greedy -pt all"
+            tsp taskset -c ${THREAD_ID} ./train-and-test1.sh "-pat 10 -e 1000 -rst false -spn 20 -s $net_seed $file"
        else
-            tsp -D $((COUNTER-1)) taskset -c ${THREAD_ID} ./train-and-test.sh "-o regression -f 1 -hl 1 -hu 16 -t 99999 -e -1 -a relu -s $net_seed $file" \
-                "results/nfd_train.${problem_file}.ns${net_seed}/ tasks/IPC/${domain}/${problem}.pddl -ffile ${facts} -dfile ${defaults} -t 99999 -e -1 -a eager_greedy -pt all"
+            tsp -D $((COUNTER-1)) taskset -c ${THREAD_ID} ./train-and-test1.sh "-pat 10 -e 1000 -rst false -spn 20 -s $net_seed $file"
         fi
 
         COUNTER=$((COUNTER+1))
@@ -114,25 +114,25 @@ elif [ $METHOD = "rsl" ]; then
     EXPERIMENT=$4
 
     if [ $EXPERIMENT = "single" ]; then
-        run_experiment_rsl 1 1 $CORES 1
-    elif [ $EXPERIMENT = "fixed_net" ]; then
+        run_experiment_rsl 1 1 $CORES 13
+    #elif [ $EXPERIMENT = "fixed_net" ]; then
         # TODO: for 1..5, dfs rw
         # run_experiment_rsl 1 $SEED $CORES 5
-        run_experiment_rsl 2 $SEED $CORES 4
-        run_experiment_rsl 3 $SEED $CORES 4
-        run_experiment_rsl 4 $SEED $CORES 4
-        run_experiment_rsl 5 $SEED $CORES 4
-    elif [ $EXPERIMENT = "fixed_sample" ]; then
+        run_experiment_rsl 2 $SEED $CORES 13
+        run_experiment_rsl 3 $SEED $CORES 13
+        run_experiment_rsl 4 $SEED $CORES 13
+        run_experiment_rsl 5 $SEED $CORES 13
+    #elif [ $EXPERIMENT = "fixed_sample" ]; then
         # run_experiment_rsl $SEED 1 $CORES 5
-        run_experiment_rsl $SEED 2 $CORES 4
-        run_experiment_rsl $SEED 3 $CORES 4
-        run_experiment_rsl $SEED 4 $CORES 4
-        run_experiment_rsl $SEED 5 $CORES 4
-    elif [ $EXPERIMENT = "change_all" ]; then
+        run_experiment_rsl $SEED 2 $CORES 13
+        run_experiment_rsl $SEED 3 $CORES 13
+        run_experiment_rsl $SEED 4 $CORES 13
+        run_experiment_rsl $SEED 5 $CORES 13
+    #elif [ $EXPERIMENT = "change_all" ]; then
         # run_experiment_rsl 1 1 $CORES 5
-        run_experiment_rsl 2 2 $CORES 4
-        run_experiment_rsl 3 3 $CORES 4
-        run_experiment_rsl 4 4 $CORES 4
-        run_experiment_rsl 5 5 $CORES 4
+        run_experiment_rsl 2 2 $CORES 13
+        run_experiment_rsl 3 3 $CORES 13
+        run_experiment_rsl 4 4 $CORES 13
+        run_experiment_rsl 5 5 $CORES 13
     fi
 fi
