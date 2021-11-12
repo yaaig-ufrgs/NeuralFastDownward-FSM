@@ -42,6 +42,9 @@ and `-pat` is the patience used for early-stop.
 ./train.py samples/rsl_blocks_probBLOCKS-14-0_countBoth_100000_ss80970 -s 1 -pat 15
 ```
 
+The resulting trained model, logs, plots, etc. will be located in the
+appropriate `results` directory.
+
 ### Evaluating instances
 Executing `./test.py` without any arguments will show how to use it with all
 the possible arguments.
@@ -51,9 +54,12 @@ it) as the first argument and will automatically find 10 random (fixed seed as d
 instances of the same domain to use for testing. `-t` is the time limit to solve the task, `-a` is the search algorithm used, and `-pt`
 [all|best] indicates if we want to use all the folds (if using e.g.
 10-fold-cross-validation) for testing or the best one.
+`-sdir` (defaults for `samples`) indicates the directory where the sample files are located. This is
+important because in case we used RSL sampling, it needs to locate the
+appropriate `_defaults.txt` and `_facts.txt` files.
 
 ```
-./test.py results/nfd_train.rsl_grid_prob04-0_countBoth_10000_ss1.ns1 -t 360 -a eager_greedy -pt all
+./test.py results/nfd_train.rsl_grid_prob04-0_countBoth_10000_ss1.ns1 -sdir samples/ -t 360 -a eager_greedy -pt all
 ```
 
 You can also manually indicate the _n_ tasks you want to evaluate.
