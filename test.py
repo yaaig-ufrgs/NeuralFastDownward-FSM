@@ -58,6 +58,8 @@ def test_main(args):
         models = [""]
 
     sample_file = str(args.train_folder).split('/')[-1].split('.')[1]
+    if args.facts_file == "" and args.defaults_file == "":
+        args.facts_file, args.defaults_file = get_defaults_and_facts_files(args.samples_dir, sample_file)
 
     if args.problem_pddls == []:
         args.problem_pddls = get_test_tasks_from_problem(
@@ -74,9 +76,6 @@ def test_main(args):
     for model_path in models:
         output = {}
         for i, problem_pddl in enumerate(args.problem_pddls):
-            if args.facts_file == "" and args.defaults_file == "":
-                args.facts_file, args.defaults_file = get_defaults_and_facts_files(args.samples_dir, sample_file)
-
             _log.info(
                 f'Solving instance "{problem_pddl}" ({i+1}/{len(args.problem_pddls)})'
             )
