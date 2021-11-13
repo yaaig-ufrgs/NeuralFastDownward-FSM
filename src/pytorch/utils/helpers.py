@@ -147,7 +147,7 @@ def logging_train_config(args, dirname, json=True):
         "plot_n_epochs": args.plot_n_epochs if args.plot_n_epochs != -1 else None,
         "compare_csv_dir": args.compare_csv_dir if args.compare_csv_dir != "" else None,
         "hstar_csv_dir": args.hstar_csv_dir if args.hstar_csv_dir != "" else None,
-        "num_threads": args.num_threads,
+        "num_threads": args.num_threads if args.num_threads != -1 else None,
         "output_folder": str(args.output_folder),
     }
 

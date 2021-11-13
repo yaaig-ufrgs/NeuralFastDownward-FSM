@@ -203,7 +203,7 @@ def train_nn(args, dirname):
                     lr=args.learning_rate,
                     weight_decay=args.weight_decay,
                 ),
-                check_no_conv=args.restart_no_conv,
+                restart_no_conv=args.restart_no_conv,
                 patience=args.patience,
             )
 

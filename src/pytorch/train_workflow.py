@@ -23,7 +23,7 @@ class TrainWorkflow:
         dirname: str,
         optimizer: optim.Optimizer,
         loss_fn: nn = nn.MSELoss(),
-        check_no_conv: bool = True,
+        restart_no_conv: bool = True,
         patience: int = None,
     ):
         self.model = model
@@ -37,7 +37,7 @@ class TrainWorkflow:
         self.loss_fn = loss_fn
         self.patience = patience
         self.early_stopped = False
-        self.check_no_conv = check_no_conv
+        self.restart_no_conv = restart_no_conv
         self.y_pred_values = {}  # {state: (y, pred)} of the last epoch
 
     def train_loop(self, t: int, fold_idx: int):
@@ -90,10 +90,10 @@ class TrainWorkflow:
                 val_loss += self.loss_fn(pred, y).item()
 
         return val_loss / num_batches
-    
-    def born_dead(self):
+
+    def dead(self):
         with torch.no_grad():
-            for X, _ in self.val_dataloader:
+            for X, _ in self.train_dataloader:
                 for p in self.model(X):
                     if float(p) != 0.0:
                         return False
@@ -134,16 +134,25 @@ class TrainWorkflow:
     def run(self, fold_idx, train_timer, validation=True):
         loss_first_epoch = 0
         best_val_loss = None
+        born_dead = False
         for t in range(self.max_epochs):
             cur_train_loss = self.train_loop(t, fold_idx)
-            if validation:
-                cur_val_loss = self.val_loop()
-                # print("epoch {} loss {} val loss {}".format(t, cur_train_loss, cur_val_loss))
-                loss_first_epoch = cur_val_loss if t == 0 else loss_first_epoch
-                if self.check_no_conv:
-                    if self.born_dead():
+            # Check if born dead
+            if t == 0:
+                if self.dead():
+                    if self.restart_no_conv:
                         _log.warning("All predictions are 0 (born dead). Restarting training with a new seed...")
                         return None, True
+                    else:
+                        _log.warning("All predictions are 0 (born dead), but restart is disabled.")
+                        born_dead = True
+            # Check if the network died during training
+            elif not born_dead and self.dead():
+                _log.warning("All predictions are 0.")
+
+            if validation:
+                cur_val_loss = self.val_loop()
+                loss_first_epoch = cur_val_loss if t == 0 else loss_first_epoch
                 if self.patience != None:
                     if best_val_loss is None or best_val_loss > cur_val_loss:
                         best_val_loss, best_val_epoch = cur_val_loss, t
