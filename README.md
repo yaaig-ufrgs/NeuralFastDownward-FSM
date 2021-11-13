@@ -6,6 +6,77 @@ Fast Downward (especially, Tensorflow and PyTorch).
 Neural Fast Downward is a fork from Fast Downward. For more information (full
 list of contributors, history, etc.), see [here](https://github.com/PatrickFerber/NeuralFastDownward).
 
+## Fast Instructions
+
+### Messing with the neural network code
+See
+[`src/pytorch/`](https://github.com/yaaig-ufrgs/NeuralFastDownward/tree/main/src/pytorch).
+
+### Generating samples
+
+Usage:
+
+```
+./fast-sample.sh [fukunaga|ferber] [rw|dfs] [fs|ps|us|as] num_searches samples_per_search n_seeds problem_dir output_dir
+./fast-sample.sh rsl [countAdds|countDels|countBoth] num_train_states num_demos max_len_demos sample_percentage check_state_invars n_seeds problem_dir output_dir
+```
+
+The example below takes all the instances in the `grid` directory and saves the
+samples, facts and defaults files in the `samples` directory with an
+appropriate filename.
+
+```
+./fast-sample.sh rsl countBoth 10000 5 500 50 true 5 tasks/ferber21/training_tasks_used/grid samples/
+```
+
+### Training a neural network
+Executing `./train.py` without any arguments will show how to use it with all
+the possible arguments. Almost everything is modifiable, and the default neural
+network is a ResNet.
+
+The example below will train a neural network with a sampling file as input.
+`-s` is the neural network seed (affects everything related to RNG, such as network initialization), 
+and `-pat` is the patience used for early-stop.
+
+```
+./train.py samples/rsl_blocks_probBLOCKS-14-0_countBoth_100000_ss80970 -s 1 -pat 15
+```
+
+The resulting trained model, logs, plots, etc. will be located in the
+appropriate `results` directory.
+
+### Evaluating instances
+Executing `./test.py` without any arguments will show how to use it with all
+the possible arguments.
+
+The example below takes a network folder (the trained model is located within
+it) as the first argument and will automatically find 10 random (fixed seed as default) 
+instances of the same domain to use for testing. `-t` is the time limit to solve the task, `-a` is the search algorithm used, and `-pt`
+[all|best] indicates if we want to use all the folds (if using e.g.
+10-fold-cross-validation) for testing or the best one.
+`-sdir` (defaults for `samples`) indicates the directory where the sample files are located. This is
+important because in case we used RSL sampling, it needs to locate the
+appropriate `_defaults.txt` and `_facts.txt` files.
+
+```
+./test.py results/nfd_train.rsl_grid_prob04-0_countBoth_10000_ss1.ns1 -sdir samples/ -t 360 -a eager_greedy -pt all
+```
+
+You can also manually indicate the _n_ tasks you want to evaluate.
+
+```
+./test.py results/nfd_train.fukunaga_blocks_probBLOCKS-12-0_dfs_fs_500x200_ss1.ns1 tasks/IPC/blocks/probBLOCKS*.pddl
+```
+
+### Running full experiments
+Provided that you have all the samples you want in the `samples` folder, you
+can run `./run_experiment.sh <args>` to automatically train and test neural networks.
+Keep in mind that this script is specifically tailored for our needs, and we
+constantly modify it -- it's meant for "batch" training/and testing, and it
+makes usage of `tsp` and `taskset` to schedule executions and allocate them to
+specific threads, respectively. For specifics, look at the code.
+
+
 ## Features
 ### Sampling
 Neural Fast Downward generates data from a given task,
