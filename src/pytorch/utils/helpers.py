@@ -356,7 +356,8 @@ def get_test_tasks_from_problem(
         )
         return []
     pddls = [f"{dir}/{f}" for f in os.listdir(dir) if f[-5:] == ".pddl" and f != "domain.pddl"]
-    Random(shuffle_seed).shuffle(pddls)
+    if shuffle_seed != -1:
+        Random(shuffle_seed).shuffle(pddls)
     if len(pddls) < n:
         _log.warning(f"Not found {n} tasks in {dir}. {len(pddls)} were selected.")
         return pddls
