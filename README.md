@@ -8,6 +8,21 @@ list of contributors, history, etc.), see [here](https://github.com/PatrickFerbe
 
 ## Fast Instructions
 
+### Pre-run
+1. Clone this repository.
+
+2. Install [`clingo`](https://github.com/potassco/clingo/releases).
+
+3. Download and extract
+   [`libtorch`](https://pytorch.org/cppdocs/installing.html) to a directory `p`.
+
+5. `cd` to the directory where root the cloned repository is located, then:
+    ```
+    export PATH_TORCH=p
+    pip install -r requirements.txt
+    ./build.py release
+    ```
+
 ### Messing with the neural network code
 See
 [`src/pytorch/`](https://github.com/yaaig-ufrgs/NeuralFastDownward/tree/main/src/pytorch).
