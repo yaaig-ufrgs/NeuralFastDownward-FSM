@@ -16,7 +16,7 @@ list of contributors, history, etc.), see [here](https://github.com/PatrickFerbe
 3. Download and extract
    [`libtorch`](https://pytorch.org/cppdocs/installing.html) to a directory `p`.
 
-5. `cd` to the directory where root the cloned repository is located, then:
+5. `cd` to the directory where the root of the cloned repository is located, then:
     ```
     export PATH_TORCH=p
     pip install -r requirements.txt
