@@ -21,7 +21,7 @@ def get_plot_title(directory: str):
     return plot_title
 
 
-def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str):
+def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str, prefix: str):
     if t == -1:
         t = "final"
 
@@ -29,7 +29,7 @@ def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str):
         makedirs(directory)
 
     plot_title = get_plot_title(directory)
-    plot_filename = f"{plot_title}_epoch_{str(t)}_{fold_idx}"
+    plot_filename = f"{prefix}{plot_title}_epoch_{str(t)}_{fold_idx}"
 
     real = [data[key][0] for key in data]
     pred = [data[key][1] for key in data]
@@ -165,12 +165,19 @@ def save_gif_from_plots(directory: str, fold_idx: int):
     """
 
     gif_filename = get_plot_title(directory)
-    plot_files = sorted(glob.glob(f"{directory}/*{fold_idx}.png"), key=path.getmtime)
+    train_plot_files = sorted(glob.glob(f"{directory}/train_*{fold_idx}.png"), key=path.getmtime)
+    val_plot_files = sorted(glob.glob(f"{directory}/val_*{fold_idx}.png"), key=path.getmtime)
 
-    with imageio.get_writer(f"{directory}/{gif_filename}.gif", mode="I") as writer:
-        for f in plot_files:
+    with imageio.get_writer(f"{directory}/train_{gif_filename}.gif", mode="I") as writer:
+        for f in train_plot_files:
             image = imageio.imread(f)
             writer.append_data(image)
+
+    with imageio.get_writer(f"{directory}/val_{gif_filename}.gif", mode="I") as writer:
+        for f in val_plot_files:
+            image = imageio.imread(f)
+            writer.append_data(image)
+
 
 
 def remove_intermediate_plots(plots_dir: str, fold_idx: int):

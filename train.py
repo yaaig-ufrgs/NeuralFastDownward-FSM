@@ -221,7 +221,7 @@ def train_nn(args, dirname):
 
             heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
             if fold_val_loss < best_fold["val_loss"]:
-                save_y_pred_csv(train_wf.y_pred_values, heuristic_pred_file)
+                save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
                 _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
                 best_fold["fold"] = fold_idx
                 best_fold["val_loss"] = fold_val_loss

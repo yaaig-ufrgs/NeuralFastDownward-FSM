@@ -38,7 +38,8 @@ class TrainWorkflow:
         self.patience = patience
         self.early_stopped = False
         self.restart_no_conv = restart_no_conv
-        self.y_pred_values = {}  # {state: (y, pred)} of the last epoch
+        self.train_y_pred_values = {}  # {state: (y, pred)} of the last epoch
+        self.val_y_pred_values = {}  # {state: (y, pred)} of the last epoch
 
     def train_loop(self, t: int, fold_idx: int):
         # size = len(self.train_dataloader.dataset)
@@ -68,19 +69,19 @@ class TrainWorkflow:
                     if len(y[i]) > 1:  # Prefix (unary encoding)
                         y_h = prefix_to_h(y[i].tolist())
                         pred_h = prefix_to_h(pred[i].tolist())
-                        self.y_pred_values[x_str] = (y_h, pred_h)
+                        self.train_y_pred_values[x_str] = (y_h, pred_h)
                     else:  # Regression
-                        self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+                        self.train_y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
 
-        if len(self.y_pred_values) > 0:
+        if len(self.train_y_pred_values) > 0:
             save_y_pred_scatter(
-                self.y_pred_values, t, fold_idx, f"{self.dirname}/plots"
+                self.train_y_pred_values, t, fold_idx, f"{self.dirname}/plots", "train_"
             )
-            self.y_pred_values.clear()
+            self.train_y_pred_values.clear()
 
         return train_loss / num_batches
 
-    def val_loop(self):
+    def val_loop(self, t: int, fold_idx: int):
         # size = len(self.val_dataloader.dataset)
         num_batches = len(self.val_dataloader)
         val_loss = 0
@@ -88,6 +89,25 @@ class TrainWorkflow:
             for X, y in self.val_dataloader:
                 pred = self.model(X)
                 val_loss += self.loss_fn(pred, y).item()
+
+                if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
+                    x_lst = X.tolist()
+                    for i, _ in enumerate(x_lst):
+                        x_int = [int(x) for x in x_lst[i]]
+                        x_str = "".join(str(e) for e in x_int)
+                        if len(y[i]) > 1:  # Prefix (unary encoding)
+                            y_h = prefix_to_h(y[i].tolist())
+                            pred_h = prefix_to_h(pred[i].tolist())
+                            self.val_y_pred_values[x_str] = (y_h, pred_h)
+                        else:  # Regression
+                            self.val_y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+
+        if len(self.val_y_pred_values) > 0:
+            save_y_pred_scatter(
+                self.val_y_pred_values, t, fold_idx, f"{self.dirname}/plots", "val_"
+            )
+            self.val_y_pred_values.clear()
+
 
         return val_loss / num_batches
 
@@ -151,7 +171,7 @@ class TrainWorkflow:
                 _log.warning("All predictions are 0.")
 
             if validation:
-                cur_val_loss = self.val_loop()
+                cur_val_loss = self.val_loop(t, fold_idx)
                 loss_first_epoch = cur_val_loss if t == 0 else loss_first_epoch
                 if self.patience != None:
                     if best_val_loss is None or best_val_loss > cur_val_loss:
@@ -184,21 +204,29 @@ class TrainWorkflow:
 
     def save_post_scatter_plot(self, fold_idx: int):
         with torch.no_grad():
-            self.y_pred_values.clear()
-            for X, y in self.train_dataloader:
-                pred = self.model(X)
-                x_lst = X.tolist()
-                for i, _ in enumerate(x_lst):
-                    x_int = [int(x) for x in x_lst[i]]
-                    x_str = "".join(str(e) for e in x_int)
-                    if len(y[i]) > 1:  # Prefix (unary encoding)
-                        y_h = prefix_to_h(y[i].tolist())
-                        pred_h = prefix_to_h(pred[i].tolist())
-                        self.y_pred_values[x_str] = (y_h, pred_h)
-                    else:  # Regression
-                        self.y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+            self.val_y_pred_values = self.fill_y_pred(self.val_dataloader)
+            self.train_y_pred_values = self.fill_y_pred(self.train_dataloader)
 
             _log.info(f"Saving post-training scatter plot.")
             save_y_pred_scatter(
-                self.y_pred_values, -1, fold_idx, f"{self.dirname}/plots"
+                self.train_y_pred_values, -1, fold_idx, f"{self.dirname}/plots", "train_"
             )
+            save_y_pred_scatter(
+                self.val_y_pred_values, -1, fold_idx, f"{self.dirname}/plots", "val_"
+            )
+
+    def fill_y_pred(self, dataloader):
+        y_pred_values = {}
+        for X, y in dataloader:
+            pred = self.model(X)
+            x_lst = X.tolist()
+            for i, _ in enumerate(x_lst):
+                x_int = [int(x) for x in x_lst[i]]
+                x_str = "".join(str(e) for e in x_int)
+                if len(y[i]) > 1:  # Prefix (unary encoding)
+                    y_h = prefix_to_h(y[i].tolist())
+                    pred_h = prefix_to_h(pred[i].tolist())
+                    y_pred_values[x_str] = (y_h, pred_h)
+                else:  # Regression
+                    y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+        return y_pred_values
