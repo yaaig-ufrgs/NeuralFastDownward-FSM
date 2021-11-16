@@ -12,6 +12,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_OUTPUT_LAYER,
     DEFAULT_SHUFFLE,
     DEFAULT_RANDOM_SEED,
+    DEFAULT_SHUFFLE_SEED,
     DEFAULT_NORMALIZE_OUTPUT,
     DEFAULT_MODEL,
 )
@@ -33,6 +34,7 @@ class KFoldTrainingData:
         output_layer=DEFAULT_OUTPUT_LAYER,
         shuffle=DEFAULT_SHUFFLE,
         seed=DEFAULT_RANDOM_SEED,
+        shuffle_seed=DEFAULT_SHUFFLE_SEED,
         normalize=DEFAULT_NORMALIZE_OUTPUT,
         model=DEFAULT_MODEL,
     ):
@@ -49,6 +51,7 @@ class KFoldTrainingData:
         self.output_layer = output_layer
         self.shuffle = shuffle
         self.seed = seed
+        self.shuffle_seed = seed if shuffle_seed == DEFAULT_SHUFFLE_SEED else shuffle_seed
         self.model = model
         self.kfolds = self.generate_kfold_training_data()
 
@@ -70,7 +73,7 @@ class KFoldTrainingData:
                     self.state_value_pairs,
                     test_size=0.2,
                     shuffle=self.shuffle,
-                    random_state=self.seed,
+                    random_state=self.shuffle_seed,
                 )
 
             else:
@@ -80,10 +83,10 @@ class KFoldTrainingData:
                     else:
                         training_set.append(self.state_value_pairs[j])
 
-            #worker_fn = None if self.seed == -1 else seed_worker
-            #g = None if self.seed == -1 else torch.Generator()
-            #if g != None:
-            #    g.manual_seed(self.seed)
+            worker_fn = None if self.seed == -1 else lambda id: np.random.seed(self.shuffle_seed % 2 ** 32)
+            g = None if self.seed == -1 else torch.Generator()
+            if g != None:
+                g.manual_seed(self.shuffle_seed)
 
             train_dataloader = DataLoader(
                 dataset=InstanceDataset(
@@ -92,8 +95,8 @@ class KFoldTrainingData:
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
                 num_workers=1,
-                #worker_init_fn=seed_worker,
-                #generator=g,
+                worker_init_fn=worker_fn,
+                generator=g,
             )
             test_dataloader = DataLoader(
                 dataset=InstanceDataset(
@@ -102,9 +105,10 @@ class KFoldTrainingData:
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
                 num_workers=1,
-                #worker_init_fn=seed_worker,
-                #generator=g,
+                worker_init_fn=worker_fn,
+                generator=g,
             )
+
             kfolds.append((train_dataloader, test_dataloader))
 
         return kfolds
@@ -115,7 +119,6 @@ class KFoldTrainingData:
         Counting from 0.
         """
         return self.kfolds[idx]
-
 
 def seed_worker(worker_id):
     """

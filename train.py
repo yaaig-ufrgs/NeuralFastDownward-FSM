@@ -155,6 +155,7 @@ def train_nn(args, dirname):
             output_layer=args.output_layer,
             shuffle=args.shuffle,
             seed=args.seed,
+            shuffle_seed=args.shuffle_seed,
             normalize=args.normalize_output,
             model=args.model,
         )

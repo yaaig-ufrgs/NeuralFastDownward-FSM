@@ -12,6 +12,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_WEIGHT_DECAY,
     DEFAULT_DROPOUT_RATE,
     DEFAULT_SHUFFLE,
+    DEFAULT_SHUFFLE_SEED,
     DEFAULT_BIAS,
     DEFAULT_LEARNING_RATE,
     DEFAULT_NUM_THREADS,
@@ -164,6 +165,13 @@ def get_train_args():
         type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
         default=DEFAULT_SHUFFLE,
         help="Shuffle the training data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-shs",
+        "--shuffle-seed",
+        type=int,
+        default=DEFAULT_SHUFFLE_SEED,
+        help="Seed to be used for separating training and validation data. Defaults to network seed. (default: %(default)s)",
     )
     parser.add_argument(
         "-bi",
