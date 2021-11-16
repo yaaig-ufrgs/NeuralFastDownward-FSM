@@ -80,7 +80,7 @@ def get_train_args():
     parser.add_argument(
         "-lo",
         "--linear-output",
-        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        type=str2bool,
         default=DEFAULT_LINEAR_OUTPUT,
         help="Use linear output in the output layer (True) or use an activation (False). (default: %(default)s)",
     )
@@ -159,14 +159,6 @@ def get_train_args():
         help="Dropout rate for hidden layers. (default: %(default)s)",
     )
     parser.add_argument(
-        "-sh",
-        "--shuffle",
-        choices=["true", "false"],
-        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
-        default=DEFAULT_SHUFFLE,
-        help="Shuffle the training data. (default: %(default)s)",
-    )
-    parser.add_argument(
         "-shs",
         "--shuffle-seed",
         type=int,
@@ -174,18 +166,23 @@ def get_train_args():
         help="Seed to be used for separating training and validation data. Defaults to network seed. (default: %(default)s)",
     )
     parser.add_argument(
+        "-sh",
+        "--shuffle",
+        type=str2bool,
+        default=DEFAULT_SHUFFLE,
+        help="Shuffle the training data. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-bi",
         "--bias",
-        choices=["true", "false"],
-        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        type=str2bool,
         default=DEFAULT_BIAS,
         help="Use bias or not. (default: %(default)s)",
     )
     parser.add_argument(
         "-biout",
         "--bias-output",
-        choices=["true", "false"],
-        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        type=str2bool,
         default=DEFAULT_BIAS,
         help="Use bias or not in the output layer. (default: %(default)s)",
     )
@@ -206,8 +203,7 @@ def get_train_args():
     parser.add_argument(
         "-sp",
         "--scatter-plot",
-        choices=["true", "false"],
-        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        type=str2bool,
         default=DEFAULT_SCATTER_PLOT,
         help="Create a scatter plot with y, predicted values. (default: %(default)s)",
     )
@@ -258,15 +254,14 @@ def get_train_args():
     parser.add_argument(
         "-no",
         "--normalize-output",
-        choices=["true", "false"],
-        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        type=str2bool,
         default=DEFAULT_NORMALIZE_OUTPUT,
         help="Normalizes the output neuron. (default: %(default)s)",
     )
     parser.add_argument(
         "-rst",
         "--restart-no-conv",
-        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        type=str2bool,
         default=DEFAULT_RESTART_NO_CONV,
         help="Restarts the network if it won't converge. (default: %(default)s)",
     )
@@ -287,7 +282,7 @@ def get_train_args():
     parser.add_argument(
         "-hpred",
         "--save-heuristic-pred",
-        type=lambda x: (str(x).lower() in ["true", "1", "yes"]),
+        type=str2bool,
         default=DEFAULT_SAVE_HEURISTIC_PRED,
         help="Save a csv file with the expected and network-predicted heuristics for all training samples. (default: %(default)s)",
     )
@@ -414,3 +409,13 @@ def get_test_args():
         help="Seed to shuffle the tasks taken automatically. (default: %(default)s)",
     )
     return parser.parse_args()
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
