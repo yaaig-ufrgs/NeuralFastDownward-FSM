@@ -50,7 +50,7 @@ def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str, prefi
     ax.set_xlabel("h^sample")
     ax.set_ylabel("h^NN")
     epoch = "\nepoch " + str(t)
-    ax.set_title(plot_title + epoch, fontsize=10)
+    ax.set_title(prefix + plot_title + epoch, fontsize=10)
 
     fig.savefig(directory + "/" + plot_filename)
 
