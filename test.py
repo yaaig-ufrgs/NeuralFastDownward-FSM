@@ -13,6 +13,7 @@ from src.pytorch.utils.helpers import (
     remove_temporary_files,
     get_test_tasks_from_problem,
     get_defaults_and_facts_files,
+    get_problem_by_sample_filename,
 )
 from src.pytorch.utils.default_args import (
     DEFAULT_MAX_EXPANSIONS,
@@ -25,11 +26,12 @@ _log = logging.getLogger(__name__)
 
 
 def test_main(args):
+    args.domain, args.problem = get_problem_by_sample_filename(str(args.train_folder).split(".")[1])
     dirname = create_test_directory(args)
     setup_full_logging(dirname)
 
     if args.max_expansions == -1:
-        args.max_expansions = get_fixed_max_expansions(dirname)
+        args.max_expansions = get_fixed_max_expansions(args)
     if args.max_expansions == DEFAULT_MAX_EXPANSIONS and args.max_search_time == DEFAULT_MAX_SEARCH_TIME:
         args.max_search_time = DEFAULT_FORCED_MAX_SEARCH_TIME
         _log.warning(f"Neither max expansions nor max search time have been defined. "

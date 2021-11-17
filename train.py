@@ -21,6 +21,7 @@ from src.pytorch.utils.helpers import (
     save_y_pred_csv,
     remove_csv_except_best,
     add_train_arg,
+    get_problem_by_sample_filename,
 )
 from src.pytorch.utils.plot import (
     save_h_pred_scatter,
@@ -54,6 +55,8 @@ def train_main(args):
         args.weights_seed = args.seed
     set_seeds(args.seed)
 
+    args.domain, args.problem = get_problem_by_sample_filename(args.samples)
+
     dirname = create_train_directory(args)
     setup_full_logging(dirname)
 
@@ -61,7 +64,7 @@ def train_main(args):
         _log.error("Invalid hidden_units length.")
         return
     if args.max_epochs == -1:
-        args.max_epochs = get_fixed_max_epochs(dirname)
+        args.max_epochs = get_fixed_max_epochs(args)
     if args.max_epochs == DEFAULT_MAX_EPOCHS and args.max_training_time == DEFAULT_MAX_TRAINING_TIME:
         args.max_epochs = DEFAULT_FORCED_MAX_EPOCHS
         _log.warning(f"Neither max epoch nor max training time have been defined. "

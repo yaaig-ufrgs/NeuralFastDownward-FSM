@@ -46,12 +46,14 @@ def get_datetime():
     return datetime.now().isoformat().replace("-", ".").replace(":", ".")
 
 
-def get_fixed_max_epochs(dirname):
-    with open("reference/epochs.csv", "r") as f:
-        for line in f.readlines():
-            sample, value = line.split(",")
-            if sample in dirname:
-                return int(value)
+def get_fixed_max_epochs(args, model="resnet", time="1800"):
+    with open(f"reference/{model}.csv", "r") as f:
+        lines = [l.replace("\n", "").split(",") for l in f.readlines()]
+        header = lines[0]
+        for line in lines[1:]:
+            if args.domain == line[header.index("domain")] and \
+               args.problem == line[header.index("problem")]:
+                return int(line[header.index(f"epochs_{time}s")])
     _log.warning(
         f"Fixed number of epochs not found. "
         f"Setting to default value ({DEFAULT_MAX_EPOCHS})."
@@ -59,12 +61,14 @@ def get_fixed_max_epochs(dirname):
     return DEFAULT_MAX_EPOCHS
 
 
-def get_fixed_max_expansions(dirname):
-    with open("reference/expanded_states.csv", "r") as f:
-        for line in f.readlines():
-            sample, value = line.split(",")
-            if sample in dirname:
-                return int(value)
+def get_fixed_max_expansions(args, model="resnet", time="600"):
+    with open(f"reference/{model}.csv", "r") as f:
+        lines = [l.replace("\n", "").split(",") for l in f.readlines()]
+        header = lines[0]
+        for line in lines[1:]:
+            if args.domain == line[header.index("domain")] and \
+               args.problem == line[header.index("problem")]:
+                return int(line[header.index(f"expansions_{time}s")])
     _log.warning(
         f"Fixed maximum expansions not found. "
         f"Setting to default value ({DEFAULT_MAX_EXPANSIONS})."
@@ -114,10 +118,9 @@ def save_json(filename: str, data: list):
 
 
 def logging_train_config(args, dirname, json=True):
-    domain, problem = get_problem_by_sample_filename(args.samples)
     args_dic = {
-        "domain": domain,
-        "problem": problem,
+        "domain": args.domain,
+        "problem": args.problem,
         "samples": args.samples,
         "model": args.model,
         "patience": args.patience,
@@ -369,5 +372,6 @@ def get_defaults_and_facts_files(samples_dir: str, sample_file: str):
     if len(ffiles) > 0 and len(dfiles) > 0:
         return ffiles[0], dfiles[0]
     else:
-        _log.error("No default and facts files found.")
+        return "", ""
+        # _log.error("No default and facts files found.")
 
