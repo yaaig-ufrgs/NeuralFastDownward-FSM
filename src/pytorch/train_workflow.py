@@ -200,7 +200,7 @@ class TrainWorkflow:
         # Post-training scatter plot.
         self.save_post_scatter_plot(fold_idx)
 
-        return (cur_val_loss if validation else None), False
+        return (best_val_loss if validation else None), False
 
     def save_post_scatter_plot(self, fold_idx: int):
         with torch.no_grad():
