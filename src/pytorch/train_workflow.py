@@ -89,7 +89,6 @@ class TrainWorkflow:
             for X, y in self.val_dataloader:
                 pred = self.model(X)
                 val_loss += self.loss_fn(pred, y).item()
-
                 if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
                     x_lst = X.tolist()
                     for i, _ in enumerate(x_lst):
@@ -101,14 +100,23 @@ class TrainWorkflow:
                             self.val_y_pred_values[x_str] = (y_h, pred_h)
                         else:  # Regression
                             self.val_y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
-
         if len(self.val_y_pred_values) > 0:
             save_y_pred_scatter(
                 self.val_y_pred_values, t, fold_idx, f"{self.dirname}/plots", "val_"
             )
             self.val_y_pred_values.clear()
+        return val_loss / num_batches
 
-
+    def val_loop_no_contrasting(self, t: int, fold_idx: int, contrasting_h: int = 501):
+        num_batches = len(self.val_dataloader)
+        val_loss = 0
+        with torch.no_grad():
+            for X, y in self.val_dataloader:
+                pred = self.model(X)
+                val_loss += self.loss_fn(
+                    torch.tensor([pred_ for i, pred_ in enumerate(pred) if y[i] != contrasting_h]),
+                    torch.tensor([y_ for y_ in y if y_ != contrasting_h])
+                ).item()
         return val_loss / num_batches
 
     def dead(self):
@@ -152,7 +160,6 @@ class TrainWorkflow:
         traced_model.save(filename)
 
     def run(self, fold_idx, train_timer, validation=True):
-        loss_first_epoch = 0
         best_val_loss = None
         born_dead = False
         for t in range(self.max_epochs):
@@ -172,7 +179,10 @@ class TrainWorkflow:
 
             if validation:
                 cur_val_loss = self.val_loop(t, fold_idx)
-                loss_first_epoch = cur_val_loss if t == 0 else loss_first_epoch
+                _log.info(
+                    f"Epoch {t} | avg_train_loss={cur_train_loss:>7f}"
+                    f" | avg_val_loss={cur_val_loss:>7f}"
+                )
                 if self.patience != None:
                     if best_val_loss is None or best_val_loss > cur_val_loss:
                         best_val_loss, best_val_epoch = cur_val_loss, t
@@ -184,10 +194,6 @@ class TrainWorkflow:
                         )
                         self.early_stopped = True
                         break
-                _log.info(
-                    f"Epoch {t} | avg_train_loss={cur_train_loss:>7f} "
-                    f"| avg_val_loss={cur_val_loss:>7f}"
-                )
             else:
                 _log.info(f"Epoch {t} | avg_train_loss={cur_train_loss:>7f}")
 
