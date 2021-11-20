@@ -14,6 +14,7 @@ from src.pytorch.utils.helpers import (
     get_test_tasks_from_problem,
     get_defaults_and_facts_files,
     get_problem_by_sample_filename,
+    get_models_from_train_folder,
 )
 from src.pytorch.utils.default_args import (
     DEFAULT_MAX_EXPANSIONS,
@@ -27,6 +28,13 @@ _log = logging.getLogger(__name__)
 
 def test_main(args):
     args.domain, args.problem = get_problem_by_sample_filename(str(args.train_folder).split(".")[1])
+
+    if len(args.train_folder_compare) > 0:
+       domain_cmp, problem_cmp =  get_problem_by_sample_filename(str(args.train_folder_compare).split(".")[1])
+       if domain_cmp != args.domain or problem_cmp != args.problem:
+            _log.error("Invalid comparison folder. Must be in the same domain and instance.")
+            return
+
     dirname = create_test_directory(args)
     setup_full_logging(dirname)
 
@@ -40,24 +48,14 @@ def test_main(args):
         args.samples_dir += "/"
 
     if args.heuristic == "nn":
-        models = []
-        models_folder = f"{args.train_folder}/models"
-        if args.test_model == "best":
-            best_fold_path = f"{models_folder}/traced_best_val_loss.pt"
-            if path.exists(best_fold_path):
-                models.append(best_fold_path)
-            else:
-                _log.error(f"Best val loss model does not exists!")
-        elif args.test_model == "all":
-            i = 0
-            while path.exists(f"{models_folder}/traced_{i}.pt"):
-                models.append(f"{models_folder}/traced_{i}.pt")
-                i += 1
-        if len(models) == 0:
+        models = get_models_from_train_folder(args.train_folder, args.test_model)
+        models_cmp = get_models_from_train_folder(args.train_folder_compare, args.test_model)
+        if len(models) == 0 or (len(args.train_folder_compare) > 0 and len(models_cmp) == 0):
             _log.error("No models found for testing.")
             return
     else:
         models = [""]
+        models_cmp = [""]
 
     sample_file = str(args.train_folder).split('/')[-1].split('.')[1]
     if args.facts_file == "" and args.defaults_file == "":
@@ -75,16 +73,19 @@ def test_main(args):
 
     logging_test_config(args, dirname)
 
-    for model_path in models:
+    for i in range(len(models)):
+        model_path = models[i]
+        model_cmp_path = models_cmp[i] if len(models_cmp) > 0 else ""
         output = {}
-        for i, problem_pddl in enumerate(args.problem_pddls):
+        for j, problem_pddl in enumerate(args.problem_pddls):
             _log.info(
-                f'Solving instance "{problem_pddl}" ({i+1}/{len(args.problem_pddls)})'
+                f'Solving instance "{problem_pddl}" ({j+1}/{len(args.problem_pddls)})'
             )
             output[problem_pddl] = solve_instance_with_fd_nh(
                 domain_pddl=args.domain_pddl,
                 problem_pddl=problem_pddl,
                 traced_model=model_path,
+                traced_model_cmp=model_cmp_path,
                 search_algorithm=args.search_algorithm,
                 heuristic=args.heuristic,
                 heuristic_multiplier=args.heuristic_multiplier,

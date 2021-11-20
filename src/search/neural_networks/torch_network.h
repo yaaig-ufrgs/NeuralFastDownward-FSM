@@ -20,8 +20,13 @@ protected:
     /** Path to the stored model */
     const std::string path;
 
+    /** Path to the compared model */
+    const std::string path_cmp;
+
     /** Torch model */
     torch::jit::script::Module module;
+
+    torch::jit::script::Module module_cmp;
 
     /** Flag if network is initialized */
     bool is_initialized = false;
@@ -38,6 +43,7 @@ protected:
      * by default all)
      */
     virtual void parse_output(const torch::jit::IValue &output) = 0;
+    virtual void parse_output_both(const torch::jit::IValue &output, const torch::jit::IValue &output_cmp) = 0;
     virtual void clear_output() = 0;
 
 

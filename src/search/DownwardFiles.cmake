@@ -525,9 +525,9 @@ fast_downward_plugin(
        HELP "Networks using torch"
        SOURCES
        neural_networks/torch_network
-       neural_networks/test_torch_network
-       neural_networks/torch_state_network
-       neural_networks/torch_policy_network
+       #neural_networks/test_torch_network
+       #neural_networks/torch_state_network
+       #neural_networks/torch_policy_network
        neural_networks/torch_sampling_network
        DEPENDS NEURAL_NETWORKS
        PACKAGES Torch
