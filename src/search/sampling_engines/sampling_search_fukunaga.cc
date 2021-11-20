@@ -39,30 +39,12 @@ string SamplingSearchFukunaga::sample_file_header() const {
     return header;
 }
 
-// // If match_heuristics then the h values will reduce. Find the new max h.
-// if (match_heuristics) {
-//     unordered_map<string,int> pairs;
-//     string state;
-//     int h, cut;
-//     for (string& s : samples) {
-//         cut = s.find_first_of(";");
-//         h = stoi(s.substr(0, cut));
-//         string state = s.substr(cut+1);
-//         if (pairs.count(state) == 0 || h < pairs[state])
-//             pairs[state] = h;
-//     }
-//     max_h = 0;
-//     for (auto& it : pairs)
-//         if (it.second > max_h)
-//             max_h = it.second;
-// }
-
 vector<string> SamplingSearchFukunaga::extract_samples() {
     vector<string> samples;
     int rand_value = 0;
     int max_h = 0;
 
-    // If match_heuristics then the h values will reduce. Find the new max h.
+    // If match_heuristics then the h values will reduce
     unordered_map<string,int> state_value;
     if (match_heuristics) {
         string state;
