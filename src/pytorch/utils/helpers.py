@@ -375,3 +375,25 @@ def get_defaults_and_facts_files(samples_dir: str, sample_file: str):
         return "", ""
         # _log.error("No default and facts files found.")
 
+
+def get_models_from_train_folder(train_folder: str, test_model: str) -> [str]:
+    models = []
+
+    if train_folder == "":
+        return models
+
+    models_folder = f"{train_folder}/models"
+
+    if test_model == "best":
+        best_fold_path = f"{models_folder}/traced_best_val_loss.pt"
+        if os.path.exists(best_fold_path):
+            models.append(best_fold_path)
+        else:
+            _log.error(f"Best val loss model does not exists!")
+    elif test_model == "all":
+        i = 0
+        while os.path.exists(f"{models_folder}/traced_{i}.pt"):
+            models.append(f"{models_folder}/traced_{i}.pt")
+            i += 1
+
+    return models

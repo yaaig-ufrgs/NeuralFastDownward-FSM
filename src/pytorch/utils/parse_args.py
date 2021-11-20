@@ -297,6 +297,13 @@ def get_test_args():
         help="Path to training folder with trained model."
     )
     parser.add_argument(
+        "-tfc",
+        "--train_folder_compare",
+        type=str,
+        default="",
+        help="Trained folder to be used for comparison agains the main model."
+    )
+    parser.add_argument(
         "problem_pddls",
         type=str,
         nargs="*",

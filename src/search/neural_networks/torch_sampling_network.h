@@ -9,6 +9,7 @@ namespace neural_networks {
 
 class TorchSamplingNetwork : public TorchNetwork {
 protected:
+    //const std::string path_cmp; // Path to secondary network model used for comparison.
     const int heuristic_shift;
     const int heuristic_multiplier;
     const std::vector<FactPair> relevant_facts;
@@ -25,6 +26,7 @@ protected:
 
     virtual std::vector<at::Tensor> get_input_tensors(const State &state) override;
     virtual void parse_output(const torch::jit::IValue &output) override;
+    virtual void parse_output_both(const torch::jit::IValue &output, const torch::jit::IValue &output_cmp) override;
     virtual void clear_output() override;
 public:
     explicit TorchSamplingNetwork(const Options &opts);

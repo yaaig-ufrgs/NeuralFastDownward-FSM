@@ -150,6 +150,7 @@ void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
             h = 0; 
         }
         last_h = tensor.size(1) == 1 ? (h + heuristic_shift) * heuristic_multiplier : unary_to_value(unary_output);
+        //cout << "###### last_h: " << last_h << endl;
         last_h_batch.push_back(last_h);
     }
     else {
@@ -157,6 +158,45 @@ void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
         last_h_batch.push_back(last_h);
     }
 }
+
+void TorchSamplingNetwork::parse_output_both(const torch::jit::IValue &output, const torch::jit::IValue &output_cmp) {
+    at::Tensor tensor = output.toTensor();
+    at::Tensor tensor_cmp = output_cmp.toTensor();
+    std::vector<double> unary_output(tensor.data_ptr<float>(),
+                                    tensor.data_ptr<float>() + tensor.numel());
+    std::vector<double> unary_output_cmp(tensor_cmp.data_ptr<float>(),
+                                    tensor_cmp.data_ptr<float>() + tensor_cmp.numel());
+
+
+    if (!blind) {
+        // Regression (tensor.size(1) == 1) or Classification (tensor.size(1) > 1).
+        double h = normalize_output ? round(unary_output[0]*max_h) : unary_output[0];
+        double h_cmp = normalize_output ? round(unary_output_cmp[0]*max_h) : unary_output_cmp[0];
+        // All negative output is zeroed.
+        if (h < 0) {
+            h = 0; 
+        }
+        if (h_cmp < 0) {
+            h_cmp = 0;
+        }
+        double h_final = h <= h_cmp ? h : h_cmp;
+        if (tensor.size(1) == 1) {
+            last_h = (h_final + heuristic_shift) * heuristic_multiplier;
+        } else {
+            double uv = unary_to_value(unary_output);
+            double uv_cmp = unary_to_value(unary_output_cmp);
+            last_h = uv <= uv_cmp ? uv : uv_cmp;
+            
+        }
+        //cout << "###### last_h_both: " << last_h << endl;
+        last_h_batch.push_back(last_h);
+    }
+    else {
+        last_h = 0;
+        last_h_batch.push_back(last_h);
+    }
+}
+
 
 void TorchSamplingNetwork::clear_output() {
     last_h = Heuristic::NO_VALUE;
