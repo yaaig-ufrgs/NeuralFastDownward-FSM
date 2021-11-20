@@ -51,7 +51,7 @@ class KFoldTrainingData:
         self.output_layer = output_layer
         self.shuffle = shuffle
         self.seed = seed
-        self.shuffle_seed = seed if shuffle_seed == DEFAULT_SHUFFLE_SEED else shuffle_seed
+        self.shuffle_seed = shuffle_seed
         self.model = model
         self.kfolds = self.generate_kfold_training_data()
 

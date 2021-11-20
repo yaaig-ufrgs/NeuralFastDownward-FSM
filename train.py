@@ -53,6 +53,8 @@ def train_main(args):
         args.seed = randint(0, 2**32-1)
     if args.weights_seed == -1:
         args.weights_seed = args.seed
+    if args.shuffle_seed == -1:
+        args.shuffle_seed = args.seed
     set_seeds(args.seed)
 
     args.domain, args.problem = get_problem_by_sample_filename(args.samples)

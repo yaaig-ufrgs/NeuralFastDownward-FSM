@@ -62,19 +62,19 @@ def parse_fd_output(output: str):
             elif "Maximum number of expansions reached." in output:
                 results["search_state"] = "maximum expansions reached"
         if exit_code == 0:
-            results["plan_length"] = re_plan[0][0]
-            results["plan_cost"] = re_plan[0][1]
-        results["initial_h"] = re_initial_h.group(1)
-        results["expanded"] = re_states[0][0]
-        results["reopened"] = re_states[0][1]
-        results["evaluated"] = re_states[0][2]
-        results["generated"] = re_states[0][3]
-        results["dead_ends"] = re_states[0][4]
-        results["search_time"] = re_time[0][0]
+            results["plan_length"] = int(re_plan[0][0])
+            results["plan_cost"] = int(re_plan[0][1])
+        results["initial_h"] = int(re_initial_h.group(1))
+        results["expanded"] = int(re_states[0][0])
+        results["reopened"] = int(re_states[0][1])
+        results["evaluated"] = int(re_states[0][2])
+        results["generated"] = int(re_states[0][3])
+        results["dead_ends"] = int(re_states[0][4])
+        results["search_time"] = float(re_time[0][0])
         results["expansion_rate"] = round(
             float(results["expanded"]) / float(results["search_time"]), 4
         )
-        results["total_time"] = re_time[0][1]
+        results["total_time"] = float(re_time[0][1])
     return results
 
 

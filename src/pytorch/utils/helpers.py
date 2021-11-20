@@ -139,6 +139,7 @@ def logging_train_config(args, dirname, json=True):
         "weight_decay": args.weight_decay,
         "dropout_rate": args.dropout_rate,
         "shuffle": args.shuffle,
+        "shuffle_seed": args.shuffle_seed,
         "bias": args.bias,
         "bias_output": args.bias_output,
         "normalize_output": args.normalize_output,
@@ -226,7 +227,12 @@ def logging_test_statistics(
     results["statistics"][model] = {}
     rlist = {}
     if len(args.problem_pddls) > 0:
-        for x in results["results"][model][args.problem_pddls[0]]:
+        stats = []
+        for problem in results["results"][model]:
+            for s in results["results"][model][problem]:
+                if s not in stats:
+                    stats.append(s)
+        for x in stats:
             rlist[x] = [
                 results["results"][model][p][x]
                 for p in results["results"][model]
@@ -330,7 +336,6 @@ def remove_csv_except_best(directory: str, fold_idx: int):
         idx = int(f_split[-1].split(".")[0])
         if idx != fold_idx:
             os.remove(f)
-
 
 def get_problem_by_sample_filename(sample_filename: str):
     # return (domain, problem)
