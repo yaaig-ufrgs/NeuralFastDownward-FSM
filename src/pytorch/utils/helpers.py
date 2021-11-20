@@ -252,8 +252,9 @@ def logging_test_statistics(
             elif x == "plan_length":
                 for i in range(len(rlist[x])):
                     rlist[x][i] = int(rlist[x][i])
-                results["statistics"][model]["max_plan_length"] = max(rlist[x])
-                results["statistics"][model]["min_plan_length"] = min(rlist[x])
+                if len(rlist[x]) > 1:
+                    results["statistics"][model]["max_plan_length"] = max(rlist[x])
+                    results["statistics"][model]["min_plan_length"] = min(rlist[x])
                 results["statistics"][model]["avg_plan_length"] = round(
                     mean(rlist[x]), decimal_places
                 )

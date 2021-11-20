@@ -158,11 +158,11 @@ def solve_instance_with_fd_nh(
     if heuristic == "nn":
         facts = "[]" if facts_file == "" else f"[file {facts_file}]"
         defaults = "[]" if defaults_file == "" else f"[file {defaults_file}]"
-        cmp_model = "\"\"" if traced_model_cmp == "" else traced_model_cmp
+        cmp_model = traced_model_cmp
         undefined_input = "true" if "_us_" in traced_model else "false"
         opt_network = (
             f"torch_sampling_network(path={traced_model},"
-            f"path_cmp={cmp_model},"
+            f"path_cmp={traced_model_cmp},"
             f"multiplier={heuristic_multiplier},"
             f"facts={facts},"
             f"defaults={defaults},"
