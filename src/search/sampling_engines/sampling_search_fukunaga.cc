@@ -39,15 +39,46 @@ string SamplingSearchFukunaga::sample_file_header() const {
     return header;
 }
 
+// // If match_heuristics then the h values will reduce. Find the new max h.
+// if (match_heuristics) {
+//     unordered_map<string,int> pairs;
+//     string state;
+//     int h, cut;
+//     for (string& s : samples) {
+//         cut = s.find_first_of(";");
+//         h = stoi(s.substr(0, cut));
+//         string state = s.substr(cut+1);
+//         if (pairs.count(state) == 0 || h < pairs[state])
+//             pairs[state] = h;
+//     }
+//     max_h = 0;
+//     for (auto& it : pairs)
+//         if (it.second > max_h)
+//             max_h = it.second;
+// }
+
 vector<string> SamplingSearchFukunaga::extract_samples() {
     vector<string> samples;
     int rand_value = 0;
     int max_h = 0;
 
+    // If match_heuristics then the h values will reduce. Find the new max h.
+    unordered_map<string,int> state_value;
+    if (match_heuristics) {
+        string state;
+        int h;
+        for (std::shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
+            string state = partialAssignment->to_string();
+            h = partialAssignment->estimated_heuristic;
+            if (state_value.count(state) == 0 || h < state_value[state])
+                state_value[state] = h;
+        }
+    }
+
     for (std::shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         ostringstream oss;
 
-        int h = partialAssignment->estimated_heuristic;
+        int h = match_heuristics ? state_value[partialAssignment->to_string()] : partialAssignment->estimated_heuristic;
         if (h > max_h)
             max_h = h;
 
@@ -100,24 +131,6 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
                 samples.push_back(oss.str());
             }
         }
-    }
-
-    // If match_heuristics then the h values will reduce. Find the new max h.
-    if (match_heuristics) {
-        unordered_map<string,int> pairs;
-        string state;
-        int h, cut;
-        for (string& s : samples) {
-            cut = s.find_first_of(";");
-            h = stoi(s.substr(0, cut));
-            string state = s.substr(cut+1);
-            if (pairs.count(state) == 0 || h < pairs[state])
-                pairs[state] = h;
-        }
-        max_h = 0;
-        for (auto& it : pairs)
-            if (it.second > max_h)
-                max_h = it.second;
     }
 
     if (contrasting_samples > 0) {

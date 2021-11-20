@@ -186,9 +186,15 @@ pair<bool, State> PartialAssignment::get_full_state(
     return make_pair(success, State(*task, move(new_values)));
 }
 
-
 pair<bool, State> TaskProxy::convert_to_full_state(
         PartialAssignment &assignment,
         bool check_mutexes, utils::RandomNumberGenerator &rng) const {
     return assignment.get_full_state(check_mutexes, rng);
+}
+
+std::string PartialAssignment::to_string() {
+    std::string s = "";
+    for (int& v : *values)
+        s += (char)v;
+    return s;
 }
