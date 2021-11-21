@@ -298,7 +298,7 @@ def get_test_args():
     )
     parser.add_argument(
         "-tfc",
-        "--train_folder_compare",
+        "--train-folder-compare",
         type=str,
         default="",
         help="Trained folder to be used for comparison agains the main model."

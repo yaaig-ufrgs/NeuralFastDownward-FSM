@@ -178,6 +178,7 @@ def logging_test_config(args, dirname, save_file=True):
         "test_model": args.test_model,
         "facts_file": args.facts_file if args.facts_file != "" else None,
         "defaults_file": args.defaults_file if args.defaults_file != "" else None,
+        "train_folder_compare": args.train_folder_compare if args.train_folder_compare != "" else None,
     }
     if args.heuristic == "nn":
         args_dic["test_model"] = args.test_model
