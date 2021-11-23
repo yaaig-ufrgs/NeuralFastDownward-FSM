@@ -58,6 +58,7 @@ def train_main(args):
     set_seeds(args.seed)
 
     args.domain, args.problem = get_problem_by_sample_filename(args.samples)
+    args.save_git_diff = True
 
     dirname = create_train_directory(args)
     setup_full_logging(dirname)

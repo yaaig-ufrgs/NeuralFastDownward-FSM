@@ -7,8 +7,9 @@ import glob
 import os
 from random import Random
 from json import dump, load
-from datetime import datetime
+from datetime import datetime, timezone
 from statistics import median, mean
+from subprocess import check_output
 from src.pytorch.utils.default_args import (
     DEFAULT_AUTO_TASKS_FOLDER,
     DEFAULT_AUTO_TASKS_N,
@@ -43,7 +44,7 @@ def prefix_to_h(prefix: [float], threshold: float = 0.01) -> int:
 
 
 def get_datetime():
-    return datetime.now().isoformat().replace("-", ".").replace(":", ".")
+    return datetime.now(timezone.utc).strftime("%d %B %Y %H:%M:%S UTC")
 
 
 def get_fixed_max_epochs(args, model="resnet", time="1800"):
@@ -76,6 +77,19 @@ def get_fixed_max_expansions(args, model="resnet", time="600"):
     return DEFAULT_MAX_EXPANSIONS
 
 
+def save_git_diff(dirname: str):
+    filename = f"{dirname}/git.diff"
+    with open(filename, "w") as f:
+        f.write(check_output(["git", "diff"]).decode("ascii").strip())
+        # _log.info(f"Git diff has been saved in {filename}")
+
+
+def get_git_commit():
+    return check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+
+def get_hostname():
+    return check_output(["hostname"]).decode("ascii").strip()
+
 def create_train_directory(args, config_in_foldername=False):
     sep = "."
     dirname = f"{args.output_folder}/nfd_train{sep}{args.samples.split('/')[-1]}"
@@ -94,6 +108,8 @@ def create_train_directory(args, config_in_foldername=False):
         dirname = dirname + f"{sep}{i}"
     os.makedirs(dirname)
     os.makedirs(f"{dirname}/models")
+    if args.save_git_diff:
+        save_git_diff(dirname)
     return dirname
 
 
@@ -109,6 +125,8 @@ def create_test_directory(args):
             i += 1
         dirname = dirname + f"{sep}{i}"
     os.makedirs(dirname)
+    if args.save_git_diff:
+        save_git_diff(dirname)
     return dirname
 
 
@@ -119,6 +137,9 @@ def save_json(filename: str, data: list):
 
 def logging_train_config(args, dirname, json=True):
     args_dic = {
+        "hostname": get_hostname(),
+        "date": get_datetime(),
+        "commit": get_git_commit(),
         "domain": args.domain,
         "problem": args.problem,
         "samples": args.samples,
@@ -165,6 +186,9 @@ def logging_train_config(args, dirname, json=True):
 
 def logging_test_config(args, dirname, save_file=True):
     args_dic = {
+        "hostname": get_hostname(),
+        "date": get_datetime(),
+        "commit": get_git_commit(),
         "train_folder": str(args.train_folder),
         "domain_pddl": args.domain_pddl,
         "problems_pddl": args.problem_pddls,

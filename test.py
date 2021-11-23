@@ -28,6 +28,7 @@ _log = logging.getLogger(__name__)
 
 def test_main(args):
     args.domain, args.problem = get_problem_by_sample_filename(str(args.train_folder).split(".")[1])
+    args.save_git_diff = True
 
     if len(args.train_folder_compare) > 0:
        domain_cmp, problem_cmp =  get_problem_by_sample_filename(str(args.train_folder_compare).split(".")[1])
