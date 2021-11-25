@@ -98,7 +98,9 @@ def test_main(args):
                 defaults_file=args.defaults_file,
                 save_log_to=dirname,
             )
-            _log.info(f"{output[problem_pddl]}")
+            _log.info(problem_pddl)
+            for var in output[problem_pddl]:
+                _log.info(f" | {var}: {output[problem_pddl][var]}")
 
         model_file = model_path.split("/")[-1]
         logging_test_statistics(args, dirname, model_file, output)
