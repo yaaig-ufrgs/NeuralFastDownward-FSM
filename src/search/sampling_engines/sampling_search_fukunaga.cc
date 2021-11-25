@@ -64,9 +64,6 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
         if (h > max_h)
             max_h = h;
 
-        if (store_plan_cost && state_representation != "assign_undefined")
-            oss << h << field_separator;
-
         if (store_state) {
             vector<int> values;
             if (state_representation == "assign_undefined") {
@@ -87,9 +84,11 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
                     }
                 }
                 for (State &s : states) {
+                    if (task_properties::is_goal_state(task_proxy, s))
+                        h = 0;
                     oss.str("");
                     if (store_plan_cost)
-                        oss << partialAssignment->estimated_heuristic << field_separator;
+                        oss << h << field_separator;
                     s.unpack();
                     values = s.get_values();
                     for (unsigned i = 0; i < relevant_facts.size(); i++)
@@ -101,9 +100,12 @@ vector<string> SamplingSearchFukunaga::extract_samples() {
                     State s = partialAssignment->get_full_state(true, *rng).second;
                     s.unpack();
                     values = s.get_values();
+                    if (task_properties::is_goal_state(task_proxy, s))
+                        h = 0;
                 } else if (state_representation == "partial" || state_representation == "undefined") {
                     values = partialAssignment->get_values();
                 }
+                oss << h << field_separator;
                 for (unsigned i = 0; i < relevant_facts.size(); i++) {
                     if ((state_representation == "undefined") &&
                         (i == 0 || relevant_facts[i].var != relevant_facts[i-1].var))
