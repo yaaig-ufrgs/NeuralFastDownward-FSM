@@ -88,7 +88,7 @@ def get_git_commit():
     return check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 def get_hostname():
-    return check_output(["hostname"]).decode("ascii").strip()
+    return check_output(["cat", "/proc/sys/kernel/hostname"]).decode("ascii").strip()
 
 def create_train_directory(args, config_in_foldername=False):
     sep = "."
