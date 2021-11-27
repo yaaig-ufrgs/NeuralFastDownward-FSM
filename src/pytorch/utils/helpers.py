@@ -47,7 +47,7 @@ def get_datetime():
     return datetime.now(timezone.utc).strftime("%d %B %Y %H:%M:%S UTC")
 
 
-def get_fixed_max_epochs(args, model="resnet", time="1800"):
+def get_fixed_max_epochs(args, model="resnet_ferber21", time="1800"):
     with open(f"reference/{model}.csv", "r") as f:
         lines = [l.replace("\n", "").split(",") for l in f.readlines()]
         header = lines[0]
@@ -62,7 +62,7 @@ def get_fixed_max_epochs(args, model="resnet", time="1800"):
     return DEFAULT_MAX_EPOCHS
 
 
-def get_fixed_max_expansions(args, model="resnet", time="600"):
+def get_fixed_max_expansions(args, model="resnet_ferber21", time="600"):
     with open(f"reference/{model}.csv", "r") as f:
         lines = [l.replace("\n", "").split(",") for l in f.readlines()]
         header = lines[0]
