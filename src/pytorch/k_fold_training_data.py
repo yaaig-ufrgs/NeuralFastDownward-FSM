@@ -67,9 +67,6 @@ class KFoldTrainingData:
 
         _log.info(f"Generating {self.num_folds}-fold...")
 
-        print("data num workers", self.data_num_workers)
-        exit(1)
-
         kfolds = []
         instances_per_fold = int(len(self.state_value_pairs) / self.num_folds)
         for i in range(self.num_folds):
