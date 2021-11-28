@@ -135,11 +135,12 @@ def save_json(filename: str, data: list):
         dump(data, f, indent=4)
 
 
-def logging_train_config(args, dirname, json=True):
+def logging_train_config(args, dirname, cmd_line, json=True):
     args_dic = {
         "hostname": get_hostname(),
         "date": get_datetime(),
         "commit": get_git_commit(),
+        "command": cmd_line,
         "domain": args.domain,
         "problem": args.problem,
         "samples": args.samples,
@@ -185,11 +186,12 @@ def logging_train_config(args, dirname, json=True):
         save_json(f"{dirname}/train_args.json", args_dic)
 
 
-def logging_test_config(args, dirname, save_file=True):
+def logging_test_config(args, dirname, cmd_line, save_file=True):
     args_dic = {
         "hostname": get_hostname(),
         "date": get_datetime(),
         "commit": get_git_commit(),
+        "command": cmd_line,
         "train_folder": str(args.train_folder),
         "domain_pddl": args.domain_pddl,
         "problems_pddl": args.problem_pddls,

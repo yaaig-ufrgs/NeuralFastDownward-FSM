@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import logging
 import random
 import numpy as np
@@ -73,7 +74,8 @@ def train_main(args):
         _log.warning(f"Neither max epoch nor max training time have been defined. "
                      f"Setting maximum epochs to {DEFAULT_FORCED_MAX_EPOCHS}.")
 
-    logging_train_config(args, dirname)
+    cmd_line = " ".join(sys.argv[0:])
+    logging_train_config(args, dirname, cmd_line)
 
     ### TRAINING ###
     best_fold, num_retries, train_timer = train_nn(args, dirname)
