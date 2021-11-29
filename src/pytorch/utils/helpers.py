@@ -426,5 +426,10 @@ def get_models_from_train_folder(train_folder: str, test_model: str) -> [str]:
         while os.path.exists(f"{models_folder}/traced_{i}.pt"):
             models.append(f"{models_folder}/traced_{i}.pt")
             i += 1
+    elif test_model == "epochs":
+        i = 0
+        while os.path.exists(f"{models_folder}/traced_0-epoch-{i}.pt"):
+            models.append(f"{models_folder}/traced_0-epoch-{i}.pt")
+            i += 1
 
     return models
