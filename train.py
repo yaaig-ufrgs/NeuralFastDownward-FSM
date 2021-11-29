@@ -166,6 +166,7 @@ def train_nn(args, dirname):
             shuffle_seed=args.shuffle_seed,
             data_num_workers=args.data_num_workers,
             normalize=args.normalize_output,
+            clamping=args.clamping,
             model=args.model,
         )
         if args.normalize_output:

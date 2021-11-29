@@ -11,6 +11,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_ACTIVATION,
     DEFAULT_WEIGHT_DECAY,
     DEFAULT_DROPOUT_RATE,
+    DEFAULT_CLAMPING,
     DEFAULT_SHUFFLE,
     DEFAULT_SHUFFLE_SEED,
     DEFAULT_BIAS,
@@ -186,6 +187,13 @@ def get_train_args():
         type=str2bool,
         default=DEFAULT_BIAS,
         help="Use bias or not in the output layer. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-clp",
+        "--clamping",
+        type=int,
+        default=DEFAULT_CLAMPING,
+        help="Value to clamp heuristics with h=value-cl. (default: %(default)s)",
     )
     parser.add_argument(
         "-of",
