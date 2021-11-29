@@ -24,6 +24,8 @@ def rsl_sampling(
     random_sample_percentage,
     regression_method,
 ):
+
+    ### (0) prepare
     startTime = time.perf_counter()
     print("> Sampling for {}".format(instance))
     print("> Seed is {}".format(seed))
@@ -36,6 +38,7 @@ def rsl_sampling(
     instance_domain = "/".join(instance_split[:-1]) + "/domain.pddl"
     instance_mutexes = instance + ".mutexes"
 
+    ### (1) simulator
     # Instantiates the "Simulator" and loads the mutexes for an instance.
     # A "Simulator" instance performs various functions imported from the "Tarski" library, and acts kind of
     # like a black box (but not really).
@@ -43,8 +46,9 @@ def rsl_sampling(
     with open(instance_mutexes, "rb") as input:
         state_mutexes = pickle.load(input)
 
-    state_mutexes_for_environment = []
 
+    ## (2) prepare mutex groups
+    state_mutexes_for_environment = []
     # A mutex group is a group of variable/value pairs of which no two can be simultaneously true.
     for mutex_group in state_mutexes:
         mutex_group_set = set()
@@ -55,6 +59,7 @@ def rsl_sampling(
         state_mutexes_for_environment.append(mutex_group_set)
     env.set_state_mutexes(state_mutexes_for_environment)
 
+    ## (3) various initialization
     sampledStatesAll = []    # List of sampled states.
     sampledStateHeurAll = [] # List of estimated heuristics for each sampled state.
 
@@ -68,7 +73,7 @@ def rsl_sampling(
     startTime_get_demos = time.perf_counter()
     # print(env.atomToInt)
 
-    # num_demos will basically dictate the number of rollouts to perform.
+    ## (4) perform `num_demos` rollouts
     for demoNum in range(num_demos):
         # print("get demo {}".format(demoNum))
         env.reset_to_initial_state()
@@ -80,6 +85,7 @@ def rsl_sampling(
         plan = env.get_random_regression_plan(maxLenOfDemo, regression_method)
         maxPlanLength = max(len(plan), maxPlanLength)
 
+        ## (4.1) add the goal
         formula = copy.deepcopy(set(unwrap_conjunction_or_atom(env.problem.goal)))
         formulaInts = set()
         for atom in formula:
@@ -90,6 +96,7 @@ def rsl_sampling(
         preImageFormulas = [(formula, formulaInts)]
         env.set_state_mutexes(state_mutexes_for_environment)
 
+        ## (4.2) add all states in the plan
         for op in plan:
             # print(op)
             formula = env.preimage_set(copy.deepcopy(formula), op)
@@ -101,26 +108,28 @@ def rsl_sampling(
                     formulaInts.add(env.atomToInt[str(atom)])
             preImageFormulas.append((formula, formulaInts))
 
+        ## (4.3) collect them all
         allPlansPreimages.append(preImageFormulas)
 
     endTime_get_demos = time.perf_counter()
     startTime_sample_states = time.perf_counter()
     maxLength = 0
 
+    ## (5) find maximum plan length and number of samples
     for preImagedSets in allPlansPreimages:
         if len(preImagedSets) > maxLength:
             maxLength = len(preImagedSets)
 
-    numTrainStatesPerPreimage = int(
-        numTrainStates / maxLength
-    )  # maxLength = number of pre image steps
+    # seems to make little sense to sample uniformly (MR)
+    numTrainStatesPerPreimage = int(numTrainStates / maxLength)  # maxLength = number of pre image steps
 
+    ## (6) go over all plans in increasing length (=heuristic value)
     heurValue = 0
     maxDemoLengthNotMet = True
     preImageSetsCurrent = []
     # preImageOrginialSets = []
     while maxDemoLengthNotMet:
-        # append all demos sets together that have heur = to current heur
+        ## (6.1) append all demos sets together that have heur = to current heur
         maxDemoLengthNotMet = False
         for preImagedSets in allPlansPreimages:
             if len(preImagedSets) > heurValue:
@@ -140,13 +149,14 @@ def rsl_sampling(
                 # randHeurSet: {on(g,i), on(f,j), on(j,e), on(b,a), on(e,h), on(h,b), on(d,c), on(a,g), on(c,f)}
                 # randHeurSetInts: {0, 64, 98, 36, 5, 75, 44, 56, 63}
                 randHeurSet, randHeurSetInts = random.choice(preImageSetsCurrent)
-                if (random.random() > random_sample_percentage / 100):  # sample random every second data point
+                
+                ## (6.2) select a random state (=no defined proposition) with probablity `random_sample_percentage`
+                if (random.random() > random_sample_percentage / 100):
                     assignedIndexes = list(randHeurSetInts)
                 else:
                     assignedIndexes = []
 
-                # Random binary state.
-                state = np.random.randint(0, 2, size=env.numAtoms)
+                state = np.random.randint(0, 2, size=env.numAtoms) # Random binary state.
 
                 for atom_indx in assignedIndexes:
                     state[atom_indx] = 1
@@ -179,7 +189,7 @@ def rsl_sampling(
                     for mutexListIndx in groupOrder:
                         mutexList = intersections[mutexListIndx][:-1][indexOfIntersection[mutexListIndx]]
                         # np.intersect1d(env.state_mutexes[mutexListIndx], trueAtoms, assume_unique = True)
-
+                        ## (6.3.1) if a proposition in this mutex group has been assigned keep it (precisely: the first assigned proposition); otherwise: select a random one
                         if len(mutexList) > 1:
                             assignedOne = False
                             areOnes = []
