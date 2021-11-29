@@ -13,6 +13,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_SHUFFLE,
     DEFAULT_RANDOM_SEED,
     DEFAULT_SHUFFLE_SEED,
+    DEFAULT_DATALOADER_NUM_WORKERS,
     DEFAULT_NORMALIZE_OUTPUT,
     DEFAULT_MODEL,
 )
@@ -35,6 +36,7 @@ class KFoldTrainingData:
         shuffle=DEFAULT_SHUFFLE,
         seed=DEFAULT_RANDOM_SEED,
         shuffle_seed=DEFAULT_SHUFFLE_SEED,
+        data_num_workers=DEFAULT_DATALOADER_NUM_WORKERS,
         normalize=DEFAULT_NORMALIZE_OUTPUT,
         model=DEFAULT_MODEL,
     ):
@@ -52,6 +54,7 @@ class KFoldTrainingData:
         self.shuffle = shuffle
         self.seed = seed
         self.shuffle_seed = shuffle_seed
+        self.data_num_workers = data_num_workers
         self.model = model
         self.kfolds = self.generate_kfold_training_data()
 
@@ -94,7 +97,7 @@ class KFoldTrainingData:
                 ),
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
-                num_workers=1,
+                num_workers=self.data_num_workers,
                 worker_init_fn=worker_fn,
                 generator=g,
             )
@@ -104,7 +107,7 @@ class KFoldTrainingData:
                 ),
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
-                num_workers=1,
+                num_workers=self.data_num_workers,
                 worker_init_fn=worker_fn,
                 generator=g,
             )

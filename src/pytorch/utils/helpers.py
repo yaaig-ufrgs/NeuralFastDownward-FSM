@@ -47,7 +47,7 @@ def get_datetime():
     return datetime.now(timezone.utc).strftime("%d %B %Y %H:%M:%S UTC")
 
 
-def get_fixed_max_epochs(args, model="resnet", time="1800"):
+def get_fixed_max_epochs(args, model="resnet_ferber21", time="1800"):
     with open(f"reference/{model}.csv", "r") as f:
         lines = [l.replace("\n", "").split(",") for l in f.readlines()]
         header = lines[0]
@@ -62,7 +62,7 @@ def get_fixed_max_epochs(args, model="resnet", time="1800"):
     return DEFAULT_MAX_EPOCHS
 
 
-def get_fixed_max_expansions(args, model="resnet", time="600"):
+def get_fixed_max_expansions(args, model="resnet_ferber21", time="600"):
     with open(f"reference/{model}.csv", "r") as f:
         lines = [l.replace("\n", "").split(",") for l in f.readlines()]
         header = lines[0]
@@ -88,7 +88,7 @@ def get_git_commit():
     return check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 def get_hostname():
-    return check_output(["hostname"]).decode("ascii").strip()
+    return check_output(["cat", "/proc/sys/kernel/hostname"]).decode("ascii").strip()
 
 def create_train_directory(args, config_in_foldername=False):
     sep = "."
@@ -135,11 +135,12 @@ def save_json(filename: str, data: list):
         dump(data, f, indent=4)
 
 
-def logging_train_config(args, dirname, json=True):
+def logging_train_config(args, dirname, cmd_line, json=True):
     args_dic = {
         "hostname": get_hostname(),
         "date": get_datetime(),
         "commit": get_git_commit(),
+        "command": cmd_line,
         "domain": args.domain,
         "problem": args.problem,
         "samples": args.samples,
@@ -161,6 +162,7 @@ def logging_train_config(args, dirname, json=True):
         "dropout_rate": args.dropout_rate,
         "shuffle": args.shuffle,
         "shuffle_seed": args.shuffle_seed,
+        "dataloader_num_workers": args.data_num_workers,
         "bias": args.bias,
         "bias_output": args.bias_output,
         "normalize_output": args.normalize_output,
@@ -184,11 +186,12 @@ def logging_train_config(args, dirname, json=True):
         save_json(f"{dirname}/train_args.json", args_dic)
 
 
-def logging_test_config(args, dirname, save_file=True):
+def logging_test_config(args, dirname, cmd_line, save_file=True):
     args_dic = {
         "hostname": get_hostname(),
         "date": get_datetime(),
         "commit": get_git_commit(),
+        "command": cmd_line,
         "train_folder": str(args.train_folder),
         "domain_pddl": args.domain_pddl,
         "problems_pddl": args.problem_pddls,

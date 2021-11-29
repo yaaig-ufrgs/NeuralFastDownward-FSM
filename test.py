@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+import sys
 from os import path
 
 from src.pytorch.fast_downward_api import solve_instance_with_fd_nh
@@ -72,7 +73,8 @@ def test_main(args):
         if args.problem_pddls == []:
             return
 
-    logging_test_config(args, dirname)
+    cmd_line = " ".join(sys.argv[0:])
+    logging_test_config(args, dirname, cmd_line)
 
     for i in range(len(models)):
         model_path = models[i]

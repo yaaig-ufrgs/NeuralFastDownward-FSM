@@ -29,6 +29,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_MODEL,
     DEFAULT_PATIENCE,
     DEFAULT_RANDOM_SEED,
+    DEFAULT_DATALOADER_NUM_WORKERS,
     DEFAULT_TEST_MODEL,
     DEFAULT_SCATTER_PLOT,
     DEFAULT_SCATTER_PLOT_N_EPOCHS,
@@ -278,6 +279,13 @@ def get_train_args():
         type=int,
         default=DEFAULT_NUM_THREADS,
         help="Number of threads used for intra operations on CPU (PyTorch). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-dnw",
+        "--data-num-workers",
+        type=int,
+        default=DEFAULT_DATALOADER_NUM_WORKERS,
+        help="Number of workers for multi-process data loading. (default: %(default)s)",
     )
     parser.add_argument(
         "-hpred",
