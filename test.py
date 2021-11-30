@@ -16,6 +16,7 @@ from src.pytorch.utils.helpers import (
     get_defaults_and_facts_files,
     get_problem_by_sample_filename,
     get_models_from_train_folder,
+    get_samples_folder_from_train_folder,
 )
 from src.pytorch.utils.default_args import (
     DEFAULT_MAX_EXPANSIONS,
@@ -40,6 +41,8 @@ def test_main(args):
     dirname = create_test_directory(args)
     setup_full_logging(dirname)
 
+    if args.samples_dir == None:
+        args.samples_dir = get_samples_folder_from_train_folder(args.train_folder)
     if args.max_expansions == -1:
         args.max_expansions = get_fixed_max_expansions(args)
     if args.max_expansions == DEFAULT_MAX_EXPANSIONS and args.max_search_time == DEFAULT_MAX_SEARCH_TIME:

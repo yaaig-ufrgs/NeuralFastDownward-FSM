@@ -140,7 +140,7 @@ def logging_train_config(args, dirname, cmd_line, json=True):
         "hostname": get_hostname(),
         "date": get_datetime(),
         "commit": get_git_commit(),
-        "command": cmd_line,
+        "command_line": cmd_line,
         "domain": args.domain,
         "problem": args.problem,
         "samples": args.samples,
@@ -436,3 +436,12 @@ def get_models_from_train_folder(train_folder: str, test_model: str) -> [str]:
             i += 1
 
     return models
+
+
+def get_samples_folder_from_train_folder(train_folder: str) -> [str]:
+    try:
+        with open(f"{train_folder}/train_args.json", "r") as f:
+            l = load(f)["samples"].split("/")
+            return l[-2] if len(l) > 1 else l[0]
+    except:
+        return "samples" # default

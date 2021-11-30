@@ -394,7 +394,7 @@ def get_test_args():
         "--samples-dir",
         type=str,
         default=DEFAULT_SAMPLES_FOLDER,
-        help="Default samples directory to automatically get facts and defaults files. (default: %(default)s)",
+        help="Default samples directory to automatically get facts and defaults files. (default: get from the samples file)",
     )
     parser.add_argument(
         "-ffile",
