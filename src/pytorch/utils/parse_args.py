@@ -48,6 +48,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_AUTO_TASKS_FOLDER,
     DEFAULT_AUTO_TASKS_SEED,
     DEFAULT_SAMPLES_FOLDER,
+    DEFAULT_SAVE_DOWNWARD_LOGS,
 )
 
 
@@ -431,6 +432,14 @@ def get_test_args():
         default=DEFAULT_AUTO_TASKS_SEED,
         help="Seed to shuffle the tasks taken automatically. (default: %(default)s)",
     )
+    parser.add_argument(
+        "-dlog",
+        "--downward-logs",
+        type=str2bool,
+        default=DEFAULT_SAVE_DOWNWARD_LOGS,
+        help="Save each instance's Fast-Downward log or not. (default: %(default)s)",
+    )
+
     return parser.parse_args()
 
 def str2bool(v):

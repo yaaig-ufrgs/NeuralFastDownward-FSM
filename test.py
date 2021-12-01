@@ -102,6 +102,7 @@ def test_main(args):
                 facts_file=args.facts_file,
                 defaults_file=args.defaults_file,
                 save_log_to=dirname,
+                save_log_bool=args.downward_logs,
             )
             _log.info(problem_pddl)
             for var in output[problem_pddl]:

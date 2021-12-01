@@ -13,6 +13,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_HEURISTIC_MULTIPLIER,
     DEFAULT_FACTS_FILE,
     DEFAULT_DEF_VALUES_FILE,
+    DEFAULT_SAVE_DOWNWARD_LOGS,
 )
 
 _log = logging.getLogger(__name__)
@@ -95,6 +96,7 @@ def solve_instance_with_fd(
     opts="astar(lmcut())",
     memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
     save_log_to=None,
+    save_log_bool=DEFAULT_SAVE_DOWNWARD_LOGS,
 ):
     try:
         cl = [
@@ -130,7 +132,7 @@ def solve_instance_with_fd(
         output = e.output
         _log.info("Solution not found.")
     output = output.decode("utf-8")
-    if save_log_to != None:
+    if save_log_bool and save_log_to != None:
         save_downward_log(save_log_to, instance_pddl, output)
     return parse_fd_output(output)
 
@@ -150,6 +152,7 @@ def solve_instance_with_fd_nh(
     facts_file=DEFAULT_FACTS_FILE,
     defaults_file=DEFAULT_DEF_VALUES_FILE,
     save_log_to=None,
+    save_log_bool=DEFAULT_SAVE_DOWNWARD_LOGS,
 ):
     """
     Tries to solve a PDDL instance with the torch_sampling_network.
@@ -184,5 +187,5 @@ def solve_instance_with_fd_nh(
     opts += ")"
 
     return solve_instance_with_fd(
-        domain_pddl, problem_pddl, (opts), memory_limit, save_log_to
+        domain_pddl, problem_pddl, (opts), memory_limit, save_log_to, save_log_bool
     )
