@@ -23,6 +23,7 @@ def rsl_sampling(
     seed,
     random_sample_percentage,
     regression_method,
+    range_contrasting,
 ):
 
     ### (0) prepare
@@ -89,10 +90,10 @@ def rsl_sampling(
         formula = copy.deepcopy(set(unwrap_conjunction_or_atom(env.problem.goal)))
         formulaInts = set()
         for atom in formula:
-            # In the simulator, each atom has an integer corresponding to it, e.g. on(d,c) -> 36, on(a,g) -> 63 
+            # In the simulator, each atom has an integer corresponding to it, e.g. on(d,c) -> 36, on(a,g) -> 63
             formulaInts.add(env.atomToInt[str(atom)])
 
-        # [({on(b,a), on(g,i), on(j,e), on(h,b), on(e,h), on(d,c), on(a,g), on(c,f), on(f,j)}, {0, 64, 98, 36, 5, 75, 44, 56, 63})] 
+        # [({on(b,a), on(g,i), on(j,e), on(h,b), on(e,h), on(d,c), on(a,g), on(c,f), on(f,j)}, {0, 64, 98, 36, 5, 75, 44, 56, 63})]
         preImageFormulas = [(formula, formulaInts)]
         env.set_state_mutexes(state_mutexes_for_environment)
 
@@ -113,10 +114,14 @@ def rsl_sampling(
 
     endTime_get_demos = time.perf_counter()
     startTime_sample_states = time.perf_counter()
+
     maxLength = 0
+    minLength = 9999
 
     ## (5) find maximum plan length and number of samples
     for preImagedSets in allPlansPreimages:
+        if len(preImagedSets) < minLength:
+            minLength = len(preImagedSets)
         if len(preImagedSets) > maxLength:
             maxLength = len(preImagedSets)
 
@@ -149,7 +154,7 @@ def rsl_sampling(
                 # randHeurSet: {on(g,i), on(f,j), on(j,e), on(b,a), on(e,h), on(h,b), on(d,c), on(a,g), on(c,f)}
                 # randHeurSetInts: {0, 64, 98, 36, 5, 75, 44, 56, 63}
                 randHeurSet, randHeurSetInts = random.choice(preImageSetsCurrent)
-                
+
                 ## (6.2) select a random state (=no defined proposition) with probablity `random_sample_percentage`
                 if (random.random() > random_sample_percentage / 100):
                     assignedIndexes = list(randHeurSetInts)
@@ -218,7 +223,7 @@ def rsl_sampling(
             sampledStatesAll.extend(sampledStates)
             sampledStateHeurAll.extend(sampledStateHeur)
 
-            # heuristic value is incremented on each while iteration, until len(preImagedSets) <= heurValue: 
+            # heuristic value is incremented on each while iteration, until len(preImagedSets) <= heurValue:
             heurValue += 1
 
             maxTime3 += time.perf_counter() - startTime
@@ -250,7 +255,11 @@ def rsl_sampling(
         if (
             not foundPreImage
         ):  # if not in any preimage just assign highest heur value (highest preimage heur + 1)
-            sampledStateHeurAll.append(heur)
+            if range_contrasting:
+                rnd_x = random.randint(minLength, heur)
+                sampledStateHeurAll.append(rnd_x)
+            else:
+                sampledStateHeurAll.append(heur)
         if numberChecked % 100 == 0:
             pass
             # print(numberChecked)
@@ -267,7 +276,7 @@ def rsl_sampling(
 
     save_sampling(sampling_filename, out_dir, sampledStatesAll, sampledStateHeurAll)
     save_facts_order_and_default_values(sampling_filename, out_dir, env.getGroundedDicts())
-   
+
 
 def save_sampling(sampling_filename, out_dir, sampledStatesAll, sampledStateHeurAll):
     out_file = out_dir + sampling_filename
@@ -321,14 +330,13 @@ if __name__ == "__main__":
         parser.add_argument("--instance", default=None)
         parser.add_argument("--one_step_method", default=None)
         parser.add_argument("--num_train_states", type=int, default=10000) # Nt
-        parser.add_argument(
-            "--check_state_invars", type=str2bool, nargs="?", const=True, default=False
-        )
+        parser.add_argument("--check_state_invars", type=str2bool, nargs="?", const=True, default=False)
         parser.add_argument("--num_demos", type=int, default=1) # Nr
         parser.add_argument("--max_len_demo", type=int, default=1) # L
         parser.add_argument("--seed", type=int, default=1)
         parser.add_argument("--random_sample_percentage", type=int, default=0) # Pr
         parser.add_argument("--regression_method", default=None)
+        parser.add_argument("--range_contrasting", type=str2bool, nargs="?", const=True, default=False)
 
         args = parser.parse_args()
         rsl_sampling(
@@ -341,4 +349,5 @@ if __name__ == "__main__":
             args.seed,
             args.random_sample_percentage,
             args.regression_method,
+            args.range_contrasting,
         )
