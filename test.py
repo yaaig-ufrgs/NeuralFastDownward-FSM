@@ -41,7 +41,7 @@ def test_main(args):
     dirname = create_test_directory(args)
     setup_full_logging(dirname)
 
-    if args.samples_dir == None:
+    if args.samples_dir == None or args.samples_dir == "None":
         args.samples_dir = get_samples_folder_from_train_folder(args.train_folder)
     if args.max_expansions == -1:
         args.max_expansions = get_fixed_max_expansions(args)
