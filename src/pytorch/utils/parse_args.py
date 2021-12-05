@@ -49,6 +49,11 @@ from src.pytorch.utils.default_args import (
     DEFAULT_AUTO_TASKS_SEED,
     DEFAULT_SAMPLES_FOLDER,
     DEFAULT_SAVE_DOWNWARD_LOGS,
+    DEFAULT_EXP_TYPE,
+    DEFAULT_EXP_THREADS,
+    DEFAULT_EXP_NET_SEED,
+    DEFAULT_EXP_SAMPLE_SEED,
+    DEFAULT_EXP_FIXED_SEED,
 )
 
 
@@ -303,6 +308,7 @@ def get_train_args():
         default=DEFAULT_SAVE_HEURISTIC_PRED,
         help="Save a csv file with the expected and network-predicted heuristics for all training samples. (default: %(default)s)",
     )
+
     return parser.parse_args()
 
 
@@ -441,6 +447,230 @@ def get_test_args():
     )
 
     return parser.parse_args()
+
+def get_exp_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-exp-type",
+        choices=["single", "fixed_net_seed", "fixed_sample_seed", "change_all", "all", "combined"],
+        default=DEFAULT_EXP_TYPE,
+        help="Experiment type according to seed. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-exp-fs",
+        "--exp-fixed-seed",
+        type=int,
+        default=DEFAULT_EXP_FIXED_SEED,
+        help="Fixed seed for fixed seed experiments. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-exp-ns",
+        "--exp-net-seed",
+        type=int,
+        default=DEFAULT_EXP_NET_SEED,
+        help="Network seed for fixed network experiments. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-exp-ss",
+        "--exp-sample-seed",
+        type=int,
+        default=DEFAULT_EXP_SAMPLE_SEED,
+        help="Sample seed for fixed sample seed experiments. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-exp-threads",
+        type=int,
+        default=DEFAULT_EXP_THREADS,
+        help="Number of threads to use. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "samples",
+        type=str,
+        help="Path to sample files.",
+    )
+    parser.add_argument(
+        "-trn-mdl",
+        "--train-model",
+        choices=["hnn", "resnet"],
+        default=DEFAULT_MODEL,
+        help="Network model to use. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-pat",
+        "--train-patience",
+        type=int,
+        default=DEFAULT_PATIENCE,
+        help="Early-stop patience. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-hl",
+        "--train-hidden-layers",
+        type=int,
+        default=DEFAULT_HIDDEN_LAYERS,
+        help="Number of hidden layers of the network. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-hu",
+        "--train-hidden-units",
+        type=int,
+        nargs="+",
+        default=DEFAULT_HIDDEN_UNITS,
+        help='Number of units in each hidden layers. For all hidden layers with same size enter \
+              only one value; for different size between layers enter "hidden_layers" values. \
+              (default: scalable according to the input and output units.)',
+    )
+    parser.add_argument(
+        "-train-t",
+        "--train-max-training-time",
+        type=int,
+        default=DEFAULT_MAX_TRAINING_TIME,
+        help="Maximum network training time (all folds). (default: %(default)ss)",
+    )
+
+    parser.add_argument(
+        "-trn-b",
+        "--train-batch-size",
+        type=int,
+        default=DEFAULT_BATCH_SIZE,
+        help="Number of samples used in each step of training. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-lr",
+        "--train-learning-rate",
+        type=float,
+        default=DEFAULT_LEARNING_RATE,
+        help="Network learning rate. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-e",
+        "--train-max-epochs",
+        type=int,
+        default=DEFAULT_MAX_EPOCHS,
+        help="Maximum number of epochs to train each fold (or -1 for fixed value). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-w",
+        "--train-weight-decay",
+        "--regularization",
+        type=float,
+        default=DEFAULT_WEIGHT_DECAY,
+        help="Weight decay (L2 regularization) to use in network training. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-d",
+        "--train-dropout-rate",
+        type=float,
+        default=DEFAULT_DROPOUT_RATE,
+        help="Dropout rate for hidden layers. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-shs",
+        "--train-shuffle-seed",
+        type=int,
+        default=DEFAULT_SHUFFLE_SEED,
+        help="Seed to be used for separating training and validation data. Defaults to network seed. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-sh",
+        "--train-shuffle",
+        type=str2bool,
+        default=DEFAULT_SHUFFLE,
+        help="Shuffle the training data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-bi",
+        "--train-bias",
+        type=str2bool,
+        default=DEFAULT_BIAS,
+        help="Use bias or not. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-of",
+        "--train-output-folder",
+        type=Path,
+        default=DEFAULT_OUTPUT_FOLDER,
+        help="Path where the training folder will be saved. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-s",
+        "--train-seed",
+        type=int,
+        default=DEFAULT_RANDOM_SEED,
+        help="Random seed to be used. Defaults to no seed. (default: random)",
+    )
+    parser.add_argument(
+        "-trn-rst",
+        "--train-restart-no-conv",
+        type=str2bool,
+        default=DEFAULT_RESTART_NO_CONV,
+        help="Restarts the network if it won't converge. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "problem_pddls",
+        type=str,
+        nargs="*",
+        default=[],
+        help="Path to problems PDDL."
+    )
+    parser.add_argument(
+        "-tst-a",
+        "--test-search-algorithm",
+        choices=["astar", "eager_greedy"],
+        default=DEFAULT_SEARCH_ALGORITHM,
+        help="Algorithm to be used in the search. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-tst-t",
+        "--test-max-search-time",
+        type=int,
+        default=DEFAULT_MAX_SEARCH_TIME,
+        help="Time limit for each search. (default: %(default)ss)",
+    )
+    parser.add_argument(
+        "-tst-m",
+        "--test-max-search-memory",
+        type=int,
+        default=DEFAULT_MAX_SEARCH_MEMORY,
+        help="Memory limit for each search. (default: %(default)sMB)",
+    )
+    parser.add_argument(
+        "-tst-e",
+        "--test-max-expansions",
+        type=int,
+        default=DEFAULT_MAX_EXPANSIONS,
+        help="Maximum expanded states for each search (or -1 for fixed value). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-tst-sdir",
+        "--test-samples-dir",
+        type=str,
+        default=DEFAULT_SAMPLES_FOLDER,
+        help="Default samples directory to automatically get facts and defaults files. (default: get from the samples file)",
+    )
+    parser.add_argument(
+        "-tst-atn",
+        "--test-auto-tasks-n",
+        type=int,
+        default=DEFAULT_AUTO_TASKS_N,
+        help="Number of tasks taken automatically. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-tst-atf",
+        "--test-auto-tasks-folder",
+        type=str,
+        default=DEFAULT_AUTO_TASKS_FOLDER,
+        help="Base folder to search for tasks automatically. (default: %(default)s)"
+    )
+    parser.add_argument(
+        "-tst-dlog",
+        "--test-downward-logs",
+        type=str2bool,
+        default=DEFAULT_SAVE_DOWNWARD_LOGS,
+        help="Save each instance's Fast-Downward log or not. (default: %(default)s)",
+    )
+
+    return parser.parse_args()
+
 
 def str2bool(v):
     if isinstance(v, bool):
