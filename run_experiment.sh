@@ -48,10 +48,7 @@ run_experiment_rsl() {
     runs=$4
     files=(samples/${METHOD}_*_*_${TECHNIQUE}_${SAMPLE_SIZE}_ss${sample_seed})
     files_len=$((${#files[@]}*${runs}))
-    #echo $files_len
     max_per_thread=$((($files_len+$cores-1)/$cores))
-    #echo $max_per_thread
-    #exit
     for file in ${files[@]} ; do
         facts="${file}_facts.txt"
         defaults="${file}_defaults.txt"
@@ -62,9 +59,9 @@ run_experiment_rsl() {
         problem=${problem%%_*}
         if [ $(($COUNTER%$max_per_thread)) = 0 ]; then
             THREAD_ID=$((THREAD_ID+1))
-            echo "tsp taskset -c ${THREAD_ID} ./train-and-test1.sh '-pat 10 -e 1000 -rst false -spn 20 -s $net_seed $file'"
+            tsp taskset -c ${THREAD_ID} ./train-and-test1.sh "-pat 10 -e 1000 -rst false -spn 20 -s $net_seed $file"
        else
-            echo "tsp -D $((COUNTER-1)) taskset -c ${THREAD_ID} ./train-and-test1.sh '-pat 10 -e 1000 -rst false -spn 20 -s $net_seed $file'"
+            tsp -D $((COUNTER-1)) taskset -c ${THREAD_ID} ./train-and-test1.sh "-pat 10 -e 1000 -rst false -spn 20 -s $net_seed $file"
         fi
 
         COUNTER=$((COUNTER+1))
