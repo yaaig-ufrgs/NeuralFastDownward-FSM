@@ -12,6 +12,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_WEIGHT_DECAY,
     DEFAULT_DROPOUT_RATE,
     DEFAULT_CLAMPING,
+    DEFAULT_REMOVE_GOALS,
     DEFAULT_SHUFFLE,
     DEFAULT_SHUFFLE_SEED,
     DEFAULT_BIAS,
@@ -202,6 +203,13 @@ def get_train_args():
         type=int,
         default=DEFAULT_CLAMPING,
         help="Value to clamp heuristics with h=value-cl. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-rmg",
+        "--remove-goals",
+        type=str2bool,
+        default=DEFAULT_REMOVE_GOALS,
+        help="Remove goals from the sampling data (h = 0). (default: %(default)s)",
     )
     parser.add_argument(
         "-of",
@@ -619,6 +627,13 @@ def get_exp_args():
         type=str2bool,
         default=DEFAULT_RESTART_NO_CONV,
         help="Restarts the network if it won't converge. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-rmg",
+        "--train-remove-goals",
+        type=str2bool,
+        default=DEFAULT_REMOVE_GOALS,
+        help="Remove goals from the sampling data (h = 0). (default: %(default)s)",
     )
     parser.add_argument(
         "problem_pddls",

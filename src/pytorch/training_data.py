@@ -52,34 +52,34 @@ class InstanceDataset(Dataset):
         self.hvalues = y
 
 
-def load_training_state_value_pairs(samples_file: str, clamping: int) -> ([([int], int)], int):
+def load_training_state_value_pairs(samples_file: str, clamping: int, remove_goals: bool) -> ([([int], int)], int):
     """
     Load state-value pairs from a sampling output,
     Returns a tuple containing a list of state-value pairs
     and the domain max value.
     """
     state_value_pairs = []
-    domain_max_value = 0
-    max_h = 0
+    domain_max_value, max_h = 0, 0
     with open(samples_file) as f:
         lines = f.readlines()
     for line in lines:
         if line[0] != "#":
             h, state = line.split("\n")[0].split(";")
             h_int = int(h)
+            if h_int == 0 and remove_goals:
+                continue
             state = [int(s) for s in state]
             state_value_pairs.append([state, h_int])
             if h_int > max_h:
                 max_h = h_int
-            if state_value_pairs[-1][1] > domain_max_value:
-                domain_max_value = state_value_pairs[-1][1]
+                domain_max_value = max_h
 
     if clamping != DEFAULT_CLAMPING:
         for i in range(len(state_value_pairs)):
             curr_h = state_value_pairs[i][1]
             if (curr_h >= max_h - clamping) and (curr_h != max_h):
                 state_value_pairs[i][1] = max_h
-            
+
     return state_value_pairs, domain_max_value
 
 

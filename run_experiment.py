@@ -61,8 +61,8 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
                       f'-lr {args.train_learning_rate} -w {args.train_weight_decay} '
                       f'-d {args.train_dropout_rate} -bi {args.train_bias} '
                       f'-of {args.train_output_folder} -rst {args.train_restart_no_conv} '
-                      f'-s {net_seed} -shs {args.train_shuffle_seed}')
-
+                      f'-s {net_seed} -shs {args.train_shuffle_seed} '
+                      f'-rmg {args.train_remove_goals}')
         if args.train_max_training_time != DEFAULT_MAX_TRAINING_TIME:
             train_args += f' -t {args.train_max_training_time}'
 
@@ -132,7 +132,8 @@ def only_train(args):
                   f'-lr {args.train_learning_rate} -w {args.train_weight_decay} '
                   f'-d {args.train_dropout_rate} -bi {args.train_bias} '
                   f'-of {args.train_output_folder} -rst {args.train_restart_no_conv} '
-                  f'-s {args.exp_net_seed} -shs {args.train_shuffle_seed}')
+                  f'-s {args.exp_net_seed} -shs {args.train_shuffle_seed} '
+                  f'-rmg {args.train_remove_goals}')
 
     if args.train_max_training_time != DEFAULT_MAX_TRAINING_TIME:
         train_args += f' -t {args.train_max_training_time}'
@@ -143,12 +144,14 @@ def only_train(args):
         thread_id = count
         if count < args.exp_threads and first:
             os.system(f"tsp taskset -c {thread_id} ./train.py {sample} {train_args}")
+            #print(f"tsp taskset -c {thread_id} ./train.py {sample} {train_args}")
             count += 1
         else:
             if first or count == args.exp_threads:
                 count = 0
             first = False
             os.system(f"tsp -D {id_count} taskset -c {count} ./train.py {sample} {train_args}")
+            #print(f"tsp -D {id_count} taskset -c {count} ./train.py {sample} {train_args}")
             id_count += 1
             count += 1
 
