@@ -167,6 +167,7 @@ def train_nn(args, dirname):
             data_num_workers=args.data_num_workers,
             normalize=args.normalize_output,
             clamping=args.clamping,
+            remove_goals=args.remove_goals,
             model=args.model,
         )
         if args.normalize_output:
