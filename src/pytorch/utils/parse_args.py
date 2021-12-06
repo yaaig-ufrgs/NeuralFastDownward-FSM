@@ -54,6 +54,8 @@ from src.pytorch.utils.default_args import (
     DEFAULT_EXP_NET_SEED,
     DEFAULT_EXP_SAMPLE_SEED,
     DEFAULT_EXP_FIXED_SEED,
+    DEFAULT_EXP_ONLY_TRAIN,
+    DEFAULT_EXP_ONLY_TEST,
 )
 
 
@@ -484,6 +486,20 @@ def get_exp_args():
         help="Number of threads to use. (default: %(default)s)",
     )
     parser.add_argument(
+        "-exp-train",
+        "--exp-only-train",
+        type=str2bool,
+        default=DEFAULT_EXP_ONLY_TRAIN,
+        help="Only train instead of training and testing. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-exp-test",
+        "--exp-only-test",
+        type=str2bool,
+        default=DEFAULT_EXP_ONLY_TEST,
+        help="Only test instead of training and testing. (default: %(default)s)",
+    )
+    parser.add_argument(
         "samples",
         type=str,
         help="Path to sample files.",
@@ -526,7 +542,6 @@ def get_exp_args():
         default=DEFAULT_MAX_TRAINING_TIME,
         help="Maximum network training time (all folds). (default: %(default)ss)",
     )
-
     parser.add_argument(
         "-trn-b",
         "--train-batch-size",
@@ -611,6 +626,12 @@ def get_exp_args():
         nargs="*",
         default=[],
         help="Path to problems PDDL."
+    )
+    parser.add_argument(
+        "-tst-modeldir",
+        "--tst-model-dir",
+        type=Path,
+        help="Path to training folder with trained model. Only used if only testing."
     )
     parser.add_argument(
         "-tst-a",
