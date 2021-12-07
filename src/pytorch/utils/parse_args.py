@@ -57,6 +57,22 @@ from src.pytorch.utils.default_args import (
     DEFAULT_EXP_FIXED_SEED,
     DEFAULT_EXP_ONLY_TRAIN,
     DEFAULT_EXP_ONLY_TEST,
+    DEFAULT_SAMPLE_METHOD,
+    DEFAULT_SAMPLE_TECHNIQUE,
+    DEFAULT_SAMPLE_STATE_REPRESENTATION,
+    DEFAULT_SAMPLE_SEARCHES,
+    DEFAULT_SAMPLES_PER_SEARCH,
+    DEFAULT_SAMPLE_SEED,
+    DEFAULT_SAMPLE_MULT_SEEDS,
+    DEFAULT_SAMPLE_DIR,
+    DEFAULT_SAMPLE_CONTRASTING,
+    DEFAULT_SAMPLE_MATCH_HEURISTICS,
+    DEFAULT_SAMPLE_ASSIGNMENTS_US,
+    DEFAULT_SAMPLE_RSL_NUM_TRAIN_STATES,
+    DEFAULT_SAMPLE_RSL_NUM_DEMOS,
+    DEFAULT_SAMPLE_RSL_MAX_LEN_DEMO,
+    DEFAULT_SAMPLE_RSL_STATE_INVARS,
+    DEFAULT_SAMPLE_THREADS,
 )
 
 
@@ -707,6 +723,126 @@ def get_exp_args():
 
     return parser.parse_args()
 
+def get_sample_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "instances_dir",
+        type=str,
+        help="Path to directory with instances to be used for sampling.",
+    )
+    parser.add_argument(
+        "method",
+        choices=["ferber", "fukunaga", "rsl"],
+        default=DEFAULT_SAMPLE_METHOD,
+        help="Sampling base method to use. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-tech",
+        "--technique",
+        choices=["rw", "dfs", "countBoth", "countAdds", "countDels"],
+        default=DEFAULT_SAMPLE_TECHNIQUE,
+        help="Sample technique to use. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-st",
+        "--state-representation",
+        choices=["fs", "ps", "us"], # full state, partial state and undefined
+        default=DEFAULT_SAMPLE_STATE_REPRESENTATION,
+        help="Output state representation. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-uss",
+        "--us-assignments",
+        type=int,
+        default=DEFAULT_SAMPLE_ASSIGNMENTS_US,
+        help="Number of assignments done with undefined state. (default: %(default)s)",
+    )
+
+    parser.add_argument(
+        "-scs",
+        "--searches",
+        type=int,
+        default=DEFAULT_SAMPLE_SEARCHES,
+        help="Number of searches. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-sscs",
+        "--samples-per-search",
+        type=int,
+        default=DEFAULT_SAMPLES_PER_SEARCH,
+        help="Number of samples per search. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-s",
+        "--seed",
+        type=int,
+        default=DEFAULT_SAMPLE_SEED,
+        help="Sample seed. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-ms",
+        "--mult-seed",
+        type=int,
+        default=DEFAULT_SAMPLE_MULT_SEEDS,
+        help="Sample mult seeds (1..n). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-c",
+        "--contrasting",
+        type=int,
+        default=DEFAULT_SAMPLE_CONTRASTING,
+        help="Percentage of contrasting samples. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output-dir",
+        type=Path,
+        default=DEFAULT_SAMPLE_DIR,
+        help="Directory where the samples will be saved. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-hmatch",
+        "--match-heuristics",
+        type=str2bool,
+        default=DEFAULT_SAMPLE_MATCH_HEURISTICS,
+        help="Match exact samples with the min heuristic value between them. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-rsl-states",
+        "--rsl-num-states",
+        type=int,
+        default=DEFAULT_SAMPLE_RSL_NUM_TRAIN_STATES,
+        help="Number of samples. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-rsl-demos",
+        "--rsl-num-demos",
+        type=int,
+        default=DEFAULT_SAMPLE_RSL_NUM_DEMOS,
+        help="Number of demos. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-rsl-len-demo",
+        "--rsl-max-len-demo",
+        type=int,
+        default=DEFAULT_SAMPLE_RSL_MAX_LEN_DEMO,
+        help="Max len of each demo. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-rsl-inv",
+        "--rsl-check-invars",
+        type=str2bool,
+        default=DEFAULT_SAMPLE_RSL_STATE_INVARS,
+        help="Check for state invariants. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-threads",
+        type=int,
+        default=DEFAULT_SAMPLE_THREADS,
+        help="Threads to use. (default: %(default)s)",
+    )
+
+    return parser.parse_args()
 
 def str2bool(v):
     if isinstance(v, bool):
