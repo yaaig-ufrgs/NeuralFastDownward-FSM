@@ -162,6 +162,7 @@ def logging_train_config(args, dirname, cmd_line, json=True):
         "dropout_rate": args.dropout_rate,
         "shuffle": args.shuffle,
         "shuffle_seed": args.shuffle_seed,
+        "remove_goals": args.remove_goals,
         "dataloader_num_workers": args.data_num_workers,
         "bias": args.bias,
         "bias_output": args.bias_output,
