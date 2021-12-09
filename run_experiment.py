@@ -103,7 +103,7 @@ def only_test(args):
     if args.test_max_expansions != DEFAULT_MAX_EXPANSIONS:
         test_args += f' -e {args.test_max_expansions}'
 
-    for net in args.tst_model_dir:
+    for net in glob(f'{args.tst_model_dir}/*'):
         if "nfd_train" in net:
             thread_id = count
             if count < args.exp_threads and first:
