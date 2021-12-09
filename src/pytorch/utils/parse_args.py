@@ -73,6 +73,13 @@ from src.pytorch.utils.default_args import (
     DEFAULT_SAMPLE_RSL_MAX_LEN_DEMO,
     DEFAULT_SAMPLE_RSL_STATE_INVARS,
     DEFAULT_SAMPLE_THREADS,
+    DEFAULT_SAMPLE_SEARCH_ALGORITHM,
+    DEFAULT_SAMPLE_SEARCH_HEURISTIC,
+    DEFAULT_SAMPLE_FERBER_TECHNIQUE,
+    DEFAULT_SAMPLE_FERBER_MIN_WALK_LENGTH,
+    DEFAULT_SAMPLE_FERBER_MAX_WALK_LENGTH,
+    DEFAULT_SAMPLE_FERBER_SELECT_STATE,
+    DEFAULT_SAMPLE_FERBER_NUM_TASKS,
 )
 
 
@@ -744,6 +751,55 @@ def get_sample_args():
         help="Sample technique to use. (default: %(default)s)",
     )
     parser.add_argument(
+        "-search",
+        "--search-algorithm",
+        choices=["greedy", "astar"],
+        default=DEFAULT_SAMPLE_SEARCH_ALGORITHM,
+        help="Search algorithm to use when sampling. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-heur",
+        "--search-heuristic",
+        choices=["ff", "lmcut"],
+        default=DEFAULT_SAMPLE_SEARCH_HEURISTIC,
+        help="Search heuristic used in the search algorithm. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-ftech",
+        "--ferber-technique",
+        choices=["forward", "backward"],
+        default=DEFAULT_SAMPLE_FERBER_TECHNIQUE,
+        help="Forward or backward search (Ferber). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-fst",
+        "--ferber-select-state",
+        choices=["random_state", "entire_plan", "init_state"],
+        default=DEFAULT_SAMPLE_FERBER_SELECT_STATE,
+        help="Forward or backward search (Ferber). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-fn",
+        "--ferber-num-tasks",
+        type=int,
+        default=DEFAULT_SAMPLE_FERBER_NUM_TASKS,
+        help="Number of tasks to generate (Ferber). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-fmin",
+        "--ferber-min-walk-len",
+        type=int,
+        default=DEFAULT_SAMPLE_FERBER_MIN_WALK_LENGTH,
+        help="Minimum random walk length (Ferber). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-fmax",
+        "--ferber-max-walk-len",
+        type=int,
+        default=DEFAULT_SAMPLE_FERBER_MAX_WALK_LENGTH,
+        help="Maximum random walk length (Ferber). (default: %(default)s)",
+    )
+    parser.add_argument(
         "-st",
         "--state-representation",
         choices=["fs", "ps", "us"], # full state, partial state and undefined
@@ -757,7 +813,6 @@ def get_sample_args():
         default=DEFAULT_SAMPLE_ASSIGNMENTS_US,
         help="Number of assignments done with undefined state. (default: %(default)s)",
     )
-
     parser.add_argument(
         "-scs",
         "--searches",

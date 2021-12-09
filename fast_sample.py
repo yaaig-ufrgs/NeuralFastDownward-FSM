@@ -49,6 +49,12 @@ def get_full_state_repr_name(state_repr):
 
 
 def fukunaga_ferber(args, meth):
+    search_algo = ""
+    if args.search_algorithm == "greedy":
+        search_algo = f'eager_greedy([{args.search_heuristic}(transform=sampling_transform())],transform=sampling_transform())'
+    elif args.search_algorith == "astar":
+        search_algo = f'astar({args.search_heuristic}(transform=sampling_transform()),transform=sampling_transform())'
+        
     state_repr = get_full_state_repr_name(args.state_representation)
     instances = glob(f"{args.instances_dir}/*.pddl")
     start = args.seed
@@ -60,25 +66,35 @@ def fukunaga_ferber(args, meth):
         domain = instance_split[-2]
         if instance_name != "domain" and instance_name != "source":
             for i in range(start, end):
-                out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.technique}_{args.state_representation}_{args.searches}x{args.samples_per_search}_ss{i}'
+                cmd, out = "", ""
                 if meth == "fukunaga":
+                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.technique}_{args.state_representation}_{args.searches}x{args.samples_per_search}_ss{i}'
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
                            f'--build release {instance} '
-                           f'--search \'sampling_search_fukunaga(astar(lmcut(transform=sampling_transform()), transform=sampling_transform()) '
+                           f'--search \'sampling_search_fukunaga({search_algo}, '
                            f'techniques=[gbackward_fukunaga(searches={args.searches}, samples_per_search={args.samples_per_search}, '
                            f'technique={args.technique}, random_seed={i})], state_representation={state_repr}, '
                            f'random_seed={i}, match_heuristics={args.match_heuristics}, assignments_by_undefined_state={args.us_assignments}, '
                            f'contrasting_samples={args.contrasting})\'')
                     print(cmd)
-                    if args.threads > 1:
-                        run_multi_thread(cmd, args.threads)
-                    else:
-                        os.system(cmd)
-                        #print(cmd)
-                else:
-                    # TODO Ferber
+                elif meth == "ferber":
+                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.ferber_technique}_{args.ferber_select_state.replace("_", "-")}_{args.ferber_num_tasks}_{args.ferber_min_walk_len}_{args.ferber_max_walk_len}_ss{i}'
+                    cmd = (f'./fast-downward.py '
+                           f'--sas-file {out}-output.sas --plan-file {out} '
+                           f'--build release {instance} '
+                           f'--search \'sampling_search_ferber({search_algo}, '
+                           f'techniques=[{args.ferber_technique}_none({args.ferber_num_tasks}, '
+                           f'distribution=uniform_int_dist({args.ferber_min_walk_len}, {args.ferber_max_walk_len}), random_seed={i})], '
+                           f'select_state_method={args.ferber_select_state}, random_seed={i})\'')
                     pass
+                if args.threads > 1:
+                    run_multi_thread(cmd, args.threads)
+                else:
+                    os.system(cmd)
+                    #print(cmd)
+
+
     sas_files = glob(f'{args.output_dir}/*_{domain}_*-output.sas')
     for sf in sas_files:
         if os.path.isfile(sf):
@@ -109,12 +125,14 @@ def rsl(args):
                     run_multi_thread(cmd, args.threads)
                 else:
                     os.system(cmd)
+                    print(cmd)
 
 
 def sample(args):
     os.system(f"tsp -K")
     os.system(f"tsp -S {args.threads}")
     args.match_heuristics = bool2str(args.match_heuristics)
+    args.ferber_technique = "iforward" if args.ferber_technique == "forward" else "gbackward"
 
     if args.method == "fukunaga" or args.method == "ferber":
         fukunaga_ferber(args, meth=args.method)
