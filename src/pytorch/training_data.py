@@ -110,7 +110,6 @@ def change_sampling_order(state_value_pairs, max_h, std_first, cont_first, inter
         new_state_value_pairs = []
         if interc_n > 1:
             for i in range(0, min_len, interc_n):
-                print(i)
                 new_state_value_pairs += standard_samples[i:i+interc_n] + contrast_samples[i:i+interc_n]
             if min_len == len(standard_samples):
                 new_state_value_pairs += contrast_samples[i+interc_n:]
