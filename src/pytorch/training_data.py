@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 from src.pytorch.utils.helpers import to_prefix, to_onehot
 import src.pytorch.fast_downward_api as fd_api
 from src.pytorch.utils.default_args import DEFAULT_CLAMPING
-
+from itertools import chain, zip_longest
 
 class InstanceDataset(Dataset):
     def __init__(self, state_value_pairs, domain_max_value, output_layer):
@@ -52,7 +52,9 @@ class InstanceDataset(Dataset):
         self.hvalues = y
 
 
-def load_training_state_value_pairs(samples_file: str, clamping: int, remove_goals: bool) -> ([([int], int)], int):
+def load_training_state_value_pairs(samples_file: str, clamping: int, remove_goals: bool,
+                                    standard_first: bool, contrast_first: bool,
+                                    intercalate_samples: int) -> ([([int], int)], int):
     """
     Load state-value pairs from a sampling output,
     Returns a tuple containing a list of state-value pairs
@@ -60,6 +62,7 @@ def load_training_state_value_pairs(samples_file: str, clamping: int, remove_goa
     """
     state_value_pairs = []
     domain_max_value, max_h = 0, 0
+
     with open(samples_file) as f:
         lines = f.readlines()
     for line in lines:
@@ -80,8 +83,44 @@ def load_training_state_value_pairs(samples_file: str, clamping: int, remove_goa
             if (curr_h >= max_h - clamping) and (curr_h != max_h):
                 state_value_pairs[i][1] = max_h
 
+    if standard_first:
+        state_value_pairs = change_sampling_order(state_value_pairs, max_h, True, False, intercalate_samples)
+    elif contrast_first:
+        state_value_pairs = change_sampling_order(state_value_pairs, max_h, False, True, intercalate_samples)
+    elif intercalate_samples > 0:
+        state_value_pairs = change_sampling_order(state_value_pairs, max_h, False, False, intercalate_samples)
+
     return state_value_pairs, domain_max_value
 
+
+def change_sampling_order(state_value_pairs, max_h, std_first, cont_first, interc_n):
+    standard_samples = []
+    contrast_samples = []
+
+    for sv in state_value_pairs:
+        if sv[1] == max_h:
+            contrast_samples.append(sv)
+        else:
+            standard_samples.append(sv)
+
+    if std_first or cont_first:
+        return standard_samples + contrast_samples if std_first else contrast_samples + standard_samples
+    else:
+        min_len = min(len(standard_samples), len(contrast_samples))
+        new_state_value_pairs = []
+        if interc_n > 1:
+            for i in range(0, min_len, interc_n):
+                print(i)
+                new_state_value_pairs += standard_samples[i:i+interc_n] + contrast_samples[i:i+interc_n]
+            if min_len == len(standard_samples):
+                new_state_value_pairs += contrast_samples[i+interc_n:]
+            else:
+                new_state_value_pairs += new_state_value_pairs[i+interc_n:]
+        else:
+            new_state_value_pairs = [x for x in chain.from_iterable(
+                zip_longest(standard_samples, contrast_samples)) if x is not None]
+
+        return new_state_value_pairs
 
 def generate_optimal_state_value_pairs(domain, problems):
     """

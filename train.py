@@ -58,6 +58,10 @@ def train_main(args):
         args.shuffle_seed = args.seed
     set_seeds(args.seed)
 
+    # If forcibly changing the order that the samples are presented, disable shuffling.
+    if args.standard_first or args.contrast_first or args.intercalate_samples != 0:
+        args.shuffle = False
+
     args.domain, args.problem = get_problem_by_sample_filename(args.samples)
     args.save_git_diff = True
 
@@ -168,6 +172,9 @@ def train_nn(args, dirname):
             normalize=args.normalize_output,
             clamping=args.clamping,
             remove_goals=args.remove_goals,
+            standard_first=args.standard_first,
+            contrast_first=args.contrast_first,
+            intercalate_samples=args.intercalate_samples,
             model=args.model,
         )
         if args.normalize_output:

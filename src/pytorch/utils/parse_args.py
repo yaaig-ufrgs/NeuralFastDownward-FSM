@@ -31,6 +31,10 @@ from src.pytorch.utils.default_args import (
     DEFAULT_MODEL,
     DEFAULT_PATIENCE,
     DEFAULT_RANDOM_SEED,
+    DEFAULT_CONTRAST_FIRST,
+    DEFAULT_STANDARD_FIRST,
+    DEFAULT_INTERCALATE_SAMPLES,
+    DEFAULT_SWAP_SAMPLES_FROM,
     DEFAULT_DATALOADER_NUM_WORKERS,
     DEFAULT_TEST_MODEL,
     DEFAULT_SCATTER_PLOT,
@@ -340,6 +344,27 @@ def get_train_args():
         type=str2bool,
         default=DEFAULT_SAVE_HEURISTIC_PRED,
         help="Save a csv file with the expected and network-predicted heuristics for all training samples. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-sfst",
+        "--standard-first",
+        type=str2bool,
+        default=DEFAULT_STANDARD_FIRST,
+        help="Show firstly the default samples to the network. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-cfst",
+        "--contrast-first",
+        type=str2bool,
+        default=DEFAULT_CONTRAST_FIRST,
+        help="Show firstly the contrasting samples to the network. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-itc",
+        "--intercalate-samples",
+        type=int,
+        default=DEFAULT_INTERCALATE_SAMPLES,
+        help="Intercalate by n the sampling data with contrasting and standard data. (default: %(default)s)",
     )
 
     return parser.parse_args()
