@@ -54,7 +54,7 @@ def fukunaga_ferber(args, meth):
         search_algo = f'eager_greedy([{args.search_heuristic}(transform=sampling_transform())],transform=sampling_transform())'
     elif args.search_algorith == "astar":
         search_algo = f'astar({args.search_heuristic}(transform=sampling_transform()),transform=sampling_transform())'
-        
+
     state_repr = get_full_state_repr_name(args.state_representation)
     instances = glob(f"{args.instances_dir}/*.pddl")
     start = args.seed
@@ -104,21 +104,18 @@ def fukunaga_ferber(args, meth):
 def rsl(args):
     global COUNT
     global ID_COUNT
-    first = True
     instances = glob(f"{args.instances_dir}/*.pddl")
     start = args.seed
     end = args.seed+1 if args.mult_seed <= 1 else args.mult_seed+1
     print(start, end)
-    domain = ""
     for instance in instances:
         instance_split = instance.split('/')
         instance_name = instance_split[-1][:-5]
-        domain = instance_split[-2]
         if instance_name != "domain" and instance_name != "source":
             for i in range(start, end):
                 cmd = (f'./RSL/sampling.py --out_dir {args.output_dir} '
                        f'--instance {instance} --num_train_states {args.rsl_num_states} '
-                       f'--num_demos {args.rsl_num_demos} --max_len_demo {args.rsl_max_len_demo} '
+                       f'--num_demos {args.rsl_num_demos} --max_len_demo {args.rsl_max_len_demo} --seed {i} '
                        f'--random_sample_percentage {args.contrasting} --regression_method {args.technique} '
                        f'--check_state_invars {args.rsl_check_invars}')
                 if args.threads > 1:
