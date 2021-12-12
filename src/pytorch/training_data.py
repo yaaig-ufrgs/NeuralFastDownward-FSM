@@ -106,6 +106,13 @@ def change_sampling_order(state_value_pairs, max_h, std_first, cont_first, inter
     if std_first or cont_first:
         return standard_samples + contrast_samples if std_first else contrast_samples + standard_samples
     else:
+        """
+        chunked_l1 = zip_longest(*[iter(standard_samples)]*interc_n)
+        chunked_l2 = zip_longest(*[iter(contrast_samples)]*interc_n)
+        new_state_value_pairs = (chain(a, b) for a, b in zip(chunked_l1, chunked_l2))
+        new_state_value_pairs = (chain.from_iterable(new_state_value_pairs))
+        new_state_value_pairs = [x for x in new_state_value_pairs if x is not None]
+        """
         min_len = min(len(standard_samples), len(contrast_samples))
         new_state_value_pairs = []
         if interc_n > 1:
@@ -114,10 +121,18 @@ def change_sampling_order(state_value_pairs, max_h, std_first, cont_first, inter
             if min_len == len(standard_samples):
                 new_state_value_pairs += contrast_samples[i+interc_n:]
             else:
-                new_state_value_pairs += new_state_value_pairs[i+interc_n:]
+                new_state_value_pairs += standard_samples[i+interc_n:]
         else:
             new_state_value_pairs = [x for x in chain.from_iterable(
                 zip_longest(standard_samples, contrast_samples)) if x is not None]
+        """
+        # Test
+        a = new_state_value_pairs[-300:-1]
+        for i in a:
+            print(i[1])
+        print(len(new_state_value_pairs), len(state_value_pairs), len(standard_samples), len(contrast_samples))
+        exit(1)
+        """
 
         return new_state_value_pairs
 
