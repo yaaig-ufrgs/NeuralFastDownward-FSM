@@ -34,6 +34,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_CONTRAST_FIRST,
     DEFAULT_STANDARD_FIRST,
     DEFAULT_INTERCALATE_SAMPLES,
+    DEFAULT_CUT_NON_INTERCALATED_SAMPLES,
     DEFAULT_SWAP_SAMPLES_FROM,
     DEFAULT_DATALOADER_NUM_WORKERS,
     DEFAULT_TEST_MODEL,
@@ -366,6 +367,13 @@ def get_train_args():
         default=DEFAULT_INTERCALATE_SAMPLES,
         help="Intercalate by n the sampling data with contrasting and standard data. (default: %(default)s)",
     )
+    parser.add_argument(
+        "-cut",
+        "--cut-non-intercalated-samples",
+        type=str2bool,
+        default=DEFAULT_CUT_NON_INTERCALATED_SAMPLES,
+        help="Remove leftover samples from the data. (default: %(default)s)",
+    )
 
     return parser.parse_args()
 
@@ -682,6 +690,34 @@ def get_exp_args():
         type=str2bool,
         default=DEFAULT_REMOVE_GOALS,
         help="Remove goals from the sampling data (h = 0). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-sfst",
+        "--train-standard-first",
+        type=str2bool,
+        default=DEFAULT_STANDARD_FIRST,
+        help="Show firstly the default samples to the network. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-cfst",
+        "--train-contrast-first",
+        type=str2bool,
+        default=DEFAULT_CONTRAST_FIRST,
+        help="Show firstly the contrasting samples to the network. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-itc",
+        "--train-intercalate-samples",
+        type=int,
+        default=DEFAULT_INTERCALATE_SAMPLES,
+        help="Intercalate by n the sampling data with contrasting and standard data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-cut",
+        "--train-cut-non-intercalated-samples",
+        type=str2bool,
+        default=DEFAULT_CUT_NON_INTERCALATED_SAMPLES,
+        help="Remove leftover samples from the data. (default: %(default)s)",
     )
     parser.add_argument(
         "problem_pddls",

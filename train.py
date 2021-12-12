@@ -175,6 +175,7 @@ def train_nn(args, dirname):
             standard_first=args.standard_first,
             contrast_first=args.contrast_first,
             intercalate_samples=args.intercalate_samples,
+            cut_non_intercalated_samples=args.cut_non_intercalated_samples,
             model=args.model,
         )
         if args.normalize_output:

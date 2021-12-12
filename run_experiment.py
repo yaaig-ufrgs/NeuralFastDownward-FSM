@@ -62,7 +62,9 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
                       f'-d {args.train_dropout_rate} -bi {args.train_bias} '
                       f'-of {args.train_output_folder} -rst {args.train_restart_no_conv} '
                       f'-s {net_seed} -shs {args.train_shuffle_seed} '
-                      f'-rmg {args.train_remove_goals}')
+                      f'-rmg {args.train_remove_goals} -cfst {args.train_contrast_first} '
+                      f'-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} '
+                      f'-cut {args.train_cut_non_intercalated_samples}')
         if args.train_max_training_time != DEFAULT_MAX_TRAINING_TIME:
             train_args += f' -t {args.train_max_training_time}'
 
@@ -133,7 +135,9 @@ def only_train(args):
                   f'-d {args.train_dropout_rate} -bi {args.train_bias} '
                   f'-of {args.train_output_folder} -rst {args.train_restart_no_conv} '
                   f'-s {args.exp_net_seed} -shs {args.train_shuffle_seed} '
-                  f'-rmg {args.train_remove_goals}')
+                  f'-rmg {args.train_remove_goals} -cfst {args.train_contrast_first} '
+                  f'-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} '
+                  f'-cut {args.train_cut_non_intercalated_samples}')
 
     if args.train_max_training_time != DEFAULT_MAX_TRAINING_TIME:
         train_args += f' -t {args.train_max_training_time}'
