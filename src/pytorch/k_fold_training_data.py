@@ -105,6 +105,7 @@ class KFoldTrainingData:
                         training_set.append(self.state_value_pairs[j])
 
             if self.standard_first or self.contrast_first or self.intercalate_samples > 0:
+                self.shuffle = False
                 training_set = self.change_sampling_order(training_set)
                 test_set = self.change_sampling_order(test_set)
 
