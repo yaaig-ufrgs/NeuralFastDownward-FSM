@@ -57,10 +57,6 @@ class KFoldTrainingData:
             samples_file,
             clamping,
             remove_goals,
-            standard_first,
-            contrast_first,
-            intercalate_samples,
-            cut_non_intercalated_samples,
         )
         self.normalize = normalize
         if self.normalize:
@@ -73,9 +69,13 @@ class KFoldTrainingData:
         self.seed = seed
         self.shuffle_seed = shuffle_seed
         self.data_num_workers = data_num_workers
+        self.standard_first = standard_first
+        self.contrast_first = contrast_first
+        self.intercalate_samples = intercalate_samples
+        self.cut_non_intercalated_samples = cut_non_intercalated_samples
         self.model = model
         self.kfolds = self.generate_kfold_training_data()
-
+    
     def generate_kfold_training_data(self):
         """
         Generate the folds.
@@ -103,6 +103,10 @@ class KFoldTrainingData:
                         test_set.append(self.state_value_pairs[j])
                     else:
                         training_set.append(self.state_value_pairs[j])
+
+            if self.standard_first or self.contrast_first or self.intercalate_samples > 0:
+                training_set = self.change_sampling_order(training_set)
+                test_set = self.change_sampling_order(test_set)
 
             worker_fn = None if self.seed == -1 else lambda id: np.random.seed(self.shuffle_seed % 2 ** 32)
             g = None if self.seed == -1 else torch.Generator()
@@ -145,6 +149,33 @@ class KFoldTrainingData:
         Counting from 0.
         """
         return self.kfolds[idx]
+
+    def change_sampling_order(self, samples):
+        standard_samples = []
+        contrast_samples = []
+        interc_n = self.intercalate_samples
+
+        for sv in samples:
+            if sv[1] == self.domain_max_value:
+                contrast_samples.append(sv)
+            else:
+                standard_samples.append(sv)
+
+        if self.standard_first or self.contrast_first:
+            return standard_samples + contrast_samples if self.standard_first else contrast_samples + standard_samples
+        else:
+            min_len = min(len(standard_samples), len(contrast_samples))
+            new_state_value_pairs = []
+            for i in range(0, min_len, interc_n):
+                new_state_value_pairs += standard_samples[i:i+interc_n] + contrast_samples[i:i+interc_n]
+            if not self.cut_non_intercalated_samples:
+                if min_len == len(standard_samples):
+                    new_state_value_pairs += contrast_samples[i+interc_n:]
+                else:
+                    new_state_value_pairs += standard_samples[i+interc_n:]
+
+            return new_state_value_pairs
+
 
 def seed_worker(worker_id):
     """

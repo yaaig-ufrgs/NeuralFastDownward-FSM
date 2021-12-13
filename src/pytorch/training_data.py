@@ -52,9 +52,7 @@ class InstanceDataset(Dataset):
         self.hvalues = y
 
 
-def load_training_state_value_pairs(samples_file: str, clamping: int, remove_goals: bool,
-                                    standard_first: bool, contrast_first: bool,
-                                    intercalate_samples: int, cut_non_interc: bool) -> ([([int], int)], int):
+def load_training_state_value_pairs(samples_file: str, clamping: int, remove_goals: bool) -> ([([int], int)], int):
     """
     Load state-value pairs from a sampling output,
     Returns a tuple containing a list of state-value pairs
@@ -83,59 +81,8 @@ def load_training_state_value_pairs(samples_file: str, clamping: int, remove_goa
             if (curr_h >= max_h - clamping) and (curr_h != max_h):
                 state_value_pairs[i][1] = max_h
 
-    if standard_first:
-        state_value_pairs = change_sampling_order(state_value_pairs, max_h, True, False,
-                                                  intercalate_samples, cut_non_interc)
-    elif contrast_first:
-        state_value_pairs = change_sampling_order(state_value_pairs, max_h, False, True,
-                                                  intercalate_samples, cut_non_interc)
-    elif intercalate_samples > 0:
-        state_value_pairs = change_sampling_order(state_value_pairs, max_h, False, False,
-                                                  intercalate_samples, cut_non_interc)
-
     return state_value_pairs, domain_max_value
 
-
-def change_sampling_order(state_value_pairs, max_h, std_first, cont_first,
-                          interc_n, cut_non_interc):
-    standard_samples = []
-    contrast_samples = []
-
-    for sv in state_value_pairs:
-        if sv[1] == max_h:
-            contrast_samples.append(sv)
-        else:
-            standard_samples.append(sv)
-
-    if std_first or cont_first:
-        return standard_samples + contrast_samples if std_first else contrast_samples + standard_samples
-    else:
-        """
-        chunked_l1 = zip_longest(*[iter(standard_samples)]*interc_n)
-        chunked_l2 = zip_longest(*[iter(contrast_samples)]*interc_n)
-        new_state_value_pairs = (chain(a, b) for a, b in zip(chunked_l1, chunked_l2))
-        new_state_value_pairs = (chain.from_iterable(new_state_value_pairs))
-        new_state_value_pairs = [x for x in new_state_value_pairs if x is not None]
-        """
-        min_len = min(len(standard_samples), len(contrast_samples))
-        new_state_value_pairs = []
-        for i in range(0, min_len, interc_n):
-            new_state_value_pairs += standard_samples[i:i+interc_n] + contrast_samples[i:i+interc_n]
-        if not cut_non_interc:
-            if min_len == len(standard_samples):
-                new_state_value_pairs += contrast_samples[i+interc_n:]
-            else:
-                new_state_value_pairs += standard_samples[i+interc_n:]
-        """
-        # Test
-        a = new_state_value_pairs[-300:-1]
-        for i in a:
-            print(i[1])
-        print(len(new_state_value_pairs), len(state_value_pairs), len(standard_samples), len(contrast_samples))
-        exit(1)
-        """
-
-        return new_state_value_pairs
 
 def generate_optimal_state_value_pairs(domain, problems):
     """
