@@ -71,6 +71,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_SAMPLE_MULT_SEEDS,
     DEFAULT_SAMPLE_DIR,
     DEFAULT_SAMPLE_CONTRASTING,
+    DEFAULT_SAMPLE_RESTART_H_WHEN_GOAL_STATE,
     DEFAULT_SAMPLE_MATCH_HEURISTICS,
     DEFAULT_SAMPLE_ASSIGNMENTS_US,
     DEFAULT_SAMPLE_RSL_NUM_TRAIN_STATES,
@@ -908,6 +909,13 @@ def get_sample_args():
         type=int,
         default=DEFAULT_SAMPLE_CONTRASTING,
         help="Percentage of contrasting samples. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-rhg",
+        "--restart_h_when_goal_state",
+        type=int,
+        default=DEFAULT_SAMPLE_RESTART_H_WHEN_GOAL_STATE,
+        help="Restart h value when goal state is sampled (only random walk). (default: %(default)s)",
     )
     parser.add_argument(
         "-o",

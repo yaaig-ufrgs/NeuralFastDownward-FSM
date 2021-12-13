@@ -75,9 +75,9 @@ def fukunaga_ferber(args, meth):
                            f'--build release {instance} '
                            f'--search \'sampling_search_fukunaga({search_algo}, '
                            f'techniques=[gbackward_fukunaga(searches={args.searches}, samples_per_search={args.samples_per_search}, '
-                           f'technique={args.technique}, random_seed={i})], state_representation={state_repr}, '
-                           f'random_seed={i}, match_heuristics={args.match_heuristics}, assignments_by_undefined_state={args.us_assignments}, '
-                           f'contrasting_samples={args.contrasting})\'')
+                           f'technique={args.technique}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state})], '
+                           f'state_representation={state_repr}, random_seed={i}, match_heuristics={args.match_heuristics}, '
+                           f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting})\'')
                     print(cmd)
                 elif meth == "ferber":
                     out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.ferber_technique}_{args.ferber_select_state.replace("_", "-")}_{args.ferber_num_tasks}_{args.ferber_min_walk_len}_{args.ferber_max_walk_len}_ss{i}'

@@ -11,6 +11,8 @@
 
 #include "../task_utils/sampling.h"
 
+#include "../task_utils/task_properties.h"
+
 using namespace std;
 
 namespace sampling_technique {
@@ -43,6 +45,7 @@ TechniqueGBackwardFukunaga::TechniqueGBackwardFukunaga(const options::Options &o
           wrap_partial_assignment(opts.get<bool>("wrap_partial_assignment")),
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
           is_valid_walk(opts.get<bool>("is_valid_walk")),
+          restart_h_when_goal_state(opts.get<bool>("restart_h_when_goal_state")),
           bias_evaluator_tree(opts.get_parse_tree("bias", options::ParseTree())),
           bias_probabilistic(opts.get<bool>("bias_probabilistic")),
           bias_adapt(opts.get<double>("bias_adapt")),
@@ -141,7 +144,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
             }
         }
     } else if (technique == "rw") {
-        int max_attempts = 100, attempts = 0;
+        int MAX_ATTEMPTS = 100, attempts = 0;
         while (samples.size() < (unsigned)samples_per_search) {
             PartialAssignment new_partial_assignment = rrws->sample_state_length(
                 partial_assignment,
@@ -156,10 +159,16 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
             if (hash_table.find(new_partial_assignment) == hash_table.end()) {
                 hash_table.insert(new_partial_assignment);
 
-                new_partial_assignment.estimated_heuristic = partial_assignment.estimated_heuristic + 1;
+                new_partial_assignment.estimated_heuristic = (
+                    restart_h_when_goal_state && task_properties::is_goal_state(
+                        task_proxy,
+                        new_partial_assignment.get_full_state(true, *rng).second)
+                    ) ? 0 : partial_assignment.estimated_heuristic + 1;
+
                 samples.push_back(make_shared<PartialAssignment>(new_partial_assignment));
                 partial_assignment = new_partial_assignment;
-            } else if (++attempts >= max_attempts) {
+                attempts = 0;
+            } else if (++attempts >= MAX_ATTEMPTS) {
                 break;
             }
         }
@@ -192,6 +201,10 @@ static shared_ptr<TechniqueGBackwardFukunaga> _parse_technique_gbackward_fukunag
             "is_valid_walk",
             "enforces states during random walk are avalid states w.r.t. "
             "the KNOWN mutexes",
+            "true");
+    parser.add_option<bool>(
+            "restart_h_when_goal_state",
+            "Restart h value when goal state is sampled (only random walk)",
             "true");
     parser.add_option<shared_ptr<Heuristic>>(
             "bias",
