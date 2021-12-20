@@ -30,6 +30,8 @@ from . import sas_tasks
 
 DEBUG = False
 
+USE_ALL_PREPOSITIONS = False # TODO: argument
+
 # TODO:
 # This is all quite hackish and would be easier if the translator were
 # restructured so that more information is immediately available for
@@ -199,7 +201,7 @@ class VarValueRenaming:
     def register_variable(self, old_domain_size, init_value, new_domain):
         assert 1 <= len(new_domain) <= old_domain_size
         assert init_value in new_domain
-        if len(new_domain) == 1:
+        if len(new_domain) == 1 and not USE_ALL_PREPOSITIONS:
             # Remove this variable completely.
             new_values_for_var = [always_false] * old_domain_size
             new_values_for_var[init_value] = always_true
@@ -210,13 +212,13 @@ class VarValueRenaming:
             new_value_counter = count()
             new_values_for_var = []
             for value in range(old_domain_size):
-                if value in new_domain:
+                if value in new_domain or USE_ALL_PREPOSITIONS:
                     new_values_for_var.append(next(new_value_counter))
                 else:
                     self.num_removed_values += 1
                     new_values_for_var.append(always_false)
             new_size = next(new_value_counter)
-            assert new_size == len(new_domain)
+            assert new_size == len(new_domain) or USE_ALL_PREPOSITIONS
 
             self.new_var_nos.append(self.new_var_count)
             self.new_values.append(new_values_for_var)

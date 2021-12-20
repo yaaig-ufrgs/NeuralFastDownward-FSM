@@ -23,6 +23,8 @@ vector<string> get_facts(vector<string> facts) {
         string line;
         if (myfile.is_open()) {
             while (getline (myfile,line, ';')) {
+                if (line[line.size()-1] == '\n')
+                    line.pop_back();
                 cout << line << endl;
                 loaded_facts.push_back(line);
             }

@@ -110,10 +110,14 @@ std::vector<FactPair> get_fact_mapping(
         return task_properties::get_strips_fact_pairs(task);
     }
 
+    bool allow_unknown_facts = true; // TODO: argument
+
     unordered_map<string, FactPair> name2factpair;
     for (const FactPair &fp: task_properties::get_strips_fact_pairs(task)) {
         string fact_name = task->get_fact_name(fp);
         fact_name = options::stringify_tree(options::generate_parse_tree(fact_name));
+        if (fact_name[fact_name.size()-1] != ')')
+            fact_name += "()";
         name2factpair.insert({fact_name, fp});
     }
 
@@ -124,6 +128,8 @@ std::vector<FactPair> get_fact_mapping(
         if (iter == name2factpair.end()) {
             not_found++;
             cout << "Unknown fact: " << fact << endl;
+            if (!allow_unknown_facts)
+                utils::exit_with(utils::ExitCode::SEARCH_INPUT_ERROR);
             order.push_back(FactPair::no_fact);
         } else {
             order.push_back(iter->second);
