@@ -4,10 +4,10 @@ import torch.nn as nn
 import torch.optim as optim
 from copy import deepcopy
 from torch.utils.data import DataLoader
-
 from src.pytorch.model import HNN
 from src.pytorch.utils.plot import save_y_pred_scatter
 from src.pytorch.utils.helpers import prefix_to_h
+from src.pytorch.utils.timer import Timer
 
 _log = logging.getLogger(__name__)
 
@@ -38,15 +38,18 @@ class TrainWorkflow:
         self.patience = patience
         self.early_stopped = False
         self.restart_no_conv = restart_no_conv
-        self.train_y_pred_values = {}  # {state: (y, pred)} of the last epoch
-        self.val_y_pred_values = {}  # {state: (y, pred)} of the last epoch
+        self.train_y_pred_values = {} # {state = (y, pred)}
+        self.val_y_pred_values = {}
 
-    def train_loop(self, t: int, fold_idx: int):
+    def train_loop(self, t: int, fold_idx: int) -> float:
+        """
+        Network's train loop.
+        """
         # size = len(self.train_dataloader.dataset)
         num_batches = len(self.train_dataloader)
         train_loss = 0
 
-        for batch, (X, y) in enumerate(self.train_dataloader):
+        for _batch, (X, y) in enumerate(self.train_dataloader):
             # Compute prediction and loss.
             pred = self.model(X)
             loss = self.loss_fn(pred, y)
@@ -62,16 +65,9 @@ class TrainWorkflow:
             self.optimizer.step()
 
             if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
-                x_lst = X.tolist()
-                for i, _ in enumerate(x_lst):
-                    x_int = [int(x) for x in x_lst[i]]
-                    x_str = "".join(str(e) for e in x_int)
-                    if len(y[i]) > 1:  # Prefix (unary encoding)
-                        y_h = prefix_to_h(y[i].tolist())
-                        pred_h = prefix_to_h(pred[i].tolist())
-                        self.train_y_pred_values[x_str] = (y_h, pred_h)
-                    else:  # Regression
-                        self.train_y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+                self.train_y_pred_values = self.fill_y_pred(
+                    X, y, pred, self.train_y_pred_values
+                )
 
         if len(self.train_y_pred_values) > 0:
             save_y_pred_scatter(
@@ -81,8 +77,10 @@ class TrainWorkflow:
 
         return train_loss / num_batches
 
-    def val_loop(self, t: int, fold_idx: int):
-        # size = len(self.val_dataloader.dataset)
+    def val_loop(self, t: int, fold_idx: int) -> float:
+        """
+        Network's evaluation loop.
+        """
         num_batches = len(self.val_dataloader)
         val_loss = 0
         with torch.no_grad():
@@ -90,16 +88,9 @@ class TrainWorkflow:
                 pred = self.model(X)
                 val_loss += self.loss_fn(pred, y).item()
                 if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
-                    x_lst = X.tolist()
-                    for i, _ in enumerate(x_lst):
-                        x_int = [int(x) for x in x_lst[i]]
-                        x_str = "".join(str(e) for e in x_int)
-                        if len(y[i]) > 1:  # Prefix (unary encoding)
-                            y_h = prefix_to_h(y[i].tolist())
-                            pred_h = prefix_to_h(pred[i].tolist())
-                            self.val_y_pred_values[x_str] = (y_h, pred_h)
-                        else:  # Regression
-                            self.val_y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+                    self.val_y_pred_values = self.fill_y_pred(
+                        X, y, pred, self.val_y_pred_values
+                    )
         if len(self.val_y_pred_values) > 0:
             save_y_pred_scatter(
                 self.val_y_pred_values, t, fold_idx, f"{self.dirname}/plots", "val_"
@@ -107,19 +98,29 @@ class TrainWorkflow:
             self.val_y_pred_values.clear()
         return val_loss / num_batches
 
-    def val_loop_no_contrasting(self, t: int, fold_idx: int, contrasting_h: int = 501):
+    def val_loop_no_contrasting(
+        self, contrasting_h: int = 501
+    ) -> float:
+        """
+        Evaluation loop without contrasting.
+        """
         num_batches = len(self.val_dataloader)
         val_loss = 0
         with torch.no_grad():
             for X, y in self.val_dataloader:
                 pred = self.model(X)
                 val_loss += self.loss_fn(
-                    torch.tensor([pred_ for i, pred_ in enumerate(pred) if y[i] != contrasting_h]),
-                    torch.tensor([y_ for y_ in y if y_ != contrasting_h])
+                    torch.tensor(
+                        [pred_ for i, pred_ in enumerate(pred) if y[i] != contrasting_h]
+                    ),
+                    torch.tensor([y_ for y_ in y if y_ != contrasting_h]),
                 ).item()
         return val_loss / num_batches
 
-    def dead(self):
+    def dead(self) -> bool:
+        """
+        Checks if the network is dead.
+        """
         with torch.no_grad():
             for X, _ in self.train_dataloader:
                 for p in self.model(X):
@@ -131,25 +132,6 @@ class TrainWorkflow:
         """
         Saves a traced model to be used by the C++ backend.
         """
-
-        # What is torch.jit.trace?
-        # ------------------------
-        # docs: https://pytorch.org/docs/stable/generated/torch.jit.trace.html
-        #
-        # "Trace a function and return an executable or ScriptFunction that will be optimized using
-        # just-in-time compilation. Tracing is ideal for code that operates only on Tensors and lists,
-        # dictionaries, and tuples of Tensors."
-        #
-        # "Using torch.jit.trace and torch.jit.trace_module, you can turn an existing module or Python
-        # function into a TorchScript ScriptFunction or ScriptModule. You must provide example inputs,
-        # and we run the function, recording the operations performed on all the tensors."
-        #
-        # In other words, "tracing" a model means transforming your PyTorch code ("eager mode") to
-        # TorchScript code ("script mode"). Script mode is focused on production, while eager mode is
-        # for prototyping and research. Script mode is performatic (JIT) and portable.
-        #
-        # TorchScript is a domain-specific language for ML, and it is a subset of Python.
-
         if model == "resnet":
             example_input = self.train_dataloader.dataset[:10][0]
         elif model == "simple":
@@ -159,7 +141,12 @@ class TrainWorkflow:
         traced_model = torch.jit.trace(model_save, example_input)
         traced_model.save(filename)
 
-    def run(self, fold_idx, train_timer, validation=True):
+    def run(
+        self, fold_idx: int, train_timer: Timer, validation: bool = True
+    ) -> (float, bool):
+        """
+        Network train/eval main loop.
+        """
         best_val_loss = None
         born_dead = False
         for t in range(self.max_epochs):
@@ -168,10 +155,14 @@ class TrainWorkflow:
             if t == 0:
                 if self.dead():
                     if self.restart_no_conv:
-                        _log.warning("All predictions are 0 (born dead). Restarting training with a new seed...")
+                        _log.warning(
+                            "All predictions are 0 (born dead). Restarting training with a new seed..."
+                        )
                         return None, True
                     else:
-                        _log.warning("All predictions are 0 (born dead), but restart is disabled.")
+                        _log.warning(
+                            "All predictions are 0 (born dead), but restart is disabled."
+                        )
                         born_dead = True
             # Check if the network died during training
             elif not born_dead and self.dead():
@@ -189,9 +180,7 @@ class TrainWorkflow:
                         self.best_epoch_model = deepcopy(self.model)
 
                     if best_val_epoch < t - self.patience:
-                        _log.info(
-                            f"Early stop. Best epoch: {best_val_epoch}/{t}"
-                        )
+                        _log.info(f"Early stop. Best epoch: {best_val_epoch}/{t}")
                         self.early_stopped = True
                         break
             else:
@@ -209,30 +198,46 @@ class TrainWorkflow:
         return (best_val_loss if validation else None), False
 
     def save_post_scatter_plot(self, fold_idx: int):
+        """
+        After all epochs are done, perform an extra evaluation to create the final scatter plot.
+        """
         with torch.no_grad():
-            self.val_y_pred_values = self.fill_y_pred(self.val_dataloader)
-            self.train_y_pred_values = self.fill_y_pred(self.train_dataloader)
+            for X, y in self.val_dataloader:
+                self.val_y_pred_values = self.fill_y_pred(
+                    X, y, self.model(X), self.val_y_pred_values
+                )
+            for X, y in self.train_dataloader:
+                self.train_y_pred_values = self.fill_y_pred(
+                    X, y, self.model(X), self.train_y_pred_values
+                )
 
             _log.info(f"Saving post-training scatter plot.")
             save_y_pred_scatter(
-                self.train_y_pred_values, -1, fold_idx, f"{self.dirname}/plots", "train_"
+                self.train_y_pred_values,
+                -1,
+                fold_idx,
+                f"{self.dirname}/plots",
+                "train_",
             )
             save_y_pred_scatter(
                 self.val_y_pred_values, -1, fold_idx, f"{self.dirname}/plots", "val_"
             )
 
-    def fill_y_pred(self, dataloader):
-        y_pred_values = {}
-        for X, y in dataloader:
-            pred = self.model(X)
-            x_lst = X.tolist()
-            for i, _ in enumerate(x_lst):
-                x_int = [int(x) for x in x_lst[i]]
-                x_str = "".join(str(e) for e in x_int)
-                if len(y[i]) > 1:  # Prefix (unary encoding)
-                    y_h = prefix_to_h(y[i].tolist())
-                    pred_h = prefix_to_h(pred[i].tolist())
-                    y_pred_values[x_str] = (y_h, pred_h)
-                else:  # Regression
-                    y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+    def fill_y_pred(
+        self, X: torch.Tensor, y: torch.Tensor, pred: torch.Tensor, y_pred_values: dict
+    ) -> dict:
+        """
+        Fill `y_pred_values` dict with sampled and predicted h values for each state.
+        state = (sampled heuristic, predicted heuristic)
+        """
+        x_lst = X.tolist()
+        for i, _ in enumerate(x_lst):
+            x_int = [int(x) for x in x_lst[i]]
+            x_str = "".join(str(e) for e in x_int)
+            if len(y[i]) > 1:  # Prefix (unary encoding)
+                y_h = prefix_to_h(y[i].tolist())
+                pred_h = prefix_to_h(pred[i].tolist())
+                y_pred_values[x_str] = (y_h, pred_h)
+            else:  # Regression
+                y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
         return y_pred_values
