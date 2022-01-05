@@ -33,7 +33,12 @@ _FD_EXIT_CODE = {
 }
 
 
-def parse_fd_output(output: str):
+def parse_fd_output(output: str) -> dict:
+    """
+    Reads Fast Downward's output during problem solving, and retuns a dict
+    with the relevant information.
+    """
+
     # Remove \n to use in re.
     output = output.replace("\n", " ")
     re_initial_h = match(r".*Initial heuristic value for .*?: (\d+)", output)
@@ -76,10 +81,14 @@ def parse_fd_output(output: str):
             float(results["expanded"]) / float(results["search_time"]), 4
         )
         results["total_time"] = float(re_time[0][1])
+
     return results
 
 
-def save_downward_log(folder, instance_pddl, output):
+def save_downward_log(folder: str, instance_pddl: str, output: str):
+    """
+    Saves the full Fast Downward log printed during problem solving.
+    """
     downward_logs = f"{folder}/downward_logs"
     if not path.exists(downward_logs):
         makedirs(downward_logs)
@@ -91,13 +100,16 @@ def save_downward_log(folder, instance_pddl, output):
 
 
 def solve_instance_with_fd(
-    domain_pddl,
-    instance_pddl,
-    opts="astar(lmcut())",
-    memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
+    domain_pddl: str,
+    instance_pddl: str,
+    opts: str = "astar(lmcut())",
+    memory_limit: int = DEFAULT_MAX_SEARCH_MEMORY,
     save_log_to=None,
-    save_log_bool=DEFAULT_SAVE_DOWNWARD_LOGS,
-):
+    save_log_bool: bool = DEFAULT_SAVE_DOWNWARD_LOGS,
+) -> dict:
+    """
+    Tries to solve an instance using Fast Downward and one of its search algorithms.
+    """
     try:
         cl = [
             _FD,
@@ -138,30 +150,29 @@ def solve_instance_with_fd(
 
 
 def solve_instance_with_fd_nh(
-    domain_pddl,
-    problem_pddl,
-    traced_model,
-    traced_model_cmp,
-    search_algorithm=DEFAULT_SEARCH_ALGORITHM,
-    heuristic=DEFAULT_HEURISTIC,
-    heuristic_multiplier=DEFAULT_HEURISTIC_MULTIPLIER,
-    unary_threshold=DEFAULT_UNARY_THRESHOLD,
-    time_limit=DEFAULT_MAX_SEARCH_TIME,
-    memory_limit=DEFAULT_MAX_SEARCH_MEMORY,
-    max_expansions=DEFAULT_MAX_EXPANSIONS,
-    facts_file=DEFAULT_FACTS_FILE,
-    defaults_file=DEFAULT_DEF_VALUES_FILE,
+    domain_pddl: str,
+    problem_pddl: str,
+    traced_model: str,
+    traced_model_cmp: str,
+    search_algorithm: str = DEFAULT_SEARCH_ALGORITHM,
+    heuristic: str = DEFAULT_HEURISTIC,
+    heuristic_multiplier: int = DEFAULT_HEURISTIC_MULTIPLIER,
+    unary_threshold: float = DEFAULT_UNARY_THRESHOLD,
+    time_limit: int = DEFAULT_MAX_SEARCH_TIME,
+    memory_limit: int = DEFAULT_MAX_SEARCH_MEMORY,
+    max_expansions: int = DEFAULT_MAX_EXPANSIONS,
+    facts_file: str = DEFAULT_FACTS_FILE,
+    defaults_file: str = DEFAULT_DEF_VALUES_FILE,
     save_log_to=None,
-    save_log_bool=DEFAULT_SAVE_DOWNWARD_LOGS,
-):
+    save_log_bool: bool = DEFAULT_SAVE_DOWNWARD_LOGS,
+) -> dict:
     """
     Tries to solve a PDDL instance with the torch_sampling_network.
     """
-
     if heuristic == "nn":
         facts = "[]" if facts_file == "" else f"[file {facts_file}]"
         defaults = "[]" if defaults_file == "" else f"[file {defaults_file}]"
-        cmp_model = "\"\"" if traced_model_cmp == "" else traced_model_cmp
+        cmp_model = '""' if traced_model_cmp == "" else traced_model_cmp
         undefined_input = "true" if "_us_" in traced_model else "false"
         opt_network = (
             f"torch_sampling_network(path={traced_model},"
