@@ -12,7 +12,6 @@ from random import randint
 
 from src.pytorch.k_fold_training_data import KFoldTrainingData
 from src.pytorch.model import HNN
-from src.pytorch.model_rsl import RSL
 from src.pytorch.train_workflow import TrainWorkflow
 from src.pytorch.log import setup_full_logging
 from src.pytorch.utils.helpers import (
