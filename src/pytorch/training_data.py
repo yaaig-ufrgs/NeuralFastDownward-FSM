@@ -5,8 +5,11 @@ import src.pytorch.fast_downward_api as fd_api
 from src.pytorch.utils.default_args import DEFAULT_CLAMPING
 from itertools import chain, zip_longest
 
+
 class InstanceDataset(Dataset):
-    def __init__(self, state_value_pairs, domain_max_value, output_layer):
+    def __init__(
+        self, state_value_pairs: list, domain_max_value: int, output_layer: str
+    ):
         states, hvalues = [], []
         for pair in state_value_pairs:
             states.append(pair[0])
@@ -31,7 +34,7 @@ class InstanceDataset(Dataset):
         else:
             raise RuntimeError(f"Invalid output layer: {output_layer}")
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> (torch.Tensor, torch.Tensor):
         return self.states[idx], self.hvalues[idx]
 
     def __len__(self):
@@ -45,18 +48,14 @@ class InstanceDataset(Dataset):
             return torch.Size([len(self.hvalues), 1])
         return self.hvalues.shape
 
-    def set_x(self, x):
-        self.states = x
 
-    def set_y(self, y):
-        self.hvalues = y
-
-
-def load_training_state_value_pairs(samples_file: str, clamping: int, remove_goals: bool) -> ([([int], int)], int):
+def load_training_state_value_pairs(
+    samples_file: str, clamping: int, remove_goals: bool
+) -> ([([int], int)], int):
     """
-    Load state-value pairs from a sampling output,
-    Returns a tuple containing a list of state-value pairs
-    and the domain max value.
+    Load state-value pairs from a sampling output, returning a tuple
+    containing a list of state-value pairs and the domain max value.
+    This is the training data.
     """
     state_value_pairs = []
     domain_max_value, max_h = 0, 0
@@ -89,7 +88,6 @@ def generate_optimal_state_value_pairs(domain, problems):
     Generates the state value pair from a set of problems.
     Returns a list of tuple(state, value).
     """
-
     states = convert_pddl_to_boolean(domain, problems)
     state_value_pairs = []
     for i in range(len(problems)):
@@ -106,7 +104,6 @@ def convert_pddl_to_boolean(domain, problems):
     """
     From a pddl, it gets the boolean vector in the format for network input.
     """
-
     # TODO: Get atoms order from domain
     with open("atoms/probBLOCKS-12-0.txt") as f:
         # Read and convert (e.g. "Atom ontable(a)" -> "ontable a")
@@ -136,7 +133,6 @@ def load_training_state_value_tuples(sas_plan: str) -> ([[int]], [int]):
     a list of states (each state is a bool list) and a list
     of hvalues. States and hvalues correspond by index.
     """
-
     states = []
     hvalues = []
     with open(

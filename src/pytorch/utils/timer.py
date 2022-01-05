@@ -30,7 +30,7 @@ class Timer(object):
         self.accumulated_time = 0.0
         self.timeout = False
 
-    def current_time(self):
+    def current_time(self) -> float:
         return self.accumulated_time + perf_counter() - self.last_start_time
 
     def check_timeout(self) -> bool:
