@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+Main file used to control the training process.
+"""
+
 import os
 import sys
 import logging
@@ -36,26 +40,19 @@ from src.pytorch.utils.default_args import (
 )
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
+from argparse import Namespace
 
 _log = logging.getLogger(__name__)
 
-def set_seeds(seed):
-    torch.manual_seed(seed)
-    torch.use_deterministic_algorithms(True)
-    random.seed(seed)
-    np.random.seed(seed)
 
-def train_main(args):
+def train_main(args: Namespace):
+    """
+    Higher-level setup of the full training procedure.
+    """
     if args.num_threads != -1:
         torch.set_num_threads(args.num_threads)
-    # Seeds
-    if args.seed == -1:
-        args.seed = randint(0, 2**32-1)
-    if args.weights_seed == -1:
-        args.weights_seed = args.seed
-    if args.shuffle_seed == -1:
-        args.shuffle_seed = args.seed
-    set_seeds(args.seed)
+
+    set_seeds(args)
 
     # If forcibly changing the order that the samples are presented, disable shuffling.
     if args.standard_first or args.contrast_first or args.intercalate_samples != 0:
@@ -72,15 +69,20 @@ def train_main(args):
         return
     if args.max_epochs == -1:
         args.max_epochs = get_fixed_max_epochs(args)
-    if args.max_epochs == DEFAULT_MAX_EPOCHS and args.max_training_time == DEFAULT_MAX_TRAINING_TIME:
+    if (
+        args.max_epochs == DEFAULT_MAX_EPOCHS
+        and args.max_training_time == DEFAULT_MAX_TRAINING_TIME
+    ):
         args.max_epochs = DEFAULT_FORCED_MAX_EPOCHS
-        _log.warning(f"Neither max epoch nor max training time have been defined. "
-                     f"Setting maximum epochs to {DEFAULT_FORCED_MAX_EPOCHS}.")
+        _log.warning(
+            f"Neither max epoch nor max training time have been defined. "
+            f"Setting maximum epochs to {DEFAULT_FORCED_MAX_EPOCHS}."
+        )
 
     cmd_line = " ".join(sys.argv[0:])
     logging_train_config(args, dirname, cmd_line)
 
-    ### TRAINING ###
+    # TRAINING
     best_fold, num_retries, train_timer = train_nn(args, dirname)
 
     _log.info("Finishing training.")
@@ -105,59 +107,19 @@ def train_main(args):
     except:
         _log.error(f"Failed to save best fold.")
 
-    ### PLOTTING ###
-    plots_dir = f"{dirname}/plots"
-
-    if args.scatter_plot and args.plot_n_epochs != -1:
-        try:
-            _log.info(f"Saving scatter plot GIF.")
-            save_gif_from_plots(plots_dir, best_fold["fold"])
-            remove_intermediate_plots(plots_dir, best_fold["fold"])
-        except:
-            _log.error(f"Failed making plot GIF.")
-
-    heuristic_pred_file = f"{dirname}/heuristic_pred.csv"
-    dir_split = dirname.split("/")[-1].split("_")
-    problem_name = "_".join(dir_split[2:4])
-    sample_seed = dir_split[-1].split(".")[0]
-    data = {}
-
-    if args.compare_csv_dir != "" and os.path.isfile(heuristic_pred_file):
-        csv_dir = args.compare_csv_dir
-        if csv_dir[-1] != "/":
-            csv_dir += "/"
-        problem_name = "_".join(dirname.split("/")[-1].split("_")[2:4])
-        csv_h = glob.glob(csv_dir + problem_name + ".csv")
-
-        if len(csv_h) > 0:
-            try:
-                _log.info(f"Saving h^nn vs. h scatter plot.")
-                data = save_h_pred_scatter(plots_dir, heuristic_pred_file, csv_h[0])
-            except:
-                _log.error(f"Failed making hnn vs. h scatter plot.")
-
-    if len(data) > 0 and args.hstar_csv_dir != "":
-        csv_dir = args.hstar_csv_dir
-        if csv_dir[-1] != "/":
-            csv_dir += "/"
-        csv_hstar = glob.glob(f"{csv_dir}*{problem_name}**{sample_seed}*.csv")
-
-        if len(csv_hstar) > 0:
-            try:
-                _log.info(f"Saving box plot.")
-                save_box_plot(plots_dir, data, csv_hstar[0])
-            except:
-                _log.error(f"Failed making box plot.")
-    
-    if not args.save_heuristic_pred:
-        os.remove(heuristic_pred_file)
+    # OTHER PLOTS
+    make_extra_plots(args, dirname, best_fold)
 
     _log.info("Training complete!")
 
 
-def train_nn(args, dirname):
+def train_nn(args: Namespace, dirname: str) -> (dict, int, Timer):
+    """
+    Manages the training procedure.
+    """
     num_retries = 0
     born_dead = True
+
     while born_dead:
         kfold = KFoldTrainingData(
             args.samples,
@@ -177,6 +139,7 @@ def train_nn(args, dirname):
             cut_non_intercalated_samples=args.cut_non_intercalated_samples,
             model=args.model,
         )
+
         if args.normalize_output:
             # Add the reference value in train_args.json to denormalize in the test
             add_train_arg(dirname, "max_h", kfold.domain_max_value)
@@ -239,6 +202,7 @@ def train_nn(args, dirname):
                 break
 
             heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
+
             if fold_val_loss < best_fold["val_loss"]:
                 save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
                 _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
@@ -249,21 +213,85 @@ def train_nn(args, dirname):
                     f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
                 )
 
-            """
-            for param in train_wf.best_epoch_model.parameters():
-                print(param.data)
-            for param in model.parameters():
-                print(param.data)
-            """
-
             train_wf.save_traced_model(
                 f"{dirname}/models/traced_{fold_idx}.pt", args.model
             )
+
             if train_timer.check_timeout():
                 _log.info(f"Maximum training time reached. Stopping training.")
                 break
 
     return best_fold, num_retries, train_timer
+
+
+def set_seeds(args: Namespace):
+    """
+    Sets seeds to assure program reproducibility.
+    """
+    if args.seed == -1:
+        args.seed = randint(0, 2 ** 32 - 1)
+    if args.weights_seed == -1:
+        args.weights_seed = args.seed
+    if args.shuffle_seed == -1:
+        args.shuffle_seed = args.seed
+    torch.manual_seed(args.seed)
+    torch.use_deterministic_algorithms(True)
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+
+
+def make_extra_plots(args: Namespace, dirname: str, best_fold: dict):
+    """
+    Manages extra plots, suchs as:
+    - h vs predicted h scatter plot animation.
+    - hnn vs chosen heuristic scatter plot.
+    - boxplot with hnn, h* and goalcount.
+    """
+    plots_dir = f"{dirname}/plots"
+
+    if args.scatter_plot and args.plot_n_epochs != -1:
+        try:
+            _log.info(f"Saving scatter plot GIF.")
+            save_gif_from_plots(plots_dir, best_fold["fold"])
+            remove_intermediate_plots(plots_dir, best_fold["fold"])
+        except:
+            _log.error(f"Failed making plot GIF.")
+
+    heuristic_pred_file = f"{dirname}/heuristic_pred.csv"
+    dir_split = dirname.split("/")[-1].split("_")
+    problem_name = "_".join(dir_split[2:4])
+    sample_seed = args.samples.split("_")[-1]
+    data = {}
+
+    if args.compare_csv_dir != "" and os.path.isfile(heuristic_pred_file):
+        csv_dir = args.compare_csv_dir
+        if csv_dir[-1] != "/":
+            csv_dir += "/"
+        problem_name = "_".join(dirname.split("/")[-1].split("_")[2:4])
+        csv_h = glob.glob(csv_dir + problem_name + ".csv")
+
+        if len(csv_h) > 0:
+            try:
+                _log.info(f"Saving h^nn vs. h scatter plot.")
+                data = save_h_pred_scatter(plots_dir, heuristic_pred_file, csv_h[0])
+            except:
+                _log.error(f"Failed making hnn vs. h scatter plot.")
+
+    if len(data) > 0 and args.hstar_csv_dir != "":
+        csv_dir = args.hstar_csv_dir
+        if csv_dir[-1] != "/":
+            csv_dir += "/"
+        csv_hstar = glob.glob(f"{csv_dir}*{problem_name}**{sample_seed}*.csv")
+
+        if len(csv_hstar) > 0:
+            try:
+                _log.info(f"Saving box plot.")
+                save_box_plot(plots_dir, data, csv_hstar[0])
+            except:
+                _log.error(f"Failed making box plot.")
+
+    if not args.save_heuristic_pred:
+        os.remove(heuristic_pred_file)
 
 
 if __name__ == "__main__":
