@@ -196,7 +196,7 @@ def train_nn(args: Namespace, dirname: str) -> (dict, int, Timer):
             if born_dead and args.num_folds == 1:
                 args.seed += args.seed_increment_when_born_dead
                 _log.info(f"Updated seed: {args.seed}")
-                set_seeds(args.seed)
+                set_seeds(args)
                 num_retries += 1
                 add_train_arg(dirname, "updated_seed", args.seed)
                 break
