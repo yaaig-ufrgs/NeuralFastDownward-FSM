@@ -196,7 +196,7 @@ def train_nn(args: Namespace, dirname: str) -> (dict, int, Timer):
             if born_dead and args.num_folds == 1:
                 args.seed += args.seed_increment_when_born_dead
                 _log.info(f"Updated seed: {args.seed}")
-                set_seeds(args)
+                set_seeds(args, False)
                 num_retries += 1
                 add_train_arg(dirname, "updated_seed", args.seed)
                 break
@@ -224,16 +224,17 @@ def train_nn(args: Namespace, dirname: str) -> (dict, int, Timer):
     return best_fold, num_retries, train_timer
 
 
-def set_seeds(args: Namespace):
+def set_seeds(args: Namespace, weights_shuffle_seed: bool = True):
     """
     Sets seeds to assure program reproducibility.
     """
     if args.seed == -1:
         args.seed = randint(0, 2 ** 32 - 1)
-    if args.weights_seed == -1:
-        args.weights_seed = args.seed
-    if args.shuffle_seed == -1:
-        args.shuffle_seed = args.seed
+    if weights_shuffle_seed:
+        if args.weights_seed == -1:
+            args.weights_seed = args.seed
+        if args.shuffle_seed == -1:
+            args.shuffle_seed = args.seed
     torch.manual_seed(args.seed)
     torch.use_deterministic_algorithms(True)
     random.seed(args.seed)
