@@ -38,7 +38,7 @@ class TrainWorkflow:
         self.patience = patience
         self.early_stopped = False
         self.restart_no_conv = restart_no_conv
-        self.train_y_pred_values = {} # {state = (y, pred)}
+        self.train_y_pred_values = {}  # {state = (y, pred)}
         self.val_y_pred_values = {}
 
     def train_loop(self, t: int, fold_idx: int) -> float:
@@ -98,9 +98,7 @@ class TrainWorkflow:
             self.val_y_pred_values.clear()
         return val_loss / num_batches
 
-    def val_loop_no_contrasting(
-        self, contrasting_h: int = 501
-    ) -> float:
+    def val_loop_no_contrasting(self, contrasting_h: int = 501) -> float:
         """
         Evaluation loop without contrasting.
         """
@@ -124,6 +122,8 @@ class TrainWorkflow:
         with torch.no_grad():
             for X, _ in self.train_dataloader:
                 for p in self.model(X):
+                    if len(p) > 1:  # prefix
+                        p = prefix_to_h(p.tolist())
                     if float(p) != 0.0:
                         return False
         return True
