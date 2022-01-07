@@ -162,6 +162,7 @@ class HNN(nn.Module):
                             tensor[i][j] = random.normalvariate(a, b)
 
     def initialize_weights(self, method, seed):
+        # TODO: Create function for each method
         if seed != -1:
             random.seed(seed)
         for m in self.modules():
@@ -175,7 +176,6 @@ class HNN(nn.Module):
                 elif method == "kaiming_uniform":
                     torch.nn.init.kaiming_uniform_(m.weight)
                     torch.nn.init.zeros_(m.bias)
-                # TODO: Create function for each method
                 elif method == "sqrt_k":
                     k = 1.0 / m.in_features
                     a, b = -sqrt(k), sqrt(k)
