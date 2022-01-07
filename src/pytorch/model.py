@@ -19,6 +19,7 @@ def RAI(fan_in, fan_out):
     b = torch.nn.parameter.Parameter(torch.tensor(V[:, -1], dtype=torch.float32))
     return W, b
 
+
 class Block(nn.Module):
     def __init__(self, hidden_size):
         """
@@ -43,6 +44,7 @@ class Block(nn.Module):
         out = nn.functional.relu(out)
 
         return out
+
 
 # H(euristic) Neural Network
 class HNN(nn.Module):
@@ -70,60 +72,29 @@ class HNN(nn.Module):
         self.dropout_rate = dropout_rate
         self.output_layer = output_layer
         self.linear_output = linear_output
+        self.use_bias = use_bias
+        self.use_bias_output = use_bias_output
         self.model = model
 
         if model == "resnet":
             self.flatten = nn.Flatten()
 
-        hu = [input_units]
-        if len(hidden_units) == 0:  # scalable
-            unit_diff = input_units - output_units
-            step = int(unit_diff / (hidden_layers + 1))
-            for i in range(self.hidden_layers):
-                hu.append(input_units - (i + 1) * step)
-        elif len(hidden_units) == 1:  # all the same
-            hu += hidden_units * self.hidden_layers
-        else:
-            hu += hidden_units
-
-        self.hid = nn.ModuleList()
-        for i in range(self.hidden_layers):
-            self.hid.append(nn.Linear(hu[i], hu[i + 1], bias=use_bias))
+        hu = self.set_hidden_units()
+        self.hid = self.set_hidden_layers(hu)
 
         if model == "resnet":
             self.resblock = Block(hidden_units[0])
 
         # If `use_bias` is set to False, `bias_output` is set to False regardless
         # of the value in `use_bias_output`.
-        bias_output = False if use_bias == False else use_bias_output
+        bias_output = False if self.use_bias == False else use_bias_output
         self.opt = nn.Linear(hu[-1], output_units, bias=bias_output)
 
         if self.dropout_rate > 0:
             self.dropout = nn.Dropout(self.dropout_rate, inplace=False)
 
-        if activation == "sigmoid":
-            self.activation = nn.functional.sigmoid
-        elif activation == "relu":
-            self.activation = nn.functional.relu
-        elif activation == "leakyrelu":
-            self.activation = nn.functional.leaky_relu
-        else:
-            raise NotImplementedError(f"{activation} function not implemented!")
-
-        if output_layer == "regression":
-            self.output_activation = (
-                nn.functional.relu
-                if activation != "leakyrelu"
-                else nn.functional.leaky_relu
-            )
-        elif output_layer == "prefix":
-            self.output_activation = nn.functional.sigmoid
-        elif output_layer == "one-hot":
-            self.output_activation = nn.functional.softmax
-        else:
-            raise NotImplementedError(
-                f"{output_layer} not implemented for output layer!"
-            )
+        self.activation = self.set_activation(activation)
+        self.output_activation = self.set_output_activation(activation)
 
         # Currently for PyTorch 1.9, the default initialization used is Kaiming,
         # "Setting a=sqrt(5) in kaiming_uniform is the same as initializing with
@@ -134,20 +105,63 @@ class HNN(nn.Module):
         if weights_method != DEFAULT_WEIGHTS_METHOD:
             self.initialize_weights(weights_method, weights_seed)
 
-    def set_random(self, type, tensor, a, b):
+    def set_hidden_units(self) -> list:
+        hu = [self.input_units]
+
+        if len(self.hidden_units) == 0:  # Layers with scalable number of units.
+            unit_diff = self.input_units - self.output_units
+            step = int(unit_diff / (self.hidden_layers + 1))
+            for i in range(self.hidden_layers):
+                hu.append(self.input_units - (i + 1) * step)
+        elif len(self.hidden_units) == 1:  # All layers with the same number of units.
+            hu += self.hidden_units * self.hidden_layers
+        else:
+            hu += self.hidden_units
+
+        return hu
+
+    def set_hidden_layers(self, hu: list) -> nn.ModuleList():
+        hid = nn.ModuleList()
+        for i in range(self.hidden_layers):
+            hid.append(nn.Linear(hu[i], hu[i + 1], bias=self.use_bias))
+        return hid
+
+    def set_activation(self, activation: str) -> nn.functional:
+        if activation == "sigmoid":
+            return nn.functional.sigmoid
+        elif activation == "relu":
+            return nn.functional.relu
+        elif activation == "leakyrelu":
+            return nn.functional.leaky_relu
+        else:
+            raise NotImplementedError(f"{activation} function not implemented!")
+
+    def set_output_activation(self, activation: str) -> nn.functional:
+        if self.output_layer == "regression":
+            return nn.functional.relu if activation != "leakyrelu" else nn.functional.leaky_relu
+        elif self.output_layer == "prefix":
+            return torch.sigmoid
+        elif self.output_layer == "one-hot":
+            return nn.functional.softmax
+        else:
+            raise NotImplementedError(
+                f"{self.output_layer} not implemented for output layer!"
+            )
+       
+    def set_random(self, type_, tensor, a, b):
         dim = len(tensor.size())
         with torch.no_grad():
             for i in range(len(tensor)):
                 if dim == 1:
-                    if type == "uniform":
+                    if type_ == "uniform":
                         tensor[i] = random.uniform(a, b)
-                    elif type == "normal":
+                    elif type_ == "normal":
                         tensor[i] = random.normalvariate(a, b)
                 else:
                     for j in range(len(tensor[i])):
-                        if type == "uniform":
+                        if type_ == "uniform":
                             tensor[i][j] = random.uniform(a, b)
-                        elif type == "normal":
+                        elif type_ == "normal":
                             tensor[i][j] = random.normalvariate(a, b)
 
     def initialize_weights(self, method, seed):

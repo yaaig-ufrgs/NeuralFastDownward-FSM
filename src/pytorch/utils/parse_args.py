@@ -146,7 +146,7 @@ def get_train_args():
         default=DEFAULT_HIDDEN_UNITS,
         help='Number of units in each hidden layers. For all hidden layers with same size enter \
               only one value; for different size between layers enter "hidden_layers" values. \
-              (default: scalable according to the input and output units.)',
+              Use 0 to make it scalable according to the input and output units. (default: 250)',
     )
     parser.add_argument(
         "-b",
