@@ -22,14 +22,7 @@ def RAI(fan_in, fan_out):
 
 class Block(nn.Module):
     def __init__(self, hidden_size):
-        """
-        Args:
-            in_channels (int):  Number of input channels.
-            out_channels (int): Number of output channels.
-            stride (int):       Controls the stride.
-        """
         super(Block, self).__init__()
-
         self.block = nn.Sequential(
             nn.Linear(hidden_size, hidden_size),
             nn.ReLU(),
@@ -138,7 +131,11 @@ class HNN(nn.Module):
 
     def set_output_activation(self, activation: str) -> nn.functional:
         if self.output_layer == "regression":
-            return nn.functional.relu if activation != "leakyrelu" else nn.functional.leaky_relu
+            return (
+                nn.functional.relu
+                if activation != "leakyrelu"
+                else nn.functional.leaky_relu
+            )
         elif self.output_layer == "prefix":
             return torch.sigmoid
         elif self.output_layer == "one-hot":
@@ -147,7 +144,7 @@ class HNN(nn.Module):
             raise NotImplementedError(
                 f"{self.output_layer} not implemented for output layer!"
             )
-       
+
     def set_random(self, type_, tensor, a, b):
         dim = len(tensor.size())
         with torch.no_grad():
