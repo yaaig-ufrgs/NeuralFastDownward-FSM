@@ -53,12 +53,10 @@ vector<string> get_defaults(vector<string> defaults) {
     }
 }
 
-
 namespace neural_networks {
 
 TorchSamplingNetwork::TorchSamplingNetwork(const Options &opts)
     : TorchNetwork(opts),
-      //relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       heuristic_shift(opts.get<int>("shift")),
       heuristic_multiplier(opts.get<int>("multiplier")),
       relevant_facts(get_fact_mapping(task.get(), get_facts(opts.get_list<string>("facts")))),
@@ -101,14 +99,11 @@ int TorchSamplingNetwork::get_heuristic() {
 }
 
 int TorchSamplingNetwork::unary_to_value(const vector<double>& unary_h) {
-    int hvalue = unary_h.size() - 1;
     for (size_t i = 0; i < unary_h.size(); i++) {
-        if (unary_h[i] < unary_threshold) {
-            hvalue = i - 1;
-            break;
-        }
+        if (unary_h[i] < unary_threshold)
+            return i - 1;
     }
-    return hvalue;
+    return unary_h.size() - 1;
 }
 
 const vector<int> &TorchSamplingNetwork::get_heuristics() {
@@ -139,26 +134,27 @@ vector<at::Tensor> TorchSamplingNetwork::get_input_tensors(const State &state) {
     return {tensor};
 }
 
+int TorchSamplingNetwork::h_adjustment(int h) {
+    return (h + heuristic_shift) * heuristic_multiplier;
+}
+
 void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
     at::Tensor tensor = output.toTensor();
     std::vector<double> unary_output(tensor.data_ptr<float>(),
                                     tensor.data_ptr<float>() + tensor.numel());
 
-    if (!blind) {
-        // Regression (tensor.size(1) == 1) or Classification (tensor.size(1) > 1).
-        double h = normalize_output ? round(unary_output[0]*max_h) : unary_output[0];
-        // All negative output is zeroed.
-        if (h < 0) {
-            h = 0; 
-        }
-        last_h = tensor.size(1) == 1 ? (h + heuristic_shift) * heuristic_multiplier : unary_to_value(unary_output);
-        //cout << "###### last_h: " << last_h << endl;
-        last_h_batch.push_back(last_h);
-    }
-    else {
+    if (blind) {
         last_h = 0;
-        last_h_batch.push_back(last_h);
+    } else {
+        // Regression
+        if (tensor.size(1) == 1) {
+            last_h = normalize_output ? round(unary_output[0] * max_h) : unary_output[0];
+        // Classification
+        } else {
+            last_h = unary_to_value(unary_output);
+        }
     }
+    last_h_batch.push_back(h_adjustment(last_h));
 }
 
 void TorchSamplingNetwork::parse_output_both(const torch::jit::IValue &output, const torch::jit::IValue &output_cmp) {
@@ -169,36 +165,26 @@ void TorchSamplingNetwork::parse_output_both(const torch::jit::IValue &output, c
     std::vector<double> unary_output_cmp(tensor_cmp.data_ptr<float>(),
                                     tensor_cmp.data_ptr<float>() + tensor_cmp.numel());
 
-
-    if (!blind) {
-        // Regression (tensor.size(1) == 1) or Classification (tensor.size(1) > 1).
-        double h = normalize_output ? round(unary_output[0]*max_h) : unary_output[0];
-        double h_cmp = normalize_output ? round(unary_output_cmp[0]*max_h) : unary_output_cmp[0];
-        // All negative output is zeroed.
-        if (h < 0) {
-            h = 0; 
-        }
-        if (h_cmp < 0) {
-            h_cmp = 0;
-        }
-        double h_final = h <= h_cmp ? h : h_cmp;
-        if (tensor.size(1) == 1) {
-            last_h = (h_final + heuristic_shift) * heuristic_multiplier;
-        } else {
-            double uv = unary_to_value(unary_output);
-            double uv_cmp = unary_to_value(unary_output_cmp);
-            last_h = uv <= uv_cmp ? uv : uv_cmp;
-            
-        }
-        //cout << "###### last_h_both: " << last_h << endl;
-        last_h_batch.push_back(last_h);
-    }
-    else {
+    if (blind) {
         last_h = 0;
-        last_h_batch.push_back(last_h);
+    } else {
+        int h1, h2;
+        // Regression
+        if (tensor.size(1) == 1) {
+            last_h = min(
+                normalize_output ? round(unary_output[0] * max_h) : unary_output[0],
+                normalize_output ? round(unary_output_cmp[0] * max_h) : unary_output_cmp[0]
+            );
+        // Classification
+        } else {
+            last_h = min(
+                h1 = unary_to_value(unary_output),
+                h2 = unary_to_value(unary_output_cmp)
+            );
+        }
     }
+    last_h_batch.push_back(h_adjustment(last_h));
 }
-
 
 void TorchSamplingNetwork::clear_output() {
     last_h = Heuristic::NO_VALUE;

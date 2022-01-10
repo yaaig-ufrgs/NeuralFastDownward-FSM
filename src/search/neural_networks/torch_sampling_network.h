@@ -17,6 +17,7 @@ protected:
     const bool blind;
     const double unary_threshold;
     const bool undefined_input;
+
     bool normalize_output;
     int max_h;
 
@@ -38,6 +39,7 @@ public:
     virtual const std::vector<int> &get_heuristics() override;
 
     int unary_to_value(const std::vector<double>& unary_h);
+    int h_adjustment(int h);
 };
 }
 #endif /* NEURAL_NETWORKS_TORCH_SAMPLING_NETWORK_H */
