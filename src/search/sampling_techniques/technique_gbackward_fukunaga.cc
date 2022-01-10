@@ -107,9 +107,12 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
     };
 
     if (technique == "dfs") {
+        // Each element of the stack is (state, operator index used to achieve the state)
         stack<pair<PartialAssignment,int>> stack;
         int idx_op = 0;
         while (samples.size() < (unsigned)samples_per_search) {
+            // A seed is calculated taking into account several factors to avoid repetition in the same sampling
+            // and guarantee that the same seed will always be used at the same depth level
             int dfs_seed = (bias_reload_counter * samples_per_search + partial_assignment.estimated_heuristic) +
                            (rng->get_seed() * ((searches+1) * samples_per_search));
             PartialAssignment new_partial_assignment = dfss->sample_state_length(
@@ -125,7 +128,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
                 if (stack.empty())
                     break;
                 partial_assignment = stack.top().first;
-                idx_op = stack.top().second + 1;
+                idx_op = stack.top().second + 1; // Continues from next operator
                 stack.pop();
                 continue;
             }
@@ -144,6 +147,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
             }
         }
     } else if (technique == "rw") {
+        // Attempts to find a new state when performing each step
         int MAX_ATTEMPTS = 100, attempts = 0;
         while (samples.size() < (unsigned)samples_per_search) {
             PartialAssignment new_partial_assignment = rrws->sample_state_length(
@@ -159,6 +163,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardFukunaga::create_next_al
             if (hash_table.find(new_partial_assignment) == hash_table.end()) {
                 hash_table.insert(new_partial_assignment);
 
+                // if it is goal state then set h to 0
                 new_partial_assignment.estimated_heuristic = (
                     restart_h_when_goal_state && task_properties::is_goal_state(
                         task_proxy,
