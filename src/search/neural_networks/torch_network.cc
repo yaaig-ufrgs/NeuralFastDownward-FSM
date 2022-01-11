@@ -82,7 +82,7 @@ void TorchNetwork::add_options_to_parser(options::OptionParser &parser) {
             "path_cmp",
             "Network model used for comparison with the main one."
             "If set, testing will take the minimum heuristic of the two models.",
-            "");
+            "''");
     parser.add_option<shared_ptr<AbstractTask>>(
         "transform",
         "Optional task transformation for the network."

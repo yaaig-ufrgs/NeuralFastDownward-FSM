@@ -170,19 +170,22 @@ def solve_instance_with_fd_nh(
     Tries to solve a PDDL instance with the torch_sampling_network.
     """
     if heuristic == "nn":
-        facts = "[]" if facts_file == "" else f"[file {facts_file}]"
-        defaults = "[]" if defaults_file == "" else f"[file {defaults_file}]"
-        cmp_model = '""' if traced_model_cmp == "" else traced_model_cmp
-        undefined_input = "true" if "_us_" in traced_model else "false"
-        opt_network = (
-            f"torch_sampling_network(path={traced_model},"
-            f"path_cmp={cmp_model},"
-            f"multiplier={heuristic_multiplier},"
-            f"facts={facts},"
-            f"defaults={defaults},"
-            f"unary_threshold={unary_threshold},"
-            f"undefined_input={undefined_input})"
-        )
+        opt_network = "torch_sampling_network("
+        opt_network += f"path={traced_model}"
+        if traced_model_cmp:
+            opt_network += f", path_cmp={traced_model_cmp}"
+        if heuristic_multiplier != DEFAULT_HEURISTIC_MULTIPLIER:
+            opt_network += f", multiplier={heuristic_multiplier}"
+        if facts_file:
+            opt_network += f", facts=[file {facts_file}]"
+        if defaults_file:
+            opt_network += f", defaults=[file {defaults_file}]"
+        if unary_threshold != DEFAULT_UNARY_THRESHOLD:
+            opt_network += f", unary_threshold={unary_threshold}"
+        if "_us_" in traced_model:
+            opt_network += f", undefined_input=true"
+        opt_network += ")"
+
         opt_heuristic = f"nh({opt_network})"
     else:
         opt_heuristic = f"{heuristic}()"
@@ -190,10 +193,10 @@ def solve_instance_with_fd_nh(
     if search_algorithm == "eager_greedy":
         opt_heuristic = f"[{opt_heuristic}]"
 
-    opts = f"{search_algorithm}({opt_heuristic}"
-    if time_limit != float("inf"):
+    opts = search_algorithm + "(" + opt_heuristic
+    if time_limit != DEFAULT_MAX_SEARCH_TIME:
         opts += f", max_time={time_limit}"
-    if max_expansions != float("inf"):
+    if max_expansions != DEFAULT_MAX_EXPANSIONS:
         opts += f", max_expansions={max_expansions}"
     opts += ")"
 
