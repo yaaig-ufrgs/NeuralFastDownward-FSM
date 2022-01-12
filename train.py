@@ -167,7 +167,6 @@ def train_nn(args: Namespace, dirname: str) -> (dict, int, Timer):
                 use_bias=args.bias,
                 use_bias_output=args.bias_output,
                 weights_method=args.weights_method,
-                weights_seed=args.weights_seed,
             ).to(torch.device("cpu"))
 
             if fold_idx == 0:
@@ -224,17 +223,14 @@ def train_nn(args: Namespace, dirname: str) -> (dict, int, Timer):
     return best_fold, num_retries, train_timer
 
 
-def set_seeds(args: Namespace, weights_shuffle_seed: bool = True):
+def set_seeds(args: Namespace, shuffle_seed: bool = True):
     """
     Sets seeds to assure program reproducibility.
     """
     if args.seed == -1:
         args.seed = randint(0, 2 ** 32 - 1)
-    if weights_shuffle_seed:
-        if args.weights_seed == -1:
-            args.weights_seed = args.seed
-        if args.shuffle_seed == -1:
-            args.shuffle_seed = args.seed
+    if shuffle_seed and args.shuffle_seed == -1:
+        args.shuffle_seed = args.seed
     torch.manual_seed(args.seed)
     torch.use_deterministic_algorithms(True)
     random.seed(args.seed)

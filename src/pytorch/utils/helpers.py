@@ -215,7 +215,6 @@ def logging_train_config(
         "normalize_output": args.normalize_output,
         "seed_increment_when_born_dead": args.seed_increment_when_born_dead,
         "weights_method": args.weights_method,
-        "weights_seed": args.weights_seed if args.weights_seed != -1 else "random",
         "seed": args.seed if args.seed != -1 else "random",
         "scatter_plot": args.scatter_plot if args.scatter_plot != -1 else None,
         "plot_n_epochs": args.plot_n_epochs if args.plot_n_epochs != -1 else None,

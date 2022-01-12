@@ -42,7 +42,6 @@ from src.pytorch.utils.default_args import (
     DEFAULT_SCATTER_PLOT_N_EPOCHS,
     DEFAULT_HEURISTIC_MULTIPLIER,
     DEFAULT_WEIGHTS_METHOD,
-    DEFAULT_WEIGHTS_SEED,
     DEFAULT_COMPARED_HEURISTIC_CSV_DIR,
     DEFAULT_FACTS_FILE,
     DEFAULT_DEF_VALUES_FILE,
@@ -275,6 +274,7 @@ def get_train_args():
             "default",
             "sqrt_k",
             "1",
+            "01",
             "xavier_uniform",
             "xavier_normal",
             "kaiming_uniform",
@@ -283,13 +283,6 @@ def get_train_args():
         ],
         default=DEFAULT_WEIGHTS_METHOD,
         help="Inicialization of network weights. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-ws",
-        "--weights-seed",
-        type=int,
-        default=DEFAULT_WEIGHTS_SEED,
-        help="Random seed to be used. Defaults to equal to main seed. (default: %(default)s)",
     )
     parser.add_argument(
         "-cdir",
