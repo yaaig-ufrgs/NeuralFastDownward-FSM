@@ -19,7 +19,6 @@ from src.pytorch.model import HNN
 from src.pytorch.train_workflow import TrainWorkflow
 from src.pytorch.log import setup_full_logging
 from src.pytorch.utils.helpers import (
-    logging_train_config,
     create_train_directory,
     get_fixed_max_epochs,
     save_y_pred_csv,
@@ -27,6 +26,7 @@ from src.pytorch.utils.helpers import (
     add_train_arg,
     get_problem_by_sample_filename,
 )
+from src.pytorch.utils.log_helpers import logging_train_config
 from src.pytorch.utils.plot import (
     save_h_pred_scatter,
     save_box_plot,
