@@ -8,7 +8,6 @@ import os
 from random import Random
 from json import dump, load
 from datetime import datetime, timezone
-from statistics import median, mean
 from subprocess import check_output
 from src.pytorch.utils.default_args import (
     DEFAULT_AUTO_TASKS_FOLDER,
