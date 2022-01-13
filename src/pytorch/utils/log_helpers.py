@@ -58,6 +58,7 @@ def logging_train_config(
         "intercalate_samples": args.intercalate_samples,
         "cut_non_intercalated_samples": args.cut_non_intercalated_samples,
         "dataloader_num_workers": args.data_num_workers,
+        "gpu": args.use_gpu,
         "bias": args.bias,
         "bias_output": args.bias_output,
         "normalize_output": args.normalize_output,

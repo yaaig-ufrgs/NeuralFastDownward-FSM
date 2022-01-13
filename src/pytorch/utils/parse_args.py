@@ -36,6 +36,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_INTERCALATE_SAMPLES,
     DEFAULT_CUT_NON_INTERCALATED_SAMPLES,
     DEFAULT_SWAP_SAMPLES_FROM,
+    DEFAULT_USE_GPU,
     DEFAULT_DATALOADER_NUM_WORKERS,
     DEFAULT_TEST_MODEL,
     DEFAULT_SCATTER_PLOT,
@@ -210,6 +211,13 @@ def get_train_args():
         type=str2bool,
         default=DEFAULT_SHUFFLE,
         help="Shuffle the training data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-gpu",
+        "--use-gpu",
+        type=str2bool,
+        default=DEFAULT_USE_GPU,
+        help="Use GPU during training. (default: %(default)s)",
     )
     parser.add_argument(
         "-bi",
