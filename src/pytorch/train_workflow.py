@@ -18,6 +18,7 @@ class TrainWorkflow:
         model: HNN,
         train_dataloader: DataLoader,
         val_dataloader: DataLoader,
+        device: torch.device,
         max_epochs: int,
         plot_n_epochs: int,
         dirname: str,
@@ -30,6 +31,7 @@ class TrainWorkflow:
         self.best_epoch_model = None
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
+        self.device = device
         self.max_epochs = max_epochs
         self.plot_n_epochs = plot_n_epochs
         self.dirname = dirname
@@ -51,6 +53,8 @@ class TrainWorkflow:
 
         for _batch, (X, y) in enumerate(self.train_dataloader):
             # Compute prediction and loss.
+            X = X.to(self.device)
+            y = y.to(self.device)
             pred = self.model(X)
             loss = self.loss_fn(pred, y)
             train_loss += loss.item()
@@ -85,6 +89,8 @@ class TrainWorkflow:
         val_loss = 0
         with torch.no_grad():
             for X, y in self.val_dataloader:
+                X = X.to(self.device)
+                y = y.to(self.device)
                 pred = self.model(X)
                 val_loss += self.loss_fn(pred, y).item()
                 if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
@@ -106,6 +112,7 @@ class TrainWorkflow:
         val_loss = 0
         with torch.no_grad():
             for X, y in self.val_dataloader:
+                X = X.to(self.device)
                 pred = self.model(X)
                 val_loss += self.loss_fn(
                     torch.tensor(
@@ -121,6 +128,7 @@ class TrainWorkflow:
         """
         with torch.no_grad():
             for X, _ in self.train_dataloader:
+                X = X.to(self.device)
                 for p in self.model(X):
                     if len(p) > 1:  # prefix
                         p = prefix_to_h(p.tolist())
@@ -138,7 +146,7 @@ class TrainWorkflow:
             example_input = self.train_dataloader.dataset[0][0]
 
         model_save = self.model if not self.early_stopped else self.best_epoch_model
-        traced_model = torch.jit.trace(model_save, example_input)
+        traced_model = torch.jit.trace(model_save, example_input.to(self.device))
         traced_model.save(filename)
 
     def run(
@@ -203,10 +211,14 @@ class TrainWorkflow:
         """
         with torch.no_grad():
             for X, y in self.val_dataloader:
+                X = X.to(self.device)
+                y = y.to(self.device)
                 self.val_y_pred_values = self.fill_y_pred(
                     X, y, self.model(X), self.val_y_pred_values
                 )
             for X, y in self.train_dataloader:
+                X = X.to(self.device)
+                y = y.to(self.device)
                 self.train_y_pred_values = self.fill_y_pred(
                     X, y, self.model(X), self.train_y_pred_values
                 )

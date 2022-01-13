@@ -83,9 +83,10 @@ def train_main(args: Namespace):
 
     cmd_line = " ".join(sys.argv[0:])
     logging_train_config(args, dirname, cmd_line)
+    device = torch.device("cuda:0" if torch.cuda.is_available() and args.use_gpu else "cpu")
 
     # TRAINING
-    best_fold, num_retries, train_timer = train_nn(args, dirname)
+    best_fold, num_retries, train_timer = train_nn(args, dirname, device)
 
     _log.info("Finishing training.")
     _log.info(f"Elapsed time: {train_timer.current_time()}")
@@ -115,7 +116,7 @@ def train_main(args: Namespace):
     _log.info("Training complete!")
 
 
-def train_nn(args: Namespace, dirname: str) -> (dict, int, Timer):
+def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int, Timer):
     """
     Manages the training procedure.
     """
@@ -169,7 +170,7 @@ def train_nn(args: Namespace, dirname: str) -> (dict, int, Timer):
                 use_bias=args.bias,
                 use_bias_output=args.bias_output,
                 weights_method=args.weights_method,
-            ).to(torch.device("cpu"))
+            ).to(device)
 
             if fold_idx == 0:
                 _log.info(model)
@@ -178,6 +179,7 @@ def train_nn(args: Namespace, dirname: str) -> (dict, int, Timer):
                 model=model,
                 train_dataloader=train_dataloader,
                 val_dataloader=val_dataloader,
+                device=device,
                 max_epochs=args.max_epochs,
                 plot_n_epochs=args.plot_n_epochs,
                 dirname=dirname,
