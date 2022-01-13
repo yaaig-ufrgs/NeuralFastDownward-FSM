@@ -122,6 +122,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
     """
     num_retries = 0
     born_dead = True
+    _log.warning(f"ATTENTION: Training will be performed on device '{device}'.")
 
     while born_dead:
         kfold = KFoldTrainingData(
