@@ -240,7 +240,7 @@ def logging_test_statistics(
                         median(rlist[x]), decimal_places
                     )
 
-    _log.info(f"Training statistics for model {model}")
+    _log.info(f"Testing statistics for model {model}")
     for x in results["statistics"][model]:
         _log.info(f" | {x}: {results['statistics'][model][x]}")
 
