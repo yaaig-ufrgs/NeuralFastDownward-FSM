@@ -53,8 +53,7 @@ class TrainWorkflow:
 
         for _batch, (X, y) in enumerate(self.train_dataloader):
             # Compute prediction and loss.
-            X = X.to(self.device)
-            y = y.to(self.device)
+            X, y = X.to(self.device), y.to(self.device)
             pred = self.model(X)
             loss = self.loss_fn(pred, y)
             train_loss += loss.item()
@@ -89,8 +88,7 @@ class TrainWorkflow:
         val_loss = 0
         with torch.no_grad():
             for X, y in self.val_dataloader:
-                X = X.to(self.device)
-                y = y.to(self.device)
+                X, y = X.to(self.device), y.to(self.device)
                 pred = self.model(X)
                 val_loss += self.loss_fn(pred, y).item()
                 if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
@@ -146,7 +144,9 @@ class TrainWorkflow:
             example_input = self.train_dataloader.dataset[0][0]
 
         model_save = self.model if not self.early_stopped else self.best_epoch_model
-        traced_model = torch.jit.trace(model_save, example_input.to(self.device))
+        # To make testing possible (and fair), the model has to be saved while in the CPU,
+        # even if training was performed in GPU.
+        traced_model = torch.jit.trace(model_save.to("cpu"), example_input)
         traced_model.save(filename)
 
     def run(
@@ -211,14 +211,12 @@ class TrainWorkflow:
         """
         with torch.no_grad():
             for X, y in self.val_dataloader:
-                X = X.to(self.device)
-                y = y.to(self.device)
+                X, y = X.to(self.device), y.to(self.device)
                 self.val_y_pred_values = self.fill_y_pred(
                     X, y, self.model(X), self.val_y_pred_values
                 )
             for X, y in self.train_dataloader:
-                X = X.to(self.device)
-                y = y.to(self.device)
+                X, y = X.to(self.device), y.to(self.device)
                 self.train_y_pred_values = self.fill_y_pred(
                     X, y, self.model(X), self.train_y_pred_values
                 )
