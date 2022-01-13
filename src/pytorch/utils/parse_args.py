@@ -375,23 +375,17 @@ def get_train_args():
 def get_test_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "train_folder",
-        type=Path,
-        help="Path to training folder with trained model."
+        "train_folder", type=Path, help="Path to training folder with trained model."
     )
     parser.add_argument(
         "-tfc",
         "--train-folder-compare",
         type=str,
         default="",
-        help="Trained folder to be used for comparison agains the main model."
+        help="Trained folder to be used for comparison agains the main model.",
     )
     parser.add_argument(
-        "problem_pddls",
-        type=str,
-        nargs="*",
-        default=[],
-        help="Path to problems PDDL."
+        "problem_pddls", type=str, nargs="*", default=[], help="Path to problems PDDL."
     )
     parser.add_argument(
         "-d",
@@ -489,7 +483,7 @@ def get_test_args():
         "--auto-tasks-folder",
         type=str,
         default=DEFAULT_AUTO_TASKS_FOLDER,
-        help="Base folder to search for tasks automatically. (default: %(default)s)"
+        help="Base folder to search for tasks automatically. (default: %(default)s)",
     )
     parser.add_argument(
         "-ats",
@@ -508,11 +502,19 @@ def get_test_args():
 
     return parser.parse_args()
 
+
 def get_exp_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-exp-type",
-        choices=["single", "fixed_net_seed", "fixed_sample_seed", "change_all", "all", "combined"],
+        choices=[
+            "single",
+            "fixed_net_seed",
+            "fixed_sample_seed",
+            "change_all",
+            "all",
+            "combined",
+        ],
         default=DEFAULT_EXP_TYPE,
         help="Experiment type according to seed. (default: %(default)s)",
     )
@@ -714,17 +716,13 @@ def get_exp_args():
         help="Remove leftover samples from the data. (default: %(default)s)",
     )
     parser.add_argument(
-        "problem_pddls",
-        type=str,
-        nargs="*",
-        default=[],
-        help="Path to problems PDDL."
+        "problem_pddls", type=str, nargs="*", default=[], help="Path to problems PDDL."
     )
     parser.add_argument(
         "-tst-modeldir",
         "--tst-model-dir",
         type=Path,
-        help="Path to training folder with trained model. Only used if only testing."
+        help="Path to training folder with trained model. Only used if only testing.",
     )
     parser.add_argument(
         "-tst-a",
@@ -773,7 +771,7 @@ def get_exp_args():
         "--test-auto-tasks-folder",
         type=str,
         default=DEFAULT_AUTO_TASKS_FOLDER,
-        help="Base folder to search for tasks automatically. (default: %(default)s)"
+        help="Base folder to search for tasks automatically. (default: %(default)s)",
     )
     parser.add_argument(
         "-tst-dlog",
@@ -784,6 +782,7 @@ def get_exp_args():
     )
 
     return parser.parse_args()
+
 
 def get_sample_args():
     parser = argparse.ArgumentParser()
@@ -857,7 +856,7 @@ def get_sample_args():
     parser.add_argument(
         "-st",
         "--state-representation",
-        choices=["fs", "ps", "us"], # full state, partial state and undefined
+        choices=["fs", "ps", "us"],  # full state, partial state and undefined
         default=DEFAULT_SAMPLE_STATE_REPRESENTATION,
         help="Output state representation. (default: %(default)s)",
     )
@@ -961,12 +960,13 @@ def get_sample_args():
 
     return parser.parse_args()
 
+
 def str2bool(v):
     if isinstance(v, bool):
         return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+    if v.lower() in ("yes", "true", "t", "y", "1"):
         return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+    elif v.lower() in ("no", "false", "f", "n", "0"):
         return False
     else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+        raise argparse.ArgumentTypeError("Boolean value expected.")
