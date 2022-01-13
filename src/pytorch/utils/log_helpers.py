@@ -1,3 +1,7 @@
+"""
+Management of bulk logging.
+"""
+
 import logging
 import os
 from json import load
@@ -7,8 +11,8 @@ from src.pytorch.utils.helpers import (
     get_hostname,
     get_datetime,
     get_git_commit,
-    save_json,
 )
+from src.pytorch.utils.file_helpers import save_json
 from argparse import Namespace
 
 _log = logging.getLogger(__name__)
