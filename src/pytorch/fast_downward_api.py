@@ -15,6 +15,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_DEF_VALUES_FILE,
     DEFAULT_SAVE_DOWNWARD_LOGS,
 )
+from src.pytorch.utils.helpers import get_defaults_and_facts_files
 
 _log = logging.getLogger(__name__)
 
@@ -169,6 +170,10 @@ def solve_instance_with_fd_nh(
     """
     Tries to solve a PDDL instance with the torch_sampling_network.
     """
+
+    if facts_file == DEFAULT_FACTS_FILE or defaults_file == DEFAULT_DEF_VALUES_FILE:
+        facts_file, defaults_file = get_defaults_and_facts_files(problem_pddl)
+
     if heuristic == "nn":
         opt_network = "torch_sampling_network("
         opt_network += f"path={traced_model}"

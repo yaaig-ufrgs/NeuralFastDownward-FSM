@@ -9,7 +9,6 @@ from src.pytorch.log import setup_full_logging
 from src.pytorch.utils.helpers import (
     get_fixed_max_expansions,
     get_test_tasks_from_problem,
-    get_defaults_and_facts_files,
     get_problem_by_sample_filename,
     get_models_from_train_folder,
     get_samples_folder_from_train_folder,
@@ -81,12 +80,6 @@ def test_main(args):
         models = [""]
         models_cmp = [""]
 
-    sample_file = str(args.train_folder).split("/")[-1].split(".")[1]
-    if args.facts_file == "" and args.defaults_file == "":
-        args.facts_file, args.defaults_file = get_defaults_and_facts_files(
-            args.samples_dir, sample_file
-        )
-
     if args.problem_pddls == []:
         args.problem_pddls = get_test_tasks_from_problem(
             train_folder=args.train_folder,
@@ -120,8 +113,6 @@ def test_main(args):
                 time_limit=args.max_search_time,
                 memory_limit=args.max_search_memory,
                 max_expansions=args.max_expansions,
-                facts_file=args.facts_file,
-                defaults_file=args.defaults_file,
                 save_log_to=dirname,
                 save_log_bool=args.downward_logs,
             )

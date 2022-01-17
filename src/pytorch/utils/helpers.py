@@ -168,17 +168,22 @@ def get_test_tasks_from_problem(
     return pddls[:n]
 
 
-def get_defaults_and_facts_files(samples_dir: str, sample_file: str) -> (str, str):
+def get_defaults_and_facts_files(problem_pddl: str) -> (str, str):
     """
     From the given samples directory and sample file, return its `facts` and `defaults` files.
     """
-    ffiles = glob.glob(samples_dir + f"{sample_file}_facts.txt")
-    dfiles = glob.glob(samples_dir + f"{sample_file}_defaults.txt")
-    if len(ffiles) > 0 and len(dfiles) > 0:
-        return ffiles[0], dfiles[0]
-    else:
-        _log.warning("No `default` and `facts` files found for the given sample.")
-        return "", ""
+    FACTS_FILENAME_FORMAT = "{problem_pddl}_facts.txt"
+    DEFAULTS_FILENAME_FORMAT = "{problem_pddl}_defaults.txt"
+
+    ffiles = FACTS_FILENAME_FORMAT.format(problem_pddl=problem_pddl)
+    dfiles = DEFAULTS_FILENAME_FORMAT.format(problem_pddl=problem_pddl)
+    if not os.path.exists(ffiles):
+        ffiles = ""
+        _log.warning("No `facts` file found for the given sample.")
+    if not os.path.exists(dfiles):
+        dfiles = ""
+        _log.warning("No `default` file found for the given sample.")
+    return ffiles, dfiles
 
 
 def get_models_from_train_folder(train_folder: str, test_model: str) -> [str]:
