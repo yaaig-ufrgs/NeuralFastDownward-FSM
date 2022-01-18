@@ -86,6 +86,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_SAMPLE_FERBER_MAX_WALK_LENGTH,
     DEFAULT_SAMPLE_FERBER_SELECT_STATE,
     DEFAULT_SAMPLE_FERBER_NUM_TASKS,
+    DEFAULT_ADDITIONAL_FOLDER_NAME,
 )
 
 
@@ -375,6 +376,25 @@ def get_train_args():
         type=str2bool,
         default=DEFAULT_CUT_NON_INTERCALATED_SAMPLES,
         help="Remove leftover samples from the data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-addfn",
+        "--additional-folder-name",
+        nargs="*",
+        choices=[
+            "patience", "output-layer",
+            "num-folds", "hidden-layers",
+            "hidden-units", "batch-size",
+            "learning-rate", "max-epochs",
+            "max-training-time", "activation",
+            "weight-decay", "dropout-rate",
+            "shuffle-seed", "shuffle",
+            "use-gpu", "bias",
+            "bias-output", "normalize-output",
+            "restart-no-conv",
+        ],
+        default=DEFAULT_ADDITIONAL_FOLDER_NAME,
+        help="Allows to add parameters to the folder name. (default: %(default)s)",
     )
 
     return parser.parse_args()

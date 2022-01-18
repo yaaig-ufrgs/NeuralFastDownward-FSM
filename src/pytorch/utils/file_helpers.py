@@ -26,20 +26,39 @@ def save_git_diff(dirname: str):
         f.write(check_output(["git", "diff"]).decode("ascii").strip())
 
 
-def create_train_directory(args: Namespace, config_in_foldername: bool = False) -> str:
+def create_train_directory(args: Namespace) -> str:
     """
     Creates training directory according to current configuration.
     """
+
+    print(getattr(args, "additional_folder_name"))
+
     sep = "."
     dirname = f"{args.output_folder}/nfd_train{sep}{args.samples.split('/')[-1]}"
     if args.seed != -1:
         dirname += f"{sep}ns{args.seed}"
-    if config_in_foldername:
-        dirname += f"{sep}{args.output_layer}_{args.activation}_hid{args.hidden_layers}"
-        if args.weight_decay > 0:
-            dirname += f"_w{args.weight_decay}"
-        if args.dropout_rate > 0:
-            dirname += f"_d{args.dropout_rate}"
+
+    # Additional folder name
+    abbrev = {
+        "patience" : "pat", "output-layer" : "o",
+        "num-folds" : "f", "hidden-layers" : "hl",
+        "hidden-units" : "hu", "batch-size" : "b",
+        "learning-rate" : "lr", "max-epochs" : "e",
+        "max-training-time" : "t", "activation" : "a",
+        "weight-decay" : "w", "dropout-rate" : "d",
+        "shuffle-seed" : "shs", "shuffle" : "s",
+        "use-gpu" : "gpu", "bias" : "bi",
+        "bias-output" : "biout", "normalize-output" : "no",
+        "restart-no-conv" : "rst",
+    }
+    for a in args.additional_folder_name:
+        value = getattr(args, a.replace("-", "_"))
+        if isinstance(value, list):
+            value = "-".join([str(v) for v in value])
+        else:
+            value = str(value)
+        dirname += f"-{abbrev[a]}_{value}"
+
     if os.path.exists(dirname):
         i = 2
         while os.path.exists(f"{dirname}{sep}{i}"):
@@ -49,6 +68,7 @@ def create_train_directory(args: Namespace, config_in_foldername: bool = False) 
     os.makedirs(f"{dirname}/models")
     if args.save_git_diff:
         save_git_diff(dirname)
+
     return dirname
 
 

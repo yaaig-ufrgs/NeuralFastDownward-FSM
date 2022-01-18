@@ -168,22 +168,40 @@ def get_test_tasks_from_problem(
     return pddls[:n]
 
 
-def get_defaults_and_facts_files(problem_pddl: str) -> (str, str):
+def get_defaults_and_facts_files(
+    train_folder: str,
+    problem_pddl: str,
+    facts_filename_format: str = "tasks/ferber21/training_tasks/{domain}/{problem}_facts.txt",
+) -> (str, str):
     """
     From the given samples directory and sample file, return its `facts` and `defaults` files.
-    """
-    FACTS_FILENAME_FORMAT = "{problem_pddl}_facts.txt"
-    DEFAULTS_FILENAME_FORMAT = "{problem_pddl}_defaults.txt"
 
-    ffiles = FACTS_FILENAME_FORMAT.format(problem_pddl=problem_pddl)
-    dfiles = DEFAULTS_FILENAME_FORMAT.format(problem_pddl=problem_pddl)
-    if not os.path.exists(ffiles):
-        ffiles = ""
+    * facts must be in the training pddls folder
+    * defaults must be in the testing pddls folder
+    """
+    with open(f"{train_folder}/train_args.json", "r") as f:
+        train_args = load(f)
+    
+    # facts
+    if "domain" in train_args and "problem" in train_args:
+        facts_file = facts_filename_format.format(
+            domain=train_args["domain"], problem=train_args["problem"]
+        )
+        if not os.path.exists(facts_file):
+            facts_file = ""
+    else:
+        facts_file = ""
+    
+    # defaults
+    defaults_file = problem_pddl.replace(".pddl", "_defaults.txt")
+    if not os.path.exists(defaults_file):
+        defaults_file = ""
+
+    if not facts_file:
         _log.warning("No `facts` file found for the given sample.")
-    if not os.path.exists(dfiles):
-        dfiles = ""
+    if not defaults_file:
         _log.warning("No `default` file found for the given sample.")
-    return ffiles, dfiles
+    return facts_file, defaults_file
 
 
 def get_models_from_train_folder(train_folder: str, test_model: str) -> [str]:

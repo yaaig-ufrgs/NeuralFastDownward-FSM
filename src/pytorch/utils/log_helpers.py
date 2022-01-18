@@ -44,8 +44,7 @@ def logging_train_config(
         "batch_size": args.batch_size,
         "learning_rate": args.learning_rate,
         "max_epochs": args.max_epochs
-        if args.max_epochs != DEFAULT_MAX_EPOCHS
-        else "inf",
+            if args.max_epochs != DEFAULT_MAX_EPOCHS else "inf",
         "max_training_time": f"{args.max_training_time}s",
         "activation": args.activation,
         "weight_decay": args.weight_decay,
@@ -71,6 +70,8 @@ def logging_train_config(
         "hstar_csv_dir": args.hstar_csv_dir if args.hstar_csv_dir != "" else None,
         "num_threads": args.num_threads if args.num_threads != -1 else None,
         "output_folder": str(args.output_folder),
+        "additional_folder_name": args.additional_folder_name
+            if args.additional_folder_name != "" else None,
     }
 
     _log.info(f"Configuration")
