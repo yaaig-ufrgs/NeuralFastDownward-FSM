@@ -243,3 +243,8 @@ def get_samples_folder_from_train_folder(train_folder: str) -> [str]:
             return l[-2] if len(l) > 1 else l[0]
     except:
         return "samples"  # default
+
+
+def get_train_args_json(train_folder: str) -> dict:
+    with open(train_folder+"/train_args.json") as json_file:
+        return load(json_file)

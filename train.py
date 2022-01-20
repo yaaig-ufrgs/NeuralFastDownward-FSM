@@ -81,9 +81,13 @@ def train_main(args: Namespace):
             f"Setting maximum epochs to {DEFAULT_FORCED_MAX_EPOCHS}."
         )
 
+    device = torch.device("cuda:0" if torch.cuda.is_available() and args.use_gpu else "cpu")
+    print(device)
+    if device == torch.device("cpu"):
+        args.use_gpu = False
+
     cmd_line = " ".join(sys.argv[0:])
     logging_train_config(args, dirname, cmd_line)
-    device = torch.device("cuda:0" if torch.cuda.is_available() and args.use_gpu else "cpu")
 
     # TRAINING
     best_fold, num_retries, train_timer = train_nn(args, dirname, device)

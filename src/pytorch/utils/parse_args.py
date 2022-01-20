@@ -744,6 +744,32 @@ def get_exp_args():
         help="Remove leftover samples from the data. (default: %(default)s)",
     )
     parser.add_argument(
+        "-trn-gpu",
+        "--train-use-gpu",
+        type=str2bool,
+        default=DEFAULT_USE_GPU,
+        help="Use GPU during training. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-addfn",
+        "--train-additional-folder-name",
+        nargs="*",
+        choices=[
+            "patience", "output-layer",
+            "num-folds", "hidden-layers",
+            "hidden-units", "batch-size",
+            "learning-rate", "max-epochs",
+            "max-training-time", "activation",
+            "weight-decay", "dropout-rate",
+            "shuffle-seed", "shuffle",
+            "use-gpu", "bias",
+            "bias-output", "normalize-output",
+            "restart-no-conv",
+        ],
+        default=DEFAULT_ADDITIONAL_FOLDER_NAME,
+        help="Allows to add parameters to the folder name. (default: %(default)s)",
+    )
+    parser.add_argument(
         "problem_pddls", type=str, nargs="*", default=[], help="Path to problems PDDL."
     )
     parser.add_argument(

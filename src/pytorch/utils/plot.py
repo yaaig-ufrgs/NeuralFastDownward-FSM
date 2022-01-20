@@ -17,10 +17,8 @@ def get_plot_title(directory: str) -> str:
     """
     Return plot title from directory name.
     """
-    dir_split = directory.split("/")[-2].split("_")
-    seeds = dir_split[-1].split(".")
-    seeds = seeds[0] + "_" + seeds[1] if len(seeds) > 1 else seeds[0]
-    plot_title = "_".join(dir_split[2:-1]) + "_" + seeds
+    dir_split = directory.split("/")[1].split("_")
+    plot_title = "_".join(dir_split[2:])
     return plot_title
 
 
@@ -58,7 +56,7 @@ def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str, prefi
     epoch = "\nepoch " + str(t)
     ax.set_title(prefix + plot_title + epoch, fontsize=10)
 
-    fig.savefig(directory + "/" + plot_filename)
+    fig.savefig(directory + "/" + plot_filename + ".png")
 
     plt.clf()
     plt.close(fig)
@@ -116,7 +114,7 @@ def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h: str) -> dict:
     ax.set_ylabel("h^NN")
 
     plot_filename = "hnn_" + compared_heuristic + "_" + plot_name
-    fig.savefig(directory + "/" + plot_filename)
+    fig.savefig(directory + "/" + plot_filename + ".png")
     plt.clf()
     plt.close(fig)
 
@@ -158,7 +156,7 @@ def save_box_plot(directory: str, data: dict, csv_h: str):
     ax = sns.boxplot(
         x="h*", y="heuristic - h*", hue="heuristic", data=cdf, fliersize=2
     ).set_title(plot_name)
-    ax.figure.savefig(directory + "/" + plot_filename)
+    ax.figure.savefig(directory + "/" + plot_filename + ".png")
     plt.clf()
     plt.close(ax.figure)
 
