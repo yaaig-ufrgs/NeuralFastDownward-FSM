@@ -20,6 +20,7 @@ from src.pytorch.utils.default_args import (
     DEFAULT_MAX_TRAINING_TIME,
     DEFAULT_MAX_SEARCH_TIME,
     DEFAULT_MAX_EXPANSIONS,
+    DEFAULT_ADDITIONAL_FOLDER_NAME,
 )
 
 
@@ -64,7 +65,9 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
                       f'-s {net_seed} -shs {args.train_shuffle_seed} '
                       f'-rmg {args.train_remove_goals} -cfst {args.train_contrast_first} '
                       f'-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} '
-                      f'-cut {args.train_cut_non_intercalated_samples}')
+                      f'-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} '
+                      f'-addfn {args.train_additional_folder_name}')
+
         if args.train_max_training_time != DEFAULT_MAX_TRAINING_TIME:
             train_args += f' -t {args.train_max_training_time}'
 
@@ -137,13 +140,18 @@ def only_train(args):
                   f'-s {args.exp_net_seed} -shs {args.train_shuffle_seed} '
                   f'-rmg {args.train_remove_goals} -cfst {args.train_contrast_first} '
                   f'-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} '
-                  f'-cut {args.train_cut_non_intercalated_samples}')
+                  f'-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} '
+                  f'-addfn {args.train_additional_folder_name}')
 
     if args.train_max_training_time != DEFAULT_MAX_TRAINING_TIME:
         train_args += f' -t {args.train_max_training_time}'
 
     sample_files = filter_samples(glob(f"{args.samples}/*"), args.exp_sample_seed)
 
+    if len(sample_files) == 0:
+        print("ERROR: Sample files not found. Check sample seed.")
+        exit(1)
+        
     for sample in sample_files:
         thread_id = count
         if count < args.exp_threads and first:
@@ -163,6 +171,7 @@ def only_train(args):
 def experiment(args):
     args.train_hidden_units = DEFAULT_HIDDEN_UNITS[0] if args.train_hidden_units == DEFAULT_HIDDEN_UNITS else args.train_hidden_units
     args.test_max_search_time = 99999999 if args.test_max_search_time == DEFAULT_MAX_SEARCH_TIME else args.test_max_search_time
+    args.train_additional_folder_name = "" if args.train_additional_folder_name == DEFAULT_ADDITIONAL_FOLDER_NAME else " ".join(args.train_additional_folder_name)
 
     os.system(f"tsp -K")
     os.system(f"tsp -S {args.exp_threads}")
@@ -205,7 +214,7 @@ def experiment(args):
                 run_train_test(args, i, i, runs=total_runs)
 
         else:
-            print("Invalid experiment configuration.")
+            print("ERROR: Invalid experiment configuration.")
             exit(1)
 
 
