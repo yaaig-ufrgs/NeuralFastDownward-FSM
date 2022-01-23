@@ -4,7 +4,7 @@
 Save a csv file with the format state,y (state, heuristic value) from 
 downward log files.
 
-Use: $ ./state_h_csv.py [log_files]
+Usage: ./state_h_csv.py [log_files]
 """
 
 from sys import argv

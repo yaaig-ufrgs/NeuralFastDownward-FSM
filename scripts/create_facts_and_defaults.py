@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 """
-Create the facts and defaults from pddl.
-Save in the same folder as pddl.
+Create the facts and defaults from pddl. Save in the same folder as pddl.
 
-usage: ./create_facts_and_defaults.py pddl facts
-       ./create_facts_and_defaults.py ../tasks/ferber21/training_tasks_used/*/*/*.pddl
+Usage: ./create_facts_and_defaults.py [--facts] [--defaults] pddls
+  e.g. ./create_facts_and_defaults.py --facts ../tasks/ferber21/training_tasks_used/*/*/*.pddl
+       ./create_facts_and_defaults.py --defaults ../tasks/ferber21/test_states/*/*/*/*.pddl
 """
 
 from sys import argv
@@ -14,8 +14,8 @@ from os import remove
 
 _FD = "../fast-downward.py"
 
-FACTS_FILENAME_FORMAT = "{problem_pddl}_facts.txt"
-DEFAULTS_FILENAME_FORMAT = "{problem_pddl}_defaults.txt"
+FACTS_FILENAME_FORMAT = "{problem_name}_facts.txt"
+DEFAULTS_FILENAME_FORMAT = "{problem_name}_defaults.txt"
 
 def get_facts(pddl: str) -> [str]:
     SAS_FILE = "output.sas"
@@ -87,17 +87,31 @@ def get_defaults(pddl: str, facts) -> [int]:
         raise Exception("get_defaults: defaults is empty")
     return defaults
 
-def get_facts_and_defaults(pddl: str) -> ([str], [int]):
-    facts = get_facts(pddl)
-    defaults = get_defaults(pddl, facts)
-    return facts, defaults
-
 if __name__ == "__main__":
+    facts_on, defaults_on = False, False
+    for arg in argv[1:min(len(argv), 3)]:
+        if arg == "--facts":
+            facts_on = True
+        elif arg == "--defaults":
+            defaults_on = True
+    if not facts_on and not defaults_on:
+        raise Exception("Use --facts arg to create facts file and/or --defaults for defaults file")
+
     for pddl in argv[1:]:
-        if pddl.split("/")[-1] == "domain.pddl":
+        nono = False
+        for a in "blocks depot grid npuzzle".split(" "):
+            if a in pddl:
+                nono = True
+        if nono:
             continue
-        facts, defaults = get_facts_and_defaults(pddl)
-        with open(FACTS_FILENAME_FORMAT.format(problem_pddl=pddl), "w") as f:
-            f.write(";".join(facts) + "\n")
-        with open(DEFAULTS_FILENAME_FORMAT.format(problem_pddl=pddl), "w") as f:
-            f.write(";".join(defaults) + "\n")
+        if pddl.split("/")[-1] == "domain.pddl" or pddl[:2] == "--":
+            continue
+
+        facts = get_facts(pddl)
+        if facts_on:
+            with open(FACTS_FILENAME_FORMAT.format(problem_name=pddl.replace(".pddl", "")), "w") as f:
+                f.write(";".join(facts) + "\n")
+        if defaults_on:
+            defaults = get_defaults(pddl, facts)
+            with open(DEFAULTS_FILENAME_FORMAT.format(problem_name=pddl.replace(".pddl", "")), "w") as f:
+                f.write(";".join(defaults) + "\n")

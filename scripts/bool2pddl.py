@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
 """
-Create pddl files from sampling output
+Create pddl files from sampling output.
 
-Run:
-    $ bool2pddl.py sas_plan pddl_base
-
-sas_plan = Sampling output file
-pddl_base = PDDL used to generate the samples
+Usage: ./bool2pddl.py sas_plan pddl_base
+    sas_plan = Sampling output file
+    pddl_base = PDDL used to generate the samples
 """
 
 from sys import argv
