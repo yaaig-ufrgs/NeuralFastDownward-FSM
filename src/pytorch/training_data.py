@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from src.pytorch.utils.helpers import to_prefix, to_onehot
 import src.pytorch.fast_downward_api as fd_api
-from src.pytorch.utils.default_args import DEFAULT_CLAMPING
+import src.pytorch.utils.default_args as default_args
 from itertools import chain, zip_longest
 
 
@@ -74,7 +74,7 @@ def load_training_state_value_pairs(
                 max_h = h_int
                 domain_max_value = max_h
 
-    if clamping != DEFAULT_CLAMPING:
+    if clamping != default_args.CLAMPING:
         for i in range(len(state_value_pairs)):
             curr_h = state_value_pairs[i][1]
             if (curr_h >= max_h - clamping) and (curr_h != max_h):

@@ -5,24 +5,7 @@ import numpy as np
 import random
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
-from src.pytorch.utils.default_args import (
-    DEFAULT_BATCH_SIZE,
-    DEFAULT_NORMALIZE_OUTPUT,
-    DEFAULT_NUM_FOLDS,
-    DEFAULT_OUTPUT_LAYER,
-    DEFAULT_SHUFFLE,
-    DEFAULT_RANDOM_SEED,
-    DEFAULT_SHUFFLE_SEED,
-    DEFAULT_DATALOADER_NUM_WORKERS,
-    DEFAULT_NORMALIZE_OUTPUT,
-    DEFAULT_CLAMPING,
-    DEFAULT_REMOVE_GOALS,
-    DEFAULT_STANDARD_FIRST,
-    DEFAULT_CONTRAST_FIRST,
-    DEFAULT_INTERCALATE_SAMPLES,
-    DEFAULT_CUT_NON_INTERCALATED_SAMPLES,
-    DEFAULT_MODEL,
-)
+import src.pytorch.utils.default_args as default_args
 
 from src.pytorch.training_data import (
     InstanceDataset,
@@ -36,21 +19,21 @@ class KFoldTrainingData:
     def __init__(
         self,
         samples_file: str,
-        batch_size: int = DEFAULT_BATCH_SIZE,
-        num_folds: int = DEFAULT_NUM_FOLDS,
-        output_layer: str = DEFAULT_OUTPUT_LAYER,
-        shuffle: bool = DEFAULT_SHUFFLE,
-        seed: int = DEFAULT_RANDOM_SEED,
-        shuffle_seed: int = DEFAULT_SHUFFLE_SEED,
-        data_num_workers: int = DEFAULT_DATALOADER_NUM_WORKERS,
-        normalize: bool = DEFAULT_NORMALIZE_OUTPUT,
-        clamping: int = DEFAULT_CLAMPING,
-        remove_goals: bool = DEFAULT_REMOVE_GOALS,
-        standard_first: bool = DEFAULT_STANDARD_FIRST,
-        contrast_first: bool = DEFAULT_STANDARD_FIRST,
-        intercalate_samples: int = DEFAULT_INTERCALATE_SAMPLES,
-        cut_non_intercalated_samples: bool = DEFAULT_CUT_NON_INTERCALATED_SAMPLES,
-        model: str = DEFAULT_MODEL,
+        batch_size: int = default_args.BATCH_SIZE,
+        num_folds: int = default_args.NUM_FOLDS,
+        output_layer: str = default_args.OUTPUT_LAYER,
+        shuffle: bool = default_args.SHUFFLE,
+        seed: int = default_args.RANDOM_SEED,
+        shuffle_seed: int = default_args.SHUFFLE_SEED,
+        data_num_workers: int = default_args.DATALOADER_NUM_WORKERS,
+        normalize: bool = default_args.NORMALIZE_OUTPUT,
+        clamping: int = default_args.CLAMPING,
+        remove_goals: bool = default_args.REMOVE_GOALS,
+        standard_first: bool = default_args.STANDARD_FIRST,
+        contrast_first: bool = default_args.STANDARD_FIRST,
+        intercalate_samples: int = default_args.INTERCALATE_SAMPLES,
+        cut_non_intercalated_samples: bool = default_args.CUT_NON_INTERCALATED_SAMPLES,
+        model: str = default_args.MODEL,
     ):
         self.state_value_pairs, self.domain_max_value = load_training_state_value_pairs(
             samples_file,

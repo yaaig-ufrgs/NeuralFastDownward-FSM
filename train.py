@@ -35,11 +35,7 @@ from src.pytorch.utils.plot import (
     save_gif_from_plots,
     remove_intermediate_plots,
 )
-from src.pytorch.utils.default_args import (
-    DEFAULT_MAX_EPOCHS,
-    DEFAULT_MAX_TRAINING_TIME,
-    DEFAULT_FORCED_MAX_EPOCHS,
-)
+import src.pytorch.utils.default_args as default_args
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
 from argparse import Namespace
@@ -72,13 +68,13 @@ def train_main(args: Namespace):
     if args.max_epochs == -1:
         args.max_epochs = get_fixed_max_epochs(args)
     if (
-        args.max_epochs == DEFAULT_MAX_EPOCHS
-        and args.max_training_time == DEFAULT_MAX_TRAINING_TIME
+        args.max_epochs == default_args.MAX_EPOCHS
+        and args.max_training_time == default_args.MAX_TRAINING_TIME
     ):
-        args.max_epochs = DEFAULT_FORCED_MAX_EPOCHS
+        args.max_epochs = default_args.FORCED_MAX_EPOCHS
         _log.warning(
             f"Neither max epoch nor max training time have been defined. "
-            f"Setting maximum epochs to {DEFAULT_FORCED_MAX_EPOCHS}."
+            f"Setting maximum epochs to {default_args.FORCED_MAX_EPOCHS}."
         )
 
     device = torch.device("cuda:0" if torch.cuda.is_available() and args.use_gpu else "cpu")

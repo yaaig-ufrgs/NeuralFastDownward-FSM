@@ -22,11 +22,7 @@ from src.pytorch.utils.log_helpers import (
     logging_test_config,
     logging_test_statistics,
 )
-from src.pytorch.utils.default_args import (
-    DEFAULT_MAX_EXPANSIONS,
-    DEFAULT_MAX_SEARCH_TIME,
-    DEFAULT_FORCED_MAX_SEARCH_TIME,
-)
+import src.pytorch.utils.default_args as default_args
 from src.pytorch.utils.parse_args import get_test_args
 
 _log = logging.getLogger(__name__)
@@ -56,13 +52,13 @@ def test_main(args):
     if args.max_expansions == -1:
         args.max_expansions = get_fixed_max_expansions(args)
     if (
-        args.max_expansions == DEFAULT_MAX_EXPANSIONS
-        and args.max_search_time == DEFAULT_MAX_SEARCH_TIME
+        args.max_expansions == default_args.MAX_EXPANSIONS
+        and args.max_search_time == default_args.MAX_SEARCH_TIME
     ):
-        args.max_search_time = DEFAULT_FORCED_MAX_SEARCH_TIME
+        args.max_search_time = default_args.FORCED_MAX_SEARCH_TIME
         _log.warning(
             f"Neither max expansions nor max search time have been defined. "
-            f"Setting maximum search time to {DEFAULT_FORCED_MAX_SEARCH_TIME}s."
+            f"Setting maximum search time to {default_args.FORCED_MAX_SEARCH_TIME}s."
         )
     if args.samples_dir[-1] != "/":
         args.samples_dir += "/"

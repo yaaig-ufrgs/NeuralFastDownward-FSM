@@ -9,17 +9,12 @@ from random import Random
 from json import dump, load
 from datetime import datetime, timezone
 from subprocess import check_output
-from src.pytorch.utils.default_args import (
-    DEFAULT_AUTO_TASKS_FOLDER,
-    DEFAULT_AUTO_TASKS_N,
-    DEFAULT_AUTO_TASKS_SEED,
-    DEFAULT_MAX_EPOCHS,
-    DEFAULT_MAX_EXPANSIONS,
-)
+from argparse import Namespace
+
+import src.pytorch.utils.default_args as default_args
 from src.pytorch.utils.file_helpers import (
     create_defaults_file,
 )
-from argparse import Namespace
 
 _log = logging.getLogger(__name__)
 
@@ -72,9 +67,9 @@ def get_fixed_max_epochs(args, model="resnet_ferber21", time="1800") -> int:
                 return int(line[header.index(f"epochs_{time}s")])
     _log.warning(
         f"Fixed number of epochs not found. "
-        f"Setting to default value ({DEFAULT_MAX_EPOCHS})."
+        f"Setting to default value ({default_args.MAX_EPOCHS})."
     )
-    return DEFAULT_MAX_EPOCHS
+    return default_args.MAX_EPOCHS
 
 
 def get_fixed_max_expansions(
@@ -95,9 +90,9 @@ def get_fixed_max_expansions(
                 return int(line[header.index(f"expansions_{time}s")])
     _log.warning(
         f"Fixed maximum expansions not found. "
-        f"Setting to default value ({DEFAULT_MAX_EXPANSIONS})."
+        f"Setting to default value ({default_args.MAX_EXPANSIONS})."
     )
-    return DEFAULT_MAX_EXPANSIONS
+    return default_args.MAX_EXPANSIONS
 
 
 def get_git_commit() -> str:
@@ -125,9 +120,9 @@ def get_problem_by_sample_filename(sample_filename: str) -> str:
 
 def get_test_tasks_from_problem(
     train_folder: str,
-    tasks_folder: str = DEFAULT_AUTO_TASKS_FOLDER,
-    n: int = DEFAULT_AUTO_TASKS_N,
-    shuffle_seed: int = DEFAULT_AUTO_TASKS_SEED,
+    tasks_folder: str = default_args.AUTO_TASKS_FOLDER,
+    n: int = default_args.AUTO_TASKS_N,
+    shuffle_seed: int = default_args.AUTO_TASKS_SEED,
 ) -> [str]:
     """
     From the given training training problem, automatically return `n` random test instances

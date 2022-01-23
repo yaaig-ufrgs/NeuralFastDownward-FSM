@@ -6,7 +6,7 @@ import logging
 import os
 from json import load
 from statistics import median, mean
-from src.pytorch.utils.default_args import DEFAULT_MAX_EPOCHS
+import src.pytorch.utils.default_args as default_args
 from src.pytorch.utils.helpers import (
     get_hostname,
     get_datetime,
@@ -44,7 +44,7 @@ def logging_train_config(
         "batch_size": args.batch_size,
         "learning_rate": args.learning_rate,
         "max_epochs": args.max_epochs
-            if args.max_epochs != DEFAULT_MAX_EPOCHS else "inf",
+            if args.max_epochs != default_args.MAX_EPOCHS else "inf",
         "max_training_time": f"{args.max_training_time}s",
         "activation": args.activation,
         "weight_decay": args.weight_decay,
