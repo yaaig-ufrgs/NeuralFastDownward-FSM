@@ -95,7 +95,7 @@ class HNN(nn.Module):
         # See:
         # https://github.com/pytorch/pytorch/blob/master/torch/nn/modules/linear.py#L92
         # https://github.com/pytorch/pytorch/issues/57109
-        if weights_method != default_args.WEIGHTS_METHOD:
+        if weights_method != "default":
             self.initialize_weights(weights_method)
 
     def set_hidden_units(self) -> list:
