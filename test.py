@@ -10,6 +10,7 @@ from src.pytorch.utils.helpers import (
     get_fixed_max_expansions,
     get_test_tasks_from_problem,
     get_problem_by_sample_filename,
+    get_defaults_and_facts_files,
     get_models_from_train_folder,
     get_samples_folder_from_train_folder,
 )
@@ -98,9 +99,8 @@ def test_main(args):
         model_cmp_path = models_cmp[i] if len(models_cmp) > 0 else ""
         output = {}
         for j, problem_pddl in enumerate(args.problem_pddls):
-            _log.info(
-                f'Solving instance "{problem_pddl}" ({j+1}/{len(args.problem_pddls)})'
-            )
+            facts_file, defaults_file = get_defaults_and_facts_files(args.train_folder, problem_pddl)
+            _log.info(f'Solving instance "{problem_pddl}" ({j+1}/{len(args.problem_pddls)})')
             output[problem_pddl] = solve_instance_with_fd_nh(
                 domain_pddl=args.domain_pddl,
                 problem_pddl=problem_pddl,
@@ -113,6 +113,8 @@ def test_main(args):
                 time_limit=args.max_search_time,
                 memory_limit=args.max_search_memory,
                 max_expansions=args.max_expansions,
+                facts_file=facts_file,
+                defaults_file=defaults_file,
                 save_log_to=dirname,
                 save_log_bool=args.downward_logs,
             )

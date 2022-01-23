@@ -94,11 +94,13 @@ def create_test_directory(args):
 
 def remove_temporary_files(directory: str):
     """
-    Removes `output.sas` file.
+    Removes `output.sas` and `defaults.txt` files.
     """
-    output_sas = f"{directory}/output.sas"
-    if os.path.exists(output_sas):
-        os.remove(output_sas)
+    def remove_file(file: str):
+        if os.path.exists(file):
+            os.remove(file)
+    remove_file(f"{directory}/output.sas")
+    remove_file(f"{directory}/defaults.txt")
 
 
 def save_y_pred_csv(data: dict, csv_filename: str):
@@ -121,3 +123,38 @@ def remove_csv_except_best(directory: str, fold_idx: int):
         idx = int(f_split[-1].split(".")[0])
         if idx != fold_idx:
             os.remove(f)
+
+def create_defaults_file(pddl_file: str, facts_file: str, output_file: str = "defaults.txt") -> str:
+    """
+    Create defaults file for `pddl_file`.
+    For all fact in facts_file, 1 if fact \in initial_state(pddl_file) else 0.
+    """
+
+    init = None
+    with open(pddl_file, "r") as f:
+        pddl_text = f.read().lower()
+        init = pddl_text.split(":init")[1].split(":goal")[0]
+
+    with open(facts_file, "r") as f:
+        facts = f.read().strip().split(";")
+    
+    # Atom on(i, a) -> (on i a)
+    modified_facts = []
+    for fact in facts:
+        f = fact.replace("Atom ", "")               # Atom on(i, a) -> on(i, a)
+        f = f.replace(", ", ",").replace(",", " ")  # on(i, a) -> on(i a)
+        f = f"({f.split('(')[0]} {f.split('(')[1]}" # on(i a) -> (on i a)
+        f = f.replace(" )", ")") # facts without objects (handempty ) -> (handempty)
+        modified_facts.append(f)
+
+    defaults = []
+    for fact in modified_facts:
+        value = "1" if fact in init else "0"
+        defaults.append(value)
+
+    if not defaults:
+        raise Exception("get_defaults: defaults is empty")
+
+    with open(output_file, "w") as f:
+        f.write(";".join(defaults) + "\n")
+    return output_file

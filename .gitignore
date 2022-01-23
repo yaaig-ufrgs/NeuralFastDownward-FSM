@@ -9,5 +9,6 @@
 /misc/autodoc/downward-xmlrpc.secret
 /output.sas
 /sas_plan*
+/defaults.txt
 __pycache__/
 results/

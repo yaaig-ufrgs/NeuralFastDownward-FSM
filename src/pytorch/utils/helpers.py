@@ -16,6 +16,9 @@ from src.pytorch.utils.default_args import (
     DEFAULT_MAX_EPOCHS,
     DEFAULT_MAX_EXPANSIONS,
 )
+from src.pytorch.utils.file_helpers import (
+    create_defaults_file,
+)
 from argparse import Namespace
 
 _log = logging.getLogger(__name__)
@@ -176,13 +179,13 @@ def get_defaults_and_facts_files(
     """
     From the given samples directory and sample file, return its `facts` and `defaults` files.
 
-    * facts must be in the training pddls folder
-    * defaults must be in the testing pddls folder
+    Facts file is obtained from `facts_filename_format`.
+    Defaults file is created (temporary file) based on `problem_pddl` and `facts_file`.
+
     """
     with open(f"{train_folder}/train_args.json", "r") as f:
         train_args = load(f)
     
-    # facts
     if "domain" in train_args and "problem" in train_args:
         facts_file = facts_filename_format.format(
             domain=train_args["domain"], problem=train_args["problem"]
@@ -192,15 +195,12 @@ def get_defaults_and_facts_files(
     else:
         facts_file = ""
     
-    # defaults
-    defaults_file = problem_pddl.replace(".pddl", "_defaults.txt")
-    if not os.path.exists(defaults_file):
-        defaults_file = ""
-
-    if not facts_file:
+    if facts_file:
+        defaults_file = create_defaults_file(problem_pddl, facts_file)
+        if not defaults_file:
+            _log.error("The `defaults` file could not be created.")
+    else:
         _log.warning("No `facts` file found for the given sample.")
-    if not defaults_file:
-        _log.warning("No `default` file found for the given sample.")
     return facts_file, defaults_file
 
 
