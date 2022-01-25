@@ -290,15 +290,20 @@ class Simulator:
         atomsInPlan = set()
         atomsAlwaysInPlan = set()
 
+        # print("branching factor is {}".format(self.maxBranchingFactor))
+
+        ## (1) initialize the atoms that are in all states with the goal
         for atom in unwrap_conjunction_or_atom(formula):
             atomsAlwaysInPlan.add(str(atom))
 
         # print("goal formula {}".format(formula))
+        ## (2) go over then regression length `L`
         for step in range(planLength):
             actionsToSelectFrom = []
             startTimeactions = time.perf_counter()
             atomsInFormulaStr = set()
 
+            ## (2.1) unpack the state, filter mutexes
             for atom in unwrap_conjunction_or_atom(formula):
                 atomsInFormulaStr.add(str(atom))
             current_mutexes_with_formula = self.get_state_mutexes_in_set(atomsInFormulaStr)
@@ -308,13 +313,15 @@ class Simulator:
             maxTime1 = 0
             maxTime2 = 0
             maxTime3 = 0
-            # print("branching factor is {}".format(self.maxBranchingFactor))
+            ## (2.2) go over all operators
             for operatorNum in range(self.maxBranchingFactor):
                 operator = self.intToOps[operatorNum]
                 operator_is_consistent = None
                 addEffects = set()
                 startTime = time.perf_counter()
 
+                ## (2.2.1) check if at least one add effect is in the formula and no delete effect is in it
+                ## (accepts also operators that have no add effects, and no delete is in the formula)
                 for eff in operator.effects:
                     if isinstance(eff, AddEffect):  # Add effects that cause invariant
                         strAtom = str(eff.atom)
@@ -334,6 +341,7 @@ class Simulator:
                 maxTime1 += time.perf_counter() - startTime
                 startTime = time.perf_counter()
 
+                ## (2.2.2) check if add effects violate some mutex
                 if (operator_is_consistent != False and len(addEffects.intersection(current_mutexes_with_formula)) > 0):
                     operator_is_consistent = False
 
@@ -343,19 +351,22 @@ class Simulator:
                 if operator_is_consistent is None:
                     operator_is_consistent = True
 
-                # Check preconditions don't cause invariant
+                # (2.2.3) Check preconditions don't cause invariant
                 if operator_is_consistent:
                     # print("operator {} is consistent before checking pre conditions".format(operatorNum))
                     forCheckingMutexes = set()
 
+                    ## (2.2.3.1) assume all preconditions
                     for atom in unwrap_conjunction_or_atom(operator.precondition):
                         if str(atom) in self.atomToInt.keys():
                             forCheckingMutexes.add(self.atomToInt[str(atom)])
 
+                    ## (2.2.3.2) assume all atoms that are not add effects (they're not deleted by the above condition, so they must be valid in the predecessor state)
                     for atom in unwrap_conjunction_or_atom(formula):
                         if str(atom) not in addEffects:
                             forCheckingMutexes.add(self.atomToInt[str(atom)])
 
+                    ## (2.2.3.3) and then check if some violates a mutex
                     if self.check_for_state_mutexes_in_a_set_of_atoms(
                         list(forCheckingMutexes)
                     ):
@@ -399,7 +410,7 @@ class Simulator:
                     #    candidateOpsNFormulas.append((operator, atomsForNewFormula))
 
             # print("end time to preimage actions {}".format(time.perf_counter() - startTime))
-            # print("number of canidate actions {}".format(len(candidateOpsNFormulas)))
+            # print("number of candidate actions {}".format(len(candidateOpsNFormulas)))
             startTime = time.perf_counter()
             if len(candidateOpsNFormulas) > 0:
                 max_unique_atoms = None
@@ -435,7 +446,7 @@ class Simulator:
                     best_formula_atoms.append(self.intToAtom[self.atomToInt[atomS]])
 
                 formula = land(*best_formula_atoms, flat=True)
-                # print("op {}, unique atoms {}".format(bestOp, max_unique_atoms, formula))
+                # print("op {}, unique atoms {}, {}".format(bestOp, max_unique_atoms, formula))
                 planFormulas.append(copy.deepcopy(formula))
                 plan.append(str(bestOp))
 
@@ -451,5 +462,5 @@ class Simulator:
             else:
                 break
             # print("end time to select best action {}".format(time.perf_counter() - startTime))
-        
+
         return plan
