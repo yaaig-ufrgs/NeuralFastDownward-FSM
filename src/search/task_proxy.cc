@@ -67,7 +67,7 @@ State State::get_unregistered_successor(const OperatorProxy &op) const {
     return State(*task, move(new_values));
 }
 
-string State::to_binary() {
+string State::to_binary() const {
     unpack();
     const vector<FactPair> relevant_facts = task_properties::get_strips_fact_pairs(task);
     const vector<int> values = get_unpacked_values();
