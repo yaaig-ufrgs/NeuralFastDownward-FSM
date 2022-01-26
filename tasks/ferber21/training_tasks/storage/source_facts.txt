@@ -1,0 +1,1 @@
+Atom at(hoist0, container-0-0);Atom at(hoist0, depot0-1-1);Atom at(hoist0, loadarea);Atom clear(container-0-0);Atom clear(depot0-1-1);Atom lifting(hoist0, crate0);Atom on(crate0, container-0-0);Atom on(crate0, depot0-1-1);Atom available(hoist0);Atom in(crate0, depot0)

@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 
-# usage: ./boolean2state.py "Atom holding(e);Atom on(e, a);Atom..." "0010..."
+"""
+Convert a boolean to state atoms.
+
+Usage: ./boolean2state.py facts boolean
+  e.g. ./boolean2state.py "Atom holding(e);Atom on(e, a);Atom..." "0010..."
+"""
 
 from sys import argv
 

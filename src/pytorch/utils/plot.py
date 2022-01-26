@@ -13,15 +13,19 @@ logging.getLogger("matplotlib.font_manager").disabled = True
 logging.getLogger("PIL").setLevel(logging.WARNING)
 
 
-def get_plot_title(directory: str):
-    dir_split = directory.split("/")[-2].split("_")
-    seeds = dir_split[-1].split(".")
-    seeds = seeds[0] + "_" + seeds[1] if len(seeds) > 1 else seeds[0]
-    plot_title = "_".join(dir_split[2:-1]) + "_" + seeds
+def get_plot_title(directory: str) -> str:
+    """
+    Return plot title from directory name.
+    """
+    dir_split = directory.split("/")[1].split("_")
+    plot_title = "_".join(dir_split[2:])
     return plot_title
 
 
 def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str, prefix: str):
+    """
+    Create and save real y and predicted y scatter plot.
+    """
     if t == -1:
         t = "final"
 
@@ -52,7 +56,7 @@ def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str, prefi
     epoch = "\nepoch " + str(t)
     ax.set_title(prefix + plot_title + epoch, fontsize=10)
 
-    fig.savefig(directory + "/" + plot_filename)
+    fig.savefig(directory + "/" + plot_filename + ".png")
 
     plt.clf()
     plt.close(fig)
@@ -110,7 +114,7 @@ def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h: str) -> dict:
     ax.set_ylabel("h^NN")
 
     plot_filename = "hnn_" + compared_heuristic + "_" + plot_name
-    fig.savefig(directory + "/" + plot_filename)
+    fig.savefig(directory + "/" + plot_filename + ".png")
     plt.clf()
     plt.close(fig)
 
@@ -152,23 +156,27 @@ def save_box_plot(directory: str, data: dict, csv_h: str):
     ax = sns.boxplot(
         x="h*", y="heuristic - h*", hue="heuristic", data=cdf, fliersize=2
     ).set_title(plot_name)
-    ax.figure.savefig(directory + "/" + plot_filename)
+    ax.figure.savefig(directory + "/" + plot_filename + ".png")
     plt.clf()
     plt.close(ax.figure)
 
 
 def save_gif_from_plots(directory: str, fold_idx: int):
     """
-    Creates a scatter plot gif showing the evolution of the hnn in comparison
-    to the sample heuristic.
+    Creates a scatter plot gif showing the evolution of the hnn in comparison to the sample heuristic.
     Only works if you have the arg -spn set up during training.
     """
-
     gif_filename = get_plot_title(directory)
-    train_plot_files = sorted(glob.glob(f"{directory}/train_*{fold_idx}.png"), key=path.getmtime)
-    val_plot_files = sorted(glob.glob(f"{directory}/val_*{fold_idx}.png"), key=path.getmtime)
+    train_plot_files = sorted(
+        glob.glob(f"{directory}/train_*{fold_idx}.png"), key=path.getmtime
+    )
+    val_plot_files = sorted(
+        glob.glob(f"{directory}/val_*{fold_idx}.png"), key=path.getmtime
+    )
 
-    with imageio.get_writer(f"{directory}/train_{gif_filename}.gif", mode="I") as writer:
+    with imageio.get_writer(
+        f"{directory}/train_{gif_filename}.gif", mode="I"
+    ) as writer:
         for f in train_plot_files:
             image = imageio.imread(f)
             writer.append_data(image)
@@ -177,7 +185,6 @@ def save_gif_from_plots(directory: str, fold_idx: int):
         for f in val_plot_files:
             image = imageio.imread(f)
             writer.append_data(image)
-
 
 
 def remove_intermediate_plots(plots_dir: str, fold_idx: int):

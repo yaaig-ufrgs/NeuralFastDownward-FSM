@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
-# usage: ./get_references.py expansions_secs train_folders
-# e.g.   ./get_references.py 600 ../results/*
+"""
+Create reference file from result folders.
+
+usage: ./get_references.py expansions_secs train_folders
+  e.g. ./get_references.py 600 ../results/*
+"""
 
 from sys import argv
 from json import load

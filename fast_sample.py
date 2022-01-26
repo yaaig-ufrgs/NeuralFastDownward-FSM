@@ -49,7 +49,7 @@ def get_full_state_repr_name(state_repr):
     return state_repr
 
 
-def fukunaga_ferber(args, meth):
+def yaaig_ferber(args, meth):
     search_algo = ""
     if args.search_algorithm == "greedy":
         search_algo = f'eager_greedy([{args.search_heuristic}(transform=sampling_transform())],transform=sampling_transform())'
@@ -68,13 +68,13 @@ def fukunaga_ferber(args, meth):
         if instance_name != "domain" and instance_name != "source":
             for i in range(start, end):
                 cmd, out = "", ""
-                if meth == "fukunaga":
+                if meth == "yaaig":
                     out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.technique}_{args.state_representation}_{args.searches}x{args.samples_per_search}_ss{i}'
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
                            f'--build release {instance} '
-                           f'--search \'sampling_search_fukunaga({search_algo}, '
-                           f'techniques=[gbackward_fukunaga(searches={args.searches}, samples_per_search={args.samples_per_search}, '
+                           f'--search \'sampling_search_yaaig({search_algo}, '
+                           f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, '
                            f'technique={args.technique}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state})], '
                            f'state_representation={state_repr}, random_seed={i}, match_heuristics={args.match_heuristics}, '
                            f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting})\'')
@@ -132,8 +132,8 @@ def sample(args):
     args.match_heuristics = bool2str(args.match_heuristics)
     args.ferber_technique = "iforward" if args.ferber_technique == "forward" else "gbackward"
 
-    if args.method == "fukunaga" or args.method == "ferber":
-        fukunaga_ferber(args, meth=args.method)
+    if args.method == "yaaig" or args.method == "ferber":
+        yaaig_ferber(args, meth=args.method)
     elif args.method == "rsl":
         args.technique = "countBoth" if args.technique == DEFAULT_SAMPLE_TECHNIQUE else args.technique
         rsl(args)

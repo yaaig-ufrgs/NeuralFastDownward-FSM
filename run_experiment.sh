@@ -4,15 +4,15 @@
 # Requirements: tsp, taskset
 #
 # Usage:
-# $ ./run_experiment.sh [fukunaga|ferber] [dfs|rw] [fs|ps|us] [500x200|30K|100K] [change_all|fixed_net|fixed_sample|single] cores
+# $ ./run_experiment.sh [yaaig|ferber] [dfs|rw] [fs|ps|us] [500x200|30K|100K] [change_all|fixed_net|fixed_sample|single] cores
 # OR
 # $ ./run_experiment.sh rsl [countBoth|countAdd|countDel] [100000|10000] [change_all|fixed_net|fixed_sample|single] cores
 #
 # Example:
-# $ ./run_experiment.sh fukunaga dfs fs 500x200 single 10
+# $ ./run_experiment.sh yaaig dfs fs 500x200 single 10
 
 # run_general <sample_seed> <net_seed> <thread> <runs>
-run_experiment_fukunaga() {
+run_experiment_yaaig() {
     sample_seed=$1
     net_seed=$2
     cores=$3
@@ -80,33 +80,33 @@ COUNTER=0
 tsp -K
 tsp -S $CORES
 
-if [ $METHOD = "fukunaga" ]; then
+if [ $METHOD = "yaaig" ]; then
     STATE_REPRESENTATION=$3
     SAMPLE_SIZE=$4
     EXPERIMENT=$5
 
     if [ $EXPERIMENT = "single" ]; then
-        # run_experiment_fukunaga <sample_seed> <net_seed> <sample_type> <thread>
-        run_experiment_fukunaga 1 1 $CORES 1
+        # run_experiment_yaaig <sample_seed> <net_seed> <sample_type> <thread>
+        run_experiment_yaaig 1 1 $CORES 1
     elif [ $EXPERIMENT = "fixed_net" ]; then
         # TODO: for 1..5, dfs rw
-        # run_experiment_fukunaga 1 $SEED $CORES 5
-        run_experiment_fukunaga 2 $SEED $CORES 4
-        run_experiment_fukunaga 3 $SEED $CORES 4
-        run_experiment_fukunaga 4 $SEED $CORES 4
-        run_experiment_fukunaga 5 $SEED $CORES 4
+        # run_experiment_yaaig 1 $SEED $CORES 5
+        run_experiment_yaaig 2 $SEED $CORES 4
+        run_experiment_yaaig 3 $SEED $CORES 4
+        run_experiment_yaaig 4 $SEED $CORES 4
+        run_experiment_yaaig 5 $SEED $CORES 4
     elif [ $EXPERIMENT = "fixed_sample" ]; then
-        # run_experiment_fukunaga $SEED 1 $CORES 5
-        run_experiment_fukunaga $SEED 2 $CORES 4
-        run_experiment_fukunaga $SEED 3 $CORES 4
-        run_experiment_fukunaga $SEED 4 $CORES 4
-        run_experiment_fukunaga $SEED 5 $CORES 4
+        # run_experiment_yaaig $SEED 1 $CORES 5
+        run_experiment_yaaig $SEED 2 $CORES 4
+        run_experiment_yaaig $SEED 3 $CORES 4
+        run_experiment_yaaig $SEED 4 $CORES 4
+        run_experiment_yaaig $SEED 5 $CORES 4
     elif [ $EXPERIMENT = "change_all" ]; then
-        # run_experiment_fukunaga 1 1 $CORES 5
-        run_experiment_fukunaga 2 2 $CORES 4
-        run_experiment_fukunaga 3 3 $CORES 4
-        run_experiment_fukunaga 4 4 $CORES 4
-        run_experiment_fukunaga 5 5 $CORES 4
+        # run_experiment_yaaig 1 1 $CORES 5
+        run_experiment_yaaig 2 2 $CORES 4
+        run_experiment_yaaig 3 3 $CORES 4
+        run_experiment_yaaig 4 4 $CORES 4
+        run_experiment_yaaig 5 5 $CORES 4
     fi
 elif [ $METHOD = "rsl" ]; then
     # $ ./run_experiment.sh rsl [countBoth|countAdd|countDel] [100000|10000] [change_all|fixed_net|fixed_sample|single] cores

@@ -3,6 +3,7 @@ import os
 
 try:
     import coloredlogs
+
     coloredlogs.install()
     _COLORED = True
 except ImportError as _:

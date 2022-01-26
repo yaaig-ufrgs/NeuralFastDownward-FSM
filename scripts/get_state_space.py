@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 
 """
+Get the entire state space of a pddl using the sampling engine.
+
 Comment lines 172 and 173 of ../src/search/search_egnines/eager_search.cc
 Use: ./get_state_space.py ../tasks/IPC/blocks/probBLOCKS-*-0.pddl
 """

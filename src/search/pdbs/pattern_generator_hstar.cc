@@ -39,8 +39,8 @@ int PDBHeuristic::compute_heuristic(const State &ancestor_state) {
     State state = convert_ancestor_state(ancestor_state);
     vector<int> sample_values(relevant_facts.size(), 0);
     unordered_map<string, int> map;
-    ifstream in_file("samples/fukunaga_blocks_probBLOCKS-7-0_dfs_fs_500x200_ss1");
-    ofstream out_file("hstar_from_fukunaga_blocks_probBLOCKS-7-0_dfs_fs_500x200_ss1.csv");
+    ifstream in_file("samples/yaaig_blocks_probBLOCKS-7-0_dfs_fs_500x200_ss1");
+    ofstream out_file("hstar_from_yaaig_blocks_probBLOCKS-7-0_dfs_fs_500x200_ss1.csv");
     string line;
     while (getline(in_file, line)) {
         if (line[0] == '#')
