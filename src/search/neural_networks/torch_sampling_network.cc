@@ -148,7 +148,7 @@ void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
     } else {
         // Regression
         if (tensor.size(1) == 1) {
-            last_h = normalize_output ? round(unary_output[0] * max_h) : unary_output[0];
+            last_h = round(normalize_output ? unary_output[0] * max_h : unary_output[0]);
         // Classification
         } else {
             last_h = unary_to_value(unary_output);
@@ -172,8 +172,8 @@ void TorchSamplingNetwork::parse_output_both(const torch::jit::IValue &output, c
         // Regression
         if (tensor.size(1) == 1) {
             last_h = min(
-                normalize_output ? round(unary_output[0] * max_h) : unary_output[0],
-                normalize_output ? round(unary_output_cmp[0] * max_h) : unary_output_cmp[0]
+                round(normalize_output ? unary_output[0] * max_h : unary_output[0]),
+                round(normalize_output ? unary_output_cmp[0] * max_h : unary_output_cmp[0])
             );
         // Classification
         } else {
