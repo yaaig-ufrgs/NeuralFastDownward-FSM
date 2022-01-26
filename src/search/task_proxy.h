@@ -695,6 +695,10 @@ public:
       unpack() to ensure the data exists.
     */
     State get_unregistered_successor(const OperatorProxy &op) const;
+
+    /*
+      Get the binary representation of the state. */
+    std::string to_binary();
 };
 
 

@@ -67,6 +67,15 @@ State State::get_unregistered_successor(const OperatorProxy &op) const {
     return State(*task, move(new_values));
 }
 
+string State::to_binary() {
+    unpack();
+    const vector<FactPair> relevant_facts = task_properties::get_strips_fact_pairs(task);
+    const vector<int> values = get_unpacked_values();
+    string bin = "";
+    for (unsigned i = 0; i < relevant_facts.size(); i++)
+        bin += (values[relevant_facts[i].var] == relevant_facts[i].value ? "1" : "0");
+    return bin;
+}
 
 const causal_graph::CausalGraph &TaskProxy::get_causal_graph() const {
     return causal_graph::get_causal_graph(task);
@@ -192,8 +201,8 @@ pair<bool, State> TaskProxy::convert_to_full_state(
     return assignment.get_full_state(check_mutexes, rng);
 }
 
-std::string PartialAssignment::to_string() {
-    std::string s = "";
+string PartialAssignment::to_string() {
+    string s = "";
     for (int& v : *values)
         s += (char)v;
     return s;
