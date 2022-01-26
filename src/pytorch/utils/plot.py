@@ -26,6 +26,9 @@ def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str, prefi
     """
     Create and save real y and predicted y scatter plot.
     """
+    if data == None:
+        return
+
     if t == -1:
         t = "final"
 

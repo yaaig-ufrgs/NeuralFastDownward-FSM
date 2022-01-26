@@ -31,6 +31,7 @@ class TrainWorkflow:
         self.best_epoch_model = None
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
+        self.validation = False if self.val_dataloader == None else True
         self.device = device
         self.max_epochs = max_epochs
         self.plot_n_epochs = plot_n_epochs
@@ -42,6 +43,7 @@ class TrainWorkflow:
         self.restart_no_conv = restart_no_conv
         self.train_y_pred_values = {}  # {state = (y, pred)}
         self.val_y_pred_values = {}
+        self.cur_train_loss = 0.0
 
     def train_loop(self, t: int, fold_idx: int) -> float:
         """
@@ -150,15 +152,14 @@ class TrainWorkflow:
         traced_model.save(filename)
 
     def run(
-        self, fold_idx: int, train_timer: Timer, validation: bool = True
-    ) -> (float, bool):
+        self, fold_idx: int, train_timer: Timer) -> (float, bool):
         """
         Network train/eval main loop.
         """
         best_val_loss = None
         born_dead = False
         for t in range(self.max_epochs):
-            cur_train_loss = self.train_loop(t, fold_idx)
+            self.cur_train_loss = self.train_loop(t, fold_idx)
             # Check if born dead
             if t == 0:
                 if self.dead():
@@ -176,10 +177,10 @@ class TrainWorkflow:
             elif not born_dead and self.dead():
                 _log.warning("All predictions are 0.")
 
-            if validation:
+            if self.validation:
                 cur_val_loss = self.val_loop(t, fold_idx)
                 _log.info(
-                    f"Epoch {t} | avg_train_loss={cur_train_loss:>7f}"
+                    f"Epoch {t} | avg_train_loss={self.cur_train_loss:>7f}"
                     f" | avg_val_loss={cur_val_loss:>7f}"
                 )
                 if self.patience != None:
@@ -192,7 +193,7 @@ class TrainWorkflow:
                         self.early_stopped = True
                         break
             else:
-                _log.info(f"Epoch {t} | avg_train_loss={cur_train_loss:>7f}")
+                _log.info(f"Epoch {t} | avg_train_loss={self.cur_train_loss:>7f}")
 
             # Check once every 10 epochs
             if (t % 10 == 0) and train_timer.check_timeout():
@@ -200,21 +201,28 @@ class TrainWorkflow:
             if t == self.max_epochs - 1:
                 _log.info("Done!")
 
+        if self.validation == False:
+            # If not using validation data, save the last epoch's model.
+            self.best_epoch_model = deepcopy(self.model)
+
         # Post-training scatter plot.
         self.save_post_scatter_plot(fold_idx)
 
-        return (best_val_loss if validation else None), False
+        return (best_val_loss if self.validation else None), False
 
     def save_post_scatter_plot(self, fold_idx: int):
         """
         After all epochs are done, perform an extra evaluation to create the final scatter plot.
         """
         with torch.no_grad():
-            for X, y in self.val_dataloader:
-                X, y = X.to(self.device), y.to(self.device)
-                self.val_y_pred_values = self.fill_y_pred(
-                    X, y, self.model(X), self.val_y_pred_values
-                )
+            if self.validation:
+                for X, y in self.val_dataloader:
+                    X, y = X.to(self.device), y.to(self.device)
+                    self.val_y_pred_values = self.fill_y_pred(
+                        X, y, self.model(X), self.val_y_pred_values
+                    )
+            else:
+                self.val_y_pred_values = None
             for X, y in self.train_dataloader:
                 X, y = X.to(self.device), y.to(self.device)
                 self.train_y_pred_values = self.fill_y_pred(

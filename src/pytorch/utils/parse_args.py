@@ -142,6 +142,13 @@ def get_train_args():
         help="Use bias or not. (default: %(default)s)",
     )
     parser.add_argument(
+        "-tsize",
+        "--training-size",
+        type=float,
+        default=default_args.TRAINING_SIZE,
+        help="Training data size in relation to validation data. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-biout",
         "--bias-output",
         type=str2bool,

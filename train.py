@@ -91,21 +91,29 @@ def train_main(args: Namespace):
     _log.info(f"Elapsed time: {train_timer.current_time()}")
     _log.info(f"Restarts needed: {num_retries}")
 
-    remove_csv_except_best(dirname, best_fold["fold"])
-    os.rename(
-        f"{dirname}/heuristic_pred_{best_fold['fold']}.csv",
-        f"{dirname}/heuristic_pred.csv",
-    )
+    h_pred_files = glob.glob(f"{dirname}/heuristic_pred*.csv")
+    if len(h_pred_files) > 1:
+        remove_csv_except_best(dirname, best_fold["fold"])
+        os.rename(
+            f"{dirname}/heuristic_pred_{best_fold['fold']}.csv",
+            f"{dirname}/heuristic_pred.csv",
+        )
+    else:
+        os.rename(
+            f"{dirname}/heuristic_pred_0.csv",
+            f"{dirname}/heuristic_pred.csv",
+        )
 
     try:
-        _log.info(
-            f"Saving traced_{best_fold['fold']}.pt as best "
-            f"model (by val loss = {best_fold['val_loss']})"
-        )
-        copyfile(
-            f"{dirname}/models/traced_{best_fold['fold']}.pt",
-            f"{dirname}/models/traced_best_val_loss.pt",
-        )
+        if args.training_size != 1.0:
+            _log.info(
+                f"Saving traced_{best_fold['fold']}.pt as best "
+                f"model (by val loss = {best_fold['val_loss']})"
+            )
+            copyfile(
+                f"{dirname}/models/traced_{best_fold['fold']}.pt",
+                f"{dirname}/models/traced_best_val_loss.pt",
+            )
     except:
         _log.error(f"Failed to save best fold.")
 
@@ -132,6 +140,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
             shuffle=args.shuffle,
             seed=args.seed,
             shuffle_seed=args.shuffle_seed,
+            training_size=args.training_size,
             data_num_workers=args.data_num_workers,
             normalize=args.normalize_output,
             clamping=args.clamping,
@@ -192,9 +201,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                 patience=args.patience,
             )
 
-            fold_val_loss, born_dead = train_wf.run(
-                fold_idx, train_timer, validation=True
-            )
+            fold_val_loss, born_dead = train_wf.run(fold_idx, train_timer)
 
             if born_dead and args.num_folds == 1:
                 args.seed += args.seed_increment_when_born_dead
@@ -206,15 +213,20 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
 
             heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
 
-            if fold_val_loss < best_fold["val_loss"]:
+            if fold_val_loss != None:
+                if fold_val_loss < best_fold["val_loss"]:
+                    save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
+                    _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
+                    best_fold["fold"] = fold_idx
+                    best_fold["val_loss"] = fold_val_loss
+                else:
+                    _log.info(
+                        f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
+                    )
+            else: # Only using training data
                 save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
-                _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
                 best_fold["fold"] = fold_idx
-                best_fold["val_loss"] = fold_val_loss
-            else:
-                _log.info(
-                    f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
-                )
+                best_fold["train_loss"] = train_wf.cur_train_loss
 
             train_wf.save_traced_model(
                 f"{dirname}/models/traced_{fold_idx}.pt", args.model

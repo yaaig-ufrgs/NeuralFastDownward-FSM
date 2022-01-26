@@ -4,6 +4,7 @@ import torch
 import numpy as np
 import random
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle as skshuffle
 from torch.utils.data import DataLoader
 import src.pytorch.utils.default_args as default_args
 
@@ -25,6 +26,7 @@ class KFoldTrainingData:
         shuffle: bool = default_args.SHUFFLE,
         seed: int = default_args.RANDOM_SEED,
         shuffle_seed: int = default_args.SHUFFLE_SEED,
+        training_size: int = default_args.TRAINING_SIZE,
         data_num_workers: int = default_args.DATALOADER_NUM_WORKERS,
         normalize: bool = default_args.NORMALIZE_OUTPUT,
         clamping: int = default_args.CLAMPING,
@@ -51,6 +53,7 @@ class KFoldTrainingData:
         self.shuffle = shuffle
         self.seed = seed
         self.shuffle_seed = shuffle_seed
+        self.training_size = training_size
         self.data_num_workers = data_num_workers
         self.standard_first = standard_first
         self.contrast_first = contrast_first
@@ -72,14 +75,17 @@ class KFoldTrainingData:
         for i in range(self.num_folds):
             training_set, test_set = [], []
             if self.num_folds == 1:
-                # Training set = 80% of the data.
-                # Test set = 20% of the data.
-                training_set, test_set = train_test_split(
-                    self.state_value_pairs,
-                    test_size=0.2,
-                    shuffle=self.shuffle,
-                    random_state=self.shuffle_seed,
-                )
+                # Test set size = complement of training set size.
+                if self.training_size < 1.0 and self.training_size > 0.0:
+                    training_set, test_set = train_test_split(
+                        self.state_value_pairs,
+                        train_size=self.training_size,
+                        shuffle=self.shuffle,
+                        random_state=self.shuffle_seed,
+                    )
+                else:
+                    training_set = skshuffle(self.state_value_pairs, random_state=self.shuffle_seed) if self.shuffle else self.state_value_pairs
+                    test_set = []
             else:
                 for j in range(len(self.state_value_pairs)):
                     if int(j / instances_per_fold) == i:
@@ -118,16 +124,19 @@ class KFoldTrainingData:
                 generator=g,
             )
 
-            test_dataloader = DataLoader(
-                dataset=InstanceDataset(
-                    test_set, self.domain_max_value, self.output_layer
-                ),
-                batch_size=self.batch_size,
-                shuffle=self.shuffle,
-                num_workers=self.data_num_workers,
-                worker_init_fn=worker_fn,
-                generator=g,
-            )
+            if len(test_set) != 0:
+                test_dataloader = DataLoader(
+                    dataset=InstanceDataset(
+                        test_set, self.domain_max_value, self.output_layer
+                    ),
+                    batch_size=self.batch_size,
+                    shuffle=self.shuffle,
+                    num_workers=self.data_num_workers,
+                    worker_init_fn=worker_fn,
+                    generator=g,
+                )
+            else:
+                test_dataloader = None
 
             kfolds.append((train_dataloader, test_dataloader))
 
@@ -150,6 +159,9 @@ class KFoldTrainingData:
         - `standard_first`: non-contrasting samples appear first.
         - `intercalate_samples`: contrasting and non-contrasting samples appear intercalated.
         """
+        if len(samples) == 0:
+            return samples
+        
         standard_samples = []
         contrast_samples = []
         interc_n = self.intercalate_samples
