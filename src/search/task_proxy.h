@@ -698,7 +698,7 @@ public:
 
     /*
       Get the binary representation of the state. */
-    std::string to_binary();
+    std::string to_binary() const;
 };
 
 
