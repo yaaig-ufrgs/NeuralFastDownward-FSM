@@ -4,7 +4,7 @@
 Get number of unique samples in each arg file.
 
 Usage: ./unique-samples.py samples_file [samples_file ...]
-  e.g. ./unique-samples.py ../../samples/fukunaga/blocks/fukunaga_probBLOCKS-12-0_*_fullstate_30K_seed*
+  e.g. ./unique-samples.py ../../samples/yaaig/blocks/yaaig_probBLOCKS-12-0_*_fullstate_30K_seed*
 """
 
 from sys import argv

@@ -4,7 +4,7 @@
 For all sample states in the `sample_file`, get h* with a*+lmcut.
 
 Usage: ./get_hstar_with_fd.py sample_file problem_pddl
-  e.g. ./get_hstar_with_fd.py ../samples/fukunaga_blocks_probBLOCKS-4-0_dfs_fs_500x200_ss1 ../tasks/IPC/blocks/probBLOCKS-4-0.pddl
+  e.g. ./get_hstar_with_fd.py ../samples/yaaig_blocks_probBLOCKS-4-0_dfs_fs_500x200_ss1 ../tasks/IPC/blocks/probBLOCKS-4-0.pddl
 
 Expected problem_pddl format:
 (define (problem BLOCKS-4-1)

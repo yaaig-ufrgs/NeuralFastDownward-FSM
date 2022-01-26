@@ -32,7 +32,7 @@ See
 Usage:
 
 ```
-./fast-sample.sh [fukunaga|ferber] [rw|dfs] [fs|ps|us|as] num_searches samples_per_search n_seeds problem_dir output_dir
+./fast-sample.sh [yaaig|ferber] [rw|dfs] [fs|ps|us|as] num_searches samples_per_search n_seeds problem_dir output_dir
 ./fast-sample.sh rsl [countAdds|countDels|countBoth] num_train_states num_demos max_len_demos sample_percentage check_state_invars n_seeds problem_dir output_dir
 ```
 
@@ -80,7 +80,7 @@ appropriate `_defaults.txt` and `_facts.txt` files.
 You can also manually indicate the _n_ tasks you want to evaluate.
 
 ```
-./test.py results/nfd_train.fukunaga_blocks_probBLOCKS-12-0_dfs_fs_500x200_ss1.ns1 tasks/IPC/blocks/probBLOCKS*.pddl
+./test.py results/nfd_train.yaaig_blocks_probBLOCKS-12-0_dfs_fs_500x200_ss1.ns1 tasks/IPC/blocks/probBLOCKS*.pddl
 ```
 
 ### Running full experiments

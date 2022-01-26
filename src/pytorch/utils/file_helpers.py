@@ -30,9 +30,6 @@ def create_train_directory(args: Namespace) -> str:
     """
     Creates training directory according to current configuration.
     """
-
-    print(getattr(args, "additional_folder_name"))
-
     sep = "."
     dirname = f"{args.output_folder}/nfd_train{sep}{args.samples.split('/')[-1]}"
     if args.seed != -1:

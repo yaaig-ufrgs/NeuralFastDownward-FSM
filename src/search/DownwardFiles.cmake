@@ -465,7 +465,7 @@ fast_downward_plugin(
         sampling_engines/sampling_search_base
         sampling_engines/sampling_search_simple
         sampling_engines/sampling_search_ferber
-        sampling_engines/sampling_search_fukunaga
+        sampling_engines/sampling_search_yaaig
         sampling_engines/sampling_v
         sampling_engines/sampling_tasks
         sampling_engines/plugin_sampling.cc
@@ -715,7 +715,7 @@ fast_downward_plugin(
     HELP "Sampling Techniques"
     SOURCES
         sampling_techniques/technique_gbackward_none
-        sampling_techniques/technique_gbackward_fukunaga
+        sampling_techniques/technique_gbackward_yaaig
         sampling_techniques/technique_iforward_none
         sampling_techniques/technique_uniform_none
         sampling_techniques/technique_null

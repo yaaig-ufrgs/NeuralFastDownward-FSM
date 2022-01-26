@@ -78,7 +78,6 @@ def train_main(args: Namespace):
         )
 
     device = torch.device("cuda:0" if torch.cuda.is_available() and args.use_gpu else "cpu")
-    print(device)
     if device == torch.device("cpu"):
         args.use_gpu = False
 

@@ -761,7 +761,7 @@ def get_sample_args():
     )
     parser.add_argument(
         "method",
-        choices=["ferber", "fukunaga", "rsl"],
+        choices=["ferber", "yaaig", "rsl"],
         default=default_args.SAMPLE_METHOD,
         help="Sampling base method to use. (default: %(default)s)",
     )

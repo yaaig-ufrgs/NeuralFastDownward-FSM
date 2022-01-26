@@ -22,8 +22,8 @@ def get_facts(pddl: str) -> [str]:
     PLAN_FILE = "sas_plan"
 
     # e.g. ../fast-downward.py --sas-file output.sas --plan-file sas_plan ../tasks/IPC/blocks/probBLOCKS-10-0.pddl
-    # --search "sampling_search_fukunaga(astar(lmcut(transform=sampling_transform()), transform=sampling_transform()),
-    # techniques=[gbackward_fukunaga(searches=1, samples_per_search=1, technique=fukunaga)])"
+    # --search "sampling_search_yaaig(astar(lmcut(transform=sampling_transform()), transform=sampling_transform()),
+    # techniques=[gbackward_yaaig(searches=1, samples_per_search=1, technique=yaaig)])"
     cl = [
         _FD,
         "--sas-file",
@@ -32,8 +32,8 @@ def get_facts(pddl: str) -> [str]:
         PLAN_FILE,
         pddl,
         "--search",
-        "sampling_search_fukunaga(astar(lmcut(transform=sampling_transform()), transform=sampling_transform()), "
-        "techniques=[gbackward_fukunaga(searches=1, samples_per_search=1, technique=fukunaga)])",
+        "sampling_search_yaaig(astar(lmcut(transform=sampling_transform()), transform=sampling_transform()), "
+        "techniques=[gbackward_yaaig(searches=1, samples_per_search=1, technique=yaaig)])",
     ]
 
     try:
