@@ -177,6 +177,8 @@ class TrainWorkflow:
             elif not born_dead and self.dead():
                 _log.warning("All predictions are 0.")
 
+            #print(self.cur_train_loss)
+
             if self.validation:
                 cur_val_loss = self.val_loop(t, fold_idx)
                 _log.info(
@@ -257,5 +259,5 @@ class TrainWorkflow:
                 pred_h = prefix_to_h(pred[i].tolist())
                 y_pred_values[x_str] = (y_h, pred_h)
             else:  # Regression
-                y_pred_values[x_str] = (int(y[i][0]), int(pred[i][0]))
+                y_pred_values[x_str] = (int(torch.round(y[i][0])), int(torch.round(pred[i][0])))
         return y_pred_values
