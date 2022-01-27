@@ -14,7 +14,7 @@ import sys
 import os
 from glob import glob
 from src.pytorch.utils.parse_args import get_sample_args
-from src.pytorch.utils.default_args import DEFAULT_SAMPLE_TECHNIQUE
+from src.pytorch.utils.default_args import SAMPLE_TECHNIQUE
 
 COUNT = 0
 ID_COUNT = 0
@@ -135,7 +135,7 @@ def sample(args):
     if args.method == "yaaig" or args.method == "ferber":
         yaaig_ferber(args, meth=args.method)
     elif args.method == "rsl":
-        args.technique = "countBoth" if args.technique == DEFAULT_SAMPLE_TECHNIQUE else args.technique
+        args.technique = "countBoth" if args.technique == SAMPLE_TECHNIQUE else args.technique
         rsl(args)
     else:
         print("Invalid configuration.")
