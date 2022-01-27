@@ -15,13 +15,7 @@ import os
 from math import ceil
 from glob import glob
 from src.pytorch.utils.parse_args import get_exp_args
-from src.pytorch.utils.default_args import (
-    DEFAULT_HIDDEN_UNITS,
-    DEFAULT_MAX_TRAINING_TIME,
-    DEFAULT_MAX_SEARCH_TIME,
-    DEFAULT_MAX_EXPANSIONS,
-    DEFAULT_ADDITIONAL_FOLDER_NAME,
-)
+import src.pytorch.utils.default_args as default_args
 
 
 COUNTER = 0
@@ -66,9 +60,11 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
                       f'-rmg {args.train_remove_goals} -cfst {args.train_contrast_first} '
                       f'-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} '
                       f'-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} '
+                      f'-tsize {args.train_training_size} '
+                      f'-wm {args.train_weights_method} '
                       f'-addfn {args.train_additional_folder_name}')
 
-        if args.train_max_training_time != DEFAULT_MAX_TRAINING_TIME:
+        if args.train_max_training_time != default_args.MAX_TRAINING_TIME:
             train_args += f' -t {args.train_max_training_time}'
 
         test_args = (f'-a {args.test_search_algorithm} -m {args.test_max_search_memory} '
@@ -77,7 +73,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
 
         if args.problem_pddls != []:
             test_args += f' {args.problem_pddls}'
-        if args.test_max_expansions != DEFAULT_MAX_EXPANSIONS:
+        if args.test_max_expansions != default_args.MAX_EXPANSIONS:
             test_args += f' -e {args.test_max_expansions}'
 
         if COUNTER % max_per_thread == 0:
@@ -105,7 +101,7 @@ def only_test(args):
 
     if args.problem_pddls != []:
         test_args += f' {args.problem_pddls}'
-    if args.test_max_expansions != DEFAULT_MAX_EXPANSIONS:
+    if args.test_max_expansions != default_args.MAX_EXPANSIONS:
         test_args += f' -e {args.test_max_expansions}'
 
     for net in glob(f'{args.tst_model_dir}/*'):
@@ -141,9 +137,11 @@ def only_train(args):
                   f'-rmg {args.train_remove_goals} -cfst {args.train_contrast_first} '
                   f'-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} '
                   f'-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} '
+                  f'-tsize {args.train_training_size} '
+                  f'-wm {args.train_weights_method} '
                   f'-addfn {args.train_additional_folder_name}')
 
-    if args.train_max_training_time != DEFAULT_MAX_TRAINING_TIME:
+    if args.train_max_training_time != default_args.MAX_TRAINING_TIME:
         train_args += f' -t {args.train_max_training_time}'
 
     sample_files = filter_samples(glob(f"{args.samples}/*"), args.exp_sample_seed)
@@ -169,9 +167,9 @@ def only_train(args):
 
 
 def experiment(args):
-    args.train_hidden_units = DEFAULT_HIDDEN_UNITS[0] if args.train_hidden_units == DEFAULT_HIDDEN_UNITS else args.train_hidden_units
-    args.test_max_search_time = 99999999 if args.test_max_search_time == DEFAULT_MAX_SEARCH_TIME else args.test_max_search_time
-    args.train_additional_folder_name = "" if args.train_additional_folder_name == DEFAULT_ADDITIONAL_FOLDER_NAME else " ".join(args.train_additional_folder_name)
+    args.train_hidden_units = default_args.HIDDEN_UNITS[0] if args.train_hidden_units == default_args.HIDDEN_UNITS else args.train_hidden_units
+    args.test_max_search_time = 99999999 if args.test_max_search_time == default_args.MAX_SEARCH_TIME else args.test_max_search_time
+    args.train_additional_folder_name = "" if args.train_additional_folder_name == default_args.ADDITIONAL_FOLDER_NAME else " ".join(args.train_additional_folder_name)
 
     os.system(f"tsp -K")
     os.system(f"tsp -S {args.exp_threads}")

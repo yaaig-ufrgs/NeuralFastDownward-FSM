@@ -602,6 +602,31 @@ def get_exp_args():
         help="Shuffle the training data. (default: %(default)s)",
     )
     parser.add_argument(
+        "-trn-tsize",
+        "--train-training-size",
+        type=float,
+        default=default_args.TRAINING_SIZE,
+        help="Training data size in relation to validation data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-wm",
+        "--train-weights-method",
+        choices=[
+            "default",
+            "sqrt_k",
+            "1",
+            "01",
+            "xavier_uniform",
+            "xavier_normal",
+            "kaiming_uniform",
+            "kaiming_normal",
+            "rai",
+        ],
+        default=default_args.WEIGHTS_METHOD,
+        help="Inicialization of network weights. (default: %(default)s)",
+    )
+
+    parser.add_argument(
         "-trn-bi",
         "--train-bias",
         type=str2bool,
