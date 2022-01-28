@@ -116,14 +116,15 @@ std::vector<FactPair> get_fact_mapping(
     for (const FactPair &fp: task_properties::get_strips_fact_pairs(task)) {
         string fact_name = task->get_fact_name(fp);
         fact_name = options::stringify_tree(options::generate_parse_tree(fact_name));
-        if (fact_name[fact_name.size()-1] != ')')
-            fact_name += "()";
         name2factpair.insert({fact_name, fp});
     }
 
     vector<FactPair> order;
     int not_found = 0;
-    for (const string &fact: facts) {
+    for (const string &fact_name: facts) {
+        // It ensures that the fact will have the same formatting pattern inserted in name2factpair.
+        string fact = options::stringify_tree(options::generate_parse_tree(fact_name));
+
         auto iter = name2factpair.find(fact);
         if (iter == name2factpair.end()) {
             not_found++;
