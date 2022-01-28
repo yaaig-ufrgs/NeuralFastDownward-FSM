@@ -46,7 +46,8 @@ def create_train_directory(args: Namespace) -> str:
         "shuffle-seed" : "shs", "shuffle" : "s",
         "use-gpu" : "gpu", "bias" : "bi",
         "bias-output" : "biout", "normalize-output" : "no",
-        "restart-no-conv" : "rst",
+        "restart-no-conv" : "rst", "sample-percentage" : "spt",
+        "training-size" : "tsize",
     }
     for a in args.additional_folder_name:
         value = getattr(args, a.replace("-", "_"))
