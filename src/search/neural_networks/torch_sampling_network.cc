@@ -114,8 +114,6 @@ vector<at::Tensor> TorchSamplingNetwork::get_input_tensors(const State &state) {
     state.unpack();
     const vector<int> &values = state.get_values();
 
-    cout << "eval state: " << state.to_binary() << " | ";
-
     unsigned size = relevant_facts.size();
     if (undefined_input)
         size += relevant_facts[relevant_facts.size()-1].var + 1;
@@ -156,7 +154,6 @@ void TorchSamplingNetwork::parse_output(const torch::jit::IValue &output) {
             last_h = unary_to_value(unary_output);
         }
     }
-    cout << h_adjustment(last_h) << " (no round: " << unary_output[0] << ")" << endl;
 
     last_h_batch.push_back(h_adjustment(last_h));
 }

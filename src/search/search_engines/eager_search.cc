@@ -190,16 +190,6 @@ SearchStatus EagerSearch::step() {
                                     preferred_operators);
     }
 
-    cout << "Current state: " << s.to_binary() << endl;
-    for (OperatorID op_id : applicable_ops) {
-        OperatorProxy op = task_proxy.get_operators()[op_id];
-        if ((node->get_real_g() + op.get_cost()) >= bound)
-            continue;
-        State succ_state = state_registry.get_successor_state(s, op);
-
-        cout << " | " << succ_state.to_binary() << endl;
-    }
-
     for (OperatorID op_id : applicable_ops) {
         OperatorProxy op = task_proxy.get_operators()[op_id];
         if ((node->get_real_g() + op.get_cost()) >= bound)
