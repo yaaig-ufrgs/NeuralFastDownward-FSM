@@ -149,6 +149,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
             contrast_first=args.contrast_first,
             intercalate_samples=args.intercalate_samples,
             cut_non_intercalated_samples=args.cut_non_intercalated_samples,
+            sample_percentage=args.sample_percentage,
             model=args.model,
         )
 

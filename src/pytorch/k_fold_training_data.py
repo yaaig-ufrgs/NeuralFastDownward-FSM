@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle as skshuffle
 from torch.utils.data import DataLoader
 import src.pytorch.utils.default_args as default_args
+from src.pytorch.utils.helpers import get_random_samples
 
 from src.pytorch.training_data import (
     InstanceDataset,
@@ -35,6 +36,7 @@ class KFoldTrainingData:
         contrast_first: bool = default_args.STANDARD_FIRST,
         intercalate_samples: int = default_args.INTERCALATE_SAMPLES,
         cut_non_intercalated_samples: bool = default_args.CUT_NON_INTERCALATED_SAMPLES,
+        sample_percentage: float = default_args.SAMPLE_PERCENTAGE,
         model: str = default_args.MODEL,
     ):
         self.state_value_pairs, self.domain_max_value = load_training_state_value_pairs(
@@ -59,6 +61,7 @@ class KFoldTrainingData:
         self.contrast_first = contrast_first
         self.intercalate_samples = intercalate_samples
         self.cut_non_intercalated_samples = cut_non_intercalated_samples
+        self.sample_percentage = sample_percentage
         self.model = model
         self.kfolds = self.generate_kfold_training_data()
 
@@ -69,6 +72,8 @@ class KFoldTrainingData:
         The first item corresponds to train set, and the second to test set.
         """
         _log.info(f"Generating {self.num_folds}-fold...")
+
+        self.state_value_pairs = get_random_samples(self.state_value_pairs, self.sample_percentage)
 
         kfolds = []
         instances_per_fold = int(len(self.state_value_pairs) / self.num_folds)

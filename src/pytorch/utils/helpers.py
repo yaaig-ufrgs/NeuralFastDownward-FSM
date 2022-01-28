@@ -5,7 +5,7 @@ Simple auxiliary functions.
 import logging
 import glob
 import os
-from random import Random
+from random import Random, sample
 from json import dump, load
 from datetime import datetime, timezone
 from subprocess import check_output
@@ -230,6 +230,15 @@ def get_models_from_train_folder(train_folder: str, test_model: str) -> [str]:
 
     return models
 
+
+def get_random_samples(lst: list, percent: float) -> list:
+    """
+    Gets unique random samples from `lst`.
+    """
+    if percent >= 1.0:
+        return lst
+    n = round(len(lst) * percent)
+    return sample(lst, n)
 
 def get_samples_folder_from_train_folder(train_folder: str) -> [str]:
     try:

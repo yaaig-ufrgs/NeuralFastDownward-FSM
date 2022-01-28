@@ -50,6 +50,7 @@ def logging_train_config(
         "weight_decay": args.weight_decay,
         "dropout_rate": args.dropout_rate,
         "training_size": args.training_size,
+        "sample_percentage": args.sample_percentage,
         "shuffle": args.shuffle,
         "shuffle_seed": args.shuffle_seed,
         "remove_goals": args.remove_goals,

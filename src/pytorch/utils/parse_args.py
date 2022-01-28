@@ -149,6 +149,13 @@ def get_train_args():
         help="Training data size in relation to validation data. (default: %(default)s)",
     )
     parser.add_argument(
+        "-spt",
+        "--sample-percentage",
+        type=float,
+        default=default_args.SAMPLE_PERCENTAGE,
+        help="Sample percentage to be used during training. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-biout",
         "--bias-output",
         type=str2bool,
@@ -607,6 +614,13 @@ def get_exp_args():
         type=float,
         default=default_args.TRAINING_SIZE,
         help="Training data size in relation to validation data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-spt",
+        "--train-sample-percentage",
+        type=float,
+        default=default_args.SAMPLE_PERCENTAGE,
+        help="Sample percentage to be used during training. (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-wm",
