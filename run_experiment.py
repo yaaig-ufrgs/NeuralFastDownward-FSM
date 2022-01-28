@@ -60,8 +60,8 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
                       f'-rmg {args.train_remove_goals} -cfst {args.train_contrast_first} '
                       f'-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} '
                       f'-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} '
-                      f'-tsize {args.train_training_size} '
-                      f'-wm {args.train_weights_method} -spt {args.train_sample_percentage} '
+                      f'-tsize {args.train_training_size} -spt {args.train_sample_percentage} '
+                      f'-wm {args.train_weights_method} '
                       f'-addfn {args.train_additional_folder_name}')
 
         if args.train_max_training_time != default_args.MAX_TRAINING_TIME:
@@ -137,8 +137,8 @@ def only_train(args):
                   f'-rmg {args.train_remove_goals} -cfst {args.train_contrast_first} '
                   f'-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} '
                   f'-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} '
-                  f'-tsize {args.train_training_size} '
-                  f'-wm {args.train_weights_method} -spt {args.train_sample_percentage} '
+                  f'-tsize {args.train_training_size} -spt {args.train_sample_percentage} '
+                  f'-wm {args.train_weights_method} '
                   f'-addfn {args.train_additional_folder_name}')
 
     if args.train_max_training_time != default_args.MAX_TRAINING_TIME:
