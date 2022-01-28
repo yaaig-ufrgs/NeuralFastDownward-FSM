@@ -190,6 +190,16 @@ SearchStatus EagerSearch::step() {
                                     preferred_operators);
     }
 
+    cout << "Current state: " << s.to_binary() << endl;
+    for (OperatorID op_id : applicable_ops) {
+        OperatorProxy op = task_proxy.get_operators()[op_id];
+        if ((node->get_real_g() + op.get_cost()) >= bound)
+            continue;
+        State succ_state = state_registry.get_successor_state(s, op);
+
+        cout << " | " << succ_state.to_binary() << endl;
+    }
+
     for (OperatorID op_id : applicable_ops) {
         OperatorProxy op = task_proxy.get_operators()[op_id];
         if ((node->get_real_g() + op.get_cost()) >= bound)
@@ -198,7 +208,7 @@ SearchStatus EagerSearch::step() {
         State succ_state = state_registry.get_successor_state(s, op);
         statistics.inc_generated();
         bool is_preferred = preferred_operators.contains(op_id);
-
+        
         SearchNode succ_node = search_space.get_node(succ_state);
 
         for (Evaluator *evaluator : path_dependent_evaluators) {
@@ -221,7 +231,7 @@ SearchStatus EagerSearch::step() {
             EvaluationContext succ_eval_context(
                 succ_state, succ_g, is_preferred, &statistics);
             statistics.inc_evaluated_states();
-
+            
             if (open_list->is_dead_end(succ_eval_context)) {
                 succ_node.mark_as_dead_end();
                 statistics.inc_dead_ends();
