@@ -98,6 +98,7 @@ def remove_temporary_files(directory: str):
         if os.path.exists(file):
             os.remove(file)
     remove_file(f"{directory}/output.sas")
+    remove_file(f"{directory}/sas_plan")
     remove_file(f"{directory}/defaults.txt")
 
 
