@@ -168,6 +168,7 @@ def get_test_tasks_from_problem(
 
 def get_defaults_and_facts_files(
     train_folder: str,
+    test_folder: str,
     problem_pddl: str,
     facts_filename_format: str = "tasks/ferber21/training_tasks/{domain}/{problem}_facts.txt",
 ) -> (str, str):
@@ -191,7 +192,7 @@ def get_defaults_and_facts_files(
             facts_file = ""
 
     if facts_file:
-        defaults_file = create_defaults_file(problem_pddl, facts_file)
+        defaults_file = create_defaults_file(problem_pddl, facts_file, test_folder)
         if not os.path.exists(defaults_file):
             defaults_file = ""
 

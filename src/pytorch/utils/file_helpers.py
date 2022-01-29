@@ -122,7 +122,7 @@ def remove_csv_except_best(directory: str, fold_idx: int):
         if idx != fold_idx:
             os.remove(f)
 
-def create_defaults_file(pddl_file: str, facts_file: str, output_file: str = "defaults.txt") -> str:
+def create_defaults_file(pddl_file: str, facts_file: str, output_folder: str = ".") -> str:
     """
     Create defaults file for `pddl_file`.
     For all fact in facts_file, 1 if fact \in initial_state(pddl_file) else 0.
@@ -135,7 +135,7 @@ def create_defaults_file(pddl_file: str, facts_file: str, output_file: str = "de
 
     with open(facts_file, "r") as f:
         facts = f.read().strip().split(";")
-    
+
     # Atom on(i, a) -> (on i a)
     modified_facts = []
     for fact in facts:
@@ -153,6 +153,7 @@ def create_defaults_file(pddl_file: str, facts_file: str, output_file: str = "de
     if not defaults:
         raise Exception("get_defaults: defaults is empty")
 
+    output_file = output_folder + "/defaults.txt"
     with open(output_file, "w") as f:
         f.write(";".join(defaults) + "\n")
     return output_file
