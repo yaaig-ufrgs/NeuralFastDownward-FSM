@@ -180,22 +180,25 @@ def get_defaults_and_facts_files(
     """
     with open(f"{train_folder}/train_args.json", "r") as f:
         train_args = load(f)
-    
+
+    facts_file, defaults_file = "", ""
+
     if "domain" in train_args and "problem" in train_args:
         facts_file = facts_filename_format.format(
             domain=train_args["domain"], problem=train_args["problem"]
         )
         if not os.path.exists(facts_file):
             facts_file = ""
-    else:
-        facts_file = ""
-    
+
     if facts_file:
         defaults_file = create_defaults_file(problem_pddl, facts_file)
-        if not defaults_file:
-            _log.error("The `defaults` file could not be created.")
-    else:
+        if not os.path.exists(defaults_file):
+            defaults_file = ""
+
+    if not facts_file:
         _log.warning("No `facts` file found for the given sample.")
+    if not defaults_file:
+        _log.error("The `defaults` file could not be created.")
     return facts_file, defaults_file
 
 
