@@ -160,7 +160,10 @@ def get_test_tasks_from_problem(
         Random(shuffle_seed).shuffle(pddls)
 
     if len(pddls) < n:
-        _log.warning(f"Not found {n} tasks in {dir}. {len(pddls)} were selected.")
+        if n == default_args.AUTO_TASKS_N:
+            _log.info(f"All {len(pddls)} tasks found were selected.")
+        else:
+            _log.warning(f"Not found {n} tasks in {dir}. {len(pddls)} were selected.")
         return pddls
 
     return pddls[:n]
