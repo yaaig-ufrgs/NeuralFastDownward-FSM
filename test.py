@@ -95,7 +95,7 @@ def test_main(args):
         model_cmp_path = models_cmp[i] if len(models_cmp) > 0 else ""
         output = {}
         for j, problem_pddl in enumerate(args.problem_pddls):
-            facts_file, defaults_file = get_defaults_and_facts_files(args.train_folder, dirname, problem_pddl)
+            facts_file, defaults_file = get_defaults_and_facts_files(args, dirname, problem_pddl)
             _log.info(f'Solving instance "{problem_pddl}" ({j+1}/{len(args.problem_pddls)})')
             output[problem_pddl] = solve_instance_with_fd_nh(
                 domain_pddl=args.domain_pddl,

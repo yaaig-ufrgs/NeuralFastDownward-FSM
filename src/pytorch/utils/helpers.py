@@ -170,37 +170,43 @@ def get_test_tasks_from_problem(
 
 
 def get_defaults_and_facts_files(
-    train_folder: str,
+    args: Namespace,
     test_folder: str,
     problem_pddl: str,
     facts_filename_format: str = "tasks/ferber21/training_tasks/{domain}/{problem}_facts.txt",
 ) -> (str, str):
     """
-    From the given samples directory and sample file, return its `facts` and `defaults` files.
+    Return its `facts` and `defaults` files.
+    User input preferred. If not, it tries to find it automatically.
 
     Facts file is obtained from `facts_filename_format`.
     Defaults file is created (temporary file) based on `problem_pddl` and `facts_file`.
-
     """
-    with open(f"{train_folder}/train_args.json", "r") as f:
+    facts_file = args.facts_file
+    if facts_file and not os.path.exists(facts_file):
+        _log.warning("The `fact_file` arg doesn't exist. Getting it automatically...")
+        facts_file = ""
+    defaults_file = args.defaults_file
+    if defaults_file and not os.path.exists(defaults_file):
+        _log.warning("The `defaults_file` arg doesn't exist. Getting it automatically...")
+        defaults_file = ""
+
+    with open(f"{args.train_folder}/train_args.json", "r") as f:
         train_args = load(f)
-
-    facts_file, defaults_file = "", ""
-
-    if "domain" in train_args and "problem" in train_args:
+    if (not facts_file) and ("domain" in train_args) and ("problem" in train_args):
         facts_file = facts_filename_format.format(
             domain=train_args["domain"], problem=train_args["problem"]
         )
         if not os.path.exists(facts_file):
             facts_file = ""
 
-    if facts_file:
+    if (not defaults_file) and facts_file:
         defaults_file = create_defaults_file(problem_pddl, facts_file, test_folder)
         if not os.path.exists(defaults_file):
             defaults_file = ""
 
     if not facts_file:
-        _log.warning("No `facts` file found for the given sample.")
+        _log.error("No `facts` file found for the given sample.")
     if not defaults_file:
         _log.error("The `defaults` file could not be created.")
     return facts_file, defaults_file
