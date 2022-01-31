@@ -98,12 +98,6 @@ if __name__ == "__main__":
         raise Exception("Use --facts arg to create facts file and/or --defaults for defaults file")
 
     for pddl in argv[1:]:
-        nono = False
-        for a in "blocks depot grid npuzzle".split(" "):
-            if a in pddl:
-                nono = True
-        if nono:
-            continue
         if pddl.split("/")[-1] == "domain.pddl" or pddl[:2] == "--":
             continue
 
