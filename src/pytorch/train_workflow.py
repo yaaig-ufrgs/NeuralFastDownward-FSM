@@ -46,7 +46,6 @@ class TrainWorkflow:
         self.restart_no_conv = restart_no_conv
         self.train_y_pred_values = {}  # {state = (y, pred)}
         self.val_y_pred_values = {}
-        self.cur_train_loss = 0.0
 
     def train_loop(self, t: int, fold_idx: int) -> float:
         """
@@ -106,7 +105,7 @@ class TrainWorkflow:
             )
             self.val_y_pred_values.clear()
         return val_loss / num_batches
-    
+
     def test_loop(self) -> float:
         """
         Network's testing loop.
@@ -161,10 +160,9 @@ class TrainWorkflow:
         elif model == "simple":
             example_input = self.train_dataloader.dataset[0][0]
 
-        model_save = self.model if not self.early_stopped else self.best_epoch_model
         # To make testing possible (and fair), the model has to be saved while in the CPU,
         # even if training was performed in GPU.
-        traced_model = torch.jit.trace(model_save.to("cpu"), example_input)
+        traced_model = torch.jit.trace(self.best_epoch_model.to("cpu"), example_input)
         traced_model.save(filename)
 
     def run(
@@ -172,10 +170,10 @@ class TrainWorkflow:
         """
         Network train/eval main loop.
         """
-        best_val_loss = None
+        best_loss, best_epoch = None, None
         born_dead = False
         for t in range(self.max_epochs):
-            self.cur_train_loss = self.train_loop(t, fold_idx)
+            cur_train_loss = self.train_loop(t, fold_idx)
             # Check if born dead
             if t == 0:
                 if self.dead():
@@ -193,16 +191,21 @@ class TrainWorkflow:
             elif not born_dead and self.dead():
                 _log.warning("All predictions are 0.")
 
-            epoch_log = f"Epoch {t} | avg_train_loss={self.cur_train_loss:>7f}"
+            epoch_log = f"Epoch {t} | avg_train_loss={cur_train_loss:>7f}"
+
             if self.validation:
                 cur_val_loss = self.val_loop(t, fold_idx)
                 epoch_log += f" | avg_val_loss={cur_val_loss:>7f}"
-                if self.patience != None:
-                    if best_val_loss is None or best_val_loss > cur_val_loss:
-                        best_val_loss, best_val_epoch = cur_val_loss, t
-                        self.best_epoch_model = deepcopy(self.model)
-                    if best_val_epoch < t - self.patience:
-                        self.early_stopped = True
+                if best_loss is None or best_loss > cur_val_loss:
+                    best_loss, best_epoch = cur_val_loss, t
+                    self.best_epoch_model = deepcopy(self.model)
+                if best_epoch < t - self.patience:
+                    self.early_stopped = True
+            else:
+                if best_loss is None or best_loss > cur_train_loss:
+                    best_loss, best_epoch = cur_train_loss, t
+                    self.best_epoch_model = deepcopy(self.model)
+
             if self.testing:
                 cur_test_loss = self.test_loop()
                 epoch_log += f" | avg_test_loss={cur_test_loss:>7f}"
@@ -210,22 +213,19 @@ class TrainWorkflow:
             _log.info(epoch_log)
 
             if self.early_stopped:
-                _log.info(f"Early stop. Best epoch: {best_val_epoch}/{t}")
+                _log.info(f"Early stop. Best epoch: {best_epoch}/{t}")
                 break
             # Check once every 10 epochs
             if (t % 10 == 0) and train_timer.check_timeout():
+                _log.info(f"Training time reached. Best epoch: {best_epoch}/{t}")
                 break
             if t == self.max_epochs - 1:
-                _log.info("Done!")
-
-        if self.validation == False:
-            # If not using validation data, save the last epoch's model.
-            self.best_epoch_model = deepcopy(self.model)
+                _log.info(f"Max epoch reached. Best epoch: {best_epoch}/{t}")
 
         # Post-training scatter plot.
         self.save_post_scatter_plot(fold_idx)
 
-        return (best_val_loss if self.validation else None), False
+        return best_loss, False # (best_epoch, is_dead_born)
 
     def save_post_scatter_plot(self, fold_idx: int):
         """
