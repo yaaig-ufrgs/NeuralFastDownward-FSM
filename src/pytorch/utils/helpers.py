@@ -135,7 +135,7 @@ def get_test_tasks_from_problem(
 
     domain = data["domain"]
     problem = data["problem"]
-    possible_parent_dirs = ["", domain, f"{domain}/moderate", f"{domain}/hard"]
+    possible_parent_dirs = ["", domain, f"{domain}/easy", f"{domain}/moderate", f"{domain}/hard"]
     dir = None
 
     for parent_dir in possible_parent_dirs:
