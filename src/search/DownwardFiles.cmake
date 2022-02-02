@@ -880,6 +880,7 @@ fast_downward_plugin(
         pdbs/pattern_collection_generator_systematic
         pdbs/pattern_database
         pdbs/pattern_generator_greedy
+        pdbs/pattern_generator_hstar
         pdbs/pattern_generator_manual
         pdbs/pattern_generator
         pdbs/pattern_information
