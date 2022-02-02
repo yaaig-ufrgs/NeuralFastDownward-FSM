@@ -166,7 +166,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                 f"of {args.num_folds}"
             )
 
-            train_dataloader, val_dataloader = kfold.get_fold(fold_idx)
+            train_dataloader, val_dataloader, test_dataloader = kfold.get_fold(fold_idx)
 
             model = HNN(
                 input_units=train_dataloader.dataset.x_shape()[1],
@@ -189,6 +189,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                 model=model,
                 train_dataloader=train_dataloader,
                 val_dataloader=val_dataloader,
+                test_dataloader=test_dataloader,
                 device=device,
                 max_epochs=args.max_epochs,
                 plot_n_epochs=args.plot_n_epochs,

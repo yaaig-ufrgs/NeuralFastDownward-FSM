@@ -18,6 +18,7 @@ class TrainWorkflow:
         model: HNN,
         train_dataloader: DataLoader,
         val_dataloader: DataLoader,
+        test_dataloader: DataLoader,
         device: torch.device,
         max_epochs: int,
         plot_n_epochs: int,
@@ -31,7 +32,9 @@ class TrainWorkflow:
         self.best_epoch_model = None
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
-        self.validation = False if self.val_dataloader == None else True
+        self.test_dataloader = test_dataloader
+        self.validation = self.val_dataloader != None
+        self.testing = self.test_dataloader != None
         self.device = device
         self.max_epochs = max_epochs
         self.plot_n_epochs = plot_n_epochs
@@ -103,6 +106,19 @@ class TrainWorkflow:
             )
             self.val_y_pred_values.clear()
         return val_loss / num_batches
+    
+    def test_loop(self) -> float:
+        """
+        Network's testing loop.
+        """
+        num_batches = len(self.test_dataloader)
+        test_loss = 0
+        with torch.no_grad():
+            for X, y in self.test_dataloader:
+                X, y = X.to(self.device), y.to(self.device)
+                pred = self.model(X)
+                test_loss += self.loss_fn(pred, y).item()
+        return test_loss / num_batches
 
     def val_loop_no_contrasting(self, contrasting_h: int = 501) -> float:
         """
@@ -177,26 +193,25 @@ class TrainWorkflow:
             elif not born_dead and self.dead():
                 _log.warning("All predictions are 0.")
 
-            #print(self.cur_train_loss)
-
+            epoch_log = f"Epoch {t} | avg_train_loss={self.cur_train_loss:>7f}"
             if self.validation:
                 cur_val_loss = self.val_loop(t, fold_idx)
-                _log.info(
-                    f"Epoch {t} | avg_train_loss={self.cur_train_loss:>7f}"
-                    f" | avg_val_loss={cur_val_loss:>7f}"
-                )
+                epoch_log += f" | avg_val_loss={cur_val_loss:>7f}"
                 if self.patience != None:
                     if best_val_loss is None or best_val_loss > cur_val_loss:
                         best_val_loss, best_val_epoch = cur_val_loss, t
                         self.best_epoch_model = deepcopy(self.model)
-
                     if best_val_epoch < t - self.patience:
-                        _log.info(f"Early stop. Best epoch: {best_val_epoch}/{t}")
                         self.early_stopped = True
-                        break
-            else:
-                _log.info(f"Epoch {t} | avg_train_loss={self.cur_train_loss:>7f}")
+            if self.testing:
+                cur_test_loss = self.test_loop()
+                epoch_log += f" | avg_test_loss={cur_test_loss:>7f}"
 
+            _log.info(epoch_log)
+
+            if self.early_stopped:
+                _log.info(f"Early stop. Best epoch: {best_val_epoch}/{t}")
+                break
             # Check once every 10 epochs
             if (t % 10 == 0) and train_timer.check_timeout():
                 break

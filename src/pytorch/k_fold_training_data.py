@@ -7,7 +7,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle as skshuffle
 from torch.utils.data import DataLoader
 import src.pytorch.utils.default_args as default_args
-from src.pytorch.utils.helpers import get_random_samples
 
 from src.pytorch.training_data import (
     InstanceDataset,
@@ -39,6 +38,9 @@ class KFoldTrainingData:
         sample_percentage: float = default_args.SAMPLE_PERCENTAGE,
         model: str = default_args.MODEL,
     ):
+        assert training_size > 0.0 and training_size <= 1.0
+        assert sample_percentage > 0.0 and sample_percentage <= 1.0
+
         self.state_value_pairs, self.domain_max_value = load_training_state_value_pairs(
             samples_file,
             clamping,
@@ -69,29 +71,36 @@ class KFoldTrainingData:
         """
         Generates the folds.
         Returns two list of tuples of size num_folds: dataloaders and problems.
-        The first item corresponds to train set, and the second to test set.
+        The first item corresponds to train set, the second to val set, and the
+        third to test set.
         """
         _log.info(f"Generating {self.num_folds}-fold...")
-
-        self.state_value_pairs = get_random_samples(self.state_value_pairs, self.sample_percentage)
 
         kfolds = []
         instances_per_fold = int(len(self.state_value_pairs) / self.num_folds)
         for i in range(self.num_folds):
-            training_set, test_set = [], []
+            training_set, val_set, test_set = [], [], []
             if self.num_folds == 1:
-                # Test set size = complement of training set size.
-                if self.training_size < 1.0 and self.training_size > 0.0:
-                    training_set, test_set = train_test_split(
+                # Test set = complement of training+val set
+                if self.sample_percentage < 1.0:
+                    self.state_value_pairs, test_set = train_test_split(
+                        self.state_value_pairs,
+                        train_size=self.sample_percentage,
+                        shuffle=self.shuffle,
+                        random_state=self.shuffle_seed,
+                    )
+
+                if self.training_size == 1.0:
+                    training_set = skshuffle(self.state_value_pairs, random_state=self.shuffle_seed) if self.shuffle else self.state_value_pairs
+                else:
+                    training_set, val_set = train_test_split(
                         self.state_value_pairs,
                         train_size=self.training_size,
                         shuffle=self.shuffle,
                         random_state=self.shuffle_seed,
                     )
-                else:
-                    training_set = skshuffle(self.state_value_pairs, random_state=self.shuffle_seed) if self.shuffle else self.state_value_pairs
-                    test_set = []
             else:
+                # TODO: `sample_percentage` and `test_set` not implemented here!
                 for j in range(len(self.state_value_pairs)):
                     if int(j / instances_per_fold) == i:
                         test_set.append(self.state_value_pairs[j])
@@ -129,24 +138,29 @@ class KFoldTrainingData:
                 generator=g,
             )
 
-            if len(test_set) != 0:
-                test_dataloader = DataLoader(
-                    dataset=InstanceDataset(
-                        test_set, self.domain_max_value, self.output_layer
-                    ),
-                    batch_size=self.batch_size,
-                    shuffle=self.shuffle,
-                    num_workers=self.data_num_workers,
-                    worker_init_fn=worker_fn,
-                    generator=g,
-                )
-            else:
-                test_dataloader = None
+            val_dataloader = DataLoader(
+                dataset=InstanceDataset(
+                    val_set, self.domain_max_value, self.output_layer
+                ),
+                batch_size=self.batch_size,
+                shuffle=self.shuffle,
+                num_workers=self.data_num_workers,
+                worker_init_fn=worker_fn,
+                generator=g,
+            ) if len(val_set) != 0 else None
 
-            kfolds.append((train_dataloader, test_dataloader))
+            test_dataloader = DataLoader(
+                dataset=InstanceDataset(
+                    test_set, self.domain_max_value, self.output_layer
+                ),
+                batch_size=self.batch_size,
+                shuffle=self.shuffle,
+                num_workers=self.data_num_workers,
+                worker_init_fn=worker_fn,
+                generator=g,
+            ) if len(test_set) != 0 else None
 
-            # for i, (inputs, targets) in enumerate(train_dataloader):
-            #    print(inputs, targets)
+            kfolds.append((train_dataloader, val_dataloader, test_dataloader))
 
         return kfolds
 
