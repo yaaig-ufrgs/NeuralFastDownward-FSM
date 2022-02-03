@@ -58,8 +58,9 @@ def eval_main(args: Namespace):
     eval_timer = Timer(time_limit=None).start()
     eval_y_pred_loss = eval_model(model, eval_data, args.log_states)
     y_pred_loss_file = dirname + "/heuristic_pred_loss.csv"
-    save_y_pred_loss_csv(eval_y_pred_loss, y_pred_loss_file)
     _log.info(f"Elapsed time: {eval_timer.current_time()}")
+    save_y_pred_loss_csv(eval_y_pred_loss, y_pred_loss_file)
+    _log.info(f"Saved (state,y,pred,loss) CSV file to: {y_pred_loss_file}")
 
 
 def eval_model(model, dataloader: DataLoader, log_states):
