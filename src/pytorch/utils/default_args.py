@@ -63,6 +63,10 @@ SAMPLES_FOLDER = None
 SAVE_DOWNWARD_LOGS = False
 SAVE_GIT_DIFF = True
 
+# Evaluation
+EVAL_RANDOM_SEED = -1
+LOG_STATES = False
+
 # Experiment
 EXP_TYPE = "all"
 EXP_THREADS = 10

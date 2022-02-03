@@ -112,6 +112,16 @@ def save_y_pred_csv(data: dict, csv_filename: str):
             f.write("%s,%s,%s\n" % (key, data[key][0], data[key][1]))
 
 
+def save_y_pred_loss_csv(data: dict, csv_filename: str):
+    """
+    Saves the {state: (value, predicted_value, loss)} set to a CSV file.
+    """
+    with open(csv_filename, "w") as f:
+        f.write("state,y,pred,rmse\n")
+        for key in data.keys():
+            f.write("%s,%s,%s,%s\n" % (key, data[key][0], data[key][1], data[key][2]))
+
+
 def remove_csv_except_best(directory: str, fold_idx: int):
     """
     Removes the recorded CSVs of each fold except the best one (less error).
