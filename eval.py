@@ -92,17 +92,18 @@ def eval_model(model, dataloader: DataLoader, log_states):
         x_str = "".join(str(e) for e in x_int)
 
         if log_states:
-            _log.info(f"state: {x_str}")
-            _log.info(f"y: {float(y[0])} | pred: {float(pred[0])} | loss: {loss}")
+            _log.info(f"| state: {x_str}")
+            _log.info(f"| y: {float(y[0])} | pred: {float(pred[0])} | loss: {loss}")
 
         eval_y_pred[x_str] = (int(torch.round(y[0])), int(torch.round(pred[0])), loss)
 
 
     mean_loss = eval_loss / len(dataloader)
-    _log.info(f"mean_loss: {mean_loss}")
-    _log.info(f"min_loss: {min_loss}")
-    _log.info(f"min_loss_no_goal: {min_loss_no_goal}")
-    _log.info(f"max_loss: {max_loss}")
+    _log.info(f"Results:")
+    _log.info(f"| mean_loss: {mean_loss}")
+    _log.info(f"| min_loss: {min_loss}")
+    _log.info(f"| min_loss_no_goal: {min_loss_no_goal}")
+    _log.info(f"| max_loss: {max_loss}")
 
     return eval_y_pred
 
