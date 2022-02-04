@@ -6,6 +6,7 @@ import logging
 import os
 from json import load
 from statistics import median, mean
+from glob import glob
 import src.pytorch.utils.default_args as default_args
 from src.pytorch.utils.helpers import (
     get_hostname,
@@ -128,6 +129,33 @@ def logging_test_config(
 
     if save_file:
         save_json(f"{dirname}/test_args.json", args_dic)
+
+
+def logging_eval_config(
+        args: Namespace, dirname: str, cmd_line: str, save_file: bool = True
+):
+    """
+    Saves the full eval configuration parameters as a JSON file.
+    """
+
+    args_dic = {
+        "hostname": get_hostname(),
+        "date": get_datetime(),
+        "commit": get_git_commit(),
+        "command": cmd_line,
+        "trained_model": str(args.trained_model),
+        "data": args.samples,
+    }
+
+    _log.info(f"Configuration")
+    for a in args_dic:
+        _log.info(f" | {a}: {args_dic[a]}")
+
+    args_files = glob(f"{dirname}/eval_args*.json")
+    args_name = "eval_args.json" if len(args_files) == 0 else "eval_args_" + str(len(args_files)) + ".json"
+
+    if save_file:
+        save_json(f"{dirname}/{args_name}", args_dic)
 
 
 def logging_test_statistics(

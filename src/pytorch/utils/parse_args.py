@@ -460,6 +460,37 @@ def get_test_args():
     return parser.parse_args()
 
 
+def get_eval_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "trained_model",
+        type=str,
+        help="Path to an already trained model to be evaluated.",
+    )
+    parser.add_argument(
+        "samples",
+        type=str,
+        nargs="*",
+        default=[], help="Path to file with states to be evaluated on",
+    )
+    parser.add_argument(
+        "-s",
+        "--seed",
+        type=int,
+        default=default_args.EVAL_RANDOM_SEED,
+        help="Random seed to be used. Defaults to no seed. (default: random)",
+    )
+    parser.add_argument(
+        "-ls",
+        "--log-states",
+        type=str2bool,
+        default=default_args.LOG_STATES,
+        help="Detailed logging of states with their predictions. (default: %(default)s)",
+    )
+
+    return parser.parse_args()
+
+
 def get_exp_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -794,6 +825,27 @@ def get_exp_args():
         type=str2bool,
         default=default_args.SAVE_DOWNWARD_LOGS,
         help="Save each instance's Fast-Downward log or not. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-evl-mdl"
+        "--eval-trained_model",
+        type=str,
+        default=default_args.EXP_TRAINED_MODEL,
+        help="Path to an already trained model to be evaluated.",
+    )
+    parser.add_argument(
+        "-evl-s",
+        "--eval-seed",
+        type=int,
+        default=default_args.EVAL_RANDOM_SEED,
+        help="Random seed to be used. Defaults to no seed. (default: random)",
+    )
+    parser.add_argument(
+        "-evl-ls",
+        "--eval-log-states",
+        type=str2bool,
+        default=default_args.LOG_STATES,
+        help="Detailed logging of states with their predictions. (default: %(default)s)",
     )
 
     return parser.parse_args()
