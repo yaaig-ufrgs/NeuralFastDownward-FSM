@@ -26,13 +26,6 @@ _log = logging.getLogger(__name__)
 
 
 def eval_main(args: Namespace):
-    if args.seed == -1:
-        args.seed = randint(0, 2 ** 32 - 1)
-    torch.manual_seed(args.seed)
-    torch.use_deterministic_algorithms(True)
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-
     if args.trained_model[-2:] != "pt":
         _log.error("Invalid model path.")
         return
@@ -64,7 +57,6 @@ def eval_main(args: Namespace):
         eval_data = KFoldTrainingData(
             sample,
             batch_size=1,
-            seed=args.seed,
             shuffle=False,
             training_size=1.0,
             model=model,

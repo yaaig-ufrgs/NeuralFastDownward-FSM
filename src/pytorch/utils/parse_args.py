@@ -474,13 +474,6 @@ def get_eval_args():
         default=[], help="Path to file with states to be evaluated on",
     )
     parser.add_argument(
-        "-s",
-        "--seed",
-        type=int,
-        default=default_args.EVAL_RANDOM_SEED,
-        help="Random seed to be used. Defaults to no seed. (default: random)",
-    )
-    parser.add_argument(
         "-ls",
         "--log-states",
         type=str2bool,
