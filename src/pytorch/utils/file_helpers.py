@@ -37,17 +37,27 @@ def create_train_directory(args: Namespace) -> str:
 
     # Additional folder name
     abbrev = {
-        "patience" : "pat", "output-layer" : "o",
-        "num-folds" : "f", "hidden-layers" : "hl",
-        "hidden-units" : "hu", "batch-size" : "b",
-        "learning-rate" : "lr", "max-epochs" : "e",
-        "max-training-time" : "t", "activation" : "a",
-        "weight-decay" : "w", "dropout-rate" : "d",
-        "shuffle-seed" : "shs", "shuffle" : "s",
-        "use-gpu" : "gpu", "bias" : "bi",
-        "bias-output" : "biout", "normalize-output" : "no",
-        "restart-no-conv" : "rst", "sample-percentage" : "spt",
-        "training-size" : "tsize",
+        "patience": "pat",
+        "output-layer": "o",
+        "num-folds": "f",
+        "hidden-layers": "hl",
+        "hidden-units": "hu",
+        "batch-size": "b",
+        "learning-rate": "lr",
+        "max-epochs": "e",
+        "max-training-time": "t",
+        "activation": "a",
+        "weight-decay": "w",
+        "dropout-rate": "d",
+        "shuffle-seed": "shs",
+        "shuffle": "s",
+        "use-gpu": "gpu",
+        "bias": "bi",
+        "bias-output": "biout",
+        "normalize-output": "no",
+        "restart-no-conv": "rst",
+        "sample-percentage": "spt",
+        "training-size": "tsize",
     }
     for a in args.additional_folder_name:
         value = getattr(args, a.replace("-", "_"))
@@ -94,9 +104,11 @@ def remove_temporary_files(directory: str):
     """
     Removes `output.sas` and `defaults.txt` files.
     """
+
     def remove_file(file: str):
         if os.path.exists(file):
             os.remove(file)
+
     remove_file(f"{directory}/output.sas")
     remove_file(f"{directory}/sas_plan")
     remove_file(f"{directory}/defaults.txt")
@@ -133,7 +145,10 @@ def remove_csv_except_best(directory: str, fold_idx: int):
         if idx != fold_idx:
             os.remove(f)
 
-def create_defaults_file(pddl_file: str, facts_file: str, output_folder: str = ".") -> str:
+
+def create_defaults_file(
+    pddl_file: str, facts_file: str, output_folder: str = "."
+) -> str:
     """
     Create defaults file for `pddl_file`.
     For all fact in facts_file, 1 if fact \in initial_state(pddl_file) else 0.
@@ -150,10 +165,10 @@ def create_defaults_file(pddl_file: str, facts_file: str, output_folder: str = "
     # Atom on(i, a) -> (on i a)
     modified_facts = []
     for fact in facts:
-        f = fact.replace("Atom ", "")               # Atom on(i, a) -> on(i, a)
+        f = fact.replace("Atom ", "")  # Atom on(i, a) -> on(i, a)
         f = f.replace(", ", ",").replace(",", " ")  # on(i, a) -> on(i a)
-        f = f"({f.split('(')[0]} {f.split('(')[1]}" # on(i a) -> (on i a)
-        f = f.replace(" )", ")") # facts without objects (handempty ) -> (handempty)
+        f = f"({f.split('(')[0]} {f.split('(')[1]}"  # on(i a) -> (on i a)
+        f = f.replace(" )", ")")  # facts without objects (handempty ) -> (handempty)
         modified_facts.append(f)
 
     defaults = []

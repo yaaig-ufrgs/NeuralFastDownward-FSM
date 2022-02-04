@@ -91,7 +91,13 @@ class KFoldTrainingData:
                     )
 
                 if self.training_size == 1.0:
-                    training_set = skshuffle(self.state_value_pairs, random_state=self.shuffle_seed) if self.shuffle else self.state_value_pairs
+                    training_set = (
+                        skshuffle(
+                            self.state_value_pairs, random_state=self.shuffle_seed
+                        )
+                        if self.shuffle
+                        else self.state_value_pairs
+                    )
                 else:
                     training_set, val_set = train_test_split(
                         self.state_value_pairs,
@@ -138,27 +144,35 @@ class KFoldTrainingData:
                 generator=g,
             )
 
-            val_dataloader = DataLoader(
-                dataset=InstanceDataset(
-                    val_set, self.domain_max_value, self.output_layer
-                ),
-                batch_size=self.batch_size,
-                shuffle=self.shuffle,
-                num_workers=self.data_num_workers,
-                worker_init_fn=worker_fn,
-                generator=g,
-            ) if len(val_set) != 0 else None
+            val_dataloader = (
+                DataLoader(
+                    dataset=InstanceDataset(
+                        val_set, self.domain_max_value, self.output_layer
+                    ),
+                    batch_size=self.batch_size,
+                    shuffle=self.shuffle,
+                    num_workers=self.data_num_workers,
+                    worker_init_fn=worker_fn,
+                    generator=g,
+                )
+                if len(val_set) != 0
+                else None
+            )
 
-            test_dataloader = DataLoader(
-                dataset=InstanceDataset(
-                    test_set, self.domain_max_value, self.output_layer
-                ),
-                batch_size=self.batch_size,
-                shuffle=self.shuffle,
-                num_workers=self.data_num_workers,
-                worker_init_fn=worker_fn,
-                generator=g,
-            ) if len(test_set) != 0 else None
+            test_dataloader = (
+                DataLoader(
+                    dataset=InstanceDataset(
+                        test_set, self.domain_max_value, self.output_layer
+                    ),
+                    batch_size=self.batch_size,
+                    shuffle=self.shuffle,
+                    num_workers=self.data_num_workers,
+                    worker_init_fn=worker_fn,
+                    generator=g,
+                )
+                if len(test_set) != 0
+                else None
+            )
 
             kfolds.append((train_dataloader, val_dataloader, test_dataloader))
 
@@ -180,7 +194,7 @@ class KFoldTrainingData:
         """
         if len(samples) == 0:
             return samples
-        
+
         standard_samples = []
         contrast_samples = []
         interc_n = self.intercalate_samples

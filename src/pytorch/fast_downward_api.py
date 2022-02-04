@@ -151,7 +151,7 @@ def solve_instance_with_fd_nh(
     max_expansions: int = default_args.MAX_EXPANSIONS,
     facts_file: str = default_args.FACTS_FILE,
     defaults_file: str = default_args.DEF_VALUES_FILE,
-    save_log_to = None,
+    save_log_to=None,
     save_log_bool: bool = default_args.SAVE_DOWNWARD_LOGS,
 ) -> dict:
     """

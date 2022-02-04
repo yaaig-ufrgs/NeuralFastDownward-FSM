@@ -165,8 +165,7 @@ class TrainWorkflow:
         traced_model = torch.jit.trace(self.best_epoch_model.to("cpu"), example_input)
         traced_model.save(filename)
 
-    def run(
-        self, fold_idx: int, train_timer: Timer) -> (float, bool):
+    def run(self, fold_idx: int, train_timer: Timer) -> (float, bool):
         """
         Network train/eval main loop.
         """
@@ -225,7 +224,7 @@ class TrainWorkflow:
         # Post-training scatter plot.
         self.save_post_scatter_plot(fold_idx)
 
-        return best_loss, False # (best_epoch, is_dead_born)
+        return best_loss, False  # (best_epoch, is_dead_born)
 
     def save_post_scatter_plot(self, fold_idx: int):
         """
@@ -274,5 +273,8 @@ class TrainWorkflow:
                 pred_h = prefix_to_h(pred[i].tolist())
                 y_pred_values[x_str] = (y_h, pred_h)
             else:  # Regression
-                y_pred_values[x_str] = (int(torch.round(y[i][0])), int(torch.round(pred[i][0])))
+                y_pred_values[x_str] = (
+                    int(torch.round(y[i][0])),
+                    int(torch.round(pred[i][0])),
+                )
         return y_pred_values

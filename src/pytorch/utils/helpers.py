@@ -135,7 +135,13 @@ def get_test_tasks_from_problem(
 
     domain = data["domain"]
     problem = data["problem"]
-    possible_parent_dirs = ["", domain, f"{domain}/easy", f"{domain}/moderate", f"{domain}/hard"]
+    possible_parent_dirs = [
+        "",
+        domain,
+        f"{domain}/easy",
+        f"{domain}/moderate",
+        f"{domain}/hard",
+    ]
     dir = None
 
     for parent_dir in possible_parent_dirs:
@@ -188,7 +194,9 @@ def get_defaults_and_facts_files(
         facts_file = ""
     defaults_file = args.defaults_file
     if defaults_file and not os.path.exists(defaults_file):
-        _log.warning("The `defaults_file` arg doesn't exist. Getting it automatically...")
+        _log.warning(
+            "The `defaults_file` arg doesn't exist. Getting it automatically..."
+        )
         defaults_file = ""
 
     with open(f"{args.train_folder}/train_args.json", "r") as f:
@@ -253,6 +261,7 @@ def get_random_samples(lst: list, percent: float) -> list:
     n = round(len(lst) * percent)
     return sample(lst, n)
 
+
 def get_samples_folder_from_train_folder(train_folder: str) -> [str]:
     try:
         with open(f"{train_folder}/train_args.json", "r") as f:
@@ -263,5 +272,5 @@ def get_samples_folder_from_train_folder(train_folder: str) -> [str]:
 
 
 def get_train_args_json(train_folder: str) -> dict:
-    with open(train_folder+"/train_args.json") as json_file:
+    with open(train_folder + "/train_args.json") as json_file:
         return load(json_file)

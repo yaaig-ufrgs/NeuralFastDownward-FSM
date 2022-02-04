@@ -77,7 +77,9 @@ def train_main(args: Namespace):
             f"Setting maximum epochs to {default_args.FORCED_MAX_EPOCHS}."
         )
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() and args.use_gpu else "cpu")
+    device = torch.device(
+        "cuda:0" if torch.cuda.is_available() and args.use_gpu else "cpu"
+    )
     if device == torch.device("cpu"):
         args.use_gpu = False
 
@@ -225,7 +227,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                     _log.info(
                         f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
                     )
-            else: # Only using training data
+            else:  # Only using training data
                 save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
                 best_fold["fold"] = fold_idx
                 best_fold["train_loss"] = train_wf.cur_train_loss
