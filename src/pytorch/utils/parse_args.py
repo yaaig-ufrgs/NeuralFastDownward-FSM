@@ -541,6 +541,13 @@ def get_exp_args():
         help="Only test instead of training and testing. (default: %(default)s)",
     )
     parser.add_argument(
+        "-exp-eval",
+        "--exp-only-eval",
+        type=str2bool,
+        default=default_args.EXP_ONLY_EVAL,
+        help="Only evaluate instead of training and testing. (default: %(default)s)",
+    )
+    parser.add_argument(
         "samples",
         type=str,
         help="Path to sample files.",
@@ -820,18 +827,12 @@ def get_exp_args():
         help="Save each instance's Fast-Downward log or not. (default: %(default)s)",
     )
     parser.add_argument(
-        "-evl-mdl"
-        "--eval-trained_model",
+        "-evl-mdl",
+        "--eval-trained-models",
         type=str,
-        default=default_args.EXP_TRAINED_MODEL,
-        help="Path to an already trained model to be evaluated.",
-    )
-    parser.add_argument(
-        "-evl-s",
-        "--eval-seed",
-        type=int,
-        default=default_args.EVAL_RANDOM_SEED,
-        help="Random seed to be used. Defaults to no seed. (default: random)",
+        nargs="*",
+        default=[],
+        help="Path to already trained models to be evaluated on.",
     )
     parser.add_argument(
         "-evl-ls",

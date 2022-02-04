@@ -3,11 +3,10 @@
 """
 ./run_experiment.py --help
 
-Example:
+Examples:
 $ ./run_experiment.py samples -exp-type combined -trn-e 10 -exp-ns 5 -exp-ss 5
+$ ./run_experiment.py samples -exp-eval true -evl-mdl results/*/models/traced_0.pt
 
-TODO: Make test work when we have have model folders with  '.1', '.2', etc.
-      Alternative, for now: train and test separately.
 """
 
 import sys
@@ -165,6 +164,41 @@ def only_train(args):
             id_count += 1
             count += 1
 
+def only_eval(args):
+    """
+    Batch-eval on trained models.
+    """
+    count = 0
+    id_count = 0
+    first = True
+
+    eval_args = (f'-ls {args.eval_log_states}')
+
+    if len(args.eval_trained_models) == 0:
+        print("ERROR: Trained models not found.")
+        exit(1)
+
+    sample_files = glob(f"{args.samples}/*")
+    if len(sample_files) == 0:
+        print("ERROR: Sample files not found.")
+        exit(1)
+    sample_files = " ".join(sample_files)
+
+    for model in args.eval_trained_models:
+        thread_id = count
+        if count < args.exp_threads and first:
+            os.system(f"tsp taskset -c {thread_id} ./eval.py {model} {sample_files} {eval_args}")
+            #print(f"tsp taskset -c {thread_id} ./eval.py {model} {sample_files} {eval_args}")
+            count += 1
+        else:
+            if first or count == args.exp_threads:
+                count = 0
+            first = False
+            os.system(f"tsp -D {id_count} taskset -c {count} ./eval.py {model} {sample_files} {eval_args}")
+            #print(f"tsp -D {id_count} taskset -c {count} ./eval.py {model} {sample_files} {eval_args}")
+            id_count += 1
+            count += 1
+
 
 def experiment(args):
     args.train_hidden_units = default_args.HIDDEN_UNITS[0] if args.train_hidden_units == default_args.HIDDEN_UNITS else args.train_hidden_units
@@ -178,6 +212,8 @@ def experiment(args):
         only_train(args)
     elif args.exp_only_test:
         only_test(args)
+    elif args.exp_only_eval:
+        only_eval(args)
     else:
         if args.exp_type == "single":
             run_train_test(args, args.exp_sample_seed, args.exp_net_seed, runs=1)
