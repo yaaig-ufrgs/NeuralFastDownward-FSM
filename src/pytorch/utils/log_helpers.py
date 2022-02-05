@@ -5,7 +5,7 @@ Management of bulk logging.
 import logging
 import os
 from json import load
-from statistics import median, mean
+from statistics import median, mean, pstdev
 from glob import glob
 import src.pytorch.utils.default_args as default_args
 from src.pytorch.utils.helpers import (
@@ -196,6 +196,7 @@ def logging_test_statistics(
     results["statistics"][model] = {}
     rlist = {}
     if len(args.problem_pddls) > 0:
+        model_stats = {}
         stats = []
         for problem in results["results"][model]:
             for s in results["results"][model][problem]:
@@ -207,76 +208,33 @@ def logging_test_statistics(
                 for p in results["results"][model]
                 if x in results["results"][model][p]
             ]
+
             if x == "search_state":
                 rlist[x] = [
                     results["results"][model][p][x] for p in results["results"][model]
                 ]
-                results["statistics"][model]["plans_found"] = rlist[x].count("success")
-                results["statistics"][model]["total_problems"] = len(rlist[x])
-                results["statistics"][model]["coverage"] = round(
-                    results["statistics"][model]["plans_found"]
-                    / results["statistics"][model]["total_problems"],
+                model_stats["plans_found"] = rlist[x].count("success")
+                model_stats["total_problems"] = len(rlist[x])
+                model_stats["coverage"] = round(
+                    model_stats["plans_found"]
+                    / model_stats["total_problems"],
                     decimal_places,
                 )
-            elif x == "plan_length":
-                for i in range(len(rlist[x])):
-                    rlist[x][i] = int(rlist[x][i])
-                if len(rlist[x]) > 1:
-                    results["statistics"][model]["max_plan_length"] = max(rlist[x])
-                    results["statistics"][model]["min_plan_length"] = min(rlist[x])
-                results["statistics"][model]["avg_plan_length"] = round(
-                    mean(rlist[x]), decimal_places
-                )
-                if len(rlist[x]) > 1:
-                    results["statistics"][model]["mdn_plan_length"] = round(
-                        median(rlist[x]), decimal_places
-                    )
-            elif x == "initial_h":
-                for i in range(len(rlist[x])):
-                    rlist[x][i] = int(rlist[x][i])
-                results["statistics"][model]["avg_initial_h"] = round(
-                    mean(rlist[x]), decimal_places
-                )
-                if len(rlist[x]) > 1:
-                    results["statistics"][model]["mdn_initial_h"] = round(
-                        median(rlist[x]), decimal_places
-                    )
-            elif x == "expansion_rate":
-                for i in range(len(rlist[x])):
-                    rlist[x][i] = float(rlist[x][i])
-                results["statistics"][model]["avg_expansion_rate"] = round(
-                    mean(rlist[x]), decimal_places
-                )
-                if len(rlist[x]) > 1:
-                    results["statistics"][model]["mdn_expansion_rate"] = round(
-                        median(rlist[x]), decimal_places
-                    )
-            elif x == "total_time":
-                for i in range(len(rlist[x])):
-                    rlist[x][i] = float(rlist[x][i])
-                results["statistics"][model]["total_accumulated_time"] = round(
-                    sum(rlist[x]), decimal_places
-                )
-            elif x == "search_time":
-                for i in range(len(rlist[x])):
-                    rlist[x][i] = float(rlist[x][i])
-                results["statistics"][model]["avg_search_time"] = round(
-                    mean(rlist[x]), decimal_places
-                )
-                if len(rlist[x]) > 1:
-                    results["statistics"][model]["mdn_search_time"] = round(
-                        median(rlist[x]), decimal_places
-                    )
             else:
-                for i in range(len(rlist[x])):
-                    rlist[x][i] = int(rlist[x][i])
-                results["statistics"][model][f"avg_{x}"] = round(
-                    mean(rlist[x]), decimal_places
-                )
-                if len(rlist[x]) > 1:
-                    results["statistics"][model][f"mdn_{x}"] = round(
-                        median(rlist[x]), decimal_places
-                    )
+                float_stats = ["search_time", "expansion_rate", "total_time"]
+                rlist[x] = [float(i) if x in float_stats else int(i) for i in rlist[x]]
+                if x == "total_time":
+                    model_stats["total_accumulated_time"] = round(sum(rlist[x]), decimal_places)
+                else:
+                    model_stats[f"avg_{x}"] = round(mean(rlist[x]), decimal_places)
+                    if len(rlist[x]) > 1:
+                        if x == "plan_length":
+                            model_stats["max_plan_length"] = max(rlist[x])
+                            model_stats["min_plan_length"] = min(rlist[x])
+                        model_stats[f"mdn_{x}"] = round(median(rlist[x]), decimal_places)
+                        model_stats[f"pstdev_{x}"] = round(pstdev(rlist[x]), decimal_places)
+
+        results["statistics"][model] = model_stats
 
     _log.info(f"Testing statistics for model {model}")
     for x in results["statistics"][model]:
