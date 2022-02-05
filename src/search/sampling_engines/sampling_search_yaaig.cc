@@ -169,8 +169,9 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 h = state_value[partialAssignment->to_string()];
         }
 
-        if (state_representation == "complete") {
-            State s = partialAssignment->get_full_state(true, *rng).second;
+        if (state_representation == "complete" || state_representation == "complete_no_mutex") {
+            State s = partialAssignment->get_full_state(
+                state_representation != "complete_no_mutex", *rng).second;
             if (task_properties::is_goal_state(task_proxy, s)) h = 0;
             s.unpack();
             values_set.push_back(make_pair(h, s.get_values()));
@@ -225,7 +226,7 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "true");
     parser.add_option<string>(
             "state_representation",
-            "State facts representation format (complete, partial, or undefined, assign_undefined).",
+            "State facts representation format (complete, complete_no_mutex, partial, or undefined, assign_undefined).",
             "complete");
     parser.add_option<bool>(
             "match_heuristics",
