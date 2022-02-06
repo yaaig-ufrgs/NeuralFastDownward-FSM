@@ -559,6 +559,14 @@ fast_downward_plugin(
 )
 
 fast_downward_plugin(
+    NAME BLIND_PRINT_SEARCH_HEURISTIC
+    HELP "The 'blind print search' heuristic"
+    SOURCES
+        heuristics/blind_print_search_heuristic
+    DEPENDS TASK_PROPERTIES
+)
+
+fast_downward_plugin(
     NAME BLIND_SEARCH_HEURISTIC
     HELP "The 'blind search' heuristic"
     SOURCES
@@ -567,10 +575,10 @@ fast_downward_plugin(
 )
 
 fast_downward_plugin(
-    NAME BLIND_PRINT_SEARCH_HEURISTIC
-    HELP "The 'blind print search' heuristic"
+    NAME CACHED_SEARCH_HEURISTIC
+    HELP "The 'cached search' heuristic"
     SOURCES
-        heuristics/blind_print_search_heuristic
+        heuristics/cached_search_heuristic
     DEPENDS TASK_PROPERTIES
 )
 
