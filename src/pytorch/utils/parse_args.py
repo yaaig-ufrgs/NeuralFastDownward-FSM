@@ -491,6 +491,13 @@ def get_eval_args():
         default=default_args.LOG_STATES,
         help="Detailed logging of states with their predictions. (default: %(default)s)",
     )
+    parser.add_argument(
+        "-sp",
+        "--save-preds",
+        type=str2bool,
+        default=default_args.SAVE_PREDS,
+        help="Save heuristic prediction files for every state. (default: %(default)s)",
+    )
 
     return parser.parse_args()
 
@@ -861,6 +868,14 @@ def get_exp_args():
         default=default_args.LOG_STATES,
         help="Detailed logging of states with their predictions. (default: %(default)s)",
     )
+    parser.add_argument(
+        "-evl-sp",
+        "--eval-save-preds",
+        type=str2bool,
+        default=default_args.SAVE_PREDS,
+        help="Save heuristic prediction files for every state. (default: %(default)s)",
+    )
+
 
     return parser.parse_args()
 

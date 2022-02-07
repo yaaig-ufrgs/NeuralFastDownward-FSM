@@ -83,9 +83,10 @@ def eval_main(args: Namespace):
         _log.info(f"| max_loss: {max_loss}")
         _log.info(f"| elapsed time: {curr_time}")
 
-        y_pred_loss_file = dirname + "/" + data_name + ".csv"
-        save_y_pred_loss_csv(y_pred_loss, y_pred_loss_file)
-        _log.info(f"Saved (state,y,pred,loss) CSV file to: {y_pred_loss_file}")
+        if args.save_preds:
+            y_pred_loss_file = dirname + "/" + data_name + ".csv"
+            save_y_pred_loss_csv(y_pred_loss, y_pred_loss_file)
+            _log.info(f"Saved (state,y,pred,loss) CSV file to: {y_pred_loss_file}")
 
         f_results.write(
             f"{data_name},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{curr_time}\n"

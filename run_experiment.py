@@ -191,7 +191,7 @@ def only_eval(args):
     id_count = 0
     first = True
 
-    eval_args = f"-ls {args.eval_log_states}"
+    eval_args = f"-ls {args.eval_log_states} -sp {args.eval_save_preds}"
 
     if len(args.eval_trained_models) == 0:
         print("ERROR: Trained models not found.")
