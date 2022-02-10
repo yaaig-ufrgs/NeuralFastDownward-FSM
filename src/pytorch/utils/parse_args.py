@@ -1013,11 +1013,18 @@ def get_sample_args():
         help="Directory where the samples will be saved. (default: %(default)s)",
     )
     parser.add_argument(
-        "-hmatch",
-        "--match-heuristics",
+        "-min",
+        "--minimization",
         type=str2bool,
         default=default_args.SAMPLE_MATCH_HEURISTICS,
         help="Match exact samples with the min heuristic value between them. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-avi",
+        "--avi_k",
+        type=str2bool,
+        default=default_args.SAMPLE_AVI,
+        help="Approximate Value Iteration (AVI) lookahead. If 0, no AVI is performed. (default: %(default)s)",
     )
     parser.add_argument(
         "-rsl-states",

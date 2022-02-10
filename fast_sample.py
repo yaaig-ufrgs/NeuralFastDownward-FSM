@@ -76,7 +76,7 @@ def yaaig_ferber(args, meth):
                            f'--search \'sampling_search_yaaig({search_algo}, '
                            f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, '
                            f'technique={args.technique}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state})], '
-                           f'state_representation={state_repr}, random_seed={i}, match_heuristics={args.match_heuristics}, '
+                           f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, avi_k={args.avi_k}, '
                            f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting})\'')
                     print(cmd)
                 elif meth == "ferber":
@@ -129,7 +129,7 @@ def rsl(args):
 def sample(args):
     os.system(f"tsp -K")
     os.system(f"tsp -S {args.threads}")
-    args.match_heuristics = bool2str(args.match_heuristics)
+    args.minimization = bool2str(args.minimization)
     args.ferber_technique = "iforward" if args.ferber_technique == "forward" else "gbackward"
 
     if args.method == "yaaig" or args.method == "ferber":
