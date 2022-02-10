@@ -18,6 +18,7 @@ namespace sampling_technique {
 class TechniqueGBackwardYaaig : public SamplingTechnique {
 protected:
     const std::string technique;
+    const bool allow_duplicates;
     const bool wrap_partial_assignment;
     const bool deprioritize_undoing_steps;
     const bool is_valid_walk;
@@ -35,6 +36,7 @@ protected:
     std::shared_ptr<sampling::RandomRegressionWalkSampler> rrws = nullptr;
     std::shared_ptr<sampling::DFSSampler> dfss = nullptr;
     utils::HashSet<PartialAssignment> hash_table;
+    utils::HashSet<PartialAssignment> unique_samples;
 
     virtual std::vector<std::shared_ptr<PartialAssignment>> create_next_all(
             std::shared_ptr<AbstractTask> seed_task,

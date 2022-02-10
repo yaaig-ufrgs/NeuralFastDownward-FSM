@@ -42,6 +42,7 @@ const string &TechniqueGBackwardYaaig::get_name() const {
 TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
         : SamplingTechnique(opts),
           technique(opts.get<string>("technique")),
+          allow_duplicates(opts.get<bool>("allow_duplicates")),
           wrap_partial_assignment(opts.get<bool>("wrap_partial_assignment")),
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
           is_valid_walk(opts.get<bool>("is_valid_walk")),
@@ -178,6 +179,17 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             }
         }
     }
+
+    if (!allow_duplicates) {
+        for (unsigned i = samples.size()-1; i > 0; i--) {
+            if (unique_samples.find(*samples[i]) == unique_samples.end()) {
+                unique_samples.insert(*samples[i]);
+            } else {
+                samples.erase(samples.begin()+i);
+            }
+        }
+    }
+
     return samples;
 }
 
@@ -189,6 +201,12 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "technique",
             "Search technique (dfs, rw).",
             "rw"
+    );
+    parser.add_option<bool>(
+            "allow_duplicates",
+            "Allow sample duplicated states in two different rollouts. "
+            "If false, duplicate states are removed after each rollout.",
+            "true"
     );
     parser.add_option<bool>(
             "wrap_partial_assignment",
