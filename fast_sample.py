@@ -130,6 +130,7 @@ def sample(args):
     os.system(f"tsp -K")
     os.system(f"tsp -S {args.threads}")
     args.minimization = bool2str(args.minimization)
+    args.restart_h_when_goal_state = bool2str(args.restart_h_when_goal_state)
     args.ferber_technique = "iforward" if args.ferber_technique == "forward" else "gbackward"
 
     if args.method == "yaaig" or args.method == "ferber":

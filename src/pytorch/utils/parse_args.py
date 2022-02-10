@@ -1001,7 +1001,7 @@ def get_sample_args():
     parser.add_argument(
         "-rhg",
         "--restart_h_when_goal_state",
-        type=int,
+        type=str2bool,
         default=default_args.SAMPLE_RESTART_H_WHEN_GOAL_STATE,
         help="Restart h value when goal state is sampled (only random walk). (default: %(default)s)",
     )
