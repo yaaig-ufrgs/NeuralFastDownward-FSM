@@ -39,9 +39,8 @@ string SamplingSearchYaaig::sample_file_header() const {
     return header;
 }
 
-unordered_map<string,int> SamplingSearchYaaig::create_smaller_h_mapping() {
+unordered_map<string,int> SamplingSearchYaaig::create_smaller_h_mapping(unordered_map<string,int>& state_value) {
     // If match_heuristics then then all identical samples receive the smallest h value among them
-    unordered_map<string,int> state_value;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         string state = partialAssignment->to_string();
         int h = partialAssignment->estimated_heuristic;
@@ -156,32 +155,38 @@ vector<string> SamplingSearchYaaig::values_to_samples(vector<pair<int,vector<int
     return samples;
 }
 
-void SamplingSearchYaaig::approximate_value_iteration() {
+void SamplingSearchYaaig::approximate_value_iteration(unordered_map<string,int>& state_value) {
     if (avi_k <= 0)
         return;
+    
+    create_smaller_h_mapping(state_value);
 
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
 
+    const OperatorsProxy operators = task_proxy.get_operators();
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         vector<OperatorID> applicable_operators;
         succ_generator->generate_applicable_ops(*partialAssignment, applicable_operators);
-        for (auto& op : applicable_operators) {
-            cout << op << " ";
+        for (OperatorID& op_id : applicable_operators) {
+            OperatorProxy op_proxy = operators[op_id];
+            string succ_pa_str = partialAssignment->get_partial_successor(op_proxy).to_string();
+            if (state_value.count(partialAssignment->to_string()) == 0) {
+                state_value[succ_pa_str] = min(
+                    state_value[succ_pa_str],
+                    partialAssignment->estimated_heuristic + op_proxy.get_cost()
+                );
+            }
         }
-        cout << endl;
     }
-
 }
 
 vector<string> SamplingSearchYaaig::extract_samples() {
-    if (avi_k > 0)
-        approximate_value_iteration();
-
     unordered_map<string,int> state_value;
-    if (match_heuristics)
-        state_value = create_smaller_h_mapping();
-
+    if (avi_k > 0)
+        approximate_value_iteration(state_value);
+    else if (match_heuristics)
+        create_smaller_h_mapping(state_value);
 
     vector<pair<int,vector<int>>> values_set;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {

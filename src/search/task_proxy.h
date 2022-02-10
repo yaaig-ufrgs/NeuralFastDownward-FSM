@@ -1018,4 +1018,12 @@ inline bool does_fire(const EffectProxy &effect, const State &state) {
     return true;
 }
 
+inline bool does_fire(const EffectProxy &effect, const PartialAssignment &partialAssignment) {
+    for (FactProxy condition : effect.get_conditions()) {
+        if (partialAssignment[condition.get_variable()] != condition)
+            return false;
+    }
+    return true;
+}
+
 #endif

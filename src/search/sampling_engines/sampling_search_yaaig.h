@@ -43,8 +43,8 @@ public:
     virtual ~SamplingSearchYaaig() override = default;
 
 private:
-    void approximate_value_iteration();
-    std::unordered_map<std::string,int> create_smaller_h_mapping();
+    void approximate_value_iteration(std::unordered_map<std::string,int>& state_value);
+    std::unordered_map<std::string,int> create_smaller_h_mapping(std::unordered_map<std::string,int>& state_value);
     std::vector<State> assign_undefined_state(std::shared_ptr<PartialAssignment>& pa, int max_attempts);
     void create_contrasting_samples(std::vector<std::pair<int,std::vector<int>>>& values_set, int percentage);
     std::vector<std::string> values_to_samples(std::vector<std::pair<int,std::vector<int>>> values_set);
