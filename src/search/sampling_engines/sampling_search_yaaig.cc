@@ -39,13 +39,13 @@ string SamplingSearchYaaig::sample_file_header() const {
     return header;
 }
 
-unordered_map<string,int> SamplingSearchYaaig::create_smaller_h_mapping(unordered_map<string,int>& state_value) {
-    // If match_heuristics then then all identical samples receive the smallest h value among them
+unordered_map<string,int> SamplingSearchYaaig::do_minimization(unordered_map<string,int>& state_value) {
+    // If minimization then then all identical samples receive the smallest h value among them
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
-        string state = partialAssignment->to_string();
+        string bin = partialAssignment->to_binary();
         int h = partialAssignment->estimated_heuristic;
-        if (state_value.count(state) == 0 || h < state_value[state])
-            state_value[state] = h;
+        if (state_value.count(bin) == 0 || h < state_value[bin])
+            state_value[bin] = h;
     }
     return state_value;
 }
@@ -102,12 +102,12 @@ void SamplingSearchYaaig::create_contrasting_samples(
     }
 
     unordered_map<string,int> state_value;
-    if (match_heuristics) {
+    if (minimization) {
         for (auto& p : values_set) {
             string s; // values to string
             for (int& v : p.second)
                 s += '0' + v;
-            // All identical states have the same h when match_heuristics=true,
+            // All identical states have the same h when minimization=true,
             // so we just add in the first occurrence
             if (state_value.count(s) == 0)
                 state_value[s] = p.first;
@@ -123,12 +123,10 @@ void SamplingSearchYaaig::create_contrasting_samples(
         vector<int> values = s.get_values();
 
         int h = max_h;
-        if (match_heuristics) {
-            string s;
-            for (int& v : values)
-                s += '0' + v;
-            if (state_value.count(s) != 0)
-                h = state_value[s];   
+        if (minimization) {
+            string bin = s.to_binary();
+            if (state_value.count(bin) != 0)
+                h = state_value[bin];
         }
         
         values_set.push_back(make_pair(h, values));
@@ -158,20 +156,22 @@ vector<string> SamplingSearchYaaig::values_to_samples(vector<pair<int,vector<int
 void SamplingSearchYaaig::approximate_value_iteration(unordered_map<string,int>& state_value) {
     if (avi_k <= 0)
         return;
-    
-    create_smaller_h_mapping(state_value);
+
+    // do_minimization to create state_value mapping
+    // TODO: AVI without minimization (for now it's not necessary)
+    do_minimization(state_value);
 
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
-
     const OperatorsProxy operators = task_proxy.get_operators();
+
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         vector<OperatorID> applicable_operators;
         succ_generator->generate_applicable_ops(*partialAssignment, applicable_operators);
         for (OperatorID& op_id : applicable_operators) {
             OperatorProxy op_proxy = operators[op_id];
-            string succ_pa_str = partialAssignment->get_partial_successor(op_proxy).to_string();
-            if (state_value.count(partialAssignment->to_string()) == 0) {
+            string succ_pa_str = partialAssignment->get_partial_successor(op_proxy).to_binary();
+            if (state_value.count(partialAssignment->to_binary()) == 0) {
                 state_value[succ_pa_str] = min(
                     state_value[succ_pa_str],
                     partialAssignment->estimated_heuristic + op_proxy.get_cost()
@@ -185,16 +185,16 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     unordered_map<string,int> state_value;
     if (avi_k > 0)
         approximate_value_iteration(state_value);
-    else if (match_heuristics)
-        create_smaller_h_mapping(state_value);
+    else if (minimization)
+        do_minimization(state_value);
 
     vector<pair<int,vector<int>>> values_set;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         int h = -1;
         if (store_plan_cost) {
-            h = partialAssignment->estimated_heuristic;
-            if (match_heuristics)
-                h = state_value[partialAssignment->to_string()];
+            h = (state_value.empty()) ?
+                partialAssignment->estimated_heuristic :
+                state_value[partialAssignment->to_binary()];
         }
 
         if (state_representation == "complete" || state_representation == "complete_no_mutex") {
@@ -228,7 +228,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       store_plan_cost(opts.get<bool>("store_plan_cost")),
       store_state(opts.get<bool>("store_state")),
       state_representation(opts.get<string>("state_representation")),
-      match_heuristics(opts.get<bool>("match_heuristics")),
+      minimization(opts.get<bool>("minimization")),
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
       contrasting_samples(opts.get<int>("contrasting_samples")),
       avi_k(opts.get<int>("avi_k")),
@@ -258,7 +258,7 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "State facts representation format (complete, complete_no_mutex, partial, or undefined, assign_undefined).",
             "complete");
     parser.add_option<bool>(
-            "match_heuristics",
+            "minimization",
             "Identical states receive the best heuristic value assigned between them.",
             "false");
     parser.add_option<int>(

@@ -617,7 +617,7 @@ public:
     std::pair<bool, State> get_full_state(
             bool check_mutexes, utils::RandomNumberGenerator &rng) const;
     
-    std::string to_string();
+    std::string to_binary() const;
 };
 
 

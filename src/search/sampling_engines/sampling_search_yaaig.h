@@ -25,7 +25,7 @@ protected:
     const bool store_plan_cost;
     const bool store_state;
     const std::string state_representation;
-    const bool match_heuristics;
+    const bool minimization;
     const int assignments_by_undefined_state;
     const int contrasting_samples;
     const int avi_k;
@@ -44,7 +44,7 @@ public:
 
 private:
     void approximate_value_iteration(std::unordered_map<std::string,int>& state_value);
-    std::unordered_map<std::string,int> create_smaller_h_mapping(std::unordered_map<std::string,int>& state_value);
+    std::unordered_map<std::string,int> do_minimization(std::unordered_map<std::string,int>& state_value);
     std::vector<State> assign_undefined_state(std::shared_ptr<PartialAssignment>& pa, int max_attempts);
     void create_contrasting_samples(std::vector<std::pair<int,std::vector<int>>>& values_set, int percentage);
     std::vector<std::string> values_to_samples(std::vector<std::pair<int,std::vector<int>>> values_set);
