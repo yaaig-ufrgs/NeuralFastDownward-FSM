@@ -73,7 +73,7 @@ def yaaig_ferber(args, meth):
             for i in range(start, end):
                 cmd, out = "", ""
                 if meth == "yaaig":
-                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.technique}_{args.state_representation}_{args.searches}x{args.samples_per_search}_{args.max_samples}_ss{i}'
+                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.technique}_{args.state_representation}_{args.searches}x{args.samples_per_search}-{args.max_samples}_ss{i}'
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
                            f'--build release {instance} '
