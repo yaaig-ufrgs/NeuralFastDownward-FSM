@@ -103,12 +103,8 @@ void SamplingSearchYaaig::create_contrasting_samples(
 
     unordered_map<string,int> state_value;
     if (minimization) {
-        for (auto& p : values_set) {
-            string s; // values to string
-            for (int& v : p.second)
-                s += '0' + v;
-            // All identical states have the same h when minimization=true,
-            // so we just add in the first occurrence
+        for (pair<int,vector<int>>& p : values_set) {
+            string s = PartialAssignment(*task, vector<int>(p.second)).to_binary();
             if (state_value.count(s) == 0)
                 state_value[s] = p.first;
         }
@@ -240,6 +236,9 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       header(construct_header()),
       rng(utils::parse_rng_from_options(opts)) {
+    assert(contrasting_samples >= 0 && contrasting_samples <= 100);
+    assert(assignments_by_undefined_state > 0);
+    assert(avi_k == 0 || avi_k == 1);
 }
 
 static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parser) {
