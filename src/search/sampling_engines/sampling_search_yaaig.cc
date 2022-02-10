@@ -39,13 +39,13 @@ string SamplingSearchYaaig::sample_file_header() const {
     return header;
 }
 
-unordered_map<string,int> SamplingSearchYaaig::do_minimization(unordered_map<string,int>& state_value) {
+unordered_map<string,pair<int,shared_ptr<PartialAssignment>>> SamplingSearchYaaig::do_minimization(unordered_map<string,pair<int, shared_ptr<PartialAssignment>>>& state_value) {
     // If minimization then then all identical samples receive the smallest h value among them
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         string bin = partialAssignment->to_binary();
         int h = partialAssignment->estimated_heuristic;
-        if (state_value.count(bin) == 0 || h < state_value[bin])
-            state_value[bin] = h;
+        if (state_value.count(bin) == 0 || h < state_value[bin].first)
+            state_value[bin] = make_pair(h, partialAssignment);
     }
     return state_value;
 }
@@ -153,7 +153,7 @@ vector<string> SamplingSearchYaaig::values_to_samples(vector<pair<int,vector<int
     return samples;
 }
 
-void SamplingSearchYaaig::approximate_value_iteration(unordered_map<string,int>& state_value) {
+void SamplingSearchYaaig::approximate_value_iteration(unordered_map<string,pair<int, shared_ptr<PartialAssignment>>>& state_value) {
     if (avi_k <= 0)
         return;
 
@@ -165,28 +165,46 @@ void SamplingSearchYaaig::approximate_value_iteration(unordered_map<string,int>&
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
     const OperatorsProxy operators = task_proxy.get_operators();
 
-    for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
+    int count = 0;
+    for (auto& it: state_value) {
+        shared_ptr<PartialAssignment>& partialAssignment = it.second.second;
+        string curr_state = it.first;
         vector<OperatorID> applicable_operators;
         succ_generator->generate_applicable_ops(*partialAssignment, applicable_operators);
         for (OperatorID& op_id : applicable_operators) {
             OperatorProxy op_proxy = operators[op_id];
             string succ_pa_str = partialAssignment->get_partial_successor(op_proxy).to_binary();
-            if (state_value.count(partialAssignment->to_binary()) == 0) {
-                state_value[succ_pa_str] = min(
-                    state_value[succ_pa_str],
-                    partialAssignment->estimated_heuristic + op_proxy.get_cost()
+            if (state_value.count(succ_pa_str) != 0) {
+                count++;
+                int old_value = state_value[succ_pa_str].first;
+                state_value[succ_pa_str].first = min(
+                    state_value[succ_pa_str].first,
+                    state_value[curr_state].first + op_proxy.get_cost()
                 );
+                //cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << endl;
+                //cout << "old: " << old_value << endl;
+                //cout << "new: " << state_value[succ_pa_str] << endl;
+                if (old_value != state_value[succ_pa_str].first) {
+                    cout << "Parent: " << partialAssignment->to_binary() << endl;
+                    cout << "Successor: " << succ_pa_str << endl;
+                    cout << old_value << " -> " << state_value[succ_pa_str].first << endl;
+                }
             }
         }
     }
+    cout << "Count: " << count << endl;
 }
 
 vector<string> SamplingSearchYaaig::extract_samples() {
-    unordered_map<string,int> state_value;
+    unordered_map<string,pair<int, shared_ptr<PartialAssignment>>> state_value;
     if (avi_k > 0)
         approximate_value_iteration(state_value);
     else if (minimization)
         do_minimization(state_value);
+
+    for (auto const &pair: state_value) {
+        std::cout << "{" << pair.first << ": " << pair.second << "}\n";
+    }
 
     vector<pair<int,vector<int>>> values_set;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
@@ -194,7 +212,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         if (store_plan_cost) {
             h = (state_value.empty()) ?
                 partialAssignment->estimated_heuristic :
-                state_value[partialAssignment->to_binary()];
+                state_value[partialAssignment->to_binary()].first;
         }
 
         if (state_representation == "complete" || state_representation == "complete_no_mutex") {
