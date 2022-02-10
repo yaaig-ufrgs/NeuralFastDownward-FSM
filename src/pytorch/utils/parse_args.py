@@ -1016,7 +1016,7 @@ def get_sample_args():
         "-min",
         "--minimization",
         type=str2bool,
-        default=default_args.SAMPLE_MATCH_HEURISTICS,
+        default=default_args.SAMPLE_MINIMIZATION,
         help="Match exact samples with the min heuristic value between them. (default: %(default)s)",
     )
     parser.add_argument(
