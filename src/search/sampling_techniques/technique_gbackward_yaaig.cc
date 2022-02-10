@@ -181,7 +181,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     }
 
     if (!allow_duplicates) {
-        for (unsigned i = samples.size()-1; i > 0; i--) {
+        for (int i = samples.size()-1; i >= 0; i--) {
             if (unique_samples.find(*samples[i]) == unique_samples.end()) {
                 unique_samples.insert(*samples[i]);
             } else {
