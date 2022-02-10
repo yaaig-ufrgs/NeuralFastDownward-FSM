@@ -952,7 +952,7 @@ def get_sample_args():
     parser.add_argument(
         "-st",
         "--state-representation",
-        choices=["fs", "ps", "us"],  # full state, partial state and undefined
+        choices=["fs", "fs-nomutex", "ps", "us", "au"],  # full state, full state no mutex, partial state, undefined, assign undefined
         default=default_args.SAMPLE_STATE_REPRESENTATION,
         help="Output state representation. (default: %(default)s)",
     )
@@ -962,6 +962,13 @@ def get_sample_args():
         type=int,
         default=default_args.SAMPLE_ASSIGNMENTS_US,
         help="Number of assignments done with undefined state. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-max",
+        "--max-samples",
+        type=int,
+        default=default_args.SAMPLE_MAX_SAMPLES,
+        help="Number of max samples to generate. (default: %(default)s)",
     )
     parser.add_argument(
         "-scs",
@@ -985,6 +992,13 @@ def get_sample_args():
         help="Sample seed. (default: %(default)s)",
     )
     parser.add_argument(
+        "-dups",
+        "--allow-dups",
+        type=str2bool,
+        default=default_args.SAMPLE_ALLOW_DUPLICATES,
+        help="Allow duplicate samples. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-ms",
         "--mult-seed",
         type=int,
@@ -1000,7 +1014,7 @@ def get_sample_args():
     )
     parser.add_argument(
         "-rhg",
-        "--restart_h_when_goal_state",
+        "--restart-h-when-goal-state",
         type=str2bool,
         default=default_args.SAMPLE_RESTART_H_WHEN_GOAL_STATE,
         help="Restart h value when goal state is sampled (only random walk). (default: %(default)s)",

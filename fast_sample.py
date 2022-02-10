@@ -42,10 +42,14 @@ def run_multi_thread(cmd, threads):
 def get_full_state_repr_name(state_repr):
     if state_repr == "fs":
         return "complete"
+    elif state_repre == "fs-nomutex":
+        return "complete-no-mutex"
     elif state_repr == "ps":
         return "partial"
     elif state_repr == "us":
         return "undefined"
+    elif state_repr == "au":
+        return "assign_undefined"
     return state_repr
 
 
@@ -53,7 +57,7 @@ def yaaig_ferber(args, meth):
     search_algo = ""
     if args.search_algorithm == "greedy":
         search_algo = f'eager_greedy([{args.search_heuristic}(transform=sampling_transform())],transform=sampling_transform())'
-    elif args.search_algorith == "astar":
+    elif args.search_algorithm == "astar":
         search_algo = f'astar({args.search_heuristic}(transform=sampling_transform()),transform=sampling_transform())'
 
     state_repr = get_full_state_repr_name(args.state_representation)
@@ -69,13 +73,13 @@ def yaaig_ferber(args, meth):
             for i in range(start, end):
                 cmd, out = "", ""
                 if meth == "yaaig":
-                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.technique}_{args.state_representation}_{args.searches}x{args.samples_per_search}_ss{i}'
+                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.technique}_{args.state_representation}_{args.searches}x{args.samples_per_search}_{args.max_samples}_ss{i}'
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
                            f'--build release {instance} '
                            f'--search \'sampling_search_yaaig({search_algo}, '
-                           f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, '
-                           f'technique={args.technique}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state})], '
+                           f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, max_samples={args.max_samples}, '
+                           f'technique={args.technique}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state}, allow_duplicates={args.allow_dups})], '
                            f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, avi_k={args.avi_k}, '
                            f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting})\'')
                     print(cmd)
@@ -131,6 +135,7 @@ def sample(args):
     os.system(f"tsp -S {args.threads}")
     args.minimization = bool2str(args.minimization)
     args.restart_h_when_goal_state = bool2str(args.restart_h_when_goal_state)
+    args.allow_dups = bool2str(args.allow_dups)
     args.ferber_technique = "iforward" if args.ferber_technique == "forward" else "gbackward"
 
     if args.method == "yaaig" or args.method == "ferber":
