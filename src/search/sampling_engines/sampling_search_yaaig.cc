@@ -7,6 +7,7 @@
 #include "../plugin.h"
 
 #include "../task_utils/task_properties.h"
+#include "../task_utils/successor_generator.h"
 
 #include <sstream>
 #include <string>
@@ -155,10 +156,32 @@ vector<string> SamplingSearchYaaig::values_to_samples(vector<pair<int,vector<int
     return samples;
 }
 
+void SamplingSearchYaaig::approximate_value_iteration() {
+    if (avi_k <= 0)
+        return;
+
+    const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
+        utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
+
+    for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
+        vector<OperatorID> applicable_operators;
+        succ_generator->generate_applicable_ops(*partialAssignment, applicable_operators);
+        for (auto& op : applicable_operators) {
+            cout << op << " ";
+        }
+        cout << endl;
+    }
+
+}
+
 vector<string> SamplingSearchYaaig::extract_samples() {
+    if (avi_k > 0)
+        approximate_value_iteration();
+
     unordered_map<string,int> state_value;
     if (match_heuristics)
         state_value = create_smaller_h_mapping();
+
 
     vector<pair<int,vector<int>>> values_set;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
@@ -203,6 +226,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       match_heuristics(opts.get<bool>("match_heuristics")),
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
       contrasting_samples(opts.get<int>("contrasting_samples")),
+      avi_k(opts.get<int>("avi_k")),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       header(construct_header()),
       rng(utils::parse_rng_from_options(opts)) {
@@ -240,6 +264,11 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
     parser.add_option<int>(
             "contrasting_samples",
             "Generate new random samples with h = L+1. (Percentage of those obtained with the search).",
+            "0"
+    );
+    parser.add_option<int>(
+            "avi_k",
+            "Correct h-values using AVI via K-step forward repeatedly",
             "0"
     );
 

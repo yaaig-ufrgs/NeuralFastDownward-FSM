@@ -18,6 +18,12 @@ void SuccessorGenerator::generate_applicable_ops(
     root->generate_applicable_ops(state.get_unpacked_values(), applicable_ops);
 }
 
+void SuccessorGenerator::generate_applicable_ops(
+    const PartialAssignment &partialAssignment, vector<OperatorID> &applicable_ops) const {
+    assert(partialAssignment.get_unpacked_values().size() > 0);
+    root->generate_applicable_ops(partialAssignment.get_unpacked_values(), applicable_ops);
+}
+
 PerTaskInformation<SuccessorGenerator> g_successor_generators;
 
 SuccessorGenerator &get_successor_generator(const TaskProxy &task_proxy) {
