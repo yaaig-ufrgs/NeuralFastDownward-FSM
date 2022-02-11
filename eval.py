@@ -103,7 +103,7 @@ def eval_model(model, dataloader: DataLoader, log_states):
     max_loss = float("-inf")
     min_loss = float("inf")
     min_loss_no_goal = float("inf")
-    eval_y_pred = {}  # { state = (y, pred, loss))}
+    eval_y_pred = []  # [[state, y, pred, loss], ...]
     repeat_count = 0
 
     with torch.no_grad():
@@ -127,15 +127,7 @@ def eval_model(model, dataloader: DataLoader, log_states):
                 _log.info(f"| state: {x_str}")
                 _log.info(f"| y: {float(y[0])} | pred: {float(pred[0])} | loss: {loss}")
 
-            if x_str in eval_y_pred:
-                repeat_count += 1
-                x_str += "_" + str(repeat_count)
-
-            eval_y_pred[x_str] = (
-                int(torch.round(y[0])),
-                int(torch.round(pred[0])),
-                loss,
-            )
+            eval_y_pred.append([x_str, float(y[0]), float(pred[0]), loss])
 
     mean_loss = eval_loss / len(dataloader)
 
