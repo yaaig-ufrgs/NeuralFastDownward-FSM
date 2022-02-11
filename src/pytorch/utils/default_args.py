@@ -66,6 +66,8 @@ SAVE_GIT_DIFF = True
 # Evaluation
 LOG_STATES = False
 SAVE_PREDS = False
+SAVE_PLOTS = True
+
 
 # Experiment
 EXP_TYPE = "all"

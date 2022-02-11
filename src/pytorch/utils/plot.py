@@ -65,6 +65,45 @@ def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str, prefi
     plt.close(fig)
 
 
+def save_y_pred_scatter_eval(data: list, directory: str, prefix: str):
+    """
+    Create and save real y and predicted y scatter plot for eval.
+    """
+    if len(data) == 0:
+        return
+
+    if not path.exists(directory):
+        makedirs(directory)
+
+    plot_title = get_plot_title(directory)
+    plot_filename = f"eval_{plot_title}_{prefix}"
+
+    real = [round(d[1]) for d in data]
+    pred = [round(d[2]) for d in data]
+
+    fig, ax = plt.subplots()
+    ax.scatter(real, pred, s=2, alpha=0.35, c="red", zorder=10)
+
+    lims = [
+        np.min([ax.get_xlim(), ax.get_ylim()]),
+        np.max([ax.get_xlim(), ax.get_ylim()]),
+    ]
+
+    ax.plot(lims, lims, "k-", alpha=0.80, zorder=0)
+    ax.set_aspect("equal")
+    ax.set_xlim(lims)
+    ax.set_ylim(lims)
+
+    ax.set_xlabel("h^sample")
+    ax.set_ylabel("h^NN")
+    ax.set_title(plot_title + "\n" + prefix, fontsize=10)
+
+    fig.savefig(directory + "/" + plot_filename + ".png")
+
+    plt.clf()
+    plt.close(fig)
+
+
 def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h: str) -> dict:
     """
     Creates a scatter plot with hnn and some other heuristic (if data for it is available).

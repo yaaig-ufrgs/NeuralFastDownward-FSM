@@ -498,6 +498,13 @@ def get_eval_args():
         default=default_args.SAVE_PREDS,
         help="Save heuristic prediction files for every state. (default: %(default)s)",
     )
+    parser.add_argument(
+        "-plt",
+        "--save-plots",
+        type=str2bool,
+        default=default_args.SAVE_PLOTS,
+        help="Save plots related to the evaluation. (default: %(default)s)",
+    )
 
     return parser.parse_args()
 

@@ -21,6 +21,7 @@ from src.pytorch.utils.parse_args import get_eval_args
 from src.pytorch.utils.file_helpers import save_y_pred_loss_csv
 from src.pytorch.utils.log_helpers import logging_eval_config
 from src.pytorch.utils.timer import Timer
+from src.pytorch.utils.plot import save_y_pred_scatter_eval
 
 _log = logging.getLogger(__name__)
 
@@ -86,7 +87,12 @@ def eval_main(args: Namespace):
         if args.save_preds:
             y_pred_loss_file = dirname + "/" + data_name + ".csv"
             save_y_pred_loss_csv(y_pred_loss, y_pred_loss_file)
-            _log.info(f"Saved (state,y,pred,loss) CSV file to: {y_pred_loss_file}")
+            _log.info(f"Saved (state,y,pred,loss) CSV file to {y_pred_loss_file}")
+
+        if args.save_plots:
+            plots_dir = f"{dirname}/plots"
+            save_y_pred_scatter_eval(y_pred_loss, plots_dir, data_name) 
+            _log.info(f"Saved {data_name} plots to {plots_dir}")
 
         f_results.write(
             f"{data_name},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{curr_time}\n"
