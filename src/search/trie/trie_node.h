@@ -1,84 +1,85 @@
 #ifndef TRIE_TRIE_NODE_H
 #define TRIE_TRIE_NODE_H
 
-#include <string>
 #include <vector>
 
 namespace trie {
 template <typename T>
 class tnode {
-  public:
+public:
     explicit tnode(T v, tnode<T>* p, int ascii, bool eow = false);
     void addChild(tnode* child, int key);
-    std::string getKey();
+    std::vector<int> getKey();
     tnode<T>* getChild(int key);
     T& get();
     void update(T val);
-    void markEnd(std::string);
+    void markEnd(std::vector<int>);
     bool isEnd();
     tnode<T>* getParent();
     int getParentIndex();
-  private:
+private:
     T mapped_value;
     int p_index;
     bool isEndOfWord;
     tnode<T>* parent;
     std::vector <tnode<T>*> children;
-    std::string key;
+    std::vector<int> key;
 };
 
 template <typename T>
 tnode<T>::tnode(T val, tnode<T>* p, int ascii, bool eow) {
-  this->mapped_value = val;
-  this-> isEndOfWord = eow;
-  this->p_index = ascii;
-  this-> key = "";
-  this->parent = p;
-  this->children = *(new std::vector <tnode<T>*>(128, nullptr));
+    this->mapped_value = val;
+    this-> isEndOfWord = eow;
+    this->p_index = ascii;
+    this->key = {};
+    this->parent = p;
+    this->children = *(new std::vector <tnode<T>*>(128, nullptr));
 }
 
 template <typename T>
 void tnode<T>::addChild(tnode* child, int key) {
-  this->children[(int)key] = child;
+    this->children[(int)key] = child;
 }
 
 template <typename T>
-std::string tnode<T>::getKey() {
-  return this->key;
+std::vector<int> tnode<T>::getKey() {
+    return this->key;
 }
 
 template <typename T>
 tnode<T>* tnode<T>::getChild(int key) {
-  return this->children[(int)key];
+    return this->children[(int)key];
 }
 
 template <typename T>
 T& tnode<T>::get() {
-  return this->mapped_value;
+    return this->mapped_value;
 }
 
 template <typename T>
 void tnode<T>::update(T val) {
-  this->mapped_value = val;
+    this->mapped_value = val;
 }
 
 template <typename T>
-void tnode<T>::markEnd(std::string key) {
-  this->key = key;
-  this->isEndOfWord = true;
+void tnode<T>::markEnd(std::vector<int> key) {
+    this->key = key;
+    this->isEndOfWord = true;
 }
 
 template <typename T>
 bool tnode<T>::isEnd() {
-  return this->isEndOfWord;
+    return this->isEndOfWord;
 }
 
 template <typename T>
 tnode<T>* tnode<T>::getParent() {
-  return this->parent;
+    return this->parent;
 }
 
-template <typename T> int tnode<T>::getParentIndex() { return this->p_index; }
+template <typename T> int tnode<T>::getParentIndex() {
+    return this->p_index;
+}
 } // namespace trie
 
 #endif

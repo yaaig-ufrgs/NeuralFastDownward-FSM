@@ -1,7 +1,6 @@
 #ifndef TRIE_TRIE_ITERATOR_H
 #define TRIE_TRIE_ITERATOR_H
 
-#include <string>
 #include <iterator>
 #include <iostream>
 
@@ -15,9 +14,9 @@
 namespace trie {
 template <typename T>
 class trie_iterator {
-  private:
+private:
     tnode<T>* cur_node;
-  public:
+public:
     using iterator_category = std::bidirectional_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using value_type = T;
@@ -28,11 +27,11 @@ class trie_iterator {
     explicit trie_iterator(tnode<T>*);
     trie_iterator();
 
-  protected:
+protected:
     // Member functions
     tnode<T>* getNode();
 
-  public:
+public:
     // Operators
     trie_iterator<T>& operator++ ();
     trie_iterator<T> operator++ (int);
@@ -49,98 +48,98 @@ class trie_iterator {
 */
 template <typename T>
 trie_iterator<T>::trie_iterator(tnode<T>* root) {
-  this->cur_node = root;
+    this->cur_node = root;
 }
 
 template <typename T>
 trie_iterator<T>::trie_iterator() {
-  this->cur_node = nullptr;
+    this->cur_node = nullptr;
 }
 
 template <typename T>
 trie_iterator<T>& trie_iterator<T>::operator++ () {
-  if (this->cur_node == nullptr || this->cur_node->getParentIndex() == 1516) {
+    if (this->cur_node == nullptr || this->cur_node->getParentIndex() == 1516) {
+        return *this;
+    }
+    if (this->cur_node->getParentIndex() == -1516) {
+        this->cur_node = this->cur_node->getParent();
+        return *this;
+    }
+    tnode<T>* tmp = recur(this->cur_node);
+    if (tmp == nullptr) {
+        T flag;
+        tmp = new tnode<T>(flag, this->cur_node, 1516);
+    }
+    this->cur_node = tmp;
     return *this;
-  }
-  if (this->cur_node->getParentIndex() == -1516) {
-    this->cur_node = this->cur_node->getParent();
-    return *this;
-  }
-  tnode<T>* tmp = recur(this->cur_node);
-  if (tmp == nullptr) {
-    T flag;
-    tmp = new tnode<T>(flag, this->cur_node, 1516);
-  }
-  this->cur_node = tmp;
-  return *this;
 }
 
 template <typename T>
 trie_iterator<T> trie_iterator<T>::operator++ (int) {
-  trie_iterator<T> t = *this;
-  ++(*this);
-  return t;
+    trie_iterator<T> t = *this;
+    ++(*this);
+    return t;
 }
 
 template <typename T>
 trie_iterator<T>& trie_iterator<T>::operator-- () {
-  if (this->cur_node == nullptr || this->cur_node->getParentIndex() == -1516) {
+    if (this->cur_node == nullptr || this->cur_node->getParentIndex() == -1516) {
+        return *this;
+    }
+    if (this->cur_node->getParentIndex() == 1516) {
+        this->cur_node = this->cur_node->getParent();
+        return *this;
+    }
+    tnode<T>* tmp = rrecur(
+        this->cur_node->getParent(),
+        this->cur_node->getParentIndex() - 1
+    );
+    if (tmp == nullptr) {
+        T flag;
+        tmp = new tnode<T>(flag, this->cur_node, -1516);
+    }
+    this->cur_node = tmp;
     return *this;
-  }
-  if (this->cur_node->getParentIndex() == 1516) {
-    this->cur_node = this->cur_node->getParent();
-    return *this;
-  }
-  tnode<T>* tmp = rrecur(
-    this->cur_node->getParent(),
-    this->cur_node->getParentIndex() - 1
-  );
-  if (tmp == nullptr) {
-    T flag;
-    tmp = new tnode<T>(flag, this->cur_node, -1516);
-  }
-  this->cur_node = tmp;
-  return *this;
 }
 
 template <typename T>
 trie_iterator<T> trie_iterator<T>::operator-- (int) {
-  trie_iterator<T> t = *this;
-  --(*this);
-  return t;
+    trie_iterator<T> t = *this;
+    --(*this);
+    return t;
 }
 
 template <typename T>
 bool trie_iterator<T>::operator== (const trie_iterator<T>& t) const {
-  if (this->cur_node == nullptr && t.cur_node == nullptr) {
-    return true;
-  } else if (this->cur_node == nullptr || t.cur_node == nullptr) {
+    if (this->cur_node == nullptr && t.cur_node == nullptr) {
+        return true;
+    } else if (this->cur_node == nullptr || t.cur_node == nullptr) {
+        return false;
+    }
+    if (this->cur_node->getParentIndex() == t.cur_node->getParentIndex()
+        && this->cur_node->getParent() == t.cur_node->getParent()) {
+        return true;
+    }
     return false;
-  }
-  if (this->cur_node->getParentIndex() == t.cur_node->getParentIndex()
-  && this->cur_node->getParent() == t.cur_node->getParent()) {
-    return true;
-  }
-  return false;
 }
 
 template <typename T>
 bool trie_iterator<T>::operator!= (const trie_iterator<T>& t) const {
-  return !(*this == t);
+    return !(*this == t);
 }
 
 template <typename T>
 typename trie_iterator<T>::reference trie_iterator<T>::operator* () const {
-  return this->cur_node->get();
+    return this->cur_node->get();
 }
 
 template <typename T>
 typename trie_iterator<T>::pointer trie_iterator<T>::operator-> () const {
-  return &this->cur_node->get();
+    return &this->cur_node->get();
 }
 
 template <typename T> tnode<T> *trie_iterator<T>::getNode() {
-  return this->cur_node;
+    return this->cur_node;
 }
 } // namespace trie
 
