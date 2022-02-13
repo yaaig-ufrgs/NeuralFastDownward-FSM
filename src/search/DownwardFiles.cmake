@@ -453,7 +453,6 @@ fast_downward_plugin(
     DEPENDENCY_ONLY
 )
 
-
 fast_downward_plugin(
     NAME SAMPLING_SEARCH
     HELP "Sampling search algorithm"
@@ -469,6 +468,7 @@ fast_downward_plugin(
         sampling_engines/sampling_v
         sampling_engines/sampling_tasks
         sampling_engines/plugin_sampling.cc
+        trie/trie
     DEPENDS EXTRA_TASKS NULL_PRUNING_METHOD ORDERED_SET SAMPLING_TECHNIQUES
     DEPENDENCY_ONLY
 )
