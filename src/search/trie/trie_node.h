@@ -1,8 +1,10 @@
-#pragma once
+#ifndef TRIE_TRIE_NODE_H
+#define TRIE_TRIE_NODE_H
 
 #include <string>
 #include <vector>
 
+namespace trie {
 template <typename T>
 class tnode {
   public:
@@ -76,7 +78,7 @@ tnode<T>* tnode<T>::getParent() {
   return this->parent;
 }
 
-template <typename T>
-int tnode<T>::getParentIndex() {
-  return this->p_index;
-}
+template <typename T> int tnode<T>::getParentIndex() { return this->p_index; }
+} // namespace trie
+
+#endif

@@ -186,6 +186,10 @@ void SamplingSearchYaaig::approximate_value_iteration(unordered_map<string,int>&
 
 vector<string> SamplingSearchYaaig::extract_samples() {
     unordered_map<string,int> state_value;
+
+    trie::trie<string> t;
+    t.insert("aaa", "asda");
+
     if (avi_k > 0)
         approximate_value_iteration(state_value);
     else if (minimization)

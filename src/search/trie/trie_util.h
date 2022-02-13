@@ -1,13 +1,15 @@
-#pragma once
+#ifndef TRIE_TRIE_UTIL_H
+#define TRIE_TRIE_UTIL_H
 
 #include <vector>
 #include <string>
 
-#include "_trie_node.h"
+#include "trie_node.h"
 
 #define sIter(c, it)\
 for (std::string::iterator it = c.begin(); it != c.end(); it++)
 
+namespace trie {
 template <typename T>
 tnode<T>* recur(tnode<T>* n, int offset = 0) {
   if (n == nullptr) {
@@ -52,3 +54,6 @@ tnode<T>* rrecur(tnode<T>* n, int offset) {
     return recur(it, 0);
   }
 }
+} // namespace trie
+
+#endif

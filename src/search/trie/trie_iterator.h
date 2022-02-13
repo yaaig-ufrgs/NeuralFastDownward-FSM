@@ -1,15 +1,18 @@
-#pragma once
+#ifndef TRIE_TRIE_ITERATOR_H
+#define TRIE_TRIE_ITERATOR_H
 
 #include <string>
 #include <iterator>
 #include <iostream>
 
-#include "_trie_node.h"
-#include "_trie_util.h"
+#include "trie_node.h"
+#include "trie_util.h"
 
 /*
   Iterator class definition.
 */
+
+namespace trie {
 template <typename T>
 class trie_iterator {
   private:
@@ -136,7 +139,9 @@ typename trie_iterator<T>::pointer trie_iterator<T>::operator-> () const {
   return &this->cur_node->get();
 }
 
-template <typename T>
-tnode<T>* trie_iterator<T>::getNode() {
+template <typename T> tnode<T> *trie_iterator<T>::getNode() {
   return this->cur_node;
 }
+} // namespace trie
+
+#endif
