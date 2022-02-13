@@ -151,34 +151,32 @@ vector<string> SamplingSearchYaaig::values_to_samples(vector<pair<int,vector<int
     return samples;
 }
 
-void SamplingSearchYaaig::approximate_value_iteration(unordered_map<string,int>& state_value) {
-    if (avi_k <= 0)
+void SamplingSearchYaaig::approximate_value_iteration() {
+    if (avi_k <= 0 || avi_its <= 0)
         return;
-
-    // do_minimization to create state_value mapping
-    // TODO: AVI without minimization (for now it's not necessary)
-    do_minimization(state_value);
 
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
     const OperatorsProxy operators = task_proxy.get_operators();
 
-    unordered_set<string> already_computed;
-    for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
-        string pa_str = partialAssignment->to_binary();
-        if (already_computed.count(pa_str) != 0)
-            continue;
-        already_computed.insert(pa_str);
-        vector<OperatorID> applicable_operators;
-        succ_generator->generate_applicable_ops(*partialAssignment, applicable_operators);
-        for (OperatorID& op_id : applicable_operators) {
-            OperatorProxy op_proxy = operators[op_id];
-            string succ_pa_str = partialAssignment->get_partial_successor(op_proxy).to_binary();
-            if (state_value.count(succ_pa_str) != 0) {
-                state_value[succ_pa_str] = min(
-                    state_value[succ_pa_str],
-                    state_value[pa_str] + op_proxy.get_cost()
-                );
+    for (int i = 0; i < avi_its; i++) {
+        unordered_set<string> already_computed;
+        for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
+            string pa_str = partialAssignment->to_binary();
+            if (already_computed.count(pa_str) != 0)
+                continue;
+            already_computed.insert(pa_str);
+            vector<OperatorID> applicable_operators;
+            succ_generator->generate_applicable_ops(*partialAssignment, applicable_operators);
+            for (OperatorID& op_id : applicable_operators) {
+                OperatorProxy op_proxy = operators[op_id];
+                string succ_pa_str = partialAssignment->get_partial_successor(op_proxy).to_binary();
+                /*if (state_value.count(succ_pa_str) != 0) {
+                    state_value[succ_pa_str] = min(
+                        state_value[succ_pa_str],
+                        state_value[pa_str] + op_proxy.get_cost()
+                    );
+                }*/
             }
         }
     }
@@ -186,14 +184,22 @@ void SamplingSearchYaaig::approximate_value_iteration(unordered_map<string,int>&
 
 vector<string> SamplingSearchYaaig::extract_samples() {
     unordered_map<string,int> state_value;
-
-    trie::trie<string> t;
-    t.insert("aaa", "asda");
-
-    if (avi_k > 0)
-        approximate_value_iteration(state_value);
-    else if (minimization)
+    if (avi_k > 0) {
+        trie::trie<shared_ptr<PartialAssignment>> t;
+        for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
+            string bin = partialAssignment->to_binary();
+            int h = partialAssignment->estimated_heuristic;
+            // Maintain a mapping to keep the smallest h-value
+            // in the trie in case there are duplicate samples
+            if (state_value.count(bin) == 0 || h < state_value[bin]) {
+                t.insert(partialAssignment->get_values(), partialAssignment);
+                state_value[bin] = h;
+            }
+        }
+        approximate_value_iteration();
+    } else if (minimization) {
         do_minimization(state_value);
+    }
 
     vector<pair<int,vector<int>>> values_set;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
@@ -239,12 +245,14 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
       contrasting_samples(opts.get<int>("contrasting_samples")),
       avi_k(opts.get<int>("avi_k")),
+      avi_its(opts.get<int>("avi_its")),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       header(construct_header()),
       rng(utils::parse_rng_from_options(opts)) {
     assert(contrasting_samples >= 0 && contrasting_samples <= 100);
     assert(assignments_by_undefined_state > 0);
     assert(avi_k == 0 || avi_k == 1);
+    assert(avi_its > 0);
 }
 
 static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parser) {
@@ -285,6 +293,11 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "avi_k",
             "Correct h-values using AVI via K-step forward repeatedly",
             "0"
+    );
+    parser.add_option<int>(
+            "avi_its",
+            "Number of AVI repeats.",
+            "1"
     );
 
     SearchEngine::add_options_to_parser(parser);

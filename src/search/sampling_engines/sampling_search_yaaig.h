@@ -30,6 +30,7 @@ protected:
     const int assignments_by_undefined_state;
     const int contrasting_samples;
     const int avi_k;
+    const int avi_its;
     const std::vector<FactPair> relevant_facts;
     const std::string header;
     std::shared_ptr<utils::RandomNumberGenerator> rng;
@@ -44,7 +45,7 @@ public:
     virtual ~SamplingSearchYaaig() override = default;
 
 private:
-    void approximate_value_iteration(std::unordered_map<std::string,int>& state_value);
+    void approximate_value_iteration();
     std::unordered_map<std::string,int> do_minimization(std::unordered_map<std::string,int>& state_value);
     std::vector<State> assign_undefined_state(std::shared_ptr<PartialAssignment>& pa, int max_attempts);
     void create_contrasting_samples(std::vector<std::pair<int,std::vector<int>>>& values_set, int percentage);
