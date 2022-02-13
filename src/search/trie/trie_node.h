@@ -22,7 +22,8 @@ private:
     int p_index;
     bool isEndOfWord;
     tnode<T>* parent;
-    std::vector <tnode<T>*> children;
+//    std::vector <tnode<T>*> children;
+    std::unordered_map<int,tnode<T>*> children;
     std::vector<int> key;
 };
 
@@ -33,12 +34,12 @@ tnode<T>::tnode(T val, tnode<T>* p, int ascii, bool eow) {
     this->p_index = ascii;
     this->key = {};
     this->parent = p;
-    this->children = *(new std::vector <tnode<T>*>(128, nullptr));
+//    this->children = *(new std::vector <tnode<T>*>(128, nullptr));
 }
 
 template <typename T>
 void tnode<T>::addChild(tnode* child, int key) {
-    this->children[(int)key] = child;
+    this->children[key] = child;
 }
 
 template <typename T>
@@ -48,7 +49,9 @@ std::vector<int> tnode<T>::getKey() {
 
 template <typename T>
 tnode<T>* tnode<T>::getChild(int key) {
-    return this->children[(int)key];
+    if (this->children.count(key) == 0)
+        return nullptr;
+    return this->children[key];
 }
 
 template <typename T>

@@ -29,7 +29,7 @@ private:
 
 template <typename T>
 trie<T>::trie(): size(0) {
-    T flag = NULL;
+    T flag = T();
     root = new tnode<T>(flag, nullptr, -1);
     size = 0;
 }
@@ -38,10 +38,14 @@ template <typename T>
 void trie<T>::insert(std::vector<int> key, T val) {
     tnode<T>* node = this->root;
     for (int& v : key) {
+        // Our use case has -1, so its increments to get the values in the range (0..127)
+        v += 1;
+        assert(v >= 0 && v < 128);
+
         if (node->getChild(v) != nullptr) {
             node = node->getChild(v);
         } else {
-            T flag = NULL;
+            T flag = T();
             tnode<T>* _node = new tnode<T>(flag, node, v);
             node->addChild(_node, v);
             node = node->getChild(v);
@@ -59,6 +63,10 @@ bool trie<T>::exist(std::vector<int> key) {
     bool res = true;
     tnode<T>* node = this->root;
     for (int& v : key) {
+        // Our use case has -1, so its increments to get the values in the range (0..127)
+        v += 1;
+        assert(v >= 0 && v < 128);
+
         if (node->getChild(v) == nullptr) {
             res = false;
             break;
@@ -129,6 +137,10 @@ template <typename T>
 typename trie<T>::iterator trie<T>::find(std::vector<int> key) {
     tnode<T>* n = this->root;
     for (int& v : key) {
+        // Our use case has -1, so its increments to get the values in the range (0..127)
+        v += 1;
+        assert(v >= 0 && v < 128);
+
         n = n->getChild(v);
         if (n == nullptr) {
             return this->end();
