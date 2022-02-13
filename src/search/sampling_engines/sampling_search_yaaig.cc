@@ -9,6 +9,8 @@
 #include "../task_utils/task_properties.h"
 #include "../task_utils/successor_generator.h"
 
+#include "../trie/trie.h"
+
 #include <sstream>
 #include <string>
 

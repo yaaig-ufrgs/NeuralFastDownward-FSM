@@ -454,6 +454,13 @@ fast_downward_plugin(
 )
 
 fast_downward_plugin(
+    NAME TRIE
+    HELP "Plugin containing the code for the Trie"
+    SOURCES
+        trie/trie
+)
+
+fast_downward_plugin(
     NAME SAMPLING_SEARCH
     HELP "Sampling search algorithm"
     SOURCES
@@ -468,8 +475,7 @@ fast_downward_plugin(
         sampling_engines/sampling_v
         sampling_engines/sampling_tasks
         sampling_engines/plugin_sampling.cc
-        trie/trie
-    DEPENDS EXTRA_TASKS NULL_PRUNING_METHOD ORDERED_SET SAMPLING_TECHNIQUES
+        DEPENDS EXTRA_TASKS NULL_PRUNING_METHOD ORDERED_SET SAMPLING_TECHNIQUES TRIE
     DEPENDENCY_ONLY
 )
 
