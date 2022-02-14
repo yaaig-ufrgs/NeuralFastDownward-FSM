@@ -33,6 +33,7 @@ protected:
     const int contrasting_samples;
     const int avi_k;
     const int avi_its;
+    const bool sort_h;
     const std::string mse_hstar_file;
     const std::string mse_result_file;
     const std::vector<FactPair> relevant_facts;

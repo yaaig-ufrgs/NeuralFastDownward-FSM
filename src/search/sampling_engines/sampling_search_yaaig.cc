@@ -156,9 +156,7 @@ double SamplingSearchYaaig::mse(trie::trie<int> trie_mse, bool root) {
     for (shared_ptr<PartialAssignment>& pa: sampling_technique::modified_tasks) {
         int best_h = INT_MAX;
         for (int& hs: trie_mse.find_all_compatible(pa->get_values(), true)) {
-            assert(best_h == INT_MAX);
             best_h = min(best_h, hs);
-            assert(best_h != INT_MAX);
         }
         assert(best_h != INT_MAX);
         int err = best_h - pa->estimated_heuristic;
@@ -212,7 +210,17 @@ void SamplingSearchYaaig::approximate_value_iteration(
     mse_result.close();
 }
 
+struct SortIncreasingH {
+  bool operator()(shared_ptr<PartialAssignment>& object1, shared_ptr<PartialAssignment>& object2) {
+    return(object1->estimated_heuristic < object2->estimated_heuristic);
+  }
+};
+
 vector<string> SamplingSearchYaaig::extract_samples() {
+    if (sort_h) {
+        sort(sampling_technique::modified_tasks.begin(), sampling_technique::modified_tasks.end(), SortIncreasingH());
+    }
+
     trie::trie<int> trie_mse;
     if (compute_mse) {
         string h_sample;
@@ -292,6 +300,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       contrasting_samples(opts.get<int>("contrasting_samples")),
       avi_k(opts.get<int>("avi_k")),
       avi_its(opts.get<int>("avi_its")),
+      sort_h(opts.get<bool>("sort_h")),
       mse_hstar_file(opts.get<string>("mse_hstar_file")),
       mse_result_file(opts.get<string>("mse_result_file")),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
@@ -344,6 +353,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "avi_its",
             "Number of AVI repeats.",
             "1");
+    parser.add_option<bool>(
+            "sort_h",
+            "Sort samples by increasing h-values.",
+            "false");
     parser.add_option<string>(
             "mse_hstar_file",
             "Path to file with h;sample for MSE.",
