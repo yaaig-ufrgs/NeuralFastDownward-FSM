@@ -1,6 +1,10 @@
 #ifndef TRIE_TRIE_H
 #define TRIE_TRIE_H
 
+/**
+ * Source: https://github.com/akshitgrover/trie
+ */
+
 #include <vector>
 
 #include "trie_node.h"
@@ -21,8 +25,11 @@ public:
     reverse_iterator rbegin();
     reverse_iterator rend();
     iterator find(std::vector<int>);
+    std::vector<T> find_all_compatible(std::vector<int> key);
 
 private:
+    std::vector<T> find_all_compatible_rec(std::vector<int> key, unsigned pos, tnode<T>* n);
+
     tnode<T> *root;
     int size;
 };
@@ -39,8 +46,7 @@ void trie<T>::insert(std::vector<int> key, T val) {
     tnode<T>* node = this->root;
     for (int& v : key) {
         // Our use case has -1, so its increments to get the values in the range (0..127)
-        v += 1;
-        assert(v >= 0 && v < 128);
+        v += 1; assert(v >= 0 && v < 128);
 
         if (node->getChild(v) != nullptr) {
             node = node->getChild(v);
@@ -64,8 +70,7 @@ bool trie<T>::exist(std::vector<int> key) {
     tnode<T>* node = this->root;
     for (int& v : key) {
         // Our use case has -1, so its increments to get the values in the range (0..127)
-        v += 1;
-        assert(v >= 0 && v < 128);
+        v += 1; assert(v >= 0 && v < 128);
 
         if (node->getChild(v) == nullptr) {
             res = false;
@@ -121,6 +126,7 @@ tnode<T>* rbrecur(tnode<T>* n, int offset, tnode<T>* r) {
         }
         return rbrecur(it, 127, r);
     }
+    return nullptr;
 }
 
 template <typename T>
@@ -138,8 +144,7 @@ typename trie<T>::iterator trie<T>::find(std::vector<int> key) {
     tnode<T>* n = this->root;
     for (int& v : key) {
         // Our use case has -1, so its increments to get the values in the range (0..127)
-        v += 1;
-        assert(v >= 0 && v < 128);
+        v += 1; assert(v >= 0 && v < 128);
 
         n = n->getChild(v);
         if (n == nullptr) {
@@ -151,6 +156,32 @@ typename trie<T>::iterator trie<T>::find(std::vector<int> key) {
     }
     trie_iterator<T> it = *(new trie_iterator<T>(n));
     return it;
+}
+
+template <typename T>
+typename std::vector<T> trie<T>::find_all_compatible(std::vector<int> key) {
+    // Our use case has -1, so its increments to get the values in the range (0..127)
+    for (int& v : key) {
+        v++;
+        assert(v >= 0 && v < 128);
+    }
+    return find_all_compatible_rec(key, 0, this->root);
+}
+
+template <typename T>
+typename std::vector<T> trie<T>::find_all_compatible_rec(std::vector<int> key, unsigned pos, tnode<T>* n) {
+    std::vector<T> values;
+    if (n != nullptr) {
+        if (pos == key.size()) {
+            values.push_back(n->get());
+        } else {
+            for (int v : (key[pos] == 0) ? n->getChildrenKeys() : std::vector<int>{key[pos]}) {
+                std::vector<T> values_ = find_all_compatible_rec(key, pos + 1, n->getChild(v));
+                values.insert(values.end(), values_.begin(), values_.end());
+            }
+        }
+    }
+    return values;
 }
 } // namespace trie
 

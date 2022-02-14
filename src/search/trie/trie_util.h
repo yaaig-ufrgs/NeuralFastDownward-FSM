@@ -18,13 +18,14 @@ tnode<T>* recur(tnode<T>* n, int offset = 0) {
             if (i == 127) {
                 return recur(n->getParent(), n->getParentIndex() + 1);
             }
-        continue;
+            continue;
         }
         if (it->isEnd()) {
         return it;
         }
         return recur(it, 0);
     }
+    return nullptr;
 }
 
 template <typename T>
@@ -49,6 +50,7 @@ tnode<T>* rrecur(tnode<T>* n, int offset) {
         }
         return recur(it, 0);
     }
+    return nullptr;
 }
 } // namespace trie
 

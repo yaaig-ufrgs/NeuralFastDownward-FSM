@@ -9,8 +9,6 @@
 #include "../task_utils/task_properties.h"
 #include "../task_utils/successor_generator.h"
 
-#include "../trie/trie.h"
-
 #include <sstream>
 #include <string>
 
@@ -151,7 +149,7 @@ vector<string> SamplingSearchYaaig::values_to_samples(vector<pair<int,vector<int
     return samples;
 }
 
-void SamplingSearchYaaig::approximate_value_iteration() {
+void SamplingSearchYaaig::approximate_value_iteration(trie::trie<shared_ptr<PartialAssignment>> trie) {
     if (avi_k <= 0 || avi_its <= 0)
         return;
 
@@ -160,23 +158,18 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     const OperatorsProxy operators = task_proxy.get_operators();
 
     for (int i = 0; i < avi_its; i++) {
-        unordered_set<string> already_computed;
-        for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
-            string pa_str = partialAssignment->to_binary();
-            if (already_computed.count(pa_str) != 0)
-                continue;
-            already_computed.insert(pa_str);
+        for (shared_ptr<PartialAssignment>& pa: sampling_technique::modified_tasks) {
             vector<OperatorID> applicable_operators;
-            succ_generator->generate_applicable_ops(*partialAssignment, applicable_operators);
+            succ_generator->generate_applicable_ops(*pa, applicable_operators);
             for (OperatorID& op_id : applicable_operators) {
                 OperatorProxy op_proxy = operators[op_id];
-                string succ_pa_str = partialAssignment->get_partial_successor(op_proxy).to_binary();
-                /*if (state_value.count(succ_pa_str) != 0) {
-                    state_value[succ_pa_str] = min(
-                        state_value[succ_pa_str],
-                        state_value[pa_str] + op_proxy.get_cost()
+                PartialAssignment succ_pa = pa->get_partial_successor(op_proxy);
+                for (shared_ptr<PartialAssignment>& _pa_succ: trie.find_all_compatible(succ_pa.get_values())) {
+                    _pa_succ->estimated_heuristic = min(
+                        _pa_succ->estimated_heuristic,
+                        pa->estimated_heuristic + op_proxy.get_cost()
                     );
-                }*/
+                }
             }
         }
     }
@@ -185,18 +178,18 @@ void SamplingSearchYaaig::approximate_value_iteration() {
 vector<string> SamplingSearchYaaig::extract_samples() {
     unordered_map<string,int> state_value;
     if (avi_k > 0) {
-        trie::trie<shared_ptr<PartialAssignment>> t;
+        trie::trie<shared_ptr<PartialAssignment>> trie;
         for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
             string bin = partialAssignment->to_binary();
             int h = partialAssignment->estimated_heuristic;
             // Maintain a mapping to keep the smallest h-value
             // in the trie in case there are duplicate samples
             if (state_value.count(bin) == 0 || h < state_value[bin]) {
-                t.insert(partialAssignment->get_values(), partialAssignment);
+                trie.insert(partialAssignment->get_values(), partialAssignment);
                 state_value[bin] = h;
             }
         }
-        approximate_value_iteration();
+        approximate_value_iteration(trie);
     } else if (minimization) {
         do_minimization(state_value);
     }
