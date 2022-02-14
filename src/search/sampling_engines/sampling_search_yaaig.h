@@ -33,9 +33,12 @@ protected:
     const int contrasting_samples;
     const int avi_k;
     const int avi_its;
+    const std::string mse_hstar_file;
+    const std::string mse_result_file;
     const std::vector<FactPair> relevant_facts;
     const std::string header;
     std::shared_ptr<utils::RandomNumberGenerator> rng;
+    const bool compute_mse;
 
     virtual std::vector<std::string> extract_samples() override;
     virtual std::string construct_header() const;
@@ -47,7 +50,11 @@ public:
     virtual ~SamplingSearchYaaig() override = default;
 
 private:
-    void approximate_value_iteration(trie::trie<std::shared_ptr<PartialAssignment>> trie);
+    double mse(trie::trie<int> trie_mse, bool root = false);
+    void approximate_value_iteration(
+        trie::trie<std::shared_ptr<PartialAssignment>> trie,
+        trie::trie<int> trie_mse
+    );
     std::unordered_map<std::string,int> do_minimization(std::unordered_map<std::string,int>& state_value);
     std::vector<State> assign_undefined_state(std::shared_ptr<PartialAssignment>& pa, int max_attempts);
     void create_contrasting_samples(std::vector<std::pair<int,std::vector<int>>>& values_set, int percentage);

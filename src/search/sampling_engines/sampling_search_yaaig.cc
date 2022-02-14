@@ -10,7 +10,9 @@
 #include "../task_utils/successor_generator.h"
 
 #include <sstream>
+#include <fstream>
 #include <string>
+#include <limits.h>
 
 using namespace std;
 
@@ -149,9 +151,37 @@ vector<string> SamplingSearchYaaig::values_to_samples(vector<pair<int,vector<int
     return samples;
 }
 
-void SamplingSearchYaaig::approximate_value_iteration(trie::trie<shared_ptr<PartialAssignment>> trie) {
+double SamplingSearchYaaig::mse(trie::trie<int> trie_mse, bool root) {
+    double sum = 0.0;
+    for (shared_ptr<PartialAssignment>& pa: sampling_technique::modified_tasks) {
+        int best_h = INT_MAX;
+        for (int& hs: trie_mse.find_all_compatible(pa->get_values(), true)) {
+            assert(best_h == INT_MAX);
+            best_h = min(best_h, hs);
+            assert(best_h != INT_MAX);
+        }
+        assert(best_h != INT_MAX);
+        int err = best_h - pa->estimated_heuristic;
+        sum += (err * err);
+    }
+    double e = sum / sampling_technique::modified_tasks.size();
+    return root ? sqrt(e) : e;
+}
+
+void SamplingSearchYaaig::approximate_value_iteration(
+    trie::trie<shared_ptr<PartialAssignment>> trie,
+    trie::trie<int> trie_mse
+) {
     if (avi_k <= 0 || avi_its <= 0)
         return;
+
+    ofstream mse_result(mse_result_file);
+    if (!trie_mse.empty()) {
+        double e = mse(trie_mse);
+        cout << endl << "[AVI] RMSE #0: " << sqrt(e) << endl;
+        mse_result << "avi_it,mse,rmse" << endl;
+        mse_result << 0 << "," << e << "," << sqrt(e) << endl;
+    }
 
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
@@ -172,10 +202,33 @@ void SamplingSearchYaaig::approximate_value_iteration(trie::trie<shared_ptr<Part
                 }
             }
         }
+        if (!trie_mse.empty()) {
+            double e = mse(trie_mse);
+            cout << "[AVI] RMSE #" << (i+1) << ": " << e << endl;
+            mse_result << (i+1) << "," << e << "," << sqrt(e) << endl;
+
+        }
     }
+    mse_result.close();
 }
 
 vector<string> SamplingSearchYaaig::extract_samples() {
+    trie::trie<int> trie_mse;
+    if (compute_mse) {
+        string h_sample;
+        ifstream f(mse_hstar_file);
+        while (getline(f, h_sample)) {
+            if (h_sample[0] == '#')
+                continue;
+            int h = stoi(h_sample.substr(0, h_sample.find(';')));
+            vector<int> key;
+            for (char& b : h_sample.substr(h_sample.find(';') + 1, h_sample.size()))
+                key.push_back((int)b - '0');
+            trie_mse.insert(key, h);
+        }
+        f.close();
+    }
+
     unordered_map<string,int> state_value;
     if (avi_k > 0) {
         trie::trie<shared_ptr<PartialAssignment>> trie;
@@ -189,7 +242,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 state_value[bin] = h;
             }
         }
-        approximate_value_iteration(trie);
+        approximate_value_iteration(trie, trie_mse);
     } else if (minimization) {
         do_minimization(state_value);
     }
@@ -239,9 +292,12 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       contrasting_samples(opts.get<int>("contrasting_samples")),
       avi_k(opts.get<int>("avi_k")),
       avi_its(opts.get<int>("avi_its")),
+      mse_hstar_file(opts.get<string>("mse_hstar_file")),
+      mse_result_file(opts.get<string>("mse_result_file")),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       header(construct_header()),
-      rng(utils::parse_rng_from_options(opts)) {
+      rng(utils::parse_rng_from_options(opts)),
+      compute_mse(mse_hstar_file != "none") {
     assert(contrasting_samples >= 0 && contrasting_samples <= 100);
     assert(assignments_by_undefined_state > 0);
     assert(avi_k == 0 || avi_k == 1);
@@ -275,23 +331,27 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
     parser.add_option<int>(
             "assignments_by_undefined_state",
             "Number of states generated from each undefined state (only with assign_undefined).",
-            "10"
-    );
+            "10");
     parser.add_option<int>(
             "contrasting_samples",
             "Generate new random samples with h = L+1. (Percentage of those obtained with the search).",
-            "0"
-    );
+            "0");
     parser.add_option<int>(
             "avi_k",
             "Correct h-values using AVI via K-step forward repeatedly",
-            "0"
-    );
+            "0");
     parser.add_option<int>(
             "avi_its",
             "Number of AVI repeats.",
-            "1"
-    );
+            "1");
+    parser.add_option<string>(
+            "mse_hstar_file",
+            "Path to file with h;sample for MSE.",
+            "none");
+    parser.add_option<string>(
+            "mse_result_file",
+            "Path to save MSE results.",
+            "sampling_mse.csv");
 
     SearchEngine::add_options_to_parser(parser);
     Options opts = parser.parse();

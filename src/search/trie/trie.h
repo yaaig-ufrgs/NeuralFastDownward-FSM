@@ -25,10 +25,11 @@ public:
     reverse_iterator rbegin();
     reverse_iterator rend();
     iterator find(std::vector<int>);
-    std::vector<T> find_all_compatible(std::vector<int> key);
+    std::vector<T> find_all_compatible(std::vector<int> key, bool bin = false);
 
 private:
     std::vector<T> find_all_compatible_rec(std::vector<int> key, unsigned pos, tnode<T>* n);
+    std::vector<T> find_all_compatible_bin_rec(std::vector<int> key, unsigned pos, tnode<T>* n);
 
     tnode<T> *root;
     int size;
@@ -159,12 +160,14 @@ typename trie<T>::iterator trie<T>::find(std::vector<int> key) {
 }
 
 template <typename T>
-typename std::vector<T> trie<T>::find_all_compatible(std::vector<int> key) {
+typename std::vector<T> trie<T>::find_all_compatible(std::vector<int> key, bool bin) {
     // Our use case has -1, so its increments to get the values in the range (0..127)
     for (int& v : key) {
         v++;
         assert(v >= 0 && v < 128);
     }
+    if (bin)
+        return find_all_compatible_bin_rec(key, 0, this->root);
     return find_all_compatible_rec(key, 0, this->root);
 }
 
@@ -181,6 +184,31 @@ typename std::vector<T> trie<T>::find_all_compatible_rec(std::vector<int> key, u
             if (key[pos] != 0) {
                 std::vector<T> values_ = find_all_compatible_rec(key, pos + 1, n->getChild(0));
                 values.insert(values.end(), values_.begin(), values_.end());
+            }
+        }
+    }
+    return values;
+}
+
+template <typename T>
+typename std::vector<T> trie<T>::find_all_compatible_bin_rec(std::vector<int> key, unsigned pos, tnode<T>* n) {
+    /**
+     * Method used to find h-value of valid states from a partial state.
+     * States must be represented as binary (0, 1, or undefined = -1).
+     */
+    std::vector<T> values;
+    if (n != nullptr) {
+        if (pos == key.size()) {
+            values.push_back(n->get());
+        } else {
+            // let 0 = undefined, 1 = binary 0, 2 = binary 1
+            // (1 -> 1), (2 -> 2), (0 -> 1 || 2)
+            if (key[pos] == 0) {
+                values = find_all_compatible_bin_rec(key, pos + 1, n->getChild(1));
+                std::vector<T> values_ = find_all_compatible_bin_rec(key, pos + 1, n->getChild(2));
+                values.insert(values.end(), values_.begin(), values_.end());
+            } else {
+                values = find_all_compatible_bin_rec(key, pos + 1, n->getChild(key[pos]));
             }
         }
     }
