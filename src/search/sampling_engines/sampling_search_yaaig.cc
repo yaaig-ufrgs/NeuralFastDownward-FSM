@@ -198,9 +198,9 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         int h = -1;
         if (store_plan_cost) {
-            h = (state_value.empty()) ?
-                partialAssignment->estimated_heuristic :
-                state_value[partialAssignment->to_binary()];
+            h = (minimization) ?
+                state_value[partialAssignment->to_binary()] :
+                partialAssignment->estimated_heuristic;
         }
 
         if (state_representation == "complete" || state_representation == "complete_no_mutex") {

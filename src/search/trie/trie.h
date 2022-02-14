@@ -175,8 +175,11 @@ typename std::vector<T> trie<T>::find_all_compatible_rec(std::vector<int> key, u
         if (pos == key.size()) {
             values.push_back(n->get());
         } else {
-            for (int v : (key[pos] == 0) ? n->getChildrenKeys() : std::vector<int>{key[pos]}) {
-                std::vector<T> values_ = find_all_compatible_rec(key, pos + 1, n->getChild(v));
+            // let 0 = undefined, v = any other value
+            // (v -> v || 0), (0 -> 0)
+            values = find_all_compatible_rec(key, pos + 1, n->getChild(key[pos]));
+            if (key[pos] != 0) {
+                std::vector<T> values_ = find_all_compatible_rec(key, pos + 1, n->getChild(0));
                 values.insert(values.end(), values_.begin(), values_.end());
             }
         }
