@@ -253,13 +253,6 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         approximate_value_iteration(trie, trie_mse);
     }
     if (minimization) {
-        for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
-            string bin = partialAssignment->to_binary();
-            int h = partialAssignment->estimated_heuristic;
-            if (state_value.count(bin) == 0 || h < state_value[bin]) {
-                state_value[bin] = h;
-            }
-        }
         do_minimization(state_value);
     }
 
