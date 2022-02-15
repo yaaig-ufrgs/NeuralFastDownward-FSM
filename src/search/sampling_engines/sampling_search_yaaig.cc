@@ -202,7 +202,7 @@ void SamplingSearchYaaig::approximate_value_iteration(
         }
         if (!trie_mse.empty()) {
             double e = mse(trie_mse);
-            cout << "[AVI] RMSE #" << (i+1) << ": " << e << endl;
+            cout << "[AVI] RMSE #" << (i+1) << ": " << sqrt(e) << endl;
             mse_result << (i+1) << "," << e << "," << sqrt(e) << endl;
 
         }
@@ -251,7 +251,15 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             }
         }
         approximate_value_iteration(trie, trie_mse);
-    } else if (minimization) {
+    }
+    if (minimization) {
+        for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
+            string bin = partialAssignment->to_binary();
+            int h = partialAssignment->estimated_heuristic;
+            if (state_value.count(bin) == 0 || h < state_value[bin]) {
+                state_value[bin] = h;
+            }
+        }
         do_minimization(state_value);
     }
 
