@@ -41,15 +41,47 @@ string SamplingSearchYaaig::sample_file_header() const {
     return header;
 }
 
-unordered_map<string,int> SamplingSearchYaaig::do_minimization(unordered_map<string,int>& state_value) {
-    // If minimization then then all identical samples receive the smallest h value among them
-    for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
-        string bin = partialAssignment->to_binary();
-        int h = partialAssignment->estimated_heuristic;
-        if (state_value.count(bin) == 0 || h < state_value[bin])
-            state_value[bin] = h;
+void SamplingSearchYaaig::do_minimization(vector<shared_ptr<PartialAssignment>>& states) {
+    // Mapping where each state will have a pair, where the first element is the
+    // smallest h-value found for the state and the second is a list of pointers
+    // to all h-values vars of all identical states.
+    unordered_map<string,pair<int,vector<int*>>> pairs;
+
+    for (shared_ptr<PartialAssignment>& s: states) {
+        string bin = s->to_binary();
+        if (pairs.count(bin) == 0) {
+            pairs[bin] = make_pair(
+                s->estimated_heuristic,
+                vector<int*>{&s->estimated_heuristic}
+            );
+        } else {
+            if (s->estimated_heuristic < pairs[bin].first)
+                pairs[bin].first = s->estimated_heuristic;
+            pairs[bin].second.push_back(&s->estimated_heuristic);
+        }
     }
-    return state_value;
+    for (pair<string,pair<int,vector<int*>>> p : pairs) {
+        for (int* h_ptr : p.second.second)
+            *h_ptr = p.second.first;
+    }
+}
+
+void SamplingSearchYaaig::do_minimization(vector<pair<int,pair<vector<int>,string>>>& states) {
+    unordered_map<string,pair<int,vector<int*>>> pairs;
+
+    for (pair<int,pair<vector<int>,string>>& s: states) {
+        if (pairs.count(s.second.second) == 0) {
+            pairs[s.second.second] = make_pair(s.first, vector<int*>{&s.first});
+        } else {
+            if (s.first < pairs[s.second.second].first)
+                pairs[s.second.second].first = s.first;
+            pairs[s.second.second].second.push_back(&s.first);
+        }
+    }
+    for (pair<string,pair<int,vector<int*>>> p : pairs) {
+        for (int* h_ptr : p.second.second)
+            *h_ptr = p.second.first;
+    }
 }
 
 vector<State> SamplingSearchYaaig::assign_undefined_state(shared_ptr<PartialAssignment>& pa, int max_attempts) {
@@ -73,7 +105,7 @@ vector<State> SamplingSearchYaaig::assign_undefined_state(shared_ptr<PartialAssi
 }
 
 void SamplingSearchYaaig::create_contrasting_samples(
-    vector<pair<int,vector<int>>>& values_set,
+    vector<pair<int,pair<vector<int>,string>>>& values_set,
     int percentage
 ) {
     if (percentage == 0)
@@ -88,7 +120,7 @@ void SamplingSearchYaaig::create_contrasting_samples(
 
     // Biggest h found in the search
     int max_h = 0;
-    for (auto& p : values_set)
+    for (pair<int,pair<vector<int>,string>>& p : values_set)
         if (p.first > max_h)
             max_h = p.first;
     max_h++; // contrasting h = max_h + 1
@@ -104,11 +136,10 @@ void SamplingSearchYaaig::create_contrasting_samples(
     }
 
     unordered_map<string,int> state_value;
-    if (minimization) {
-        for (pair<int,vector<int>>& p : values_set) {
-            string s = PartialAssignment(*task, vector<int>(p.second)).to_binary();
-            if (state_value.count(s) == 0)
-                state_value[s] = p.first;
+    if (minimization != "none") {
+        for (pair<int,pair<vector<int>,string>>& p : values_set) {
+            if (state_value.count(p.second.second) == 0)
+                state_value[p.second.second] = p.first;
         }
     }
 
@@ -118,23 +149,24 @@ void SamplingSearchYaaig::create_contrasting_samples(
             continue;
         State s = fs.second;
         s.unpack();
-        vector<int> values = s.get_values();
 
         int h = max_h;
-        if (minimization) {
+        if (minimization != "none") {
             string bin = s.to_binary();
             if (state_value.count(bin) != 0)
                 h = state_value[bin];
         }
         
-        values_set.push_back(make_pair(h, values));
+        values_set.push_back(make_pair(h, make_pair(s.get_values(), s.to_binary())));
         samples_to_be_created--;
     }
 }
 
-vector<string> SamplingSearchYaaig::values_to_samples(vector<pair<int,vector<int>>> values_set) {
+vector<string> SamplingSearchYaaig::values_to_samples(
+    vector<pair<int,pair<vector<int>,string>>> values_set
+) {
     vector<string> samples;
-    for (pair<int,vector<int>>& p : values_set) {
+    for (pair<int,pair<vector<int>,string>>& p : values_set) {
         ostringstream oss;
         if (store_plan_cost)
             oss << p.first << field_separator;
@@ -142,8 +174,8 @@ vector<string> SamplingSearchYaaig::values_to_samples(vector<pair<int,vector<int
             for (unsigned i = 0; i < relevant_facts.size(); i++) {
                 if ((state_representation == "undefined") &&
                     (i == 0 || relevant_facts[i].var != relevant_facts[i-1].var))
-                    oss << (p.second[relevant_facts[i].var] == PartialAssignment::UNASSIGNED);
-                oss << (p.second[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
+                    oss << (p.second.first[relevant_facts[i].var] == PartialAssignment::UNASSIGNED);
+                oss << (p.second.first[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
             }
         }
         samples.push_back(oss.str());
@@ -155,9 +187,8 @@ double SamplingSearchYaaig::mse(trie::trie<int> trie_mse, bool root) {
     double sum = 0.0;
     for (shared_ptr<PartialAssignment>& pa: sampling_technique::modified_tasks) {
         int best_h = INT_MAX;
-        for (int& hs: trie_mse.find_all_compatible(pa->get_values(), true)) {
+        for (int& hs: trie_mse.find_all_compatible(pa->get_values(), true))
             best_h = min(best_h, hs);
-        }
         assert(best_h != INT_MAX);
         int err = best_h - pa->estimated_heuristic;
         sum += (err * err);
@@ -166,12 +197,38 @@ double SamplingSearchYaaig::mse(trie::trie<int> trie_mse, bool root) {
     return root ? sqrt(e) : e;
 }
 
-void SamplingSearchYaaig::approximate_value_iteration(
-    trie::trie<shared_ptr<PartialAssignment>> trie,
-    trie::trie<int> trie_mse
-) {
+void SamplingSearchYaaig::approximate_value_iteration() {
     if (avi_k <= 0 || avi_its <= 0)
         return;
+    
+    trie::trie<int> trie_mse;
+    if (compute_mse) {
+        string h_sample;
+        ifstream f(mse_hstar_file);
+        while (getline(f, h_sample)) {
+            if (h_sample[0] == '#')
+                continue;
+            int h = stoi(h_sample.substr(0, h_sample.find(';')));
+            vector<int> key;
+            for (char& b : h_sample.substr(h_sample.find(';') + 1, h_sample.size()))
+                key.push_back((int)b - '0');
+            trie_mse.insert(key, h);
+        }
+        f.close();
+    }
+
+    unordered_map<string,int> min_pairs_pre;
+    trie::trie<shared_ptr<PartialAssignment>> trie;
+    for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
+        string bin = partialAssignment->to_binary();
+        int h = partialAssignment->estimated_heuristic;
+        // Maintain a mapping to keep the smallest h-value
+        // in the trie in case there are duplicate samples
+        if (min_pairs_pre.count(bin) == 0 || h < min_pairs_pre[bin]) {
+            trie.insert(partialAssignment->get_values(), partialAssignment);
+            min_pairs_pre[bin] = h;
+        }
+    }
 
     ofstream mse_result(mse_result_file);
     if (!trie_mse.empty()) {
@@ -218,72 +275,53 @@ struct SortIncreasingH {
 
 vector<string> SamplingSearchYaaig::extract_samples() {
     if (sort_h) {
-        sort(sampling_technique::modified_tasks.begin(), sampling_technique::modified_tasks.end(), SortIncreasingH());
+        sort(
+            sampling_technique::modified_tasks.begin(),
+            sampling_technique::modified_tasks.end(),
+            SortIncreasingH()
+        );
     }
 
-    trie::trie<int> trie_mse;
-    if (compute_mse) {
-        string h_sample;
-        ifstream f(mse_hstar_file);
-        while (getline(f, h_sample)) {
-            if (h_sample[0] == '#')
-                continue;
-            int h = stoi(h_sample.substr(0, h_sample.find(';')));
-            vector<int> key;
-            for (char& b : h_sample.substr(h_sample.find(';') + 1, h_sample.size()))
-                key.push_back((int)b - '0');
-            trie_mse.insert(key, h);
-        }
-        f.close();
-    }
+    if (avi_k > 0)
+        approximate_value_iteration();
+    if (minimization == "partial" || minimization == "both")
+        do_minimization(sampling_technique::modified_tasks);
 
-    unordered_map<string,int> state_value;
-    if (avi_k > 0) {
-        trie::trie<shared_ptr<PartialAssignment>> trie;
-        for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
-            string bin = partialAssignment->to_binary();
-            int h = partialAssignment->estimated_heuristic;
-            // Maintain a mapping to keep the smallest h-value
-            // in the trie in case there are duplicate samples
-            if (state_value.count(bin) == 0 || h < state_value[bin]) {
-                trie.insert(partialAssignment->get_values(), partialAssignment);
-                state_value[bin] = h;
-            }
-        }
-        approximate_value_iteration(trie, trie_mse);
-    }
-    if (minimization) {
-        do_minimization(state_value);
-    }
-
-    vector<pair<int,vector<int>>> values_set;
+    vector<pair<int,pair<vector<int>,string>>> values_set;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         int h = -1;
-        if (store_plan_cost) {
-            h = (minimization) ?
-                state_value[partialAssignment->to_binary()] :
-                partialAssignment->estimated_heuristic;
-        }
+        if (store_plan_cost)
+            h = partialAssignment->estimated_heuristic;
 
         if (state_representation == "complete" || state_representation == "complete_no_mutex") {
             State s = partialAssignment->get_full_state(
                 state_representation != "complete_no_mutex", *rng).second;
             if (task_properties::is_goal_state(task_proxy, s)) h = 0;
             s.unpack();
-            values_set.push_back(make_pair(h, s.get_values()));
+            values_set.push_back(
+                make_pair(h, make_pair(s.get_values(), s.to_binary()))
+            );
         } else if (state_representation == "partial" || state_representation == "undefined") {
             if (task_properties::is_goal_state(
                     task_proxy, partialAssignment->get_full_state(true, *rng).second))
                 h = 0;
-            values_set.push_back(make_pair(h, partialAssignment->get_values()));
+            values_set.push_back(
+                make_pair(h, make_pair(partialAssignment->get_values(), partialAssignment->to_binary()))
+            );
         } else if (state_representation == "assign_undefined") {
-            for (State &s : assign_undefined_state(partialAssignment, 5*assignments_by_undefined_state)) {
+            for (State &s : assign_undefined_state(partialAssignment, 5 * assignments_by_undefined_state)) {
                 if (task_properties::is_goal_state(task_proxy, s)) h = 0;
                 s.unpack();
-                values_set.push_back(make_pair(h, s.get_values()));
+                values_set.push_back(
+                    make_pair(h, make_pair(s.get_values(), s.to_binary()))
+                );
             }
         }
     }
+
+    if ((minimization == "complete" || minimization == "both")
+        && !(state_representation == "partial" || state_representation == "undefined"))
+        do_minimization(values_set);
 
     if (contrasting_samples > 0)
         create_contrasting_samples(values_set, contrasting_samples);
@@ -296,7 +334,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       store_plan_cost(opts.get<bool>("store_plan_cost")),
       store_state(opts.get<bool>("store_state")),
       state_representation(opts.get<string>("state_representation")),
-      minimization(opts.get<bool>("minimization")),
+      minimization(opts.get<string>("minimization")),
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
       contrasting_samples(opts.get<int>("contrasting_samples")),
       avi_k(opts.get<int>("avi_k")),
@@ -334,10 +372,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "state_representation",
             "State facts representation format (complete, complete_no_mutex, partial, or undefined, assign_undefined).",
             "complete");
-    parser.add_option<bool>(
+    parser.add_option<string>(
             "minimization",
-            "Identical states receive the best heuristic value assigned between them.",
-            "false");
+            "Identical states receive the best heuristic value assigned between them (minimization in : none, partial, complete, both).",
+            "none");
     parser.add_option<int>(
             "assignments_by_undefined_state",
             "Number of states generated from each undefined state (only with assign_undefined).",

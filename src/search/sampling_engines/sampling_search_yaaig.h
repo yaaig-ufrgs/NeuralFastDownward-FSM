@@ -28,7 +28,7 @@ protected:
     const bool store_plan_cost;
     const bool store_state;
     const std::string state_representation;
-    const bool minimization;
+    const std::string minimization;
     const int assignments_by_undefined_state;
     const int contrasting_samples;
     const int avi_k;
@@ -52,14 +52,14 @@ public:
 
 private:
     double mse(trie::trie<int> trie_mse, bool root = false);
-    void approximate_value_iteration(
-        trie::trie<std::shared_ptr<PartialAssignment>> trie,
-        trie::trie<int> trie_mse
-    );
-    std::unordered_map<std::string,int> do_minimization(std::unordered_map<std::string,int>& state_value);
+    void approximate_value_iteration();
+    void do_minimization(std::vector<std::shared_ptr<PartialAssignment>>& states);
+    void do_minimization(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& states);
     std::vector<State> assign_undefined_state(std::shared_ptr<PartialAssignment>& pa, int max_attempts);
-    void create_contrasting_samples(std::vector<std::pair<int,std::vector<int>>>& values_set, int percentage);
-    std::vector<std::string> values_to_samples(std::vector<std::pair<int,std::vector<int>>> values_set);
+    void create_contrasting_samples(
+        std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& values_set, int percentage);
+    std::vector<std::string> values_to_samples(
+        std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> values_set);
 };
 }
 #endif
