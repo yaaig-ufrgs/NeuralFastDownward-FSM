@@ -179,7 +179,7 @@ class HNN(nn.Module):
             torch.nn.init.kaiming_uniform_(m.weight)
         elif "normal" in method:
             torch.nn.init.kaiming_normal_(m.weight)
-        if zero_bias:
+        if zero_bias and self.use_bias:
             torch.nn.init.zeros_(m.bias)
 
     def set_xavier_init(
@@ -193,7 +193,7 @@ class HNN(nn.Module):
             torch.nn.init.xavier_uniform_(m.weight, gain=gain_)
         elif "normal" in method:
             torch.nn.init.xavier_normal_(m.weight, gain=gain_)
-        if zero_bias:
+        if zero_bias and self.use_bias:
             torch.nn.init.zeros_(m.bias)
 
     def forward(self, x):
