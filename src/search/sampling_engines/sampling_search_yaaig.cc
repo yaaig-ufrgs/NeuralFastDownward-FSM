@@ -267,18 +267,14 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     mse_result.close();
 }
 
-struct SortIncreasingH {
-  bool operator()(shared_ptr<PartialAssignment>& object1, shared_ptr<PartialAssignment>& object2) {
-    return(object1->estimated_heuristic < object2->estimated_heuristic);
-  }
-};
-
 vector<string> SamplingSearchYaaig::extract_samples() {
     if (sort_h) {
         sort(
             sampling_technique::modified_tasks.begin(),
             sampling_technique::modified_tasks.end(),
-            SortIncreasingH()
+            [](shared_ptr<PartialAssignment>& object1, shared_ptr<PartialAssignment>& object2) {
+                return (object1->estimated_heuristic < object2->estimated_heuristic);
+            }
         );
     }
 
