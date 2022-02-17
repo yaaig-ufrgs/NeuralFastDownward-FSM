@@ -63,7 +63,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
             f"-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} "
             f"-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} "
             f"-tsize {args.train_training_size} -spt {args.train_sample_percentage} "
-            f"-wm {args.train_weights_method} "
+            f"-us {args.train_unique_samples} -wm {args.train_weights_method} "
             f"-addfn {args.train_additional_folder_name}"
         )
 
@@ -152,7 +152,7 @@ def only_train(args):
         f"-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} "
         f"-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} "
         f"-tsize {args.train_training_size} -spt {args.train_sample_percentage} "
-        f"-wm {args.train_weights_method} "
+        f"-us {args.train_unique_samples} -wm {args.train_weights_method} "
         f"-addfn {args.train_additional_folder_name}"
     )
 
