@@ -33,6 +33,7 @@ def logging_train_config(
         "domain": args.domain,
         "problem": args.problem,
         "samples": args.samples,
+        "unique_samples": args.unique_samples,
         "model": args.model,
         "patience": args.patience,
         "output_layer": args.output_layer,
