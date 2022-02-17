@@ -156,6 +156,13 @@ def get_train_args():
         help="Sample percentage to be used during training. (default: %(default)s)",
     )
     parser.add_argument(
+        "-us",
+        "--unique-samples",
+        type=str2bool,
+        default=default_args.UNIQUE_SAMPLES,
+        help="Remove repeated samples from data. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-biout",
         "--bias-output",
         type=str2bool,

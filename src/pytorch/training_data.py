@@ -50,7 +50,7 @@ class InstanceDataset(Dataset):
 
 
 def load_training_state_value_pairs(
-    samples_file: str, clamping: int, remove_goals: bool
+        samples_file: str, clamping: int, remove_goals: bool,  unique_samples: bool
 ) -> ([([int], int)], int):
     """
     Load state-value pairs from a sampling output, returning a tuple
@@ -59,11 +59,17 @@ def load_training_state_value_pairs(
     """
     state_value_pairs = []
     domain_max_value, max_h = 0, 0
+    uniques = []
 
     with open(samples_file) as f:
         lines = f.readlines()
     for line in lines:
         if line[0] != "#":
+            if unique_samples:
+                if line in uniques:
+                    continue
+                uniques.append(line)
+
             h, state = line.split("\n")[0].split(";")
             h_int = int(h)
             if h_int == 0 and remove_goals:
