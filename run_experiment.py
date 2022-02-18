@@ -63,12 +63,14 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
             f"-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} "
             f"-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} "
             f"-tsize {args.train_training_size} -spt {args.train_sample_percentage} "
-            f"-us {args.train_unique_samples} -wm {args.train_weights_method} "
-            f"-addfn {args.train_additional_folder_name}"
+            f"-us {args.train_unique_samples} -wm {args.train_weights_method}"
         )
 
         if args.train_max_training_time != default_args.MAX_TRAINING_TIME:
             train_args += f" -t {args.train_max_training_time}"
+
+        if args.train_additional_folder_name != "":
+            train_args += f" -addfn {args.train_additional_folder_name}"
 
         test_args = (
             f"-a {args.test_search_algorithm} -m {args.test_max_search_memory} "
@@ -152,12 +154,14 @@ def only_train(args):
         f"-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} "
         f"-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} "
         f"-tsize {args.train_training_size} -spt {args.train_sample_percentage} "
-        f"-us {args.train_unique_samples} -wm {args.train_weights_method} "
-        f"-addfn {args.train_additional_folder_name}"
+        f"-us {args.train_unique_samples} -wm {args.train_weights_method}"
     )
 
     if args.train_max_training_time != default_args.MAX_TRAINING_TIME:
         train_args += f" -t {args.train_max_training_time}"
+
+    if args.train_additional_folder_name != "":
+        train_args += f" -addfn {args.train_additional_folder_name}"
 
     sample_files = filter_samples(glob(f"{args.samples}/*"), args.exp_sample_seed)
 
@@ -254,21 +258,21 @@ def experiment(args):
             run_train_test(args, args.exp_sample_seed, args.exp_net_seed, runs=1)
 
         elif args.exp_type == "fixed_net_seed":
-            for i in range(1, args.exp_sample_seed + 1):
+            for i in range(0, args.exp_sample_seed + 1):
                 run_train_test(args, i, args.exp_net_seed, runs=args.exp_sample_seed)
 
         elif args.exp_type == "fixed_sample_seed":
-            for i in range(1, args.exp_net_seed + 1):
+            for i in range(0, args.exp_net_seed + 1):
                 run_train_test(args, args.exp_sample_seed, i, runs=args.exp_net_seed)
 
         elif args.exp_type == "change_all":
-            for i in range(1, args.exp_net_seed + 1):
+            for i in range(0, args.exp_net_seed + 1):
                 run_train_test(args, i, i, runs=args.exp_net_seed)
 
         elif args.exp_type == "all":
             total_runs = args.exp_sample_seed * args.exp_net_seed
-            for i in range(1, args.exp_sample_seed + 1):
-                for j in range(1, args.exp_net_seed + 1):
+            for i in range(0, args.exp_sample_seed + 1):
+                for j in range(0, args.exp_net_seed + 1):
                     run_train_test(args, i, j, runs=total_runs)
 
         elif args.exp_type == "combined":
