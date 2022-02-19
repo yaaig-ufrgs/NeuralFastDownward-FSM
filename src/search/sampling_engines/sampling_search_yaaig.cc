@@ -204,7 +204,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
 
     auto t_start_avi = std::chrono::high_resolution_clock::now();
     cout << endl;
-    
+
     trie::trie<int> trie_mse;
     if (compute_mse) {
         string h_sample;
@@ -243,18 +243,22 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     ofstream mse_result(mse_result_file);
     if (!trie_mse.empty()) {
         double e = mse(trie_mse);
+        double re = sqrt(e);
         cout << "[AVI] Iteration #" << 0 << endl;
-        cout << "[AVI] - RMSE: " << sqrt(e) << endl;
+        cout << "[AVI] - RMSE: " << re << endl;
 
-        //mse_result << "avi_it,mse,rmse" << endl;
-        //mse_result << 0 << "," << e << "," << sqrt(e) << endl;
+        mse_result << "avi_it,mse,rmse,success_rate,time (sec)" << endl;
+        mse_result << 0 << "," << e << "," << re << ",," << endl;
     }
 
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
     const OperatorsProxy operators = task_proxy.get_operators();
 
-    for (int i = 0; i < avi_its; i++) {
+    double last_loss = __DBL_MAX__;
+    bool early_stop = false;
+    int total_samples = sampling_technique::modified_tasks.size();
+    for (int i = 0; (i < avi_its) && !early_stop; i++) {
         int success_count = 0;
         auto t_start_avi_it = std::chrono::high_resolution_clock::now();
         for (shared_ptr<PartialAssignment>& pa: sampling_technique::modified_tasks) {
@@ -278,19 +282,29 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         cout << "[AVI] Iteration #" << (i+1) << endl;
         if (!trie_mse.empty()) {
             double e = mse(trie_mse);
-            cout << "[AVI] - RMSE: " << sqrt(e) << endl;
-
-            //mse_result << (i+1) << "," << e << "," << sqrt(e) << endl;
+            double re = sqrt(e);
+            cout << "[AVI] - RMSE: " << re << endl;
+            mse_result << (i+1) << "," << e << "," << re;
+            early_stop = (last_loss - re <= avi_epsilon);
+            last_loss = re;
         }
-        cout << "[AVI] - Success rate: " << (100 * (float)success_count / sampling_technique::modified_tasks.size()) << "%" << endl;
-        cout << "[AVI] - Time: " << (std::chrono::duration<double, std::milli>(
-            std::chrono::high_resolution_clock::now() - t_start_avi_it).count() / 1000.0) << "s" << endl;
+        double success_rate = (100 * (double)success_count / total_samples);
+        double it_time = (std::chrono::duration<double, std::milli>(
+            std::chrono::high_resolution_clock::now() - t_start_avi_it).count() / 1000.0);
+
+        cout << "[AVI] - Success rate: " << success_count << "/" << total_samples << " (" << success_rate << "%)" << endl;
+        cout << "[AVI] - Time: " << it_time << "s" << endl;
+
+        if (!trie_mse.empty())
+            mse_result << "," << success_count << "/" << total_samples << " (" << success_rate << "%)" << "," << it_time << endl;
+        if (early_stop)
+            cout << "[AVI] Early stopped." << endl;
     }
 
     cout << "[AVI] Total time: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t_start_avi).count() / 1000.0) << "s" << endl;
 
-    //mse_result.close();
+    mse_result.close();
 }
 
 vector<string> SamplingSearchYaaig::extract_samples() {
@@ -361,6 +375,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       contrasting_samples(opts.get<int>("contrasting_samples")),
       avi_k(opts.get<int>("avi_k")),
       avi_its(opts.get<int>("avi_its")),
+      avi_epsilon(stod(opts.get<string>("avi_epsilon"))),
       sort_h(opts.get<bool>("sort_h")),
       mse_hstar_file(opts.get<string>("mse_hstar_file")),
       mse_result_file(opts.get<string>("mse_result_file")),
@@ -414,6 +429,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "avi_its",
             "Number of AVI repeats.",
             "1");
+    parser.add_option<string>(
+            "avi_epsilon",
+            "RMSE no-improvement threshold for AVI early stop.",
+            "0");
     parser.add_option<bool>(
             "sort_h",
             "Sort samples by increasing h-values.",

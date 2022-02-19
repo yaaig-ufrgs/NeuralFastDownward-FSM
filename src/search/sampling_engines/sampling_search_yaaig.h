@@ -33,6 +33,7 @@ protected:
     const int contrasting_samples;
     const int avi_k;
     const int avi_its;
+    const double avi_epsilon;
     const bool sort_h;
     const std::string mse_hstar_file;
     const std::string mse_result_file;
