@@ -13,6 +13,7 @@
 #include <fstream>
 #include <string>
 #include <limits.h>
+#include <chrono>
 
 using namespace std;
 
@@ -200,6 +201,9 @@ double SamplingSearchYaaig::mse(trie::trie<int> trie_mse, bool root) {
 void SamplingSearchYaaig::approximate_value_iteration() {
     if (avi_k <= 0 || avi_its <= 0)
         return;
+
+    auto t_start_avi = std::chrono::high_resolution_clock::now();
+    cout << endl;
     
     trie::trie<int> trie_mse;
     if (compute_mse) {
@@ -215,8 +219,12 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             trie_mse.insert(key, h);
         }
         f.close();
+
+        cout << "[AVI] Time creating trie_mse: " << (std::chrono::duration<double, std::milli>(
+            std::chrono::high_resolution_clock::now() - t_start_avi).count() / 1000.0) << "s" << endl;
     }
 
+    auto t_start_avi_trie = std::chrono::high_resolution_clock::now();
     unordered_map<string,int> min_pairs_pre;
     trie::trie<shared_ptr<PartialAssignment>> trie;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
@@ -229,13 +237,17 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             min_pairs_pre[bin] = h;
         }
     }
+    cout << "[AVI] Time creating trie: " << (std::chrono::duration<double, std::milli>(
+        std::chrono::high_resolution_clock::now() - t_start_avi_trie).count() / 1000.0) << "s" << endl;
 
     ofstream mse_result(mse_result_file);
     if (!trie_mse.empty()) {
         double e = mse(trie_mse);
-        cout << endl << "[AVI] RMSE #0: " << sqrt(e) << endl;
-        mse_result << "avi_it,mse,rmse" << endl;
-        mse_result << 0 << "," << e << "," << sqrt(e) << endl;
+        cout << "[AVI] Iteration #" << 0 << endl;
+        cout << "[AVI] - RMSE: " << sqrt(e) << endl;
+
+        //mse_result << "avi_it,mse,rmse" << endl;
+        //mse_result << 0 << "," << e << "," << sqrt(e) << endl;
     }
 
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
@@ -243,28 +255,42 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     const OperatorsProxy operators = task_proxy.get_operators();
 
     for (int i = 0; i < avi_its; i++) {
+        int success_count = 0;
+        auto t_start_avi_it = std::chrono::high_resolution_clock::now();
         for (shared_ptr<PartialAssignment>& pa: sampling_technique::modified_tasks) {
+            bool success = false;
             vector<OperatorID> applicable_operators;
             succ_generator->generate_applicable_ops(*pa, applicable_operators);
             for (OperatorID& op_id : applicable_operators) {
                 OperatorProxy op_proxy = operators[op_id];
                 PartialAssignment succ_pa = pa->get_partial_successor(op_proxy);
                 for (shared_ptr<PartialAssignment>& _pa_succ: trie.find_all_compatible(succ_pa.get_values())) {
-                    _pa_succ->estimated_heuristic = min(
-                        _pa_succ->estimated_heuristic,
-                        pa->estimated_heuristic + op_proxy.get_cost()
-                    );
+                    int candidate_heuristic = pa->estimated_heuristic + op_proxy.get_cost();
+                    if (candidate_heuristic < _pa_succ->estimated_heuristic) {
+                        _pa_succ->estimated_heuristic = candidate_heuristic;
+                        success = true;
+                    }
                 }
             }
+            if (success)
+                success_count++;
         }
+        cout << "[AVI] Iteration #" << (i+1) << endl;
         if (!trie_mse.empty()) {
             double e = mse(trie_mse);
-            cout << "[AVI] RMSE #" << (i+1) << ": " << sqrt(e) << endl;
-            mse_result << (i+1) << "," << e << "," << sqrt(e) << endl;
+            cout << "[AVI] - RMSE: " << sqrt(e) << endl;
 
+            //mse_result << (i+1) << "," << e << "," << sqrt(e) << endl;
         }
+        cout << "[AVI] - Success rate: " << (100 * (float)success_count / sampling_technique::modified_tasks.size()) << "%" << endl;
+        cout << "[AVI] - Time: " << (std::chrono::duration<double, std::milli>(
+            std::chrono::high_resolution_clock::now() - t_start_avi_it).count() / 1000.0) << "s" << endl;
     }
-    mse_result.close();
+
+    cout << "[AVI] Total time: " << (std::chrono::duration<double, std::milli>(
+        std::chrono::high_resolution_clock::now() - t_start_avi).count() / 1000.0) << "s" << endl;
+
+    //mse_result.close();
 }
 
 vector<string> SamplingSearchYaaig::extract_samples() {
