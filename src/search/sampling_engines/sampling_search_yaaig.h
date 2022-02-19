@@ -34,6 +34,7 @@ protected:
     const int avi_k;
     const int avi_its;
     const double avi_epsilon;
+    const bool avi_symmetric_statespace;
     const bool sort_h;
     const std::string mse_hstar_file;
     const std::string mse_result_file;

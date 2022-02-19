@@ -261,6 +261,8 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     for (int i = 0; (i < avi_its) && !early_stop; i++) {
         int success_count = 0;
         auto t_start_avi_it = std::chrono::high_resolution_clock::now();
+        // for v in succ(u)
+        //   h(u) := min { h(u), h(v)+1 }
         for (shared_ptr<PartialAssignment>& pa: sampling_technique::modified_tasks) {
             bool success = false;
             vector<OperatorID> applicable_operators;
@@ -269,10 +271,17 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                 OperatorProxy op_proxy = operators[op_id];
                 PartialAssignment succ_pa = pa->get_partial_successor(op_proxy);
                 for (shared_ptr<PartialAssignment>& _pa_succ: trie.find_all_compatible(succ_pa.get_values())) {
-                    int candidate_heuristic = pa->estimated_heuristic + op_proxy.get_cost();
-                    if (candidate_heuristic < _pa_succ->estimated_heuristic) {
-                        _pa_succ->estimated_heuristic = candidate_heuristic;
+                    int candidate_heuristic = _pa_succ->estimated_heuristic + op_proxy.get_cost();
+                    if (candidate_heuristic < pa->estimated_heuristic) {
+                        pa->estimated_heuristic = candidate_heuristic;
                         success = true;
+                    }
+                    if (avi_symmetric_statespace) {
+                        candidate_heuristic = pa->estimated_heuristic + op_proxy.get_cost();
+                        if (candidate_heuristic < _pa_succ->estimated_heuristic) {
+                            _pa_succ->estimated_heuristic = candidate_heuristic;
+                            success = true;
+                        }
                     }
                 }
             }
@@ -376,6 +385,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       avi_k(opts.get<int>("avi_k")),
       avi_its(opts.get<int>("avi_its")),
       avi_epsilon(stod(opts.get<string>("avi_epsilon"))),
+      avi_symmetric_statespace(opts.get<bool>("avi_symmetric_statespace")),
       sort_h(opts.get<bool>("sort_h")),
       mse_hstar_file(opts.get<string>("mse_hstar_file")),
       mse_result_file(opts.get<string>("mse_result_file")),
@@ -433,6 +443,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "avi_epsilon",
             "RMSE no-improvement threshold for AVI early stop.",
             "0");
+    parser.add_option<bool>(
+            "avi_symmetric_statespace",
+            "AVI iterates both ways if domain state space is symmetric.",
+            "false");
     parser.add_option<bool>(
             "sort_h",
             "Sort samples by increasing h-values.",
