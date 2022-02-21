@@ -270,6 +270,8 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             for (OperatorID& op_id : applicable_operators) {
                 OperatorProxy op_proxy = operators[op_id];
                 PartialAssignment succ_pa = pa->get_partial_successor(op_proxy);
+                if (succ_pa.violates_mutexes())
+                    continue;
                 for (shared_ptr<PartialAssignment>& _pa_succ: trie.find_all_compatible(succ_pa.get_values())) {
                     int candidate_heuristic = _pa_succ->estimated_heuristic + op_proxy.get_cost();
                     if (candidate_heuristic < pa->estimated_heuristic) {
