@@ -54,7 +54,7 @@ def eval_main(args: Namespace):
     eval_results_path = dirname + "/" + eval_results_name
 
     f_results = open(eval_results_path, "a")
-    f_results.write("sample,min_loss,min_loss_no_goal,mean_loss,max_loss,time\n")
+    f_results.write("sample,num_samples,misses,max_rounded_abs_error,mean_rounded_abs_error,min_rmse_loss,min_rmse_loss_no_goal,mean_rmse_loss,max_rmse_loss,time\n")
 
     model = torch.jit.load(args.trained_model)
     model.eval()
@@ -73,15 +73,30 @@ def eval_main(args: Namespace):
         _log.info(f"Evaluating {data_name}...")
 
         eval_timer = Timer(time_limit=None).start()
-        y_pred_loss, min_loss, min_loss_no_goal, mean_loss, max_loss = eval_model(
-            model, eval_data, args.log_states
-        )
+
+        (
+            y_pred_loss,
+            num_samples,
+            misses,
+            max_abs_error,
+            mean_abs_error,
+            min_loss,
+            min_loss_no_goal,
+            mean_loss,
+            max_loss,
+        ) = eval_model(model, eval_data, args.log_states)
+
         curr_time = eval_timer.current_time()
+
         _log.info(f"Results:")
-        _log.info(f"| min_loss: {min_loss}")
-        _log.info(f"| min_loss_no_goal: {min_loss_no_goal}")
-        _log.info(f"| mean_loss: {mean_loss}")
-        _log.info(f"| max_loss: {max_loss}")
+        _log.info(f"| num_samples: {num_samples}")
+        _log.info(f"| misses: {misses}")
+        _log.info(f"| max_rounded_abs_error: {max_abs_error}")
+        _log.info(f"| mean_rounded_abs_error: {mean_abs_error}")
+        _log.info(f"| min_rmse_loss: {min_loss}")
+        _log.info(f"| min_rmse_loss_no_goal: {min_loss_no_goal}")
+        _log.info(f"| mean_rmse_loss: {mean_loss}")
+        _log.info(f"| max_rmse_loss: {max_loss}")
         _log.info(f"| elapsed time: {curr_time}")
 
         if args.save_preds:
@@ -91,11 +106,11 @@ def eval_main(args: Namespace):
 
         if args.save_plots:
             plots_dir = f"{dirname}/plots"
-            save_y_pred_scatter_eval(y_pred_loss, plots_dir, data_name) 
+            save_y_pred_scatter_eval(y_pred_loss, plots_dir, data_name)
             _log.info(f"Saved {data_name} plots to {plots_dir}")
 
         f_results.write(
-            f"{data_name},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{curr_time}\n"
+            f"{data_name},{num_samples},{misses},{max_abs_error},{mean_abs_error},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{curr_time}\n"
         )
         _log.info(f"Appended results to {eval_results_path}")
 
@@ -109,19 +124,38 @@ def eval_model(model, dataloader: DataLoader, log_states):
     max_loss = float("-inf")
     min_loss = float("inf")
     min_loss_no_goal = float("inf")
-    eval_y_pred = []  # [[state, y, pred, loss], ...]
-    repeat_count = 0
+    eval_y_pred = []  # [[state, y, pred, abs_error, loss], ...]
+    eval_abs_error = 0
+    max_abs_error = 0
+    misses = 0
+
+    # Observation: RMSE and "abssolute error" here are virtually the same, except the RMSE is comparing y
+    # directly with the floating-point output (prediction) of the trained model, while the "abs error"
+    # is comparing y with the rounded (integer) prediction of the trained model.
+    # This distinction is made because during search, the output of the network is rounded; therefore, while the
+    # difference between the absolute error and RMSE here are minimum, the former directly reflects the output
+    # of the network during search.
 
     with torch.no_grad():
         for X, y in dataloader:
             pred = model(X)
             loss = loss_fn(pred, y).item()
 
+            rounded_y = int(torch.round(y[0]))
+            rounded_pred = int(torch.round(pred[0]))
+            if rounded_y != rounded_pred:
+                misses += 1
+
+            abs_error = abs(rounded_y - rounded_pred)
+            if abs_error > max_abs_error:
+                max_abs_error = abs_error
+            eval_abs_error += abs_error
+
             if loss > max_loss:
                 max_loss = loss
             if loss < min_loss:
                 min_loss = loss
-            if loss < min_loss_no_goal and int(torch.round(y[0])) != 0:
+            if loss < min_loss_no_goal and rounded_y != 0:
                 min_loss_no_goal = loss
             eval_loss += loss
 
@@ -131,13 +165,26 @@ def eval_model(model, dataloader: DataLoader, log_states):
 
             if log_states:
                 _log.info(f"| state: {x_str}")
-                _log.info(f"| y: {float(y[0])} | pred: {float(pred[0])} | loss: {loss}")
+                _log.info(
+                    f"| y: {float(y[0])} | pred: {float(pred[0])} | rmse_loss: {loss} | abs_error_round: {abs_error}"
+                )
 
-            eval_y_pred.append([x_str, float(y[0]), float(pred[0]), loss])
+            eval_y_pred.append([x_str, float(y[0]), float(pred[0]), abs_error, loss])
 
     mean_loss = eval_loss / len(dataloader)
+    mean_abs_error = eval_abs_error / len(dataloader)
 
-    return eval_y_pred, min_loss, min_loss_no_goal, mean_loss, max_loss
+    return (
+        eval_y_pred,
+        len(dataloader),
+        misses,
+        max_abs_error,
+        mean_abs_error,
+        min_loss,
+        min_loss_no_goal,
+        mean_loss,
+        max_loss,
+    )
 
 
 class RMSELoss(torch.nn.Module):
