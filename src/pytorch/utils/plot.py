@@ -137,7 +137,10 @@ def save_pred_error_bar_eval(data: list, directory: str, prefix: str):
     ax.set_xlabel("abs(y-pred) error")
     ax.set_ylabel("count")
     ax.set_title(plot_title + "\n" + prefix, fontsize=10)
-
+    ax.text(0.70, 0.90, f'max_error = {max(rounded_errors)}\navg_error = {round(sum(rounded_errors) / len(rounded_errors), 2)}\nmax_count = {max(d_error_count, key=d_error_count.get)}',
+            horizontalalignment='left',
+            verticalalignment='center',
+            transform = ax.transAxes)
     fig.savefig(directory + "/" + plot_filename + ".png")
 
     plt.clf()
