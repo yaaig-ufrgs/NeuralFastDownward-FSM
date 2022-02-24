@@ -23,6 +23,7 @@ protected:
     const bool deprioritize_undoing_steps;
     const bool is_valid_walk;
     const bool restart_h_when_goal_state;
+    const bool allow_internal_rollout_duplicates;
     const options::ParseTree bias_evaluator_tree;
     const bool bias_probabilistic;
     const double bias_adapt;

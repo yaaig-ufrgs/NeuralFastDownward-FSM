@@ -47,6 +47,7 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
           is_valid_walk(opts.get<bool>("is_valid_walk")),
           restart_h_when_goal_state(opts.get<bool>("restart_h_when_goal_state")),
+          allow_internal_rollout_duplicates(opts.get<bool>("allow_internal_rollout_duplicates")),
           bias_evaluator_tree(opts.get_parse_tree("bias", options::ParseTree())),
           bias_probabilistic(opts.get<bool>("bias_probabilistic")),
           bias_adapt(opts.get<double>("bias_adapt")),
@@ -134,7 +135,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 continue;
             }
 
-            if (hash_table.find(new_partial_assignment) == hash_table.end()) {
+            if (allow_internal_rollout_duplicates || hash_table.find(new_partial_assignment) == hash_table.end()) {
                 new_partial_assignment.estimated_heuristic = partial_assignment.estimated_heuristic + 1;
 
                 hash_table.insert(new_partial_assignment);
@@ -161,7 +162,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 bias_adapt
             );
 
-            if (hash_table.find(new_partial_assignment) == hash_table.end()) {
+            if (allow_internal_rollout_duplicates || hash_table.find(new_partial_assignment) == hash_table.end()) {
                 hash_table.insert(new_partial_assignment);
 
                 // if it is goal state then set h to 0
@@ -219,16 +220,24 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
     parser.add_option<bool>(
             "deprioritize_undoing_steps",
             "Deprioritizes actions which undo the previous action",
-            "false");
+            "false"
+    );
     parser.add_option<bool>(
             "is_valid_walk",
             "enforces states during random walk are avalid states w.r.t. "
             "the KNOWN mutexes",
-            "true");
+            "true"
+    );
     parser.add_option<bool>(
             "restart_h_when_goal_state",
             "Restart h value when goal state is sampled (only random walk)",
-            "true");
+            "true"
+    );
+    parser.add_option<bool>(
+            "allow_internal_rollout_duplicates",
+            "If false, states already seen within the same rollout are ignored.",
+            "false"
+    );
     parser.add_option<shared_ptr<Heuristic>>(
             "bias",
             "bias heuristic",
