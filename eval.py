@@ -21,7 +21,9 @@ from src.pytorch.utils.parse_args import get_eval_args
 from src.pytorch.utils.file_helpers import save_y_pred_loss_csv
 from src.pytorch.utils.log_helpers import logging_eval_config
 from src.pytorch.utils.timer import Timer
-from src.pytorch.utils.plot import save_y_pred_scatter_eval
+from src.pytorch.utils.plot import save_y_pred_scatter_eval, save_pred_error_bar_eval
+from src.pytorch.utils.helpers import get_train_args_json
+import src.pytorch.utils.default_args as default_args
 
 _log = logging.getLogger(__name__)
 
@@ -36,6 +38,16 @@ def eval_main(args: Namespace):
         return
 
     dirname = "/".join(args.trained_model.split("/")[:2])
+
+    if args.follow_training:
+        original_train_args = get_train_args_json(dirname)
+        args.seed = original_train_args["seed"]
+        args.shuffle_seed = original_train_args["shuffle_seed"]
+        args.shuffle = original_train_args["shuffle"]
+        args.training_size = original_train_args["training_size"]
+
+    set_seeds(args)
+
     eval_files = glob(f"{dirname}/eval*.log")
     log_name = (
         "eval.log" if len(eval_files) == 0 else "eval_" + str(len(eval_files)) + ".log"
@@ -61,11 +73,14 @@ def eval_main(args: Namespace):
 
     eval_timer_total = Timer(time_limit=None).start()
     for sample in args.samples:
+        # TODO FIX THIS
         eval_data = KFoldTrainingData(
             sample,
             batch_size=1,
-            shuffle=False,
-            training_size=1.0,
+            shuffle=args.shuffle,
+            seed=args.seed,
+            shuffle_seed=args.shuffle_seed,
+            training_size=args.training_size,
             model=model,
         ).get_fold(0)[0]
 
@@ -90,7 +105,7 @@ def eval_main(args: Namespace):
 
         _log.info(f"Results:")
         _log.info(f"| num_samples: {num_samples}")
-        _log.info(f"| misses: {misses}")
+        _log.info(f"| rounded_misses: {misses}")
         _log.info(f"| max_rounded_abs_error: {max_abs_error}")
         _log.info(f"| mean_rounded_abs_error: {mean_abs_error}")
         _log.info(f"| min_rmse_loss: {min_loss}")
@@ -107,6 +122,7 @@ def eval_main(args: Namespace):
         if args.save_plots:
             plots_dir = f"{dirname}/plots"
             save_y_pred_scatter_eval(y_pred_loss, plots_dir, data_name)
+            save_pred_error_bar_eval(y_pred_loss, plots_dir, data_name)
             _log.info(f"Saved {data_name} plots to {plots_dir}")
 
         f_results.write(
@@ -185,6 +201,20 @@ def eval_model(model, dataloader: DataLoader, log_states):
         mean_loss,
         max_loss,
     )
+
+
+def set_seeds(args: Namespace, shuffle_seed: bool = True):
+    """
+    Sets seeds to assure program reproducibility.
+    """
+    if args.seed == -1:
+        args.seed = randint(0, 2 ** 32 - 1)
+    if shuffle_seed and args.shuffle_seed == -1:
+        args.shuffle_seed = args.seed
+    torch.manual_seed(args.seed)
+    torch.use_deterministic_algorithms(True)
+    random.seed(args.seed)
+    np.random.seed(args.seed)
 
 
 class RMSELoss(torch.nn.Module):

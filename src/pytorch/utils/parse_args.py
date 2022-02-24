@@ -492,6 +492,42 @@ def get_eval_args():
         help="Path to file with states to be evaluated on",
     )
     parser.add_argument(
+        "-s",
+        "--seed",
+        type=int,
+        default=default_args.EVAL_SEED,
+        help="Random seed to be used. Defaults to no seed. (default: random)",
+    )
+    parser.add_argument(
+        "-shs",
+        "--shuffle-seed",
+        type=int,
+        default=default_args.EVAL_SHUFFLE_SEED,
+        help="Seed to be used for separating training and validation data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-sh",
+        "--shuffle",
+        type=str2bool,
+        default=default_args.EVAL_SHUFFLE,
+        help="Shuffle the training data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-tsize",
+        "--training-size",
+        type=float,
+        default=default_args.EVAL_TRAINING_SIZE,
+        help="Training data size in relation to validation data. Change it in case you want to separate training data from validation data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-ft",
+        "--follow-training",
+        type=str2bool,
+        default=default_args.FOLLOW_TRAIN,
+        help="Follow original training config when it comes to training data size, shuffling and seeds. (default: %(default)s)",
+    )
+
+    parser.add_argument(
         "-ls",
         "--log-states",
         type=str2bool,

@@ -104,6 +104,48 @@ def save_y_pred_scatter_eval(data: list, directory: str, prefix: str):
     plt.close(fig)
 
 
+def save_pred_error_bar_eval(data: list, directory: str, prefix: str):
+    """
+    Create and save error count histogram plot for eval.
+    """
+    if len(data) == 0:
+        return
+
+    if not path.exists(directory):
+        makedirs(directory)
+
+    plot_title = get_plot_title(directory)
+    plot_filename = f"eval_error_{plot_title}_{prefix}"
+
+    rounded_errors = [round(d[3]) for d in data]
+
+    d_error_count = {}
+
+    for e in rounded_errors:
+        d_error_count[e] = d_error_count.get(e, 0) + 1
+
+    fig, ax = plt.subplots()
+    x_vals = list(d_error_count.keys())
+    y_vals = list(d_error_count.values())
+    low_x, high_x = min(x_vals), max(x_vals)
+    low_y, high_y = min(y_vals), max(y_vals)
+
+    ax.bar(x_vals, y_vals, width=0.8, align='center')
+    ax.set_xlim(low_x-2, high_x+10)
+    ax.set_ylim(low_y-2, high_y+5)
+
+    #ax.set_xticks(range(len())) 
+
+    ax.set_xlabel("abs(y-pred) error")
+    ax.set_ylabel("count")
+    ax.set_title(plot_title + "\n" + prefix, fontsize=10)
+
+    fig.savefig(directory + "/" + plot_filename + ".png")
+
+    plt.clf()
+    plt.close(fig)
+
+
 def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h: str) -> dict:
     """
     Creates a scatter plot with hnn and some other heuristic (if data for it is available).
