@@ -127,14 +127,12 @@ def save_pred_error_bar_eval(data: list, directory: str, prefix: str):
     fig, ax = plt.subplots()
     x_vals = list(d_error_count.keys())
     y_vals = list(d_error_count.values())
-    low_x, high_x = min(x_vals), max(x_vals)
+    #low_x, high_x = min(x_vals), max(x_vals)
     low_y, high_y = min(y_vals), max(y_vals)
 
-    ax.bar(x_vals, y_vals, width=0.8, align='center')
-    ax.set_xlim(low_x-2, high_x+10)
-    ax.set_ylim(low_y-2, high_y+5)
-
-    #ax.set_xticks(range(len())) 
+    ax.bar(x_vals, y_vals, width=0.7, align='center', edgecolor='black', linewidth=0.5)
+    #ax.set_xlim(low_x-5, high_x+5)
+    ax.set_ylim(low_y, high_y+5)
 
     ax.set_xlabel("abs(y-pred) error")
     ax.set_ylabel("count")
