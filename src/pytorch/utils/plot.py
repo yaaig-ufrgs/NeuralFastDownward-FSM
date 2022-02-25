@@ -22,7 +22,7 @@ def get_plot_title(directory: str) -> str:
     return plot_title
 
 
-def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str, prefix: str):
+def save_y_pred_scatter(data: list, t: int, fold_idx: int, directory: str, prefix: str):
     """
     Create and save real y and predicted y scatter plot.
     """
@@ -38,8 +38,11 @@ def save_y_pred_scatter(data: dict, t: int, fold_idx: int, directory: str, prefi
     plot_title = get_plot_title(directory)
     plot_filename = f"{prefix}{plot_title}_epoch_{str(t)}_{fold_idx}"
 
-    real = [data[key][0] for key in data]
-    pred = [data[key][1] for key in data]
+    real = [d[1] for d in data]
+    pred = [d[2] for d in data]
+
+    #real = [data[key][0] for key in data]
+    #pred = [data[key][1] for key in data]
 
     fig, ax = plt.subplots()
     ax.scatter(real, pred, s=2, alpha=0.35, c="red", zorder=10)

@@ -44,8 +44,8 @@ class TrainWorkflow:
         self.patience = patience
         self.early_stopped = False
         self.restart_no_conv = restart_no_conv
-        self.train_y_pred_values = {}  # {state = (y, pred)}
-        self.val_y_pred_values = {}
+        self.train_y_pred_values = []  # [state, y, pred]
+        self.val_y_pred_values = [] # [state, y, pred]
 
     def train_loop(self, t: int, fold_idx: int) -> float:
         """
@@ -271,10 +271,12 @@ class TrainWorkflow:
             if len(y[i]) > 1:  # Prefix (unary encoding)
                 y_h = prefix_to_h(y[i].tolist())
                 pred_h = prefix_to_h(pred[i].tolist())
-                y_pred_values[x_str] = (y_h, pred_h)
+                #y_pred_values[x_str] = (y_h, pred_h)
+                y_pred_values.append([x_str, y_h, pred_h])
             else:  # Regression
-                y_pred_values[x_str] = (
-                    int(torch.round(y[i][0])),
-                    int(torch.round(pred[i][0])),
-                )
+                y_pred_values.append([
+                    x_str,
+                    torch.round(y[i][0]),
+                    torch.round(pred[i][0]),
+                ])
         return y_pred_values
