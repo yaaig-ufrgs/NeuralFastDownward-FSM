@@ -526,7 +526,13 @@ def get_eval_args():
         default=default_args.FOLLOW_TRAIN,
         help="Follow original training config when it comes to training data size, shuffling and seeds. (default: %(default)s)",
     )
-
+    parser.add_argument(
+        "-us",
+        "--unique-samples",
+        type=str2bool,
+        default=default_args.UNIQUE_SAMPLES,
+        help="Remove repeated samples from data. (default: %(default)s)",
+    )
     parser.add_argument(
         "-ls",
         "--log-states",

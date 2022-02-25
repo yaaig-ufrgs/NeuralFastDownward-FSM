@@ -45,6 +45,7 @@ def eval_main(args: Namespace):
         args.shuffle_seed = original_train_args["shuffle_seed"]
         args.shuffle = original_train_args["shuffle"]
         args.training_size = original_train_args["training_size"]
+        args.unique_samples = original_train_args["unique_samples"]
 
     set_seeds(args)
 
@@ -72,69 +73,86 @@ def eval_main(args: Namespace):
     model.eval()
 
     eval_timer_total = Timer(time_limit=None).start()
+
+    # EVALUATION
     for sample in args.samples:
-        # TODO FIX THIS
-        eval_data = KFoldTrainingData(
+        train_data, val_data, test_data = KFoldTrainingData(
             sample,
             batch_size=1,
             shuffle=args.shuffle,
             seed=args.seed,
             shuffle_seed=args.shuffle_seed,
             training_size=args.training_size,
+            unique_samples=args.unique_samples,
             model=model,
-        ).get_fold(0)[0]
+        ).get_fold(0)
 
-        data_name = sample.split("/")[-1]
-        _log.info(f"Evaluating {data_name}...")
+        if train_data != None:
+            eval_workflow(model, sample, dirname, train_data, "training", f_results, args)
+        if val_data != None:
+            eval_workflow(model, sample, dirname, val_data, "validation", f_results, args)
+        if test_data != None:
+            eval_workflow(model, sample, dirname, test_data, "test", f_results, args)
 
-        eval_timer = Timer(time_limit=None).start()
+    _log.info(f"Total elapsed time for evaluation: {eval_timer_total.current_time()}")
 
-        (
-            y_pred_loss,
-            num_samples,
-            misses,
-            max_abs_error,
-            mean_abs_error,
-            min_loss,
-            min_loss_no_goal,
-            mean_loss,
-            max_loss,
-        ) = eval_model(model, eval_data, args.log_states)
-
-        curr_time = eval_timer.current_time()
-
-        _log.info(f"Results:")
-        _log.info(f"| num_samples: {num_samples}")
-        _log.info(f"| rounded_misses: {misses}")
-        _log.info(f"| max_rounded_abs_error: {max_abs_error}")
-        _log.info(f"| mean_rounded_abs_error: {mean_abs_error}")
-        _log.info(f"| min_rmse_loss: {min_loss}")
-        _log.info(f"| min_rmse_loss_no_goal: {min_loss_no_goal}")
-        _log.info(f"| mean_rmse_loss: {mean_loss}")
-        _log.info(f"| max_rmse_loss: {max_loss}")
-        _log.info(f"| elapsed time: {curr_time}")
-
-        if args.save_preds:
-            y_pred_loss_file = dirname + "/" + data_name + ".csv"
-            save_y_pred_loss_csv(y_pred_loss, y_pred_loss_file)
-            _log.info(f"Saved (state,y,pred,loss) CSV file to {y_pred_loss_file}")
-
-        if args.save_plots:
-            plots_dir = f"{dirname}/plots"
-            save_y_pred_scatter_eval(y_pred_loss, plots_dir, data_name)
-            save_pred_error_bar_eval(y_pred_loss, plots_dir, data_name)
-            _log.info(f"Saved {data_name} plots to {plots_dir}")
-
-        f_results.write(
-            f"{data_name},{num_samples},{misses},{max_abs_error},{mean_abs_error},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{curr_time}\n"
-        )
-        _log.info(f"Appended results to {eval_results_path}")
-
-    _log.info(f"Total elapsed time: {eval_timer_total.current_time()}")
     f_results.close()
 
 
-def eval_model(model, dataloader: DataLoader, log_states):
+def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data_type: str, f_results, args: Namespace):
+    """
+    Complete model evaluation workflow for a given dataset.
+    """
+    data_name = sample.split("/")[-1]
+    _log.info(f"Evaluating {data_name} ({data_type} dataset)...")
+
+    eval_timer = Timer(time_limit=None).start()
+
+    (
+        y_pred_loss,
+        num_samples,
+        misses,
+        max_abs_error,
+        mean_abs_error,
+        min_loss,
+        min_loss_no_goal,
+        mean_loss,
+        max_loss,
+    ) = eval_model(model, dataloader, args.log_states)
+
+    curr_time = eval_timer.current_time()
+
+    _log.info(f"Results for {data_type} dataset:")
+    _log.info(f"| num_samples: {num_samples}")
+    _log.info(f"| rounded_misses: {misses}")
+    _log.info(f"| max_rounded_abs_error: {max_abs_error}")
+    _log.info(f"| mean_rounded_abs_error: {mean_abs_error}")
+    _log.info(f"| min_rmse_loss: {min_loss}")
+    _log.info(f"| min_rmse_loss_no_goal: {min_loss_no_goal}")
+    _log.info(f"| mean_rmse_loss: {mean_loss}")
+    _log.info(f"| max_rmse_loss: {max_loss}")
+    _log.info(f"| elapsed time: {curr_time}")
+
+    if args.save_preds:
+        y_pred_loss_file = f"{dirname}/{data_name}_{data_type}.csv"
+        save_y_pred_loss_csv(y_pred_loss, y_pred_loss_file)
+        _log.info(f"Saved {data_type} dataset (state,y,pred,loss) CSV file to {y_pred_loss_file}")
+
+    if args.save_plots:
+        plots_dir = f"{dirname}/plots"
+        save_y_pred_scatter_eval(y_pred_loss, plots_dir, data_type + "_" + data_name)
+        save_pred_error_bar_eval(y_pred_loss, plots_dir, data_type + "_" + data_name)
+        _log.info(f"Saved {data_name} plots for {data_type} dataset to {plots_dir}")
+
+    f_results.write(
+        f"{data_type},,,,,,,,,\n"
+    )
+    f_results.write(
+        f"{data_name},{num_samples},{misses},{max_abs_error},{mean_abs_error},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{curr_time}\n"
+    )
+    _log.info(f"Saved results to a CSV file.")
+
+def eval_model(model, dataloader: DataLoader, log_states: bool):
     loss_fn = RMSELoss()
     eval_loss = 0
     max_loss = float("-inf")
