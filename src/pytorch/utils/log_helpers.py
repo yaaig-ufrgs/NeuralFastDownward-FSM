@@ -35,6 +35,7 @@ def logging_train_config(
         "samples": args.samples,
         "unique_samples": args.unique_samples,
         "model": args.model,
+        "save_best_epoch_model": args.save_best_epoch_model,
         "patience": args.patience,
         "output_layer": args.output_layer,
         "linear_output": args.linear_output,
@@ -148,6 +149,12 @@ def logging_eval_config(
         "command": cmd_line,
         "trained_model": str(args.trained_model),
         "data": args.samples,
+        "follow_training": args.follow_training,
+        "seed:": args.seed,
+        "shuffle_seed": args.shuffle_seed,
+        "shuffle": args.shuffle,
+        "training_size": args.training_size, 
+        "unique_samples": args.unique_samples,
     }
 
     _log.info(f"Configuration")

@@ -19,6 +19,13 @@ def get_train_args():
         help="Network model to use. (default: %(default)s)",
     )
     parser.add_argument(
+        "-sb",
+        "--save-best-epoch-model",
+        type=str2bool,
+        default=default_args.SAVE_BEST_EPOCH_MODEL,
+        help="Saves the best model from the best epoch instead of the last one. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-pat",
         "--patience",
         type=int,

@@ -204,6 +204,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                 device=device,
                 max_epochs=args.max_epochs,
                 plot_n_epochs=args.plot_n_epochs,
+                save_best=args.save_best_epoch_model,
                 dirname=dirname,
                 optimizer=torch.optim.Adam(
                     model.parameters(),

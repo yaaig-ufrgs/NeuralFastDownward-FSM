@@ -22,6 +22,7 @@ class TrainWorkflow:
         device: torch.device,
         max_epochs: int,
         plot_n_epochs: int,
+        save_best: bool,
         dirname: str,
         optimizer: optim.Optimizer,
         loss_fn: nn = nn.MSELoss(),
@@ -38,6 +39,7 @@ class TrainWorkflow:
         self.device = device
         self.max_epochs = max_epochs
         self.plot_n_epochs = plot_n_epochs
+        self.save_best = save_best
         self.dirname = dirname
         self.optimizer = optimizer
         self.loss_fn = loss_fn
@@ -220,6 +222,9 @@ class TrainWorkflow:
                 break
             if t == self.max_epochs - 1:
                 _log.info(f"Max epoch reached. Best epoch: {best_epoch}/{t}")
+
+        if not self.save_best:
+            self.best_epoch_model = self.model
 
         # Post-training scatter plot.
         self.save_post_scatter_plot(fold_idx)
