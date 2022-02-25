@@ -68,7 +68,7 @@ def save_y_pred_scatter(data: list, t: int, fold_idx: int, directory: str, prefi
     plt.close(fig)
 
 
-def save_y_pred_scatter_eval(data: list, directory: str, prefix: str):
+def save_y_pred_scatter_eval(data: list, directory: str, data_type: str, prefix: str):
     """
     Create and save real y and predicted y scatter plot for eval.
     """
@@ -79,7 +79,7 @@ def save_y_pred_scatter_eval(data: list, directory: str, prefix: str):
         makedirs(directory)
 
     plot_title = get_plot_title(directory)
-    plot_filename = f"eval_{plot_title}_{prefix}"
+    plot_filename = f"eval_best_{data_type}_{plot_title}_{prefix}"
 
     real = [round(d[1]) for d in data]
     pred = [round(d[2]) for d in data]
@@ -99,7 +99,7 @@ def save_y_pred_scatter_eval(data: list, directory: str, prefix: str):
 
     ax.set_xlabel("h^sample")
     ax.set_ylabel("h^NN")
-    ax.set_title(plot_title + "\n" + prefix, fontsize=10)
+    ax.set_title(data_type + "_" + plot_title + "\n" + prefix, fontsize=10)
 
     fig.savefig(directory + "/" + plot_filename + ".png")
 
@@ -107,7 +107,7 @@ def save_y_pred_scatter_eval(data: list, directory: str, prefix: str):
     plt.close(fig)
 
 
-def save_pred_error_bar_eval(data: list, directory: str, prefix: str):
+def save_pred_error_bar_eval(data: list, directory: str, data_type: str, prefix: str):
     """
     Create and save error count histogram plot for eval.
     """
@@ -118,7 +118,7 @@ def save_pred_error_bar_eval(data: list, directory: str, prefix: str):
         makedirs(directory)
 
     plot_title = get_plot_title(directory)
-    plot_filename = f"eval_error_{plot_title}_{prefix}"
+    plot_filename = f"eval_error_{data_type}_{plot_title}_{prefix}"
 
     rounded_errors = [round(d[3]) for d in data]
 
@@ -139,7 +139,7 @@ def save_pred_error_bar_eval(data: list, directory: str, prefix: str):
 
     ax.set_xlabel("abs(y-pred) error")
     ax.set_ylabel("count")
-    ax.set_title(plot_title + "\n" + prefix, fontsize=10)
+    ax.set_title(data_type + "_" + plot_title + "\n" + prefix, fontsize=10)
     ax.text(0.70, 0.90, f'max_error = {max(rounded_errors)}\navg_error = {round(sum(rounded_errors) / len(rounded_errors), 2)}\nmax_count = {max(d_error_count, key=d_error_count.get)}',
             horizontalalignment='left',
             verticalalignment='center',

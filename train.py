@@ -38,6 +38,7 @@ from src.pytorch.utils.plot import (
 import src.pytorch.utils.default_args as default_args
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
+from eval import eval_workflow 
 from argparse import Namespace
 
 _log = logging.getLogger(__name__)
@@ -119,10 +120,17 @@ def train_main(args: Namespace):
     except:
         _log.error(f"Failed to save best fold.")
 
+
+    _log.info(f"Restarts needed: {num_retries}")
+    _log.info("Training complete!")
+
     # OTHER PLOTS
     make_extra_plots(args, dirname, best_fold)
 
-    _log.info("Training complete!")
+    # POST-TRAINING EVALUATION OF THE BEST MODEL
+    _log.info("Performing post-training evaluation...")
+    post_training_evaluation(f"{dirname}/models/traced_best_val_loss.pt", args, dirname)
+    _log.info("Finished!")
 
 
 def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int, Timer):
@@ -242,6 +250,43 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                 break
 
     return best_fold, num_retries, train_timer
+
+
+def post_training_evaluation(trained_model: str, args: Namespace, dirname: str) -> (dict, int, Timer):
+    """
+    Manages the training procedure.
+    """
+    model = torch.jit.load(trained_model)
+    model.eval()
+
+    train_data, val_data, test_data = KFoldTrainingData(
+        args.samples,
+        batch_size=1,
+        num_folds=args.num_folds,
+        output_layer=args.output_layer,
+        shuffle=args.shuffle,
+        seed=args.seed,
+        shuffle_seed=args.shuffle_seed,
+        training_size=args.training_size,
+        data_num_workers=args.data_num_workers,
+        normalize=args.normalize_output,
+        clamping=args.clamping,
+        remove_goals=args.remove_goals,
+        standard_first=args.standard_first,
+        contrast_first=args.contrast_first,
+        intercalate_samples=args.intercalate_samples,
+        cut_non_intercalated_samples=args.cut_non_intercalated_samples,
+        sample_percentage=args.sample_percentage,
+        unique_samples=args.unique_samples,
+        model=args.model,
+    ).get_fold(0)
+
+    if train_data != None:
+        eval_workflow(model, args.samples, dirname, train_data, "training", None, False, True, True)
+    if val_data != None:
+        eval_workflow(model, args.samples, dirname, val_data, "validation", None, False, True, True)
+    if test_data != None:
+        eval_workflow(model, args.samples, dirname, test_data, "test", None, False, True, True)
 
 
 def set_seeds(args: Namespace, shuffle_seed: bool = True):

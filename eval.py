@@ -88,18 +88,18 @@ def eval_main(args: Namespace):
         ).get_fold(0)
 
         if train_data != None:
-            eval_workflow(model, sample, dirname, train_data, "training", f_results, args)
+            eval_workflow(model, sample, dirname, train_data, "training", f_results, args.log_states, args.save_preds, args.save_plots)
         if val_data != None:
-            eval_workflow(model, sample, dirname, val_data, "validation", f_results, args)
+            eval_workflow(model, sample, dirname, val_data, "validation", f_results, args.log_states, args.save_preds, args.save_plots)
         if test_data != None:
-            eval_workflow(model, sample, dirname, test_data, "test", f_results, args)
+            eval_workflow(model, sample, dirname, test_data, "test", f_results, args.log_states, args.save_preds, args.save_plots)
 
     _log.info(f"Total elapsed time for evaluation: {eval_timer_total.current_time()}")
 
     f_results.close()
 
 
-def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data_type: str, f_results, args: Namespace):
+def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data_type: str, f_results, log_states: bool, save_preds: bool, save_plots: bool):
     """
     Complete model evaluation workflow for a given dataset.
     """
@@ -118,7 +118,7 @@ def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data
         min_loss_no_goal,
         mean_loss,
         max_loss,
-    ) = eval_model(model, dataloader, args.log_states)
+    ) = eval_model(model, dataloader, log_states)
 
     curr_time = eval_timer.current_time()
 
@@ -133,24 +133,26 @@ def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data
     _log.info(f"| max_rmse_loss: {max_loss}")
     _log.info(f"| elapsed time: {curr_time}")
 
-    if args.save_preds:
+    if save_preds:
         y_pred_loss_file = f"{dirname}/{data_name}_{data_type}.csv"
         save_y_pred_loss_csv(y_pred_loss, y_pred_loss_file)
         _log.info(f"Saved {data_type} dataset (state,y,pred,loss) CSV file to {y_pred_loss_file}")
 
-    if args.save_plots:
+    if save_plots:
         plots_dir = f"{dirname}/plots"
-        save_y_pred_scatter_eval(y_pred_loss, plots_dir, data_type + "_" + data_name)
-        save_pred_error_bar_eval(y_pred_loss, plots_dir, data_type + "_" + data_name)
+        save_y_pred_scatter_eval(y_pred_loss, plots_dir, data_type, data_name)
+        save_pred_error_bar_eval(y_pred_loss, plots_dir, data_type, data_name)
         _log.info(f"Saved {data_name} plots for {data_type} dataset to {plots_dir}")
 
-    f_results.write(
-        f"{data_type},,,,,,,,,\n"
-    )
-    f_results.write(
-        f"{data_name},{num_samples},{misses},{max_abs_error},{mean_abs_error},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{curr_time}\n"
-    )
-    _log.info(f"Saved results to a CSV file.")
+    if f_results != None:
+        f_results.write(
+            f"{data_type},,,,,,,,,\n"
+        )
+        f_results.write(
+            f"{data_name},{num_samples},{misses},{max_abs_error},{mean_abs_error},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{curr_time}\n"
+        )
+        _log.info(f"Saved results to a CSV file.")
+
 
 def eval_model(model, dataloader: DataLoader, log_states: bool):
     loss_fn = RMSELoss()
