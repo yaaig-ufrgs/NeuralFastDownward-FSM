@@ -229,7 +229,8 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
 
             if fold_val_loss != None:
                 if fold_val_loss < best_fold["val_loss"]:
-                    save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
+                    if args.save_heuristic_pred:
+                        save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
                     _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
                     best_fold["fold"] = fold_idx
                     best_fold["val_loss"] = fold_val_loss
@@ -238,7 +239,8 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                         f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
                     )
             else:  # Only using training data
-                save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
+                if args.save_heuristic_pred:
+                    save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
                 best_fold["fold"] = fold_idx
                 best_fold["train_loss"] = train_wf.cur_train_loss
 
@@ -354,7 +356,7 @@ def make_extra_plots(args: Namespace, dirname: str, best_fold: dict):
             except:
                 _log.error(f"Failed making box plot.")
 
-    if not args.save_heuristic_pred:
+    if args.save_heuristic_pred == False:
         os.remove(heuristic_pred_file)
 
 
