@@ -240,14 +240,18 @@ def get_train_args():
             "rai",
         ],
         default=default_args.WEIGHTS_METHOD,
-        help="Inicialization of network weights. (default: %(default)s)",
+        help="Initialization of network weights. (default: %(default)s)",
     )
     parser.add_argument(
-        "-wl",
-        "--weighted-loss",
-        type=str2bool,
-        default=default_args.WEIGHTED_LOSS,
-        help="Use weighted MSE. (default: %(default)s)",
+        "-lf",
+        "--loss-function",
+        choices=[
+            "mse",
+            "mse_weighted",
+            "rmse",
+        ],
+        default=default_args.LOSS_FUNCTION,
+        help="Loss function to be used during training. (default: %(default)s)",
     )
     parser.add_argument(
         "-cdir",

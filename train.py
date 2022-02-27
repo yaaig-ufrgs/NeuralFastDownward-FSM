@@ -11,6 +11,7 @@ import random
 import numpy as np
 import glob
 import torch
+import torch.nn as nn
 from shutil import copyfile
 from random import randint
 
@@ -38,6 +39,7 @@ from src.pytorch.utils.plot import (
 import src.pytorch.utils.default_args as default_args
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
+from src.pytorch.utils.loss import *
 from eval import eval_workflow 
 from argparse import Namespace
 
@@ -141,6 +143,9 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
     born_dead = True
     _log.warning(f"ATTENTION: Training will be performed on device '{device}'.")
 
+    losses = {"mse": nn.MSELoss(), "mse_weighted": MSELossWeighted(), "rmse": RMSELoss()}
+    chosen_loss_function = losses[args.loss_function]
+
     while born_dead:
         kfold = KFoldTrainingData(
             args.samples,
@@ -212,6 +217,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                     lr=args.learning_rate,
                     weight_decay=args.weight_decay,
                 ),
+                loss_fn=chosen_loss_function,
                 restart_no_conv=args.restart_no_conv,
                 patience=args.patience,
             )
