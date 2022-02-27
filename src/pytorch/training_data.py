@@ -14,7 +14,7 @@ class InstanceDataset(Dataset):
         for pair in state_value_pairs:
             states.append(pair[0])
             hvalues.append(pair[1])
-            hvalues.append(pair[2])
+            weights.append(pair[2])
 
         self.output_layer = output_layer
         self.domain_max_value = domain_max_value
