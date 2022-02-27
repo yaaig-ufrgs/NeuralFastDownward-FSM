@@ -10,10 +10,11 @@ class InstanceDataset(Dataset):
     def __init__(
         self, state_value_pairs: list, domain_max_value: int, output_layer: str
     ):
-        states, hvalues = [], []
+        states, hvalues, weights = [], [], []
         for pair in state_value_pairs:
             states.append(pair[0])
             hvalues.append(pair[1])
+            hvalues.append(pair[2])
 
         self.output_layer = output_layer
         self.domain_max_value = domain_max_value
@@ -50,7 +51,7 @@ class InstanceDataset(Dataset):
 
 
 def load_training_state_value_pairs(
-        samples_file: str, clamping: int, remove_goals: bool,  unique_samples: bool
+        samples_file: str, clamping: int, remove_goals: bool,  unique_samples: bool, unique_states: bool
 ) -> ([([int], int)], int):
     """
     Load state-value pairs from a sampling output, returning a tuple
@@ -59,33 +60,59 @@ def load_training_state_value_pairs(
     """
     state_value_pairs = []
     domain_max_value, max_h = 0, 0
-    uniques = []
+    uniques_xy = []
+    uniques_x = []
+    sample_count = {}
 
     with open(samples_file) as f:
         lines = f.readlines()
     for line in lines:
         if line[0] != "#":
+            # If specified, skip repeated lines (state and heuristic) if they already appeared.
             if unique_samples:
-                if line in uniques:
+                if line in uniques_xy:
                     continue
-                uniques.append(line)
+                uniques_xy.append(line)
 
             h, state = line.split("\n")[0].split(";")
             h_int = int(h)
+
+            # h = 0 means state x is a goal, so remove it if specified.
             if h_int == 0 and remove_goals:
                 continue
+
+            # Count how many times each state (x) appeared.
+            if state in sample_count:
+                sample_count[state] += 1
+            else:
+                sample_count[state] = 1
+
+            # If specified, skip state (x) if it already appeared.
+            if unique_states:
+                if state in uniques_x:
+                    continue
+                uniques_x.append(state)
+
             state = [int(s) for s in state]
             state_value_pairs.append([state, h_int])
+
+            # Gets the domain max h value.
             if h_int > max_h:
                 max_h = h_int
                 domain_max_value = max_h
 
+    # Clamps the heuristic value.
     if clamping != default_args.CLAMPING:
         for i in range(len(state_value_pairs)):
             curr_h = state_value_pairs[i][1]
             if (curr_h >= max_h - clamping) and (curr_h != max_h):
                 state_value_pairs[i][1] = max_h
 
+    # Appends weights (counts) to state_value_pairs:
+    for sv in state_value_pairs:
+        st = "".join([str(s) for s in sv[0]])
+        sv.append(sample_count[st])
+        
     return state_value_pairs, domain_max_value
 
 

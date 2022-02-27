@@ -37,6 +37,7 @@ class KFoldTrainingData:
         cut_non_intercalated_samples: bool = default_args.CUT_NON_INTERCALATED_SAMPLES,
         sample_percentage: float = default_args.SAMPLE_PERCENTAGE,
         unique_samples: bool = default_args.UNIQUE_SAMPLES,
+        unique_states: bool = default_args.UNIQUE_STATES,
         model: str = default_args.MODEL,
     ):
         assert training_size > 0.0 and training_size <= 1.0
@@ -47,6 +48,7 @@ class KFoldTrainingData:
             clamping,
             remove_goals,
             unique_samples,
+            unique_states,
         )
 
         self.normalize = normalize

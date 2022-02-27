@@ -34,6 +34,7 @@ def logging_train_config(
         "problem": args.problem,
         "samples": args.samples,
         "unique_samples": args.unique_samples,
+        "unique_states": args.unique_states,
         "model": args.model,
         "save_best_epoch_model": args.save_best_epoch_model,
         "patience": args.patience,

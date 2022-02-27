@@ -170,6 +170,13 @@ def get_train_args():
         help="Remove repeated samples from data. (default: %(default)s)",
     )
     parser.add_argument(
+        "-ust",
+        "--unique-states",
+        type=str2bool,
+        default=default_args.UNIQUE_STATES,
+        help="Remove repeated states (only x) from data. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-biout",
         "--bias-output",
         type=str2bool,
@@ -234,6 +241,13 @@ def get_train_args():
         ],
         default=default_args.WEIGHTS_METHOD,
         help="Inicialization of network weights. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-wl",
+        "--weighted-loss",
+        type=str2bool,
+        default=default_args.WEIGHTED_LOSS,
+        help="Use weighted MSE. (default: %(default)s)",
     )
     parser.add_argument(
         "-cdir",
@@ -538,7 +552,7 @@ def get_eval_args():
         "--unique-samples",
         type=str2bool,
         default=default_args.UNIQUE_SAMPLES,
-        help="Remove repeated samples from data. (default: %(default)s)",
+        help="Remove repeated samples (x and y) from data. (default: %(default)s)",
     )
     parser.add_argument(
         "-ls",
