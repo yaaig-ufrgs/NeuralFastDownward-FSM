@@ -143,8 +143,8 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
     born_dead = True
     _log.warning(f"ATTENTION: Training will be performed on device '{device}'.")
 
-    losses = {"mse": nn.MSELoss(), "mse_weighted": MSELossWeighted(), "rmse": RMSELoss()}
-    chosen_loss_function = losses[args.loss_function]
+    losses = {"mse": (nn.MSELoss(), False), "mse_weighted": (MSELossWeighted(), True), "rmse": (RMSELoss(), False)}
+    chosen_loss_function, is_weighted = losses[args.loss_function]
 
     while born_dead:
         kfold = KFoldTrainingData(
@@ -218,6 +218,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                     weight_decay=args.weight_decay,
                 ),
                 loss_fn=chosen_loss_function,
+                is_weighted_loss_fn=is_weighted,
                 restart_no_conv=args.restart_no_conv,
                 patience=args.patience,
             )

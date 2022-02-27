@@ -26,6 +26,7 @@ class TrainWorkflow:
         dirname: str,
         optimizer: optim.Optimizer,
         loss_fn: nn = nn.MSELoss(),
+        is_weighted_loss_fn: bool = False,
         restart_no_conv: bool = True,
         patience: int = None,
     ):
@@ -43,6 +44,7 @@ class TrainWorkflow:
         self.dirname = dirname
         self.optimizer = optimizer
         self.loss_fn = loss_fn
+        self.is_weighted_loss_fn = is_weighted_loss_fn
         self.patience = patience
         self.early_stopped = False
         self.restart_no_conv = restart_no_conv
@@ -61,7 +63,7 @@ class TrainWorkflow:
             # Compute prediction and loss.
             X, y, w = X.to(self.device), y.to(self.device), w.to(self.device)
             pred = self.model(X)
-            loss = self.loss_fn(pred, y)
+            loss = self.loss_fn(pred, y, w) if self.is_weighted_loss_fn else self.loss_fn(pred, y)
             train_loss += loss.item()
 
             # Clear gradients for the variables it will update.
@@ -96,7 +98,7 @@ class TrainWorkflow:
             for X, y, w in self.val_dataloader:
                 X, y, w = X.to(self.device), y.to(self.device), w.to(self.device)
                 pred = self.model(X)
-                val_loss += self.loss_fn(pred, y).item()
+                val_loss += self.loss_fn(pred, y, w).item() if self.is_weighted_loss_fn else self.loss_fn(pred, y).item()
                 if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
                     self.val_y_pred_values = self.fill_y_pred(
                         X, y, pred, self.val_y_pred_values
@@ -118,7 +120,7 @@ class TrainWorkflow:
             for X, y, w in self.test_dataloader:
                 X, y = X.to(self.device), y.to(self.device), w.to(self.device)
                 pred = self.model(X)
-                test_loss += self.loss_fn(pred, y).item()
+                test_loss += self.loss_fn(pred, y, w).item() if self.is_weighted_loss_fn else self.loss_fn(pred, y).item()
         return test_loss / num_batches
 
     def val_loop_no_contrasting(self, contrasting_h: int = 501) -> float:
