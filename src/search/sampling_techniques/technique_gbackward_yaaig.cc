@@ -59,9 +59,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     if (seed_task != last_task) {
         regression_task_proxy = make_shared<RegressionTaskProxy>(*seed_task);
         state_registry = make_shared<StateRegistry>(task_proxy);
-        if (technique == "dfs" || technique == "bfs")
+        if (technique == "dfs" || technique == "bfs" || technique == "dfs_rw" || technique == "bfs_rw")
             dfss = make_shared<sampling::DFSSampler>(*regression_task_proxy, *rng);
-        else if (technique == "rw")
+        if (technique == "rw" || technique == "dfs_rw" || technique == "bfs_rw")
             rrws = make_shared<sampling::RandomRegressionWalkSampler>(*regression_task_proxy, *rng);
     }
     bias_reload_counter++;
@@ -101,27 +101,60 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     //   Atom on(b, a);Atom on(c, b);Atom on(d, c);(handempty)
     hash_table.clear();
     
-    PartialAssignment partial_assignment = regression_task_proxy->get_goal_assignment();
-    partial_assignment.estimated_heuristic = 0;
+    PartialAssignment pa = regression_task_proxy->get_goal_assignment();
+    pa.estimated_heuristic = 0;
     vector<shared_ptr<PartialAssignment>> samples;
 
-    if (technique == "dfs" || technique == "bfs") {
+    if (technique == "rw") {
+        samples.push_back(make_shared<PartialAssignment>(pa));
+        // Attempts to find a new state when performing each step
+        int MAX_ATTEMPTS = 100, attempts = 0;
+        while (samples.size() < (unsigned)samples_per_search) {
+            PartialAssignment pa_ = rrws->sample_state_length(
+                pa,
+                1,
+                deprioritize_undoing_steps,
+                is_valid_state,
+                func_bias,
+                bias_probabilistic,
+                bias_adapt
+            );
+
+            if ((allow_internal_rollout_duplicates && pa_ != pa) ||
+                 hash_table.find(pa_) == hash_table.end()) {
+                hash_table.insert(pa_);
+
+                // if it is goal state then set h to 0
+                pa_.estimated_heuristic = (
+                    restart_h_when_goal_state && task_properties::is_goal_state(
+                        task_proxy,
+                        pa_.get_full_state(true, *rng).second)
+                    ) ? 0 : pa.estimated_heuristic + 1;
+
+                samples.push_back(make_shared<PartialAssignment>(pa_));
+                pa = pa_;
+                attempts = 0;
+            } else if (++attempts >= MAX_ATTEMPTS) {
+                break;
+            }
+        }
+    } else if (technique == "dfs" || technique == "bfs" || technique == "dfs_rw" || technique == "bfs_rw") {
         // Each element of the stack is (state, operator index used to achieve the state)
-        PartialAssignment pa = partial_assignment;
         stack<PartialAssignment> stack;
         queue<PartialAssignment> queue;
         
-        if (technique == "dfs")
+        if (technique == "dfs" || technique == "dfs_rw")
             stack.push(pa);
         else
             queue.push(pa);
 
         hash_table.insert(pa);
         while (samples.size() < (unsigned)samples_per_search) {
-            if ((technique == "dfs" && stack.empty()) || (technique == "bfs" && queue.empty()))
+            if (((technique == "dfs" || technique == "dfs_rw") && stack.empty()) ||
+                ((technique == "bfs" || technique == "bfs_rw") && queue.empty()))
                 break;
 
-            if (technique == "dfs") {
+            if (technique == "dfs" || technique == "dfs_rw") {
                 pa = stack.top();
                 stack.pop();
             } else {
@@ -134,56 +167,84 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             while (idx_op != -1) {
                 PartialAssignment pa_ = dfss->sample_state_length(
                     pa,
-                    (*rng)(INT16_MAX),
+                    (*rng)(INT32_MAX - 1),
                     idx_op,
                     is_valid_state
                 );
                 // idx_op has the index of the operator that was used,
                 // or -1 if all operators have already been tested
+                if (idx_op == -1)
+                    break;
 
-                if (idx_op != -1 &&
-                   (allow_internal_rollout_duplicates || hash_table.find(pa_) == hash_table.end())) {
+                if ((allow_internal_rollout_duplicates && pa_ != pa) || hash_table.find(pa_) == hash_table.end()) {
                     pa_.estimated_heuristic = pa.estimated_heuristic + 1; // TODO: non-unitary operator
 
-                    hash_table.insert(pa_);
-                    if (technique == "dfs")
-                        stack.push(pa_);
-                    else
-                        queue.push(pa_);
+                    if (pa_.estimated_heuristic <= depth_k) {
+                        hash_table.insert(pa_);
+                        if (technique == "dfs" || technique == "dfs_rw")
+                            stack.push(pa_);
+                        else
+                            queue.push(pa_);
+                    }
                 }
+                idx_op++;
             }
         }
-    } else if (technique == "rw") {
-        samples.push_back(make_shared<PartialAssignment>(partial_assignment));
-        // Attempts to find a new state when performing each step
-        int MAX_ATTEMPTS = 100, attempts = 0;
-        while (samples.size() < (unsigned)samples_per_search) {
-            PartialAssignment new_partial_assignment = rrws->sample_state_length(
-                partial_assignment,
-                1,
-                deprioritize_undoing_steps,
-                is_valid_state,
-                func_bias,
-                bias_probabilistic,
-                bias_adapt
-            );
-
-            if (allow_internal_rollout_duplicates || hash_table.find(new_partial_assignment) == hash_table.end()) {
-                hash_table.insert(new_partial_assignment);
-
-                // if it is goal state then set h to 0
-                new_partial_assignment.estimated_heuristic = (
-                    restart_h_when_goal_state && task_properties::is_goal_state(
-                        task_proxy,
-                        new_partial_assignment.get_full_state(true, *rng).second)
-                    ) ? 0 : partial_assignment.estimated_heuristic + 1;
-
-                samples.push_back(make_shared<PartialAssignment>(new_partial_assignment));
-                partial_assignment = new_partial_assignment;
-                attempts = 0;
-            } else if (++attempts >= MAX_ATTEMPTS) {
-                break;
+        if (technique == "dfs_rw" || technique == "bfs_rw") {
+            vector<PartialAssignment> leaves;
+            int leaf_h = 0;
+            for (shared_ptr<PartialAssignment> pa : samples) {
+                if (pa->estimated_heuristic > leaf_h) {
+                    leaf_h = pa->estimated_heuristic;
+                    leaves.clear();
+                }
+                if (pa->estimated_heuristic == leaf_h)
+                    leaves.push_back(*pa);
             }
+
+            cout << "Starting random walk search from " << leaves.size() << " leaves (depth = " << leaf_h << ")" << endl;
+            cout << "Looking for " << (samples_per_search - samples.size()) << " more samples..." << endl;
+
+            do {
+                for (int i = leaves.size() - 1; i >= 0; i--) {
+                    /* RW CTRL+C CTRL+V */
+                    PartialAssignment pa = leaves[i];
+                    unsigned attempts, MAX_ATTEMPTS = 100;
+                    for (attempts = 0; attempts < MAX_ATTEMPTS; attempts++) {
+                        PartialAssignment pa_ = rrws->sample_state_length(
+                            pa,
+                            1,
+                            deprioritize_undoing_steps,
+                            is_valid_state,
+                            func_bias,
+                            bias_probabilistic,
+                            bias_adapt
+                        );
+                        if (pa_ == pa) {
+                            attempts = MAX_ATTEMPTS;
+                            break;
+                        }
+
+                        if (allow_internal_rollout_duplicates || hash_table.find(pa_) == hash_table.end()) {
+                            // if it is goal state then set h to 0
+                            pa_.estimated_heuristic = (
+                                restart_h_when_goal_state && task_properties::is_goal_state(
+                                    task_proxy,
+                                    pa_.get_full_state(true, *rng).second)
+                                ) ? 0 : pa.estimated_heuristic + 1;
+
+                            hash_table.insert(pa_);
+                            samples.push_back(make_shared<PartialAssignment>(pa_));
+                            leaves[i] = pa_;
+                            break;
+                        }
+                    }
+                    if (attempts == MAX_ATTEMPTS)
+                        leaves.erase(leaves.begin() + i);
+                    if (samples.size() >= (unsigned)samples_per_search)
+                        break;
+                }
+            } while (!leaves.empty() && samples.size() < (unsigned)samples_per_search);
         }
     }
 
