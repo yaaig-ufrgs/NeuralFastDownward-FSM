@@ -173,7 +173,7 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
     # of the network during search.
 
     with torch.no_grad():
-        for X, y in dataloader:
+        for X, y, _ in dataloader:
             pred = model(X)
             loss = loss_fn(pred, y).item()
 

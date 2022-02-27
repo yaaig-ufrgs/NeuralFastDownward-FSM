@@ -57,9 +57,9 @@ class TrainWorkflow:
         num_batches = len(self.train_dataloader)
         train_loss = 0
 
-        for _batch, (X, y) in enumerate(self.train_dataloader):
+        for _batch, (X, y, w) in enumerate(self.train_dataloader):
             # Compute prediction and loss.
-            X, y = X.to(self.device), y.to(self.device)
+            X, y, w = X.to(self.device), y.to(self.device), w.to(self.device)
             pred = self.model(X)
             loss = self.loss_fn(pred, y)
             train_loss += loss.item()
@@ -93,8 +93,8 @@ class TrainWorkflow:
         num_batches = len(self.val_dataloader)
         val_loss = 0
         with torch.no_grad():
-            for X, y in self.val_dataloader:
-                X, y = X.to(self.device), y.to(self.device)
+            for X, y, w in self.val_dataloader:
+                X, y, w = X.to(self.device), y.to(self.device), w.to(self.device)
                 pred = self.model(X)
                 val_loss += self.loss_fn(pred, y).item()
                 if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
@@ -115,8 +115,8 @@ class TrainWorkflow:
         num_batches = len(self.test_dataloader)
         test_loss = 0
         with torch.no_grad():
-            for X, y in self.test_dataloader:
-                X, y = X.to(self.device), y.to(self.device)
+            for X, y, w in self.test_dataloader:
+                X, y = X.to(self.device), y.to(self.device), w.to(self.device)
                 pred = self.model(X)
                 test_loss += self.loss_fn(pred, y).item()
         return test_loss / num_batches
@@ -128,7 +128,7 @@ class TrainWorkflow:
         num_batches = len(self.val_dataloader)
         val_loss = 0
         with torch.no_grad():
-            for X, y in self.val_dataloader:
+            for X, y, w in self.val_dataloader:
                 X = X.to(self.device)
                 pred = self.model(X)
                 val_loss += self.loss_fn(
@@ -144,7 +144,7 @@ class TrainWorkflow:
         Checks if the network is dead.
         """
         with torch.no_grad():
-            for X, _ in self.train_dataloader:
+            for X, _, _ in self.train_dataloader:
                 X = X.to(self.device)
                 for p in self.model(X):
                     if len(p) > 1:  # prefix
@@ -237,14 +237,14 @@ class TrainWorkflow:
         """
         with torch.no_grad():
             if self.validation:
-                for X, y in self.val_dataloader:
+                for X, y, _ in self.val_dataloader:
                     X, y = X.to(self.device), y.to(self.device)
                     self.val_y_pred_values = self.fill_y_pred(
                         X, y, self.model(X), self.val_y_pred_values
                     )
             else:
                 self.val_y_pred_values = None
-            for X, y in self.train_dataloader:
+            for X, y, _ in self.train_dataloader:
                 X, y = X.to(self.device), y.to(self.device)
                 self.train_y_pred_values = self.fill_y_pred(
                     X, y, self.model(X), self.train_y_pred_values

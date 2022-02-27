@@ -19,6 +19,7 @@ class InstanceDataset(Dataset):
         self.output_layer = output_layer
         self.domain_max_value = domain_max_value
 
+        self.weights = torch.tensor(states, dtype=torch.float32)
         self.states = torch.tensor(states, dtype=torch.float32)
         if output_layer == "regression":
             self.hvalues = torch.tensor(hvalues, dtype=torch.float32).unsqueeze(1)
@@ -35,8 +36,8 @@ class InstanceDataset(Dataset):
         else:
             raise RuntimeError(f"Invalid output layer: {output_layer}")
 
-    def __getitem__(self, idx: int) -> (torch.Tensor, torch.Tensor):
-        return self.states[idx], self.hvalues[idx]
+    def __getitem__(self, idx: int) -> (torch.Tensor, torch.Tensor, torch.Tensor):
+        return self.states[idx], self.hvalues[idx], self.weights[idx]
 
     def __len__(self):
         return len(self.states)
