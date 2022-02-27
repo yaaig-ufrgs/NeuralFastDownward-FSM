@@ -18,6 +18,7 @@ namespace sampling_technique {
 class TechniqueGBackwardYaaig : public SamplingTechnique {
 protected:
     const std::string technique;
+    const int depth_k;
     const bool allow_duplicates;
     const bool wrap_partial_assignment;
     const bool deprioritize_undoing_steps;

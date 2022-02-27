@@ -166,7 +166,7 @@ public:
     ~DFSSampler();
 
     PartialAssignment sample_state_length(
-        const PartialAssignment &goals, int &rng_seed, int &idx_op,
+        const PartialAssignment &goals, int rng_seed, int &idx_op,
         const ValidStateDetector &is_valid_state = [](const PartialAssignment &) {return true;},
         const PartialDeadEndDetector &is_dead_end = [](const PartialAssignment &) {return false;}) const;
 };

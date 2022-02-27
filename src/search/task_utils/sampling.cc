@@ -502,7 +502,7 @@ bool sample_next_state_with_depth_first_search(
         S &current_state,
         S &previous_state,
         S &pre_previous_state,
-        int &rng_seed,
+        int rng_seed,
         int &idx_op,
         const G &generator,
         const function<S (const S &, const OperatorID &)> &construct_candidate,
@@ -535,7 +535,7 @@ bool sample_next_state_with_depth_first_search(
 template<typename S, typename G>
 S sample_with_depth_first_search(
         const S &state,
-        int &rng_seed,
+        int rng_seed,
         int &idx_op,
         const G &generator,
         //utils::RandomNumberGenerator &rng,
@@ -567,7 +567,7 @@ S sample_with_depth_first_search(
 static PartialAssignment sample_partial_assignment_with_depth_first_search(
     const RegressionTaskProxy &regression_task_proxy, const PartialAssignment &goals,
     const predecessor_generator::PredecessorGenerator &predecessor_generator,
-    int &rng_seed,
+    int rng_seed,
     int &idx_op,
     const ValidStateDetector & is_valid_state,
     const PartialDeadEndDetector &is_dead_end) {
@@ -606,7 +606,7 @@ DFSSampler::~DFSSampler() {
 
 PartialAssignment DFSSampler::sample_state_length(
     const PartialAssignment &goals,
-    int &rng_seed,
+    int rng_seed,
     int &idx_op,
     const ValidStateDetector &is_valid_state,
     const PartialDeadEndDetector &is_dead_end) const {

@@ -33,15 +33,14 @@ static int compute_heuristic(
     return bias->compute_heuristic(state);
 }
 
-
 const string &TechniqueGBackwardYaaig::get_name() const {
     return name;
 }
 
-
 TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
         : SamplingTechnique(opts),
           technique(opts.get<string>("technique")),
+          depth_k(opts.get<int>("depth_k")),
           allow_duplicates(opts.get<bool>("allow_duplicates")),
           wrap_partial_assignment(opts.get<bool>("wrap_partial_assignment")),
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
@@ -60,7 +59,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     if (seed_task != last_task) {
         regression_task_proxy = make_shared<RegressionTaskProxy>(*seed_task);
         state_registry = make_shared<StateRegistry>(task_proxy);
-        if (technique == "dfs")
+        if (technique == "dfs" || technique == "bfs")
             dfss = make_shared<sampling::DFSSampler>(*regression_task_proxy, *rng);
         else if (technique == "rw")
             rrws = make_shared<sampling::RandomRegressionWalkSampler>(*regression_task_proxy, *rng);
@@ -104,51 +103,58 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     
     PartialAssignment partial_assignment = regression_task_proxy->get_goal_assignment();
     partial_assignment.estimated_heuristic = 0;
-    vector<shared_ptr<PartialAssignment>> samples{
-        make_shared<PartialAssignment>(partial_assignment)
-    };
+    vector<shared_ptr<PartialAssignment>> samples;
 
-    if (technique == "dfs") {
+    if (technique == "dfs" || technique == "bfs") {
         // Each element of the stack is (state, operator index used to achieve the state)
-        stack<pair<PartialAssignment,int>> stack;
-        int idx_op = 0;
+        PartialAssignment pa = partial_assignment;
+        stack<PartialAssignment> stack;
+        queue<PartialAssignment> queue;
+        
+        if (technique == "dfs")
+            stack.push(pa);
+        else
+            queue.push(pa);
+
+        hash_table.insert(pa);
         while (samples.size() < (unsigned)samples_per_search) {
-            // A seed is calculated taking into account several factors to avoid repetition in the same sampling
-            // and guarantee that the same seed will always be used at the same depth level
-            int dfs_seed = (bias_reload_counter * samples_per_search + partial_assignment.estimated_heuristic) +
-                           (rng->get_seed() * ((searches+1) * samples_per_search));
-            PartialAssignment new_partial_assignment = dfss->sample_state_length(
-                partial_assignment,
-                dfs_seed,
-                idx_op,
-                is_valid_state
-            );
-            // idx_op has the index of the operator that was used,
-            // or -1 if all operators have already been tested
+            if ((technique == "dfs" && stack.empty()) || (technique == "bfs" && queue.empty()))
+                break;
 
-            if (idx_op == -1) {
-                if (stack.empty())
-                    break;
-                partial_assignment = stack.top().first;
-                idx_op = stack.top().second + 1; // Continues from next operator
+            if (technique == "dfs") {
+                pa = stack.top();
                 stack.pop();
-                continue;
-            }
-
-            if (allow_internal_rollout_duplicates || hash_table.find(new_partial_assignment) == hash_table.end()) {
-                new_partial_assignment.estimated_heuristic = partial_assignment.estimated_heuristic + 1;
-
-                hash_table.insert(new_partial_assignment);
-                stack.push(make_pair(new_partial_assignment, idx_op));
-                samples.push_back(make_shared<PartialAssignment>(new_partial_assignment));
-
-                partial_assignment = new_partial_assignment;
-                idx_op = 0; // If new node, use first operator
             } else {
-                idx_op++; // If same node, use next operator
+                pa = queue.front();
+                queue.pop();
+            }
+            samples.push_back(make_shared<PartialAssignment>(pa));
+
+            int idx_op = 0;
+            while (idx_op != -1) {
+                PartialAssignment pa_ = dfss->sample_state_length(
+                    pa,
+                    (*rng)(INT16_MAX),
+                    idx_op,
+                    is_valid_state
+                );
+                // idx_op has the index of the operator that was used,
+                // or -1 if all operators have already been tested
+
+                if (idx_op != -1 &&
+                   (allow_internal_rollout_duplicates || hash_table.find(pa_) == hash_table.end())) {
+                    pa_.estimated_heuristic = pa.estimated_heuristic + 1; // TODO: non-unitary operator
+
+                    hash_table.insert(pa_);
+                    if (technique == "dfs")
+                        stack.push(pa_);
+                    else
+                        queue.push(pa_);
+                }
             }
         }
     } else if (technique == "rw") {
+        samples.push_back(make_shared<PartialAssignment>(partial_assignment));
         // Attempts to find a new state when performing each step
         int MAX_ATTEMPTS = 100, attempts = 0;
         while (samples.size() < (unsigned)samples_per_search) {
@@ -200,8 +206,14 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
     SamplingTechnique::add_options_to_parser(parser);
     parser.add_option<string>(
             "technique",
-            "Search technique (dfs, rw).",
+            "Search technique (rw, dfs, bfs, dfs_rw, bfs_rw). If dfs_rw or bfs_rw, set depth_k.",
             "rw"
+    );
+    parser.add_option<int>(
+            "depth_k",
+            "Maximum depth using the dfs/bfs algorithm. "
+            "If it doesn't reach max_samples, complete with random walks of each leaf state.",
+            "99999"
     );
     parser.add_option<bool>(
             "allow_duplicates",

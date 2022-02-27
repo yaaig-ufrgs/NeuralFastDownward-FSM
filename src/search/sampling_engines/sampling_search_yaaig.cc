@@ -419,7 +419,7 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "true");
     parser.add_option<string>(
             "state_representation",
-            "State facts representation format (complete, complete_no_mutex, partial, or undefined, assign_undefined).",
+            "State facts representation format (complete, complete_no_mutex, partial, or undefined, assign_undefined.).",
             "complete");
     parser.add_option<string>(
             "minimization",
