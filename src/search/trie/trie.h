@@ -6,6 +6,7 @@
  */
 
 #include <vector>
+#include <assert.h>
 
 #include "trie_node.h"
 #include "trie_iterator.h"
