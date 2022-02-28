@@ -119,9 +119,10 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 bias_probabilistic,
                 bias_adapt
             );
+            if (pa_ == pa) // there is no applicable operator
+                break;
 
-            if ((allow_internal_rollout_duplicates && pa_ != pa) ||
-                 hash_table.find(pa_) == hash_table.end()) {
+            if (allow_internal_rollout_duplicates || hash_table.find(pa_) == hash_table.end()) {
                 hash_table.insert(pa_);
 
                 // if it is goal state then set h to 0
@@ -153,7 +154,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             if (((technique == "dfs" || technique == "dfs_rw") && stack.empty()) ||
                 ((technique == "bfs" || technique == "bfs_rw") && queue.empty()))
                 break;
-
+            
             if (technique == "dfs" || technique == "dfs_rw") {
                 pa = stack.top();
                 stack.pop();
@@ -164,10 +165,11 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             samples.push_back(make_shared<PartialAssignment>(pa));
 
             int idx_op = 0;
+            int rng_seed = (*rng)(INT32_MAX - 1);
             while (idx_op != -1) {
                 PartialAssignment pa_ = dfss->sample_state_length(
                     pa,
-                    (*rng)(INT32_MAX - 1),
+                    rng_seed,
                     idx_op,
                     is_valid_state
                 );
@@ -207,7 +209,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
             do {
                 for (int i = leaves.size() - 1; i >= 0; i--) {
-                    /* RW CTRL+C CTRL+V */
+                    // Adapted from RW code
                     PartialAssignment pa = leaves[i];
                     unsigned attempts, MAX_ATTEMPTS = 100;
                     for (attempts = 0; attempts < MAX_ATTEMPTS; attempts++) {

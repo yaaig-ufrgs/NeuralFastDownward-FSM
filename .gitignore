@@ -12,3 +12,5 @@
 /defaults.txt
 __pycache__/
 results/
+scripts/create_hstar_sampling
+samples/
