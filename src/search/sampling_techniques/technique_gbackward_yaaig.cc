@@ -13,6 +13,8 @@
 
 #include "../task_utils/task_properties.h"
 
+#define RW_MAX_ATTEMPTS 100
+
 using namespace std;
 
 namespace sampling_technique {
@@ -108,7 +110,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     if (technique == "rw") {
         samples.push_back(make_shared<PartialAssignment>(pa));
         // Attempts to find a new state when performing each step
-        int MAX_ATTEMPTS = 100, attempts = 0;
+        int attempts = 0;
         while (samples.size() < (unsigned)samples_per_search) {
             PartialAssignment pa_ = rrws->sample_state_length(
                 pa,
@@ -135,7 +137,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 samples.push_back(make_shared<PartialAssignment>(pa_));
                 pa = pa_;
                 attempts = 0;
-            } else if (++attempts >= MAX_ATTEMPTS) {
+            } else if (++attempts >= RW_MAX_ATTEMPTS) {
                 break;
             }
         }
@@ -211,8 +213,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 for (int i = leaves.size() - 1; i >= 0; i--) {
                     // Adapted from RW code
                     PartialAssignment pa = leaves[i];
-                    unsigned attempts, MAX_ATTEMPTS = 100;
-                    for (attempts = 0; attempts < MAX_ATTEMPTS; attempts++) {
+                    unsigned attempts;
+                    for (attempts = 0; attempts < RW_MAX_ATTEMPTS; attempts++) {
                         PartialAssignment pa_ = rrws->sample_state_length(
                             pa,
                             1,
@@ -223,7 +225,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                             bias_adapt
                         );
                         if (pa_ == pa) {
-                            attempts = MAX_ATTEMPTS;
+                            attempts = RW_MAX_ATTEMPTS;
                             break;
                         }
 
@@ -241,7 +243,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                             break;
                         }
                     }
-                    if (attempts == MAX_ATTEMPTS)
+                    if (attempts == RW_MAX_ATTEMPTS)
                         leaves.erase(leaves.begin() + i);
                     if (samples.size() >= (unsigned)samples_per_search)
                         break;
