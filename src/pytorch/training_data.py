@@ -63,19 +63,28 @@ def load_training_state_value_pairs(
     domain_max_value, max_h = 0, 0
     uniques_xy = []
     uniques_x = []
+    state_count = {}
     sample_count = {}
 
     with open(samples_file) as f:
         lines = f.readlines()
     for line in lines:
         if line[0] != "#":
+            line = line.split("\n")[0]
+
+            # Count how many times each state + heuristic (x + y) appeared.
+            if line in sample_count:
+                sample_count[line] += 1
+            else:
+                sample_count[line] = 1
+
             # If specified, skip repeated lines (state and heuristic) if they already appeared.
             if unique_samples:
                 if line in uniques_xy:
                     continue
                 uniques_xy.append(line)
 
-            h, state = line.split("\n")[0].split(";")
+            h, state = line.split(";")
             h_int = int(h)
 
             # h = 0 means state x is a goal, so remove it if specified.
@@ -83,10 +92,10 @@ def load_training_state_value_pairs(
                 continue
 
             # Count how many times each state (x) appeared.
-            if state in sample_count:
-                sample_count[state] += 1
+            if state in state_count:
+                state_count[state] += 1
             else:
-                sample_count[state] = 1
+                state_count[state] = 1
 
             # If specified, skip state (x) if it already appeared.
             if unique_states:
@@ -111,9 +120,17 @@ def load_training_state_value_pairs(
 
     # Appends weights (counts) to state_value_pairs:
     for sv in state_value_pairs:
-        st = "".join([str(s) for s in sv[0]])
-        sv.append(sample_count[st])
-        
+        if unique_samples: # Weighting based on quant of unique states + heuristic.
+            st = "".join([str(s) for s in sv[0]])
+            h = str(sv[1])
+            h_st = h + ";" + st;
+            sv.append(sample_count[h_st])
+        elif unique_states: # Weighting based on quant. of unique states.
+            st = "".join([str(s) for s in sv[0]])
+            sv.append(state_count[st])
+        else: # No weighting.
+            sv.append(1)
+            
     return state_value_pairs, domain_max_value
 
 

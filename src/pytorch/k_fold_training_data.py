@@ -178,7 +178,6 @@ class KFoldTrainingData:
                 else None
             )
 
-
             kfolds.append((train_dataloader, val_dataloader, test_dataloader))
 
         return kfolds
