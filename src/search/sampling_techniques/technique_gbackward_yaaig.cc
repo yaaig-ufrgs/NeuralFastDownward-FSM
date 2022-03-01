@@ -209,7 +209,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             cout << "Starting random walk search from " << leaves.size() << " leaves (depth = " << leaf_h << ")" << endl;
             cout << "Looking for " << (samples_per_search - samples.size()) << " more samples..." << endl;
 
-            do {
+            while (!leaves.empty() && samples.size() < (unsigned)samples_per_search) {
                 for (int i = leaves.size() - 1; i >= 0; i--) {
                     // Adapted from RW code
                     PartialAssignment pa = leaves[i];
@@ -248,7 +248,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                     if (samples.size() >= (unsigned)samples_per_search)
                         break;
                 }
-            } while (!leaves.empty() && samples.size() < (unsigned)samples_per_search);
+            }
         }
     }
 
