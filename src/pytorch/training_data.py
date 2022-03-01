@@ -123,7 +123,7 @@ def load_training_state_value_pairs(
         if unique_samples: # Weighting based on quant of unique states + heuristic.
             st = "".join([str(s) for s in sv[0]])
             h = str(sv[1])
-            h_st = h + ";" + st;
+            h_st = h + ";" + st
             sv.append(sample_count[h_st])
         elif unique_states: # Weighting based on quant. of unique states.
             st = "".join([str(s) for s in sv[0]])
