@@ -43,17 +43,25 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
         : SamplingTechnique(opts),
           technique(opts.get<string>("technique")),
           depth_k(opts.get<int>("depth_k")),
-          allow_duplicates(opts.get<bool>("allow_duplicates")),
+          allow_duplicates_interrollout(
+              opts.get<string>("allow_duplicates") == "all" || opts.get<string>("allow_duplicates") == "interrollout"
+          ),
+          allow_duplicates_intrarollout(
+              opts.get<string>("allow_duplicates") == "all"
+          ),
           wrap_partial_assignment(opts.get<bool>("wrap_partial_assignment")),
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
           is_valid_walk(opts.get<bool>("is_valid_walk")),
           restart_h_when_goal_state(opts.get<bool>("restart_h_when_goal_state")),
-          allow_internal_rollout_duplicates(opts.get<bool>("allow_internal_rollout_duplicates")),
           bias_evaluator_tree(opts.get_parse_tree("bias", options::ParseTree())),
           bias_probabilistic(opts.get<bool>("bias_probabilistic")),
           bias_adapt(opts.get<double>("bias_adapt")),
           bias_reload_frequency(opts.get<int>("bias_reload_frequency")),
           bias_reload_counter(0) {
+    cout << "---------------------\n";
+    cout << (int)allow_duplicates_interrollout << endl;
+    cout << (int)allow_duplicates_intrarollout << endl;
+    cout << "---------------------\n";
 }
 
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
@@ -101,7 +109,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     // Hash table does not work for cases like:
     //   Atom on(b, a);Atom on(c, b);Atom on(d, c) and
     //   Atom on(b, a);Atom on(c, b);Atom on(d, c);(handempty)
-    hash_table.clear();
+    if (allow_duplicates_interrollout)
+        hash_table.clear();
     
     PartialAssignment pa = regression_task_proxy->get_goal_assignment();
     pa.estimated_heuristic = 0;
@@ -124,7 +133,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             if (pa_ == pa) // there is no applicable operator
                 break;
 
-            if (allow_internal_rollout_duplicates || hash_table.find(pa_) == hash_table.end()) {
+            if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
                 hash_table.insert(pa_);
 
                 // if it is goal state then set h to 0
@@ -180,7 +189,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 if (idx_op == -1)
                     break;
 
-                if ((allow_internal_rollout_duplicates && pa_ != pa) || hash_table.find(pa_) == hash_table.end()) {
+                if ((allow_duplicates_intrarollout && pa_ != pa) || hash_table.find(pa_) == hash_table.end()) {
                     pa_.estimated_heuristic = pa.estimated_heuristic + 1; // TODO: non-unitary operator
 
                     if (pa_.estimated_heuristic <= depth_k) {
@@ -229,7 +238,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                             break;
                         }
 
-                        if (allow_internal_rollout_duplicates || hash_table.find(pa_) == hash_table.end()) {
+                        if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
                             // if it is goal state then set h to 0
                             pa_.estimated_heuristic = (
                                 restart_h_when_goal_state && task_properties::is_goal_state(
@@ -252,7 +261,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         }
     }
 
-    if (!allow_duplicates) {
+    utils::HashSet<PartialAssignment> unique_samples;
+    if (!allow_duplicates_intrarollout) {
         for (int i = samples.size()-1; i >= 0; i--) {
             if (unique_samples.find(*samples[i]) == unique_samples.end()) {
                 unique_samples.insert(*samples[i]);
@@ -280,11 +290,10 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "If it doesn't reach max_samples, complete with random walks of each leaf state.",
             "99999"
     );
-    parser.add_option<bool>(
+    parser.add_option<string>(
             "allow_duplicates",
-            "Allow sample duplicated states in two different rollouts. "
-            "If false, duplicate states are removed after each rollout.",
-            "true"
+            "Allow sample duplicated states in [all, interrollout, none]",
+            "all"
     );
     parser.add_option<bool>(
             "wrap_partial_assignment",
@@ -309,11 +318,6 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "restart_h_when_goal_state",
             "Restart h value when goal state is sampled (only random walk)",
             "true"
-    );
-    parser.add_option<bool>(
-            "allow_internal_rollout_duplicates",
-            "If false, states already seen within the same rollout are ignored.",
-            "false"
     );
     parser.add_option<shared_ptr<Heuristic>>(
             "bias",
