@@ -18,6 +18,7 @@ namespace sampling_technique {
 class TechniqueGBackwardYaaig : public SamplingTechnique {
 protected:
     const std::string technique;
+    const std::string subtechnique;
     const int depth_k;
     const bool allow_duplicates_interrollout;
     const bool allow_duplicates_intrarollout;

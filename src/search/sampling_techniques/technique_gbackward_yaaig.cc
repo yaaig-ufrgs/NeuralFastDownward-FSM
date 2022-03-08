@@ -42,6 +42,7 @@ const string &TechniqueGBackwardYaaig::get_name() const {
 TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
         : SamplingTechnique(opts),
           technique(opts.get<string>("technique")),
+          subtechnique(opts.get<string>("subtechnique")),
           depth_k(opts.get<int>("depth_k")),
           allow_duplicates_interrollout(
               opts.get<string>("allow_duplicates") == "all" || opts.get<string>("allow_duplicates") == "interrollout"
@@ -58,10 +59,8 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           bias_adapt(opts.get<double>("bias_adapt")),
           bias_reload_frequency(opts.get<int>("bias_reload_frequency")),
           bias_reload_counter(0) {
-    cout << "---------------------\n";
-    cout << (int)allow_duplicates_interrollout << endl;
-    cout << (int)allow_duplicates_intrarollout << endl;
-    cout << "---------------------\n";
+    if (technique == "bfs_rw" || technique == "dfs_rw")
+        assert(subtechnique == "round_robin" || subtechnique == "round_robin_fashion");
 }
 
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
@@ -189,7 +188,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 if (idx_op == -1)
                     break;
 
-                if ((allow_duplicates_intrarollout && pa_ != pa) || hash_table.find(pa_) == hash_table.end()) {
+                if ((allow_duplicates_intrarollout && pa_ != pa && technique[0] != 'b') || hash_table.find(pa_) == hash_table.end()) {
                     pa_.estimated_heuristic = pa.estimated_heuristic + 1; // TODO: non-unitary operator
 
                     if (pa_.estimated_heuristic <= depth_k) {
@@ -204,22 +203,30 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             }
         }
         if (technique == "dfs_rw" || technique == "bfs_rw") {
-            vector<PartialAssignment> leaves;
+            vector<PartialAssignment> leaves, original_leaves;
             int leaf_h = 0;
             for (shared_ptr<PartialAssignment> pa : samples) {
                 if (pa->estimated_heuristic > leaf_h) {
                     leaf_h = pa->estimated_heuristic;
+                    original_leaves.clear();
                     leaves.clear();
                 }
-                if (pa->estimated_heuristic == leaf_h)
+                if (pa->estimated_heuristic == leaf_h) {
+                    original_leaves.push_back(*pa);
                     leaves.push_back(*pa);
+                }
             }
+            vector<bool> dead_leaf = vector<bool>(leaves.size(), false);
+            vector<utils::HashSet<PartialAssignment>> hash_table_leaf(leaves.size());
 
             cout << "Starting random walk search from " << leaves.size() << " leaves (depth = " << leaf_h << ")" << endl;
             cout << "Looking for " << (samples_per_search - samples.size()) << " more samples..." << endl;
 
-            while (!leaves.empty() && samples.size() < (unsigned)samples_per_search) {
-                for (int i = leaves.size() - 1; i >= 0; i--) {
+            while (samples.size() < (unsigned)samples_per_search) {
+                bool all_leaves_dead = true;
+                for (unsigned i = 0; i < leaves.size(); i++) {
+                    if (dead_leaf[i])
+                        continue;
                     // Adapted from RW code
                     PartialAssignment pa = leaves[i];
                     unsigned attempts;
@@ -238,7 +245,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                             break;
                         }
 
-                        if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
+                        if (allow_duplicates_intrarollout || hash_table_leaf[i].find(pa_) == hash_table_leaf[i].end()) {
                             // if it is goal state then set h to 0
                             pa_.estimated_heuristic = (
                                 restart_h_when_goal_state && task_properties::is_goal_state(
@@ -246,28 +253,31 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                                     pa_.get_full_state(true, *rng).second)
                                 ) ? 0 : pa.estimated_heuristic + 1;
 
-                            hash_table.insert(pa_);
+                            hash_table_leaf[i].insert(pa_);
                             samples.push_back(make_shared<PartialAssignment>(pa_));
                             leaves[i] = pa_;
                             break;
                         }
                     }
                     if (attempts == RW_MAX_ATTEMPTS)
-                        leaves.erase(leaves.begin() + i);
+                        dead_leaf[i] = true;
+                    if (!dead_leaf[i])
+                        all_leaves_dead = false;
                     if (samples.size() >= (unsigned)samples_per_search)
                         break;
                 }
-            }
-        }
-    }
 
-    utils::HashSet<PartialAssignment> unique_samples;
-    if (!allow_duplicates_intrarollout) {
-        for (int i = samples.size()-1; i >= 0; i--) {
-            if (unique_samples.find(*samples[i]) == unique_samples.end()) {
-                unique_samples.insert(*samples[i]);
-            } else {
-                samples.erase(samples.begin()+i);
+                if (all_leaves_dead) {
+                    if (subtechnique == "round_robin") {
+                        break;
+                    } else if (subtechnique == "round_robin_fashion") {
+                        for (unsigned i = 0; i < leaves.size(); i++) {
+                            leaves[i] = original_leaves[i];
+                            dead_leaf[i] = false;
+                            hash_table_leaf[i].clear();
+                        }
+                    }
+                }
             }
         }
     }
@@ -283,6 +293,11 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "technique",
             "Search technique (rw, dfs, bfs, dfs_rw, bfs_rw). If dfs_rw or bfs_rw, set depth_k.",
             "rw"
+    );
+    parser.add_option<string>(
+            "subtechnique",
+            "If dfs_rw or bfs_rw: round_robin, round_robin_fashion",
+            "round_robin"
     );
     parser.add_option<int>(
             "depth_k",
