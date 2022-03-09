@@ -1004,7 +1004,7 @@ def get_exp_args():
     )
     parser.add_argument(
         "-eval-us",
-        "--unique-samples",
+        "--eval-unique-samples",
         type=str2bool,
         default=default_args.UNIQUE_SAMPLES,
         help="Remove repeated samples (x and y) from data. (default: %(default)s)",
@@ -1048,11 +1048,25 @@ def get_sample_args():
         help="Sampling base method to use. (default: %(default)s)",
     )
     parser.add_argument(
+        "-stp",
+        "--statespace",
+        type=str,
+        default=default_args.SAMPLE_STATESPACE,
+        help="Path to the full statespace sampling file. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-tech",
         "--technique",
-        choices=["rw", "dfs", "countBoth", "countAdds", "countDels"],
+        choices=["rw", "dfs", "bfs", "dfs_rw", "bfs_rw", "countBoth", "countAdds", "countDels"],
         default=default_args.SAMPLE_TECHNIQUE,
         help="Sample technique to use. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-stech",
+        "--subtechnique",
+        choices=["round_robin", "round_robin_fashion"],
+        default=default_args.SAMPLE_TECHNIQUE,
+        help="Subtechique to use in dfs_rw or bfs_rw. (default: %(default)s)",
     )
     parser.add_argument(
         "-search",
@@ -1148,7 +1162,7 @@ def get_sample_args():
     parser.add_argument(
         "-dups",
         "--allow-dups",
-        type=str2bool,
+        choices=["all", "interrollout", "none"],  # full state, full state no mutex, partial state, undefined, assign undefined
         default=default_args.SAMPLE_ALLOW_DUPLICATES,
         help="Allow duplicate samples. (default: %(default)s)",
     )
@@ -1181,18 +1195,53 @@ def get_sample_args():
         help="Directory where the samples will be saved. (default: %(default)s)",
     )
     parser.add_argument(
+        "-sym",
+        "--symm-statespace",
+        type=str2bool,
+        default=default_args.SAMPLE_SYMMETRIC_STATESPACE,
+        help="AVI iterates both ways if domain state space is symmetric. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-min",
         "--minimization",
+        choices=["none", "partial", "complete", "both"],
+        default=default_args.SEARCH_MINIMIZATION,
+        help="Sample h-value minimization strategy to use. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-sorth",
+        "--sort-h",
         type=str2bool,
-        default=default_args.SAMPLE_MINIMIZATION,
-        help="Match exact samples with the min heuristic value between them. (default: %(default)s)",
+        default=default_args.SAMPLE_SORT_H,
+        help="Sort sampling by increasign h-values before performing AVI. (default: %(default)s)",
     )
     parser.add_argument(
         "-avi",
-        "--avi_k",
+        "--avi-k",
         type=int,
         default=default_args.SAMPLE_AVI,
         help="Approximate Value Iteration (AVI) lookahead. If 0, no AVI is performed. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-avits",
+        "--avi-its",
+        type=int,
+        default=default_args.SAMPLE_AVI_ITS,
+        help="Number of AVI iterations. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-avieps",
+        "--avi-eps",
+        type=int,
+        default=default_args.SAMPLE_AVI_EPSILON,
+        help="RMSE no-improvement threshold for AVI early stop. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-kd",
+        "--k-depth",
+        type=int,
+        default=default_args.SAMPLE_K_DEPTH,
+        help="Depth `k` for DFS or BFS. (default: %(default)s)",
     )
     parser.add_argument(
         "-rsl-states",
