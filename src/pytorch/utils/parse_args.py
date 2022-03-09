@@ -761,6 +761,24 @@ def get_exp_args():
         help="Remove repeated samples from data. (default: %(default)s)",
     )
     parser.add_argument(
+        "-trn-ust",
+        "--train-unique-states",
+        type=str2bool,
+        default=default_args.UNIQUE_STATES,
+        help="Remove repeated states (only x) from data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-lf",
+        "--train-loss-function",
+        choices=[
+            "mse",
+            "mse_weighted",
+            "rmse",
+        ],
+        default=default_args.LOSS_FUNCTION,
+        help="Loss function to be used during training. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-trn-wm",
         "--train-weights-method",
         choices=[
@@ -950,6 +968,48 @@ def get_exp_args():
         help="Path to already trained models to be evaluated on.",
     )
     parser.add_argument(
+        "-evl-s",
+        "--eval-seed",
+        type=int,
+        default=default_args.EVAL_SEED,
+        help="Random seed to be used. Defaults to no seed. (default: random)",
+    )
+    parser.add_argument(
+        "-evl-shs",
+        "--eval-shuffle-seed",
+        type=int,
+        default=default_args.EVAL_SHUFFLE_SEED,
+        help="Seed to be used for separating training and validation data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-eval-sh",
+        "--eval-shuffle",
+        type=str2bool,
+        default=default_args.EVAL_SHUFFLE,
+        help="Shuffle the training data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-evl-tsize",
+        "--eval-training-size",
+        type=float,
+        default=default_args.EVAL_TRAINING_SIZE,
+        help="Training data size in relation to validation data. Change it in case you want to separate training data from validation data. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-eval-ft",
+        "--eval-follow-training",
+        type=str2bool,
+        default=default_args.FOLLOW_TRAIN,
+        help="Follow original training config when it comes to training data size, shuffling and seeds. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-eval-us",
+        "--unique-samples",
+        type=str2bool,
+        default=default_args.UNIQUE_SAMPLES,
+        help="Remove repeated samples (x and y) from data. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-evl-ls",
         "--eval-log-states",
         type=str2bool,
@@ -963,7 +1023,13 @@ def get_exp_args():
         default=default_args.SAVE_PREDS,
         help="Save heuristic prediction files for every state. (default: %(default)s)",
     )
-
+    parser.add_argument(
+        "-evl-plt",
+        "--eval-save-plots",
+        type=str2bool,
+        default=default_args.SAVE_PLOTS,
+        help="Save plots related to the evaluation. (default: %(default)s)",
+    )
 
     return parser.parse_args()
 

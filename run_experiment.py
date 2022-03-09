@@ -63,7 +63,8 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
             f"-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} "
             f"-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} "
             f"-tsize {args.train_training_size} -spt {args.train_sample_percentage} "
-            f"-us {args.train_unique_samples} -wm {args.train_weights_method}"
+            f"-us {args.train_unique_samples} -ust {args.train_unique_states} "
+            f"-lf {args.train_loss_function} -wm {args.train_weights_method}"
         )
 
         if args.train_max_training_time != default_args.MAX_TRAINING_TIME:
@@ -149,12 +150,13 @@ def only_train(args):
         f"-lr {args.train_learning_rate} -w {args.train_weight_decay} "
         f"-d {args.train_dropout_rate} -bi {args.train_bias} "
         f"-of {args.train_output_folder} -rst {args.train_restart_no_conv} "
-        f"-s {args.exp_net_seed} -shs {args.train_shuffle_seed} "
+        f"-s {net_seed} -shs {args.train_shuffle_seed} "
         f"-rmg {args.train_remove_goals} -cfst {args.train_contrast_first} "
         f"-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} "
         f"-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} "
         f"-tsize {args.train_training_size} -spt {args.train_sample_percentage} "
-        f"-us {args.train_unique_samples} -wm {args.train_weights_method}"
+        f"-us {args.train_unique_samples} -ust {args.train_unique_states} "
+        f"-lf {args.train_loss_function} -wm {args.train_weights_method}"
     )
 
     if args.train_max_training_time != default_args.MAX_TRAINING_TIME:
@@ -195,7 +197,12 @@ def only_eval(args):
     id_count = 0
     first = True
 
-    eval_args = f"-ls {args.eval_log_states} -sp {args.eval_save_preds}"
+    eval_args = (f"-ls {args.eval_log_states} -sp {args.eval_save_preds} "
+                 f"-s {args.eval_seed} -shs {args.eval_shuffle_seed} "
+                 f"-sh {args.eval_shuffle} -tsize {args.eval_training_size} "
+                 f"-us {args.eval_unique_samples} -ls {args.eval_log_states} "
+                 f"-plt {args.eval_save_plots} -ft {args.eval_follow_training}"
+                )
 
     if len(args.eval_trained_models) == 0:
         print("ERROR: Trained models not found.")
