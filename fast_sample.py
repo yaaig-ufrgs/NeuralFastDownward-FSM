@@ -60,6 +60,9 @@ def yaaig_ferber(args, meth):
     elif args.search_algorithm == "astar":
         search_algo = f'astar({args.search_heuristic}(transform=sampling_transform()),transform=sampling_transform())'
 
+    if args.technique == "dfs" or args.technique == "dfs_rw": # recheck this
+        args.samples_per_search = int(1.0/args.searches*args.max_samples+0.999)
+
     state_repr = get_full_state_repr_name(args.state_representation)
     instances = glob(f"{args.instances_dir}/*.pddl")
     start = args.seed
@@ -71,16 +74,28 @@ def yaaig_ferber(args, meth):
         domain = instance_split[-2]
         if instance_name != "domain" and instance_name != "source":
             for i in range(start, end):
-                cmd, out = "", ""
+                cmd, out, subtech, depthk, avik, avits, dups = "", "", "", "", "", "", ""
+                if args.technique == "dfs_rw" or args.technique == "bfs_rw":
+                    subtech = f"_{args.subtechnique}"
+                    depthk = f"_k{args.k_depth}"
+                if args.avi_k > 0:
+                    avik = f"_k-{args.avi_k}"
+                    avits = f"_it-{args.avi_its}"
+                if args.allow_dups != "none":
+                    dups = "ir" if args.allow_dups == "interrollout" else args.allow_dups
                 if meth == "yaaig":
-                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.technique}_{args.state_representation}_{args.searches}x{args.samples_per_search}-{args.max_samples}_ss{i}'
+                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.technique}{subtech}{depthk}{avik}{avits}_dups-{dups}_min-{args.minimization}_{args.state_representation}_{args.searches}x{args.samples_per_search}-{args.max_samples}_ss{i}'
+                    rmse_out = out + "_rmse"
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
                            f'--build release {instance} '
                            f'--search \'sampling_search_yaaig({search_algo}, '
                            f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, max_samples={args.max_samples}, '
-                           f'technique={args.technique}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state}, allow_duplicates={args.allow_dups})], '
-                           f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, avi_k={args.avi_k}, '
+                           f'depth_k={args.k_depth}, technique={args.technique}, subtechnique={args.subtechnique}, random_seed={i}, '
+                           f'restart_h_when_goal_state={args.restart_h_when_goal_state}, allow_duplicates={args.allow_dups})], '
+                           f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, '
+                           f'avi_k={args.avi_k}, avi_its={args.avi_its}, avi_epsilon={args.avi_eps}, sort_h={args.sort_h}, '
+                           f'avi_symmetric_statespace={args.symm_statespace}, mse_hstar_file={args.statespace}, mse_results_file={rmse_out}, '
                            f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting})\'')
                     print(cmd)
                 elif meth == "ferber":
@@ -133,9 +148,7 @@ def rsl(args):
 def sample(args):
     os.system(f"tsp -K")
     os.system(f"tsp -S {args.threads}")
-    args.minimization = bool2str(args.minimization)
     args.restart_h_when_goal_state = bool2str(args.restart_h_when_goal_state)
-    args.allow_dups = bool2str(args.allow_dups)
     args.ferber_technique = "iforward" if args.ferber_technique == "forward" else "gbackward"
 
     if args.method == "yaaig" or args.method == "ferber":
