@@ -149,10 +149,15 @@ class TrainWorkflow:
             for X, _, _ in self.train_dataloader:
                 X = X.to(self.device)
                 for p in self.model(X):
-                    if len(p) > 1:  # prefix
-                        p = prefix_to_h(p.tolist())
-                    if float(p) != 0.0:
-                        return False
+                    p_list = p.tolist()
+                    if type(p_list) is float:
+                        if p_list != 0.0:
+                            return False
+                    else:
+                        if len(p) > 1:  # prefix
+                            p = prefix_to_h(p_list)
+                        if float(p) != 0.0:
+                            return False
         return True
 
     def save_traced_model(self, filename: str, model="hnn"):

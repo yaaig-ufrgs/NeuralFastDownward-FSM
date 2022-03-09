@@ -55,7 +55,7 @@ class KFoldTrainingData:
         if self.normalize:
             for i in range(len(self.state_value_pairs)):
                 self.state_value_pairs[i][1] /= self.domain_max_value
-        self.batch_size = batch_size
+        self.batch_size = batch_size if batch_size > 0 else None
         self.num_folds = num_folds
         self.output_layer = output_layer
         self.shuffle = shuffle

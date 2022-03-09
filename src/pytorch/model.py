@@ -198,7 +198,8 @@ class HNN(nn.Module):
 
     def forward(self, x):
         if self.model == "resnet":
-            x = self.flatten(x)
+            if len(x.size()) > 1:
+                x = self.flatten(x)
             for h in self.hid:
                 x = self.activation(h(x))
                 if self.dropout_rate > 0:
