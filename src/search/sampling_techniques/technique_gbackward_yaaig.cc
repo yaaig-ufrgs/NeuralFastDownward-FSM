@@ -60,7 +60,7 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           bias_reload_frequency(opts.get<int>("bias_reload_frequency")),
           bias_reload_counter(0) {
     if (technique == "bfs_rw" || technique == "dfs_rw")
-        assert(subtechnique == "round_robin" || subtechnique == "round_robin_fashion");
+        assert(subtechnique == "round_robin" || subtechnique == "round_robin_fashion" || subtechnique == "random_leaf");
 }
 
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
@@ -216,6 +216,12 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                     leaves.push_back(*pa);
                 }
             }
+            if (subtechnique == "random_leaf") {
+                leaves.clear();
+                int lid = (*rng)(INT32_MAX - 1);
+                leaves.push_back(original_leaves[lid]);
+            }
+
             vector<bool> dead_leaf = vector<bool>(leaves.size(), false);
             vector<utils::HashSet<PartialAssignment>> hash_table_leaf(leaves.size());
 
@@ -276,6 +282,11 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                             dead_leaf[i] = false;
                             hash_table_leaf[i].clear();
                         }
+                    } else if (subtechnique == "random_leaf") {
+                        int lid = (*rng)(INT32_MAX - 1);
+                        leaves.push_back(original_leaves[lid]);
+                        dead_leaf[0] = false;
+                        hash_table_leaf[0].clear();
                     }
                 }
             }
@@ -296,8 +307,8 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
     );
     parser.add_option<string>(
             "subtechnique",
-            "If dfs_rw or bfs_rw: round_robin, round_robin_fashion",
-            "round_robin"
+            "If dfs_rw or bfs_rw: round_robin, round_robin_fashion, random_leaf",
+            "random_leaf"
     );
     parser.add_option<int>(
             "depth_k",
