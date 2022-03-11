@@ -218,7 +218,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             }
             if (subtechnique == "random_leaf") {
                 leaves.clear();
-                int lid = (*rng)(INT32_MAX - 1);
+                int lid = (*rng)(INT32_MAX - 1) % original_leaves.size();
                 leaves.push_back(original_leaves[lid]);
             }
 
@@ -283,8 +283,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                             hash_table_leaf[i].clear();
                         }
                     } else if (subtechnique == "random_leaf") {
-                        int lid = (*rng)(INT32_MAX - 1);
-                        leaves.push_back(original_leaves[lid]);
+                        int lid = (*rng)(INT32_MAX - 1) % original_leaves.size();
+                        leaves[0] = original_leaves[lid];
                         dead_leaf[0] = false;
                         hash_table_leaf[0].clear();
                     }
