@@ -136,11 +136,12 @@ def get_test_tasks_from_problem(
     domain = data["domain"]
     problem = data["problem"]
     possible_parent_dirs = [
-        "",
-        domain,
-        f"{domain}/easy",
-        f"{domain}/moderate",
-        f"{domain}/hard",
+        "ferber21/test_states",
+        f"ferber21/test_states/{domain}",
+        f"ferber21/test_states/{domain}/easy",
+        f"ferber21/test_states/{domain}/moderate",
+        f"ferber21/test_states/{domain}/hard",
+        f"experiments/{domain}"
     ]
     dir = None
 
@@ -179,7 +180,8 @@ def get_defaults_and_facts_files(
     args: Namespace,
     test_folder: str,
     problem_pddl: str,
-    facts_filename_format: str = "tasks/ferber21/training_tasks/{domain}/{problem}_facts.txt",
+    # facts_filename_format: str = "tasks/ferber21/training_tasks/{domain}/{problem}_facts.txt",
+    facts_filename_format: str = "tasks/experiments/{domain}/{problem}_facts.txt",
 ) -> (str, str):
     """
     Return its `facts` and `defaults` files.
