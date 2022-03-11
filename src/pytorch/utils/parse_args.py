@@ -622,6 +622,7 @@ def get_exp_args():
     )
     parser.add_argument(
         "-exp-threads",
+        "--exp-threads",
         type=int,
         default=default_args.EXP_THREADS,
         help="Number of threads to use. (default: %(default)s)",
@@ -997,9 +998,16 @@ def get_exp_args():
     )
     parser.add_argument(
         "-tst-modeldir",
-        "--tst-model-dir",
+        "--test-model-dir",
         type=Path,
         help="Path to training folder with trained model. Only used if only testing.",
+    )
+    parser.add_argument(
+        "-tst-pt",
+        "--test-test-model",
+        choices=["all", "best", "epochs"],
+        default=default_args.TEST_MODEL,
+        help="Model(s) used for testing. (default: %(default)s)",
     )
     parser.add_argument(
         "-tst-a",
@@ -1049,6 +1057,13 @@ def get_exp_args():
         type=str,
         default=default_args.AUTO_TASKS_FOLDER,
         help="Base folder to search for tasks automatically. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-tst-ats",
+        "--test-auto-tasks-seed",
+        type=int,
+        default=default_args.AUTO_TASKS_SEED,
+        help="Seed to shuffle the tasks taken automatically. (default: %(default)s)",
     )
     parser.add_argument(
         "-tst-dlog",

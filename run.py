@@ -4,19 +4,25 @@
 Run experimentes configured from JSON files.
 ./run.py [exp1.json exp2.json ... expn.json]
 
-See exp.json files and parse_args.py.
+See exp.json files and `parse_args.py`.
+
+In each JSON, arguments with empty string take the default values
+from `default_args.py`.
 """
 
 import sys
 import os
 from json import load
 
+
 def build_args(d: dict, prefix: str) -> str:
     args = ""
-    for k, v in exp.items():
+    for k, v in d.items():
         if v == "" or k == "ignore":
             continue
         if k == "samples":
+            args += f"{v} "
+        elif k == "problem-pddls":
             args += f"{v} "
         else:
             arg = prefix + k
@@ -44,15 +50,21 @@ for exp_path in sys.argv[1:]:
     sample = full_exp['sample']
 
     if not str2bool(exp['ignore']):
+        only_train = str2bool(exp['exp-only-train'])
+        only_test = str2bool(exp['exp-only-test'])
+        only_eval = str2bool(exp['exp-only-eval'])
         args = f"./run_experiment.py "
         args += build_args(exp, "--")
-        if not str2bool(train['ignore']):
-            args += build_args(train, "--train-")
-        if not str2bool(test['ignore']):
-            args += build_args(test, "--test-")
-           
+        if not str2bool(evalu['ignore']) and only_eval:
+            args += build_args(evalu, "--eval-")
+        else:
+            if not str2bool(train['ignore']) and not only_test:
+                args += build_args(train, "--train-")
+            if not str2bool(test['ignore']) and not only_train:
+                args += build_args(test, "--test-")
 
     print(args)
-                
-                
-        
+    print()
+    os.system(args)
+    # TODO WHILE
+    # TODO SAMPLE

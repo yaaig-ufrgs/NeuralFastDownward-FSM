@@ -80,6 +80,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
         test_args = (
             f"-a {args.test_search_algorithm} -m {args.test_max_search_memory} "
             f"-sdir {args.test_samples_dir} -atn {args.test_auto_tasks_n} "
+            f"-ats {args.test_auto_tasks_seed} -pt {args.test_test_model} "
             f"-dlog {args.test_downward_logs} {trained_model_dir}"
         )
 
@@ -114,6 +115,7 @@ def only_test(args):
     test_args = (
         f"-a {args.test_search_algorithm} -m {args.test_max_search_memory} "
         f"-sdir {args.test_samples_dir} -atn {args.test_auto_tasks_n} "
+        f"-ats {args.test_auto_tasks_seed} -pt {args.test_test_model} "
         f"-dlog {args.test_downward_logs}"
     )
 
@@ -211,6 +213,9 @@ def only_eval(args):
                  f"-us {args.eval_unique_samples} -ls {args.eval_log_states} "
                  f"-plt {args.eval_save_plots} -ft {args.eval_follow_training}"
                 )
+
+    if args.eval_trained_models[-1] == '*':
+        args.eval_trained_models = glob(args.eval_trained_models)
 
     if len(args.eval_trained_models) == 0:
         print("ERROR: Trained models not found.")
