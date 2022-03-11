@@ -587,6 +587,7 @@ def get_exp_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-exp-type",
+        "--exp-type",
         choices=[
             "single",
             "fixed_net_seed",
@@ -659,6 +660,13 @@ def get_exp_args():
         help="Network model to use. (default: %(default)s)",
     )
     parser.add_argument(
+        "-trn-sb",
+        "--train-save-best-epoch-model",
+        type=str2bool,
+        default=default_args.SAVE_BEST_EPOCH_MODEL,
+        help="Saves the best model from the best epoch instead of the last one. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-trn-pat",
         "--train-patience",
         type=int,
@@ -695,6 +703,27 @@ def get_exp_args():
         type=int,
         default=default_args.BATCH_SIZE,
         help="Number of samples used in each step of training. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-o",
+        "--train-output-layer",
+        choices=["regression", "prefix", "one-hot"],
+        default=default_args.OUTPUT_LAYER,
+        help="Network output layer type. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-lo",
+        "--train-linear-output",
+        type=str2bool,
+        default=default_args.LINEAR_OUTPUT,
+        help="Use linear output in the output layer (True) or use an activation (False). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-f",
+        "--train-num-folds",
+        type=int,
+        default=default_args.NUM_FOLDS,
+        help="Number of folds to split training data. (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-lr",
@@ -795,7 +824,6 @@ def get_exp_args():
         default=default_args.WEIGHTS_METHOD,
         help="Inicialization of network weights. (default: %(default)s)",
     )
-
     parser.add_argument(
         "-trn-bi",
         "--train-bias",
@@ -804,11 +832,32 @@ def get_exp_args():
         help="Use bias or not. (default: %(default)s)",
     )
     parser.add_argument(
+        "-trn-biout",
+        "--train-bias-output",
+        type=str2bool,
+        default=default_args.BIAS,
+        help="Use bias or not in the output layer. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-clp",
+        "--train-clamping",
+        type=int,
+        default=default_args.CLAMPING,
+        help="Value to clamp heuristics with h=value-cl. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-trn-of",
         "--train-output-folder",
         type=Path,
         default=default_args.OUTPUT_FOLDER,
         help="Path where the training folder will be saved. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-a",
+        "--train-activation",
+        choices=["sigmoid", "relu", "leakyrelu"],
+        default=default_args.ACTIVATION,
+        help="Activation function for hidden layers. (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-s",
@@ -825,11 +874,39 @@ def get_exp_args():
         help="Restarts the network if it won't converge. (default: %(default)s)",
     )
     parser.add_argument(
+        "-trn-sibd",
+        "--train-seed-increment-when-born-dead",
+        type=int,
+        default=default_args.SEED_INCREMENT_WHEN_BORN_DEAD,
+        help="Seed increment when the network needs to restart due to born dead. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-trd",
+        "--train-num-threads",
+        type=int,
+        default=default_args.NUM_THREADS,
+        help="Number of threads used for intra operations on CPU (PyTorch). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-dnw",
+        "--train-data-num-workers",
+        type=int,
+        default=default_args.DATALOADER_NUM_WORKERS,
+        help="Number of workers for multi-process data loading. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-trn-rmg",
         "--train-remove-goals",
         type=str2bool,
         default=default_args.REMOVE_GOALS,
         help="Remove goals from the sampling data (h = 0). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-hpred",
+        "--train-save-heuristic-pred",
+        type=str2bool,
+        default=default_args.SAVE_HEURISTIC_PRED,
+        help="Save a csv file with the expected and network-predicted heuristics for all training samples. (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-sfst",
@@ -865,6 +942,27 @@ def get_exp_args():
         type=str2bool,
         default=default_args.USE_GPU,
         help="Use GPU during training. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-sp",
+        "--train-scatter-plot",
+        type=str2bool,
+        default=default_args.SCATTER_PLOT,
+        help="Create a scatter plot with y, predicted values. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-spn",
+        "--train-plot-n-epochs",
+        type=int,
+        default=default_args.SCATTER_PLOT_N_EPOCHS,
+        help="Do a scatter plot every n epochs. If -1, plot only after training. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-no",
+        "--train-normalize-output",
+        type=str2bool,
+        default=default_args.NORMALIZE_OUTPUT,
+        help="Normalizes the output neuron. (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-addfn",
