@@ -2,10 +2,10 @@
     "experiment": {
         "ignore": "no",
         "samples": "samples",
-        "exp-type": "all",
+        "exp-type": "fixed_sample_seed",
         "exp-fixed-seed": "",
         "exp-net-seed": 9,
-        "exp-sample-seed": 9,
+        "exp-sample-seed": 0,
         "exp-threads": 10,
         "exp-only-train": "no",
         "exp-only-test": "no",

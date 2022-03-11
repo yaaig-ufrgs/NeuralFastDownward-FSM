@@ -12,6 +12,7 @@ from `default_args.py`.
 
 import sys
 import os
+import time
 from json import load
 
 
@@ -66,5 +67,15 @@ for exp_path in sys.argv[1:]:
     print(args)
     print()
     os.system(args)
-    # TODO WHILE
+    time.sleep(2)
+
+    while True:
+        p = os.popen('tsp')
+        out = p.read()
+        p.close()
+        if "queued" not in out and "running" not in out:
+            print("...")
+            break
+        time.sleep(180)
+    
     # TODO SAMPLE
