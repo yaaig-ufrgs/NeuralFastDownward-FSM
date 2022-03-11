@@ -11,12 +11,10 @@ list of contributors, history, etc.), see [here](https://github.com/PatrickFerbe
 ### Pre-run
 1. Clone this repository.
 
-2. Install [`clingo`](https://github.com/potassco/clingo/releases).
-
-3. Download and extract
+2. Download and extract
    [`libtorch`](https://pytorch.org/cppdocs/installing.html) to a directory `p`.
 
-5. `cd` to the directory where the root of the cloned repository is located, then:
+3. `cd` to the directory where the root of the cloned repository is located, then:
     ```
     export PATH_TORCH=p
     pip install -r requirements.txt
@@ -45,7 +43,7 @@ appropriate filename.
 ```
 
 ### Training a neural network
-Executing `./train.py` without any arguments will show how to use it with all
+Executing `./train.py -h` will show how to use it with all
 the possible arguments. Almost everything is modifiable, and the default neural
 network is a ResNet.
 
@@ -61,7 +59,7 @@ The resulting trained model, logs, plots, etc. will be located in the
 appropriate `results` directory.
 
 ### Evaluating instances
-Executing `./test.py` without any arguments will show how to use it with all
+Executing `./test.py -h` will show how to use it with all
 the possible arguments.
 
 The example below takes a network folder (the trained model is located within
