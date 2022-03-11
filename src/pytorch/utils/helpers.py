@@ -136,12 +136,12 @@ def get_test_tasks_from_problem(
     domain = data["domain"]
     problem = data["problem"]
     possible_parent_dirs = [
+        f"experiments/{domain}",
         "ferber21/test_states",
         f"ferber21/test_states/{domain}",
         f"ferber21/test_states/{domain}/easy",
         f"ferber21/test_states/{domain}/moderate",
         f"ferber21/test_states/{domain}/hard",
-        f"experiments/{domain}"
     ]
     dir = None
 
@@ -149,6 +149,7 @@ def get_test_tasks_from_problem(
         candidate_dir = f"{tasks_folder}/{parent_dir}/{problem}"
         if os.path.isdir(candidate_dir):
             dir = candidate_dir
+            break
 
     if dir == None:
         _log.error(
