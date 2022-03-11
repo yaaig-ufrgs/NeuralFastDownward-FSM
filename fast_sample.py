@@ -95,7 +95,7 @@ def yaaig_ferber(args, meth):
                            f'restart_h_when_goal_state={args.restart_h_when_goal_state}, allow_duplicates={args.allow_dups})], '
                            f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, '
                            f'avi_k={args.avi_k}, avi_its={args.avi_its}, avi_epsilon={args.avi_eps}, sort_h={args.sort_h}, '
-                           f'avi_symmetric_statespace={args.symm_statespace}, mse_hstar_file={args.statespace}, mse_results_file={rmse_out}, '
+                           f'avi_symmetric_statespace={args.symm_statespace}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
                            f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting})\'')
                     print(cmd)
                 elif meth == "ferber":
@@ -149,6 +149,8 @@ def sample(args):
     os.system(f"tsp -K")
     os.system(f"tsp -S {args.threads}")
     args.restart_h_when_goal_state = bool2str(args.restart_h_when_goal_state)
+    args.sort_h = bool2str(args.sort_h)
+    args.symm_statespace = bool2str(args.symm_statespace)
     args.ferber_technique = "iforward" if args.ferber_technique == "forward" else "gbackward"
 
     if args.method == "yaaig" or args.method == "ferber":

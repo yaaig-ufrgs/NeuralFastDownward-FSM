@@ -1318,7 +1318,7 @@ def get_sample_args():
         "-min",
         "--minimization",
         choices=["none", "partial", "complete", "both"],
-        default=default_args.SEARCH_MINIMIZATION,
+        default=default_args.SAMPLE_MINIMIZATION,
         help="Sample h-value minimization strategy to use. (default: %(default)s)",
     )
     parser.add_argument(
