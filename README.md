@@ -25,21 +25,40 @@ list of contributors, history, etc.), see [here](https://github.com/PatrickFerbe
 See
 [`src/pytorch/`](https://github.com/yaaig-ufrgs/NeuralFastDownward/tree/main/src/pytorch).
 
-### Generating samples
+### Default arguments
+See [`src/pytorch/utils/default_args.py`](https://github.com/yaaig-ufrgs/NeuralFastDownward/tree/main/src/pytorch/utils/default_args.py) and [`src/pytorch/utils/parse_args.py`](https://github.com/yaaig-ufrgs/NeuralFastDownward/tree/main/src/pytorch/utils/parse_args.py) for lists of default argument values when invoking programs.
 
-Usage:
+### Generating samples (CURRENTLY BEING REWORKED)
 
 ```
-./fast-sample.sh [yaaig|ferber] [rw|dfs] [fs|ps|us|as] num_searches samples_per_search n_seeds problem_dir output_dir
-./fast-sample.sh rsl [countAdds|countDels|countBoth] num_train_states num_demos max_len_demos sample_percentage check_state_invars n_seeds problem_dir output_dir
+usage: fast_sample.py [-h] [-stp STATESPACE]
+                      [-tech {rw,dfs,bfs,dfs_rw,bfs_rw,countBoth,countAdds,countDels}]
+                      [-stech {round_robin,round_robin_fashion,random_leaf}]
+                      [-search {greedy,astar}] [-heur {ff,lmcut}]
+                      [-ftech {forward,backward}]
+                      [-fst {random_state,entire_plan,init_state}]
+                      [-fn FERBER_NUM_TASKS] [-fmin FERBER_MIN_WALK_LEN]
+                      [-fmax FERBER_MAX_WALK_LEN] [-st {fs,fs-nomutex,ps,us,au}]
+                      [-uss US_ASSIGNMENTS] [-max MAX_SAMPLES] [-scs SEARCHES]
+                      [-sscs SAMPLES_PER_SEARCH] [-s SEED]
+                      [-dups {all,interrollout,none}] [-ms MULT_SEED]
+                      [-c CONTRASTING] [-rhg RESTART_H_WHEN_GOAL_STATE]
+                      [-o OUTPUT_DIR] [-sym SYMM_STATESPACE]
+                      [-min {none,partial,complete,both}] [-sorth SORT_H]
+                      [-avi AVI_K] [-avits AVI_ITS] [-avieps AVI_EPS] [-kd K_DEPTH]
+                      [-rsl-states RSL_NUM_STATES] [-rsl-demos RSL_NUM_DEMOS]
+                      [-rsl-len-demo RSL_MAX_LEN_DEMO] [-rsl-inv RSL_CHECK_INVARS]
+                      [-threads THREADS]
+                      instances_dir {ferber,yaaig,rsl}
 ```
 
-The example below takes all the instances in the `grid` directory and saves the
+The example below takes all the instances in the `blocks` directory and saves the
 samples, facts and defaults files in the `samples` directory with an
-appropriate filename.
+appropriate filename. In the example, a backward regression will be performed with Random Walk and heuristic value minimization in both partial and complete states, 
+using our strategy (yaaig). All the other unspecified settings are default.
 
 ```
-./fast-sample.sh rsl countBoth 10000 5 500 50 true 5 tasks/ferber21/training_tasks_used/grid samples/
+./fast_sample.py tasks/IPC/blocks yaaig -o samples -tech rw -ftech backward -min both
 ```
 
 ### Training a neural network
@@ -47,47 +66,65 @@ Executing `./train.py -h` will show how to use it with all
 the possible arguments. Almost everything is modifiable, and the default neural
 network is a ResNet.
 
-The example below will train a neural network with a sampling file as input.
-`-s` is the neural network seed (affects everything related to RNG, such as network initialization), 
-and `-pat` is the patience used for early-stop.
+```
+usage: train.py [-h] [-mdl {hnn,resnet}] [-sb SAVE_BEST_EPOCH_MODEL] [-pat PATIENCE]
+                [-o {regression,prefix,one-hot}] [-lo LINEAR_OUTPUT] [-f NUM_FOLDS]
+                [-hl HIDDEN_LAYERS] [-hu HIDDEN_UNITS [HIDDEN_UNITS ...]]
+                [-b BATCH_SIZE] [-lr LEARNING_RATE] [-e MAX_EPOCHS]
+                [-t MAX_TRAINING_TIME] [-a {sigmoid,relu,leakyrelu}]
+                [-w WEIGHT_DECAY] [-d DROPOUT_RATE] [-shs SHUFFLE_SEED] [-sh SHUFFLE]
+                [-gpu USE_GPU] [-bi BIAS] [-tsize TRAINING_SIZE]
+                [-spt SAMPLE_PERCENTAGE] [-us UNIQUE_SAMPLES] [-ust UNIQUE_STATES]
+                [-biout BIAS_OUTPUT] [-clp CLAMPING] [-rmg REMOVE_GOALS]
+                [-of OUTPUT_FOLDER] [-s SEED] [-sp SCATTER_PLOT] [-spn PLOT_N_EPOCHS]
+                [-wm {default,sqrt_k,1,01,xavier_uniform,xavier_normal,kaiming_uniform,kaiming_normal,rai}]
+                [-lf {mse,mse_weighted,rmse}] [-cdir COMPARE_CSV_DIR]
+                [-hdir HSTAR_CSV_DIR] [-no NORMALIZE_OUTPUT] [-rst RESTART_NO_CONV]
+                [-sibd SEED_INCREMENT_WHEN_BORN_DEAD] [-trd NUM_THREADS]
+                [-dnw DATA_NUM_WORKERS] [-hpred SAVE_HEURISTIC_PRED]
+                [-sfst STANDARD_FIRST] [-cfst CONTRAST_FIRST]
+                [-itc INTERCALATE_SAMPLES] [-cut CUT_NON_INTERCALATED_SAMPLES]
+                [-addfn [{patience,output-layer,num-folds,hidden-layers,hidden-units,batch-size,learning-rate,max-epochs,max-training-time,activation,weight-decay,dropout-rate,shuffle-seed,shuffle,use-gpu,bias,bias-output,normalize-output,restart-no-conv,sample-percentage,training-size} ...]]
+                samples
+```
+
+The example below will train a neural network with a sampling file as input, utilizing seed 0 (for reproducibility), a max of 28200 training epochs, ReLU activation, regression output, MSE loss function and Kaiming Uniform network initialization. The trained model will be saved in the `results` folder.
 
 ```
-./train.py samples/rsl_blocks_probBLOCKS-14-0_countBoth_100000_ss80970 -s 1 -pat 15
-```
+./train.py samples/yaaig_blocks_probBLOCKS-7-0_rw_fs_avi1-itmax_1pct_ss0 -s 0 -e 28200 -a relu -o regression -of results -lf mse -wm kaiming_uniform
 
-The resulting trained model, logs, plots, etc. will be located in the
-appropriate `results` directory.
+```
 
 ### Evaluating instances
 Executing `./test.py -h` will show how to use it with all
 the possible arguments.
 
+```
+usage: test.py [-h] [-tfc TRAIN_FOLDER_COMPARE] [-d DOMAIN_PDDL] [-a {astar,eager_greedy}]
+               [-heu {nn,add,blind,ff,goalcount,hmax,lmcut}] [-hm HEURISTIC_MULTIPLIER] [-u UNARY_THRESHOLD]
+               [-t MAX_SEARCH_TIME] [-m MAX_SEARCH_MEMORY] [-e MAX_EXPANSIONS] [-pt {all,best,epochs}] [-sdir SAMPLES_DIR]
+               [-ffile FACTS_FILE] [-dfile DEFAULTS_FILE] [-atn AUTO_TASKS_N] [-atf AUTO_TASKS_FOLDER]
+               [-ats AUTO_TASKS_SEED] [-dlog DOWNWARD_LOGS]
+               train_folder [problem_pddls ...]
+```
+
 The example below takes a network folder (the trained model is located within
 it) as the first argument and will automatically find 10 random (fixed seed as default) 
 instances of the same domain to use for testing. `-t` is the time limit to solve the task, `-a` is the search algorithm used, and `-pt`
-[all|best] indicates if we want to use all the folds (if using e.g.
-10-fold-cross-validation) for testing or the best one.
-`-sdir` (defaults for `samples`) indicates the directory where the sample files are located. This is
-important because in case we used RSL sampling, it needs to locate the
-appropriate `_defaults.txt` and `_facts.txt` files.
+[all|best] indicates if we want to use all the folds (if using e.g. 10-fold-cross-validation) for testing or the best one.
 
 ```
-./test.py results/nfd_train.rsl_grid_prob04-0_countBoth_10000_ss1.ns1 -sdir samples/ -t 360 -a eager_greedy -pt all
+./test.py results/nfd_train.yaaig_blocks_probBLOCKS-7-0_rw_fs_avi1-itmax_1pct_ss0.ns0 -t 360 -a eager_greedy -pt all
 ```
 
 You can also manually indicate the _n_ tasks you want to evaluate.
 
 ```
-./test.py results/nfd_train.yaaig_blocks_probBLOCKS-12-0_dfs_fs_500x200_ss1.ns1 tasks/IPC/blocks/probBLOCKS*.pddl
+./test.py results/nfd_train.yaaig_blocks_probBLOCKS-7-0_rw_fs_avi1-itmax_1pct_ss0.ns0 tasks/IPC/blocks/probBLOCKS*.pddl
 ```
 
 ### Running full experiments
-Provided that you have all the samples you want in the `samples` folder, you
-can run `./run_experiment.sh <args>` to automatically train and test neural networks.
-Keep in mind that this script is specifically tailored for our needs, and we
-constantly modify it -- it's meant for "batch" training/and testing, and it
-makes usage of `tsp` and `taskset` to schedule executions and allocate them to
-specific threads, respectively. For specifics, look at the code.
+You can create multiple files like [`exp_example.json`](https://github.com/yaaig-ufrgs/NeuralFastDownward/blob/main/exp_example.json) and call `./run.py exp1.json exp2.json`. Batch experiments will be performed according to the content in the JSON files.
 
 
 ## Features
