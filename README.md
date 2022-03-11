@@ -124,7 +124,7 @@ You can also manually indicate the _n_ tasks you want to evaluate.
 ```
 
 ### Running full experiments
-You can create multiple files like [`exp_example.json`](https://github.com/yaaig-ufrgs/NeuralFastDownward/blob/main/exp_example.json) and call `./run.py exp1.json exp2.json`. Batch experiments will be performed according to the content in the JSON files.
+You can create multiple files like [`exp_example.json`](https://github.com/yaaig-ufrgs/NeuralFastDownward/blob/main/exp_example.json) and call `./run.py exp1.json exp2.json`. Batch experiments will be performed according to the content in the JSON files. Empty or unspecified arguments are run as default. 
 
 
 ## Features
