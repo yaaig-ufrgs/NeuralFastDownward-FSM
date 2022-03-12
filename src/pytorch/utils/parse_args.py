@@ -1386,6 +1386,7 @@ def get_sample_args():
     )
     parser.add_argument(
         "-threads",
+        "--threads",
         type=int,
         default=default_args.SAMPLE_THREADS,
         help="Threads to use. (default: %(default)s)",
