@@ -55,7 +55,8 @@ usage: fast_sample.py [-h] [-stp STATESPACE]
 The example below takes all the instances in the `blocks` directory and saves the
 samples, facts and defaults files in the `samples` directory with an
 appropriate filename. In the example, a backward regression will be performed with Random Walk and heuristic value minimization in both partial and complete states, 
-using our strategy (yaaig). All the other unspecified settings are default.
+using our strategy (yaaig). All the other unspecified settings will be run as
+default.
 
 ```
 ./fast_sample.py tasks/IPC/blocks yaaig -o samples -tech rw -ftech backward -min both
@@ -124,7 +125,19 @@ You can also manually indicate the _n_ tasks you want to evaluate.
 ```
 
 ### Running full experiments
-You can create multiple files like [`exp_example.json`](https://github.com/yaaig-ufrgs/NeuralFastDownward/blob/main/exp_example.json) and call `./run.py exp1.json exp2.json`. Batch experiments will be performed according to the content in the JSON files. Empty or unspecified arguments are run as default. 
+You can create multiple files like [`exp_example.json`](https://github.com/yaaig-ufrgs/NeuralFastDownward/blob/main/exp_example.json) and call `./run.py exp1.json exp2.json`. Batch experiments will be performed according to the content in the JSON files. All the empty/unspecified settings will be run as
+default, and missing sections will be ignored. 
+
+Generally, most of the time
+you'll be interested in having only short `"experiment"`, `"train"` and `"test"`
+sections. Evaluation with the samples used for training are already performed
+automatically at the end of every train, so you'll only be interested in
+inserting an `"eval"` section if you are interested in evaluating your network
+over other samples and have `"exp-only-eval": "yes"`. The `"sampling"` section
+is interesting to have if you want to perform a full
+sampling-then-train-then-test workflow, but most of the time you'll have
+already generated your samples separately.
+
 
 
 ## Features
