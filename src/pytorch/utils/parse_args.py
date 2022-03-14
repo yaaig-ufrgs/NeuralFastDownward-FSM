@@ -590,9 +590,6 @@ def get_exp_args():
         "--exp-type",
         choices=[
             "single",
-            "fixed_net_seed",
-            "fixed_sample_seed",
-            "change_all",
             "all",
             "combined",
         ],
@@ -600,25 +597,18 @@ def get_exp_args():
         help="Experiment type according to seed. (default: %(default)s)",
     )
     parser.add_argument(
-        "-exp-fs",
-        "--exp-fixed-seed",
-        type=int,
-        default=default_args.EXP_FIXED_SEED,
-        help="Fixed seed for fixed seed experiments. (default: %(default)s)",
-    )
-    parser.add_argument(
         "-exp-ns",
         "--exp-net-seed",
-        type=int,
+        type=str,
         default=default_args.EXP_NET_SEED,
-        help="Network seed for fixed network experiments. (default: %(default)s)",
+        help="Inclusive network seed interval to be used in experiments. (default: %(default)s)",
     )
     parser.add_argument(
         "-exp-ss",
         "--exp-sample-seed",
-        type=int,
+        type=str,
         default=default_args.EXP_SAMPLE_SEED,
-        help="Sample seed for fixed sample seed experiments. (default: %(default)s)",
+        help="Inclusive sample seed interval to be used in experiments. (default: %(default)s)",
     )
     parser.add_argument(
         "-exp-threads",

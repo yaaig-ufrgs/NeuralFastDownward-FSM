@@ -42,7 +42,7 @@ def run_multi_thread(cmd, threads):
 def get_full_state_repr_name(state_repr):
     if state_repr == "fs":
         return "complete"
-    elif state_repre == "fs-nomutex":
+    elif state_repr == "fs-nomutex":
         return "complete-no-mutex"
     elif state_repr == "ps":
         return "partial"

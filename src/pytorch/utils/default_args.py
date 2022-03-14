@@ -77,13 +77,11 @@ EVAL_TRAINING_SIZE = 1.0
 EVAL_SEED = -1
 EVAL_SHUFFLE_SEED = -1
 
-
 # Experiment
-EXP_TYPE = "all"
+EXP_TYPE = "all" # ['single', 'all', 'combined']
 EXP_THREADS = 10
-EXP_NET_SEED = 1
-EXP_SAMPLE_SEED = 1
-EXP_FIXED_SEED = 1
+EXP_NET_SEED = "0..9"
+EXP_SAMPLE_SEED = "0..9"
 EXP_ONLY_TRAIN = False
 EXP_ONLY_TEST = False
 EXP_ONLY_EVAL = False
