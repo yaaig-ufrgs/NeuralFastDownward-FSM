@@ -130,7 +130,7 @@ default, and missing sections will be ignored.
 
 Generally, most of the time
 you'll be interested in having only short `"experiment"`, `"train"` and `"test"`
-sections. Evaluation with the samples used for training are already performed
+sections in the JSON files. Evaluation with the samples used for training are already performed
 automatically at the end of every train, so you'll only be interested in
 inserting an `"eval"` section if you are interested in evaluating your network
 over other samples and have `"exp-only-eval": "yes"`. The `"sampling"` section
