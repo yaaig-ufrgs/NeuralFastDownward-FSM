@@ -15,7 +15,7 @@ from sys import argv
 def bool2state(facts, boolean):
     atoms = [f for f in facts.split("=")[-1].replace("Atom ", "").split(";") if f]
     assert len(atoms) == len(boolean)
-    state = [atoms[i] for i, x in enumerate(boolean) if x == "1"]
+    state = ["("+atoms[i].replace("(", " ").replace(",", " ").replace("  ", " ") for i, x in enumerate(boolean) if x == "1"]
     return " ".join(state)
 
 if __name__ == "__main__":

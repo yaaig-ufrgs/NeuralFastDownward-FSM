@@ -28,7 +28,7 @@ FD = ("." if "scripts" in argv[0] else "..") + "/fast-downward.py"
 
 samples_file = argv[1]
 problem_pddl_file = argv[2]
-domain_pddl_file = f"{'/'.join(problem_pddl_file.split('/')[:-1])}/domain.pddl"
+domain_pddl_file = f"./{'/'.join(problem_pddl_file.split('/')[:-1])}/domain.pddl"
 
 samples_name = samples_file.split('/')[-1]
 problem = f"problem_{samples_name}.pddl"
@@ -43,6 +43,8 @@ with open(samples_file,) as f:
 atoms = samples[1][:-1]
 samples = [sample[:-1] if sample[-1] == "\n" else sample for sample in samples if sample[0] != "#"]
 
+fixed_facts = "" # " " + "(neighbor p_1_1 p_1_2) (neighbor p_1_2 p_1_1) (neighbor p_1_2 p_1_3) (neighbor p_1_3 p_1_2) (neighbor p_2_1 p_2_2) (neighbor p_2_2 p_2_1) (neighbor p_2_2 p_2_3) (neighbor p_2_3 p_2_2) (neighbor p_3_1 p_3_2) (neighbor p_3_2 p_3_1) (neighbor p_3_2 p_3_3) (neighbor p_3_3 p_3_2) (neighbor p_1_1 p_2_1) (neighbor p_2_1 p_1_1) (neighbor p_1_2 p_2_2) (neighbor p_2_2 p_1_2) (neighbor p_1_3 p_2_3) (neighbor p_2_3 p_1_3) (neighbor p_2_1 p_3_1) (neighbor p_3_1 p_2_1) (neighbor p_2_2 p_3_2) (neighbor p_3_2 p_2_2) (neighbor p_2_3 p_3_3) (neighbor p_3_3 p_2_3)"
+
 total = len(samples)
 hstar = {}
 for i, sample in enumerate(samples):
@@ -51,7 +53,7 @@ for i, sample in enumerate(samples):
         continue
 
     try:
-        output = "(:init " + check_output(["./boolean2state.py", atoms, sample]).decode("utf-8")[:-1] + ")\n"
+        output = "(:init " + check_output(["./boolean2state.py", atoms, sample]).decode("utf-8")[:-1] + fixed_facts + ")\n"
         for j in range(len(pddl)):
             if ":init" in pddl[j] or ":INIT" in pddl[j]:
                 pddl[j] = output
@@ -104,6 +106,5 @@ for file in [domain, problem, f"output_{samples_name}.sas", f"sas_plan_{samples_
     remove(file)
 
 with open(f"hstar_{samples_name}", "w") as f:
-    f.write("sample,hstar\n")
-    for h in hstar:
-        f.write(f"{h},{hstar[h]}\n")
+    for s in hstar:
+        f.write(f"{hstar[s]};{s}\n")
