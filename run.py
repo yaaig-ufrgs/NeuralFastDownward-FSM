@@ -20,7 +20,7 @@ from json import load
 def build_args(d: dict, prefix: str) -> str:
     args = ""
     for k, v in d.items():
-        if v == "":
+        if v == "" or k == "exp-only-sampling":
             continue
         if k in ["samples", "problem-pddls", "method", "instances_dir"]:
             args += f" {v}"
@@ -98,6 +98,4 @@ def main(exp_paths: [str]):
 
 
 if __name__ == "__main__":
-    if "/" in argv[0]:
-        raise Exception("Run in root folder.")
     main(argv[1:])
