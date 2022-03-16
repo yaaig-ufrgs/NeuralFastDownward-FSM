@@ -26,11 +26,10 @@ public:
     reverse_iterator rbegin();
     reverse_iterator rend();
     iterator find(std::vector<int>);
-    std::vector<T> find_all_compatible(std::vector<int> key, bool bin = false);
+    std::vector<T> find_all_compatible(std::vector<int> key, std::string rule);
 
 private:
-    std::vector<T> find_all_compatible_rec(std::vector<int> key, unsigned pos, tnode<T>* n);
-    std::vector<T> find_all_compatible_bin_rec(std::vector<int> key, unsigned pos, tnode<T>* n);
+    std::vector<T> find_all_compatible_rec(std::vector<int> key, unsigned pos, tnode<T>* n, std::string rule);
 
     tnode<T> *root;
     int size;
@@ -47,8 +46,8 @@ template <typename T>
 void trie<T>::insert(std::vector<int> key, T val) {
     tnode<T>* node = this->root;
     for (int& v : key) {
-        // Our use case has -1, so its increments to get the values in the range (0..127)
-        v += 1; assert(v >= 0 && v < 128);
+        // Our use case has -1, so its increments to get the values in the range (0..MAX_CHILDREN-1)
+        v += 1; assert(v >= 0 && v < MAX_CHILDREN);
 
         if (node->getChild(v) != nullptr) {
             node = node->getChild(v);
@@ -71,8 +70,8 @@ bool trie<T>::exist(std::vector<int> key) {
     bool res = true;
     tnode<T>* node = this->root;
     for (int& v : key) {
-        // Our use case has -1, so its increments to get the values in the range (0..127)
-        v += 1; assert(v >= 0 && v < 128);
+        // Our use case has -1, so its increments to get the values in the range (0..MAX_CHILDREN-1)
+        v += 1; assert(v >= 0 && v < MAX_CHILDREN);
 
         if (node->getChild(v) == nullptr) {
             res = false;
@@ -99,7 +98,7 @@ typename trie<T>::iterator trie<T>::begin() {
 }
 
 template <typename T>
-tnode<T>* rbrecur(tnode<T>* n, int offset = 127, tnode<T>* r = nullptr);
+tnode<T>* rbrecur(tnode<T>* n, int offset = MAX_CHILDREN-1, tnode<T>* r = nullptr);
 
 template <typename T>
 typename trie<T>::iterator trie<T>::end() {
@@ -126,7 +125,7 @@ tnode<T>* rbrecur(tnode<T>* n, int offset, tnode<T>* r) {
         if (it->isEnd()) {
             r = it;
         }
-        return rbrecur(it, 127, r);
+        return rbrecur(it, MAX_CHILDREN-1, r);
     }
     return nullptr;
 }
@@ -145,8 +144,8 @@ template <typename T>
 typename trie<T>::iterator trie<T>::find(std::vector<int> key) {
     tnode<T>* n = this->root;
     for (int& v : key) {
-        // Our use case has -1, so its increments to get the values in the range (0..127)
-        v += 1; assert(v >= 0 && v < 128);
+        // Our use case has -1, so its increments to get the values in the range (0..MAX_CHILDREN-1)
+        v += 1; assert(v >= 0 && v < MAX_CHILDREN);
 
         n = n->getChild(v);
         if (n == nullptr) {
@@ -161,55 +160,42 @@ typename trie<T>::iterator trie<T>::find(std::vector<int> key) {
 }
 
 template <typename T>
-typename std::vector<T> trie<T>::find_all_compatible(std::vector<int> key, bool bin) {
-    // Our use case has -1, so its increments to get the values in the range (0..127)
+typename std::vector<T> trie<T>::find_all_compatible(std::vector<int> key, std::string rule) {
+    // Our use case has -1, so its increments to get the values in the range (0..MAX_CHILDREN-1)
     for (int& v : key) {
         v++;
-        assert(v >= 0 && v < 128);
+        assert(v >= 0 && v < MAX_CHILDREN);
     }
-    if (bin)
-        return find_all_compatible_bin_rec(key, 0, this->root);
-    return find_all_compatible_rec(key, 0, this->root);
+    assert(rule == "vu_u" || rule == "u_vu" || rule == "v_v");
+    return find_all_compatible_rec(key, 0, this->root, rule);
 }
 
 template <typename T>
-typename std::vector<T> trie<T>::find_all_compatible_rec(std::vector<int> key, unsigned pos, tnode<T>* n) {
+typename std::vector<T> trie<T>::find_all_compatible_rec(std::vector<int> key, unsigned pos, tnode<T>* n, std::string rule) {
     std::vector<T> values;
     if (n != nullptr) {
         if (pos == key.size()) {
             values.push_back(n->get());
         } else {
             // let 0 = undefined, v = any other value
-            // (v -> v || 0), (0 -> 0)
-            values = find_all_compatible_rec(key, pos + 1, n->getChild(key[pos]));
-            if (key[pos] != 0) {
-                std::vector<T> values_ = find_all_compatible_rec(key, pos + 1, n->getChild(0));
-                values.insert(values.end(), values_.begin(), values_.end());
-            }
-        }
-    }
-    return values;
-}
-
-template <typename T>
-typename std::vector<T> trie<T>::find_all_compatible_bin_rec(std::vector<int> key, unsigned pos, tnode<T>* n) {
-    /**
-     * Method used to find h-value of valid states from a partial state.
-     * States must be represented as binary (0, 1, or undefined = -1).
-     */
-    std::vector<T> values;
-    if (n != nullptr) {
-        if (pos == key.size()) {
-            values.push_back(n->get());
-        } else {
-            // let 0 = undefined, 1 = binary 0, 2 = binary 1
-            // (1 -> 1), (2 -> 2), (0 -> 1 || 2)
-            if (key[pos] == 0) {
-                values = find_all_compatible_bin_rec(key, pos + 1, n->getChild(1));
-                std::vector<T> values_ = find_all_compatible_bin_rec(key, pos + 1, n->getChild(2));
-                values.insert(values.end(), values_.begin(), values_.end());
-            } else {
-                values = find_all_compatible_bin_rec(key, pos + 1, n->getChild(key[pos]));
+            if (rule == "vu_u") {
+                // v -> v || u
+                // u -> u
+                values = find_all_compatible_rec(key, pos + 1, n->getChild(key[pos]), rule);
+                if (key[pos] != 0) { // if (key[pos] == v)
+                    std::vector<T> values_ = find_all_compatible_rec(key, pos + 1, n->getChild(0), rule);
+                    values.insert(values.end(), values_.begin(), values_.end());
+                }
+            } else if (rule == "v_vu") {
+                // v -> v
+                // u -> v || u
+                values = find_all_compatible_rec(key, pos + 1, n->getChild(key[pos]), rule);
+                if (key[pos] == 0) { // if (key[pos] == u)
+                    for (int i = 1; i < MAX_CHILDREN-1; i++) {
+                        std::vector<T> values_ = find_all_compatible_rec(key, pos + 1, n->getChild(i), rule);
+                        values.insert(values.end(), values_.begin(), values_.end());
+                    }
+                }
             }
         }
     }

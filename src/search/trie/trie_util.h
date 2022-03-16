@@ -6,16 +6,19 @@
 #include "trie_node.h"
 
 namespace trie {
+
+int MAX_CHILDREN = 128;
+
 template <typename T>
 tnode<T>* recur(tnode<T>* n, int offset = 0) {
     if (n == nullptr) {
         return nullptr;
     }
     tnode<T>* it = nullptr;
-    for (int i = offset; i < 128; i++) {
+    for (int i = offset; i < MAX_CHILDREN; i++) {
         it = n->getChild(i);
         if (it == nullptr) {
-            if (i == 127) {
+            if (i == MAX_CHILDREN - 1) {
                 return recur(n->getParent(), n->getParentIndex() + 1);
             }
             continue;

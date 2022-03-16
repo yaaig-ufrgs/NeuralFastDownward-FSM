@@ -133,8 +133,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 break;
 
             if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
-                hash_table.insert(pa_);
-
                 // if it is goal state then set h to 0
                 pa_.estimated_heuristic = (
                     restart_h_when_goal_state && task_properties::is_goal_state(
@@ -142,6 +140,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                         pa_.get_full_state(true, *rng).second)
                     ) ? 0 : pa.estimated_heuristic + 1;
 
+                hash_table.insert(pa_);
                 samples.push_back(make_shared<PartialAssignment>(pa_));
                 pa = pa_;
                 attempts = 0;

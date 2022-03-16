@@ -196,7 +196,7 @@ double SamplingSearchYaaig::mse(trie::trie<int> trie_mse, bool root) {
     double sum = 0.0;
     for (shared_ptr<PartialAssignment>& pa: sampling_technique::modified_tasks) {
         int best_h = INT_MAX;
-        for (int& hs: trie_mse.find_all_compatible(pa->get_values(), true))
+        for (int& hs: trie_mse.find_all_compatible(pa->get_values(), "v_vu"))
             best_h = min(best_h, hs);
         assert(best_h != INT_MAX);
         int err = best_h - pa->estimated_heuristic;
@@ -259,6 +259,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         mse_result << 0 << "," << e << "," << re << ",," << endl;
     }
 
+
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
     const OperatorsProxy operators = task_proxy.get_operators();
@@ -280,7 +281,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                 PartialAssignment succ_pa = pa->get_partial_successor(op_proxy);
                 if (succ_pa.violates_mutexes())
                     continue;
-                for (shared_ptr<PartialAssignment>& _pa_succ: trie.find_all_compatible(succ_pa.get_values())) {
+                for (shared_ptr<PartialAssignment>& _pa_succ: trie.find_all_compatible(succ_pa.get_values(), avi_rule)) {
                     int candidate_heuristic = _pa_succ->estimated_heuristic + op_proxy.get_cost();
                     if (candidate_heuristic < pa->estimated_heuristic) {
                         pa->estimated_heuristic = candidate_heuristic;
@@ -394,6 +395,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       contrasting_samples(opts.get<int>("contrasting_samples")),
       avi_k(opts.get<int>("avi_k")),
       avi_its(opts.get<int>("avi_its")),
+      avi_rule(opts.get<string>("avi_rule")),
       avi_epsilon(stod(opts.get<string>("avi_epsilon"))),
       avi_symmetric_statespace(opts.get<bool>("avi_symmetric_statespace")),
       sort_h(opts.get<bool>("sort_h")),
@@ -449,6 +451,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "avi_its",
             "Number of AVI repeats.",
             "1");
+    parser.add_option<string>(
+            "avi_rule",
+            "Rule applied when checking subset states.",
+            "vu_u");
     parser.add_option<string>(
             "avi_epsilon",
             "RMSE no-improvement threshold for AVI early stop.",

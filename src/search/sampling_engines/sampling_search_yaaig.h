@@ -33,6 +33,7 @@ protected:
     const int contrasting_samples;
     const int avi_k;
     const int avi_its;
+    const std::string avi_rule;
     const double avi_epsilon;
     const bool avi_symmetric_statespace;
     const bool sort_h;
