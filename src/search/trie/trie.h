@@ -166,7 +166,7 @@ typename std::vector<T> trie<T>::find_all_compatible(std::vector<int> key, std::
         v++;
         assert(v >= 0 && v < MAX_CHILDREN);
     }
-    assert(rule == "vu_u" || rule == "u_vu" || rule == "v_v");
+    assert(rule == "vu_u" || rule == "v_vu" || rule == "v_v");
     return find_all_compatible_rec(key, 0, this->root, rule);
 }
 
