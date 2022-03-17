@@ -10,7 +10,6 @@ In each JSON, arguments with empty string take the default values
 from `src/pytorch/utils/default_args.py`.
 """
 
-from distutils.command.build import build
 from sys import argv
 import os
 import time
@@ -39,6 +38,18 @@ def str2bool(s: str) -> bool:
     raise Exception(f"{s} isn't a boolean!")
 
 
+def wait(secs: int, exp_path: str):
+    while True:
+        p = os.popen("tsp")
+        out = p.read()
+        p.close()
+        if "queued" not in out and "running" not in out:
+            if "skipped" in out:
+                print(f"{exp_path}: Some task(s) were skipped.")
+            break
+        time.sleep(180)
+
+
 def main(exp_paths: [str]):
     for exp_path in exp_paths:
         full_exp = {}
@@ -46,13 +57,14 @@ def main(exp_paths: [str]):
             full_exp = load(exp_file)
 
         exp = full_exp["experiment"] if "experiment" in full_exp else None
+        if exp is None:
+            continue
         train = full_exp["train"] if "train" in full_exp else None
         test = full_exp["test"] if "test" in full_exp else None
         evalu = full_exp["eval"] if "eval" in full_exp else None
         sampling = full_exp["sampling"] if "sampling" in full_exp else None
-
-        if not exp:
-            continue
+        if sampling is not None:
+            sampling["threads"] = exp["exp-threads"]
 
         only_sampling = str2bool(exp["exp-only-sampling"])
         only_train = str2bool(exp["exp-only-train"])
@@ -64,6 +76,9 @@ def main(exp_paths: [str]):
             args += build_args(sampling, "--")
             print(args, end="\n\n")
             os.system(args)
+
+        time.sleep(2)
+        wait(180, exp_path)
 
         if not only_sampling:
             args = "./run_experiment.py"
@@ -78,16 +93,8 @@ def main(exp_paths: [str]):
             print(args, end="\n\n")
             os.system(args)
 
-        time.sleep(2)
-        while True:
-            p = os.popen("tsp")
-            out = p.read()
-            p.close()
-            if "queued" not in out and "running" not in out:
-                if "skipped" in out:
-                    print(f"{exp_path}: Some task(s) were skipped.")
-                break
-            time.sleep(180)
+            time.sleep(2)
+            wait(180, exp_path)
 
         out = ""
         while "queued" in out and "running" in out:

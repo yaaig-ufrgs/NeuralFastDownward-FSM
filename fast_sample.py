@@ -26,15 +26,15 @@ def run_multi_thread(cmd, threads):
     global FIRST
     thread_id = COUNT
     if COUNT < threads and FIRST:
-        #os.system(f'tsp taskset -c {thread_id} ' + cmd)
         print(f'tsp taskset -c {thread_id} ' + cmd)
+        os.system(f'tsp taskset -c {thread_id} ' + cmd)
         COUNT += 1
     else:
         if FIRST or COUNT == threads:
             COUNT = 0
         FIRST = False
-        #os.system(f'tsp -D {ID_COUNT} taskset -c {COUNT} ' + cmd)
         print(f'tsp -D {ID_COUNT} taskset -c {COUNT} ' + cmd)
+        os.system(f'tsp -D {ID_COUNT} taskset -c {COUNT} ' + cmd)
         ID_COUNT += 1
         COUNT += 1
 
@@ -98,7 +98,6 @@ def yaaig_ferber(args, meth):
                            f'avi_rule={args.avi_rule}, sort_h={args.sort_h}, '
                            f'avi_symmetric_statespace={args.symm_statespace}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
                            f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting})\'')
-                    print(cmd)
                 elif meth == "ferber":
                     out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.ferber_technique}_{args.ferber_select_state.replace("_", "-")}_{args.ferber_num_tasks}_{args.ferber_min_walk_len}_{args.ferber_max_walk_len}_ss{i}'
                     cmd = (f'./fast-downward.py '
@@ -108,12 +107,11 @@ def yaaig_ferber(args, meth):
                            f'techniques=[{args.ferber_technique}_none({args.ferber_num_tasks}, '
                            f'distribution=uniform_int_dist({args.ferber_min_walk_len}, {args.ferber_max_walk_len}), random_seed={i})], '
                            f'select_state_method={args.ferber_select_state}, random_seed={i})\'')
-                    pass
+                #print(cmd)
                 if args.threads > 1:
                     run_multi_thread(cmd, args.threads)
                 else:
                     os.system(cmd)
-                    #print(cmd)
 
 
     sas_files = glob(f'{args.output_dir}/*_{domain}_*-output.sas')
