@@ -1340,6 +1340,13 @@ def get_sample_args():
         help="RMSE no-improvement threshold for AVI early stop. (default: %(default)s)",
     )
     parser.add_argument(
+        "-avirule",
+        "--avi-rule",
+        choices=["vu_u", "v_vu"], # v -> v | u,  u -> u :::: v -> v,  u -> v | u
+        default=default_args.SAMPLE_AVI_RULE,
+        help="Rule used to check if a state s' is compatible with s'' during AVI. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-kd",
         "--k-depth",
         type=int,

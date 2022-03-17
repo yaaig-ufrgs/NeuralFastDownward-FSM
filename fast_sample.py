@@ -94,7 +94,8 @@ def yaaig_ferber(args, meth):
                            f'depth_k={args.k_depth}, technique={args.technique}, subtechnique={args.subtechnique}, random_seed={i}, '
                            f'restart_h_when_goal_state={args.restart_h_when_goal_state}, allow_duplicates={args.allow_dups})], '
                            f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, '
-                           f'avi_k={args.avi_k}, avi_its={args.avi_its}, avi_epsilon={args.avi_eps}, sort_h={args.sort_h}, '
+                           f'avi_k={args.avi_k}, avi_its={args.avi_its}, avi_epsilon={args.avi_eps}, '
+                           f'avi_rule={args.avi_rule}, sort_h={args.sort_h}, '
                            f'avi_symmetric_statespace={args.symm_statespace}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
                            f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting})\'')
                     print(cmd)

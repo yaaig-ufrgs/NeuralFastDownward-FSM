@@ -42,6 +42,7 @@
         "avi-k": 0,
         "avi-its": 1,
         "avi-eps": 0,
+        "avi-rule": "vu_u",
         "k-depth": 99999,
         "rsl-num-states": "",
         "rsl-num-demos": "",
