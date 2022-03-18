@@ -10,10 +10,11 @@ In each JSON, arguments with empty string take the default values
 from `src/pytorch/utils/default_args.py`.
 """
 
-from sys import argv
 import os
 import time
+from sys import argv
 from json import load
+from glob import glob
 
 
 def build_args(d: dict, prefix: str) -> str:
@@ -50,6 +51,13 @@ def wait(secs: int, exp_path: str):
         time.sleep(secs)
 
 
+def remove_leftover_files(output_dir: str):
+    sas_files = glob(f'{output_dir}/*-output.sas')
+    for sf in sas_files:
+        if os.path.isfile(sf):
+            os.remove(sf)
+   
+
 def main(exp_paths: [str]):
     for exp_path in exp_paths:
         full_exp = {}
@@ -80,6 +88,8 @@ def main(exp_paths: [str]):
 
         time.sleep(2)
         wait(180, exp_path)
+
+        remove_leftover_files(exp["samples"])
 
         if not only_sampling:
             args = "./run_experiment.py"

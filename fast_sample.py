@@ -114,10 +114,11 @@ def yaaig_ferber(args, meth):
                     os.system(cmd)
 
 
-    sas_files = glob(f'{args.output_dir}/*_{domain}_*-output.sas')
-    for sf in sas_files:
-        if os.path.isfile(sf):
-            os.remove(sf)
+    if args.threads <= 1:
+        sas_files = glob(f'{args.output_dir}/*-output.sas')
+        for sf in sas_files:
+            if os.path.isfile(sf):
+                os.remove(sf)
 
 
 def rsl(args):
