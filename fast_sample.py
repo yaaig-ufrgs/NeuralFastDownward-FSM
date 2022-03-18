@@ -91,7 +91,7 @@ def yaaig_ferber(args, meth):
                            f'--build release {instance} '
                            f'--search \"sampling_search_yaaig({search_algo}, '
                            f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, max_samples={args.max_samples}, '
-                           f'depth_k={args.k_depth}, technique={args.technique}, subtechnique={args.subtechnique}, random_seed={i}, '
+                           f'technique={args.technique}, subtechnique={args.subtechnique}, depth_k={args.k_depth}, random_seed={i}, '
                            f'restart_h_when_goal_state={args.restart_h_when_goal_state}, allow_duplicates={args.allow_dups})], '
                            f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, '
                            f'avi_k={args.avi_k}, avi_its={args.avi_its}, avi_epsilon={args.avi_eps}, '
@@ -107,10 +107,10 @@ def yaaig_ferber(args, meth):
                            f'techniques=[{args.ferber_technique}_none({args.ferber_num_tasks}, '
                            f'distribution=uniform_int_dist({args.ferber_min_walk_len}, {args.ferber_max_walk_len}), random_seed={i})], '
                            f'select_state_method={args.ferber_select_state}, random_seed={i})\"')
-                #print(cmd)
                 if args.threads > 1:
                     run_multi_thread(cmd, args.threads)
                 else:
+                    print(cmd)
                     os.system(cmd)
 
 
