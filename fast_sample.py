@@ -43,13 +43,17 @@ def get_full_state_repr_name(state_repr):
     if state_repr == "fs":
         return "complete"
     elif state_repr == "fs-nomutex":
-        return "complete-no-mutex"
+        return "complete_no_mutex"
     elif state_repr == "ps":
         return "partial"
     elif state_repr == "us":
         return "undefined"
     elif state_repr == "au":
         return "assign_undefined"
+    elif state_repr == "vps":
+        return "values_partial"
+    elif state_repr == "vfs":
+        return "values_complete"
     return state_repr
 
 
