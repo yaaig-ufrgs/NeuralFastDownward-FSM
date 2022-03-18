@@ -72,8 +72,6 @@ def yaaig_ferber(args, meth):
         instance_split = instance.split('/')
         instance_name = instance_split[-1][:-5]
         domain = instance_split[-2]
-        print(args.subtechnique)
-        exit(1)
         if instance_name != "domain" and instance_name != "source":
             for i in range(start, end):
                 cmd, out, subtech, depthk, avik, avits, dups = "", "", "", "", "", "", ""
