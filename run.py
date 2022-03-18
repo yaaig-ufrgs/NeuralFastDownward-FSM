@@ -88,10 +88,10 @@ def main(exp_paths: [str]):
             print(args, end="\n\n")
             os.system(args)
 
-        time.sleep(2)
-        wait(180, exp_path)
+            time.sleep(2)
+            wait(180, exp_path)
 
-        remove_leftover_files(exp["samples"])
+            remove_leftover_files(exp["samples"])
 
         if not only_sampling:
             args = "./run_experiment.py"
