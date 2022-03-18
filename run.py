@@ -56,7 +56,7 @@ def remove_leftover_files(output_dir: str):
     for sf in sas_files:
         if os.path.isfile(sf):
             os.remove(sf)
-   
+
 
 def main(exp_paths: [str]):
     for exp_path in exp_paths:
@@ -74,7 +74,7 @@ def main(exp_paths: [str]):
         if sampling is not None:
             sampling["threads"] = exp["exp-threads"]
             sampling["output-dir"] = exp["samples"]
-        if train is not None:
+        if train is not None and test is not None:
             test["model-dir"] = train["output-folder"]
 
         only_sampling = str2bool(exp["exp-only-sampling"])
