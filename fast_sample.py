@@ -56,9 +56,9 @@ def get_full_state_repr_name(state_repr):
 def yaaig_ferber(args, meth):
     search_algo = ""
     if args.search_algorithm == "greedy":
-        search_algo = f'eager_greedy([{args.search_heuristic}(transform=sampling_transform())],transform=sampling_transform())'
+        search_algo = f'eager_greedy([{args.search_heuristic}(transform=sampling_transform())], transform=sampling_transform())'
     elif args.search_algorithm == "astar":
-        search_algo = f'astar({args.search_heuristic}(transform=sampling_transform()),transform=sampling_transform())'
+        search_algo = f'astar({args.search_heuristic}(transform=sampling_transform()), transform=sampling_transform())'
 
     if args.technique == "dfs" or args.technique == "dfs_rw": # recheck this
         args.samples_per_search = int(1.0/args.searches*args.max_samples+0.999)
@@ -72,6 +72,8 @@ def yaaig_ferber(args, meth):
         instance_split = instance.split('/')
         instance_name = instance_split[-1][:-5]
         domain = instance_split[-2]
+        print(args.subtechnique)
+        exit(1)
         if instance_name != "domain" and instance_name != "source":
             for i in range(start, end):
                 cmd, out, subtech, depthk, avik, avits, dups = "", "", "", "", "", "", ""
@@ -89,7 +91,7 @@ def yaaig_ferber(args, meth):
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
                            f'--build release {instance} '
-                           f'--search \'sampling_search_yaaig({search_algo}, '
+                           f'--search \"sampling_search_yaaig({search_algo}, '
                            f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, max_samples={args.max_samples}, '
                            f'depth_k={args.k_depth}, technique={args.technique}, subtechnique={args.subtechnique}, random_seed={i}, '
                            f'restart_h_when_goal_state={args.restart_h_when_goal_state}, allow_duplicates={args.allow_dups})], '
@@ -97,16 +99,16 @@ def yaaig_ferber(args, meth):
                            f'avi_k={args.avi_k}, avi_its={args.avi_its}, avi_epsilon={args.avi_eps}, '
                            f'avi_rule={args.avi_rule}, sort_h={args.sort_h}, '
                            f'avi_symmetric_statespace={args.symm_statespace}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
-                           f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting})\'')
+                           f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting})\"')
                 elif meth == "ferber":
                     out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.ferber_technique}_{args.ferber_select_state.replace("_", "-")}_{args.ferber_num_tasks}_{args.ferber_min_walk_len}_{args.ferber_max_walk_len}_ss{i}'
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
                            f'--build release {instance} '
-                           f'--search \'sampling_search_ferber({search_algo}, '
+                           f'--search \"sampling_search_ferber({search_algo}, '
                            f'techniques=[{args.ferber_technique}_none({args.ferber_num_tasks}, '
                            f'distribution=uniform_int_dist({args.ferber_min_walk_len}, {args.ferber_max_walk_len}), random_seed={i})], '
-                           f'select_state_method={args.ferber_select_state}, random_seed={i})\'')
+                           f'select_state_method={args.ferber_select_state}, random_seed={i})\"')
                 #print(cmd)
                 if args.threads > 1:
                     run_multi_thread(cmd, args.threads)

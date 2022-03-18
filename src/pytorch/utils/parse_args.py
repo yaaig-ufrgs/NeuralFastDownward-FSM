@@ -1168,7 +1168,7 @@ def get_sample_args():
         "-stech",
         "--subtechnique",
         choices=["round_robin", "round_robin_fashion", "random_leaf"],
-        default=default_args.SAMPLE_TECHNIQUE,
+        default=default_args.SAMPLE_SUBTECHNIQUE,
         help="Subtechique to use in dfs_rw or bfs_rw. (default: %(default)s)",
     )
     parser.add_argument(
