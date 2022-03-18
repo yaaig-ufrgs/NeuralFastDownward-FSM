@@ -47,7 +47,7 @@ def wait(secs: int, exp_path: str):
             if "skipped" in out:
                 print(f"{exp_path}: Some task(s) were skipped.")
             break
-        time.sleep(180)
+        time.sleep(secs)
 
 
 def main(exp_paths: [str]):
@@ -65,6 +65,7 @@ def main(exp_paths: [str]):
         sampling = full_exp["sampling"] if "sampling" in full_exp else None
         if sampling is not None:
             sampling["threads"] = exp["exp-threads"]
+            sampling["output-dir"] = exp["samples"]
 
         only_sampling = str2bool(exp["exp-only-sampling"])
         only_train = str2bool(exp["exp-only-train"])

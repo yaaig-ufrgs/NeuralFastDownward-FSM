@@ -152,6 +152,9 @@ def sample(args):
     args.symm_statespace = bool2str(args.symm_statespace)
     args.ferber_technique = "iforward" if args.ferber_technique == "forward" else "gbackward"
 
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+
     if args.method == "yaaig" or args.method == "ferber":
         yaaig_ferber(args, meth=args.method)
     elif args.method == "rsl":
