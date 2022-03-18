@@ -83,8 +83,9 @@ def yaaig_ferber(args, meth):
                     avits = f"_it-{args.avi_its}"
                 if args.allow_dups != "none":
                     dups = "ir" if args.allow_dups == "interrollout" else args.allow_dups
+                sps = f"{args.searches}x{args.samples_per_search}-{args.max_samples}" if args.samples_per_search != -1 else f"{args.max_samples}"
                 if meth == "yaaig":
-                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.technique}{subtech}{depthk}{avik}{avits}_dups-{dups}_min-{args.minimization}_{args.state_representation}_{args.searches}x{args.samples_per_search}-{args.max_samples}_ss{i}'
+                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.technique}{subtech}{depthk}{avik}{avits}_dups-{dups}_min-{args.minimization}_{args.state_representation}_{sps}_ss{i}'
                     rmse_out = out + "_rmse"
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '

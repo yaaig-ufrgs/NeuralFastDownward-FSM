@@ -74,6 +74,8 @@ def main(exp_paths: [str]):
         if sampling is not None:
             sampling["threads"] = exp["exp-threads"]
             sampling["output-dir"] = exp["samples"]
+        if train is not None:
+            test["model-dir"] = train["output-folder"]
 
         only_sampling = str2bool(exp["exp-only-sampling"])
         only_train = str2bool(exp["exp-only-train"])
