@@ -89,7 +89,7 @@ def main(exp_paths: [str]):
             os.system(args)
 
             time.sleep(2)
-            wait(180, exp_path)
+            wait(10, exp_path)
 
             remove_leftover_files(exp["samples"])
 
