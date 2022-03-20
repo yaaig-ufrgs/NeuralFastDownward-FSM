@@ -24,6 +24,8 @@ THREAD_ID = -1
 def filter_samples(samples: [str], seed: int) -> [str]:
     filtered_samples = []
     for sample in samples:
+        if "rmse" in sample:
+            continue
         ss = sample.split("/")[1].split("_")[-1][2:]
         if ss.isnumeric() and (int(ss) == seed or seed == -1):
             filtered_samples.append(sample)
