@@ -12,7 +12,7 @@ from sys import argv
 
 section = argv[1]
 key = argv[2]
-value = argv[3]
+value = int(argv[3]) if argv[3].isdigit() else argv[3]
 
 for json_file in argv[4:]:
     with open(json_file) as jf:
