@@ -83,8 +83,9 @@ def yaaig_ferber(args, meth):
                     subtech = f"_{args.subtechnique}"
                     depthk = f"_k{args.k_depth}"
                 if args.avi_k > 0:
-                    avik = f"_k-{args.avi_k}"
-                    avits = f"_it-{args.avi_its}"
+                    avik = f"_avi-k-{args.avi_k}"
+                    avi_iterations = "max" if args.avi_its >= 9999 else args.avi_its
+                    avits = f"_it-{avi_iterations}"
                 if args.allow_dups != "none":
                     dups = "ir" if args.allow_dups == "interrollout" else args.allow_dups
                 sps = f"{args.searches}x{args.samples_per_search}-{args.max_samples}" if args.samples_per_search != -1 else f"{args.max_samples}"
