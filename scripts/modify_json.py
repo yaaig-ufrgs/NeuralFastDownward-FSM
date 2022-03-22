@@ -3,8 +3,9 @@
 """
 Usage:
     $ ./modify_json.py <section> <key> <value> [*.json]
-Example:
+Examples:
     $ ./modify_json.py sampling minimization none experiments/*.json
+    $ ./modify_json.py train output-folder "+_hstar" experiments/*/*.json
 """
 
 import json
