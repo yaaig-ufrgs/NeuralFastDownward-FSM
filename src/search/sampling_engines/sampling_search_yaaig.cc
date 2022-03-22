@@ -360,8 +360,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 make_pair(h, make_pair(s.get_values(), s.to_binary()))
             );
         } else if (state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial") {
-            if (task_properties::is_goal_state(
-                    task_proxy, partialAssignment->get_full_state(true, *rng).second))
+            if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
                 h = 0;
             values_set.push_back(
                 make_pair(h, make_pair(partialAssignment->get_values(), partialAssignment->to_binary()))

@@ -135,10 +135,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
                 // if it is goal state then set h to 0
                 pa_.estimated_heuristic = (
-                    restart_h_when_goal_state && task_properties::is_goal_state(
-                        task_proxy,
-                        pa_.get_full_state(true, *rng).second)
-                    ) ? 0 : pa.estimated_heuristic + 1;
+                    restart_h_when_goal_state &&
+                    task_properties::is_goal_assignment(task_proxy, pa_)
+                ) ? 0 : pa.estimated_heuristic + 1;
 
                 hash_table.insert(pa_);
                 samples.push_back(make_shared<PartialAssignment>(pa_));
@@ -253,10 +252,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                         if (allow_duplicates_intrarollout || hash_table_leaf[i].find(pa_) == hash_table_leaf[i].end()) {
                             // if it is goal state then set h to 0
                             pa_.estimated_heuristic = (
-                                restart_h_when_goal_state && task_properties::is_goal_state(
-                                    task_proxy,
-                                    pa_.get_full_state(true, *rng).second)
-                                ) ? 0 : pa.estimated_heuristic + 1;
+                                restart_h_when_goal_state &&
+                                task_properties::is_goal_assignment(task_proxy, pa_)
+                            ) ? 0 : pa.estimated_heuristic + 1;
 
                             hash_table_leaf[i].insert(pa_);
                             samples.push_back(make_shared<PartialAssignment>(pa_));
