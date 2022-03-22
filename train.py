@@ -217,6 +217,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                     lr=args.learning_rate,
                     weight_decay=args.weight_decay,
                 ),
+                scatter_plot=args.scatter_plot,
                 loss_fn=chosen_loss_function,
                 is_weighted_loss_fn=is_weighted,
                 restart_no_conv=args.restart_no_conv,
@@ -291,11 +292,11 @@ def post_training_evaluation(trained_model: str, args: Namespace, dirname: str) 
     ).get_fold(0)
 
     if train_data != None:
-        eval_workflow(model, args.samples, dirname, train_data, "training", None, False, True, True)
+        eval_workflow(model, args.samples, dirname, train_data, "training", None, False, True, args.scatter_plot)
     if val_data != None:
-        eval_workflow(model, args.samples, dirname, val_data, "validation", None, False, True, True)
+        eval_workflow(model, args.samples, dirname, val_data, "validation", None, False, True, args.scatter_plot)
     if test_data != None:
-        eval_workflow(model, args.samples, dirname, test_data, "test", None, False, True, True)
+        eval_workflow(model, args.samples, dirname, test_data, "test", None, False, True, args.scatter_plot)
 
 
 def set_seeds(args: Namespace, shuffle_seed: bool = True):
@@ -342,7 +343,7 @@ def make_extra_plots(args: Namespace, dirname: str, best_fold: dict):
         problem_name = "_".join(dirname.split("/")[-1].split("_")[2:4])
         csv_h = glob.glob(csv_dir + problem_name + ".csv")
 
-        if len(csv_h) > 0:
+        if len(csv_h) > 0 and args.scatter_plot:
             try:
                 _log.info(f"Saving h^nn vs. h scatter plot.")
                 data = save_h_pred_scatter(plots_dir, heuristic_pred_file, csv_h[0])

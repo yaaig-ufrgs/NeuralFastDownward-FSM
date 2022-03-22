@@ -25,6 +25,7 @@ class TrainWorkflow:
         save_best: bool,
         dirname: str,
         optimizer: optim.Optimizer,
+        scatter_plot: bool,
         loss_fn: nn = nn.MSELoss(),
         is_weighted_loss_fn: bool = False,
         restart_no_conv: bool = True,
@@ -43,6 +44,7 @@ class TrainWorkflow:
         self.save_best = save_best
         self.dirname = dirname
         self.optimizer = optimizer
+        self.scatter_plot = scatter_plot
         self.loss_fn = loss_fn
         self.is_weighted_loss_fn = is_weighted_loss_fn
         self.patience = patience
@@ -80,7 +82,7 @@ class TrainWorkflow:
                     X, y, pred, self.train_y_pred_values
                 )
 
-        if len(self.train_y_pred_values) > 0:
+        if len(self.train_y_pred_values) > 0 and self.scatter_plot:
             save_y_pred_scatter(
                 self.train_y_pred_values, t, fold_idx, f"{self.dirname}/plots", "train_"
             )
@@ -103,7 +105,7 @@ class TrainWorkflow:
                     self.val_y_pred_values = self.fill_y_pred(
                         X, y, pred, self.val_y_pred_values
                     )
-        if len(self.val_y_pred_values) > 0:
+        if len(self.val_y_pred_values) > 0 and self.scatter_plot:
             save_y_pred_scatter(
                 self.val_y_pred_values, t, fold_idx, f"{self.dirname}/plots", "val_"
             )
@@ -234,7 +236,8 @@ class TrainWorkflow:
             self.best_epoch_model = self.model
 
         # Post-training scatter plot.
-        self.save_post_scatter_plot(fold_idx)
+        if self.scatter_plot:
+            self.save_post_scatter_plot(fold_idx)
 
         return best_loss, False  # (best_epoch, is_dead_born)
 
