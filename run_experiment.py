@@ -42,7 +42,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
     max_per_thread = ceil(files_len / threads)
 
     for sample in sample_files:
-        sample_name = sample.split("/")[1]
+        sample_name = sample.split("/")[-1]
         sample_name_split = sample_name.split("_")
         sample_type = sample_name_split[0]
         domain = sample_name_split[1]
