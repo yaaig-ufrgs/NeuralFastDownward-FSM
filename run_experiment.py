@@ -26,7 +26,7 @@ def filter_samples(samples: [str], seed: int) -> [str]:
     for sample in samples:
         if "rmse" in sample:
             continue
-        ss = sample.split("/")[1].split("_")[-1][2:]
+        ss = sample.split("/")[-1].split("_")[-1][2:]
         if ss.isnumeric() and (int(ss) == seed or seed == -1):
             filtered_samples.append(sample)
     return filtered_samples
