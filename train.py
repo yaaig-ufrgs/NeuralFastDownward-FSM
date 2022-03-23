@@ -149,6 +149,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
     while born_dead:
         kfold = KFoldTrainingData(
             args.samples,
+            device=device,
             batch_size=args.batch_size,
             num_folds=args.num_folds,
             output_layer=args.output_layer,
@@ -271,6 +272,7 @@ def post_training_evaluation(trained_model: str, args: Namespace, dirname: str) 
 
     train_data, val_data, test_data = KFoldTrainingData(
         args.samples,
+        device=torch.device("cpu"),
         batch_size=1,
         num_folds=args.num_folds,
         output_layer=args.output_layer,

@@ -20,6 +20,7 @@ class KFoldTrainingData:
     def __init__(
         self,
         samples_file: str,
+        device: torch.device,
         batch_size: int = default_args.BATCH_SIZE,
         num_folds: int = default_args.NUM_FOLDS,
         output_layer: str = default_args.OUTPUT_LAYER,
@@ -42,6 +43,8 @@ class KFoldTrainingData:
     ):
         assert training_size > 0.0 and training_size <= 1.0
         assert sample_percentage > 0.0 and sample_percentage <= 1.0
+
+        self.device = device
 
         self.state_value_pairs, self.domain_max_value = load_training_state_value_pairs(
             samples_file,
@@ -137,6 +140,8 @@ class KFoldTrainingData:
             if g != None:
                 g.manual_seed(self.shuffle_seed)
 
+            pin_mem = True if self.device == torch.device("cuda:0") else False
+
             train_dataloader = DataLoader(
                 dataset=InstanceDataset(
                     training_set, self.domain_max_value, self.output_layer
@@ -146,6 +151,7 @@ class KFoldTrainingData:
                 num_workers=self.data_num_workers,
                 worker_init_fn=worker_fn,
                 generator=g,
+                pin_memory=pin_mem,
             )
 
             val_dataloader = (
@@ -158,6 +164,7 @@ class KFoldTrainingData:
                     num_workers=self.data_num_workers,
                     worker_init_fn=worker_fn,
                     generator=g,
+                    pin_memory=pin_mem,
                 )
                 if len(val_set) != 0
                 else None
@@ -173,6 +180,7 @@ class KFoldTrainingData:
                     num_workers=self.data_num_workers,
                     worker_init_fn=worker_fn,
                     generator=g,
+                    pin_memory=pin_mem,
                 )
                 if len(test_set) != 0
                 else None
