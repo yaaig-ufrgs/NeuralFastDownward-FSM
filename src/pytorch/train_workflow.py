@@ -120,7 +120,7 @@ class TrainWorkflow:
         test_loss = 0
         with torch.no_grad():
             for X, y, w in self.test_dataloader:
-                X, y = X.to(self.device), y.to(self.device), w.to(self.device)
+                X, y, w = X.to(self.device), y.to(self.device), w.to(self.device)
                 pred = self.model(X)
                 test_loss += self.loss_fn(pred, y, w).item() if self.is_weighted_loss_fn else self.loss_fn(pred, y).item()
         return test_loss / num_batches
