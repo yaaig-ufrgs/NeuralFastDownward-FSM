@@ -109,13 +109,5 @@ def main(exp_paths: [str]):
             time.sleep(2)
             wait(180, exp_path)
 
-        out = ""
-        while "queued" in out and "running" in out:
-            time.sleep(180)
-            p = os.popen("tsp")
-            out = p.read()
-            p.close()
-
-
 if __name__ == "__main__":
     main(argv[1:])

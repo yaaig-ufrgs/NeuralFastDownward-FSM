@@ -50,6 +50,8 @@ def get_full_state_repr_name(state_repr):
         return "undefined"
     elif state_repr == "au":
         return "assign_undefined"
+    elif state_repr == "uc":
+        return "undefined_char"
     elif state_repr == "vps":
         return "values_partial"
     elif state_repr == "vfs":
