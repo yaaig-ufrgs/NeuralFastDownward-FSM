@@ -10,12 +10,12 @@ from sklearn.metrics import mean_squared_error as mse
 hstar = {}
 with open(argv[1], "r") as f:
     for h, s in [x.strip().split(";") for x in f.readlines() if x and x[0] != "#"]:
-        assert s not in hstar
+        assert s not in hstar or hstar[s] == int(h)
         hstar[s] = int(h)
 
 for sample_file in argv[2:]:
     hstar_values, sampling_values = [], []
-    with open(argv[2], "r") as f:
+    with open(sample_file, "r") as f:
         for h, s in [x.strip().split(";") for x in f.readlines() if x and x[0] != "#"]:
             assert s in hstar
             hstar_values.append(hstar[s])
