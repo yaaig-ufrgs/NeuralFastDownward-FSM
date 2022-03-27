@@ -172,7 +172,15 @@ vector<string> SamplingSearchYaaig::values_to_samples(
         if (store_plan_cost)
             oss << p.first << field_separator;
         if (store_state) {
-            if (state_representation == "values_partial" || state_representation == "values_complete") {
+            if (state_representation == "facts_partial" || state_representation == "facts_complete") {
+                for (unsigned i = 0; i < relevant_facts.size(); i++) {
+                    if (p.second.first[relevant_facts[i].var] == relevant_facts[i].value) {
+                        oss << task->get_fact_name(relevant_facts[i]);
+                        if (i < relevant_facts.size() - 1)
+                            oss << ' ';
+                    }
+                }
+            } else if (state_representation == "values_partial" || state_representation == "values_complete") {
                 for (unsigned i = 0; i < p.second.first.size(); i++) {
                     oss << p.second.first[i];
                     if (i < p.second.first.size() - 1)
@@ -351,7 +359,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         if (store_plan_cost)
             h = partialAssignment->estimated_heuristic;
 
-        if (state_representation == "complete" || state_representation == "complete_no_mutex" || state_representation == "values_complete") {
+        if (state_representation == "complete" || state_representation == "complete_no_mutex" || state_representation == "values_complete" || state_representation == "facts_complete") {
             State s = partialAssignment->get_full_state(
                 state_representation != "complete_no_mutex", *rng).second;
             if (task_properties::is_goal_state(task_proxy, s)) h = 0;
@@ -359,7 +367,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             values_set.push_back(
                 make_pair(h, make_pair(s.get_values(), s.to_binary()))
             );
-        } else if (state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial") {
+        } else if (state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial" || state_representation == "facts_partial") {
             if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
                 h = 0;
             values_set.push_back(
@@ -430,7 +438,7 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "true");
     parser.add_option<string>(
             "state_representation",
-            "State facts representation format (complete, complete_no_mutex, partial, undefined, assign_undefined, undefined_char, values_partial, or values_complete).",
+            "State facts representation format (complete, complete_no_mutex, partial, undefined, assign_undefined, undefined_char, values_partial, values_complete, facts_partial, or facts_complete).",
             "complete");
     parser.add_option<string>(
             "minimization",
