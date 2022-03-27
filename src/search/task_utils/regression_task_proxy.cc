@@ -101,8 +101,8 @@ inline shared_ptr<vector<RegressionOperator>> extract_regression_operators(const
     task_properties::verify_no_axioms(tp);
     task_properties::verify_no_conditional_effects(tp);
 
-    bool VISITALL_WITHOUT_UNDEFINED_HACK = true;
-    int op_idx_offset = OperatorsProxy(task).size();
+    bool VISITALL_WITHOUT_UNDEFINED_HACK = false;
+    int op_idx = 0;
 
     auto rops = make_shared<vector<RegressionOperator>>();
     for (OperatorProxy op : OperatorsProxy(task)) {
@@ -114,16 +114,15 @@ inline shared_ptr<vector<RegressionOperator>> extract_regression_operators(const
             // - No need to worry about applying this rule wrongly to robot
             // atoms because only tile atoms come into case 3.
             OperatorProxy op2 = op;
-            RegressionOperator o(op, op.get_id(), 0);
-            rops->emplace_back(op, op.get_id(), 0);
-            RegressionOperator o2(op2, op.get_id() + op_idx_offset, 1);
-            rops->emplace_back(op2, op.get_id() + op_idx_offset, 1);
+            RegressionOperator o(op, op_idx, 0);
+            rops->emplace_back(op, op_idx++, 0);
+            RegressionOperator o2(op2, op_idx, 1);
+            rops->emplace_back(op2, op_idx++, 1);
         } else {
             RegressionOperator o(op);
             rops->emplace_back(op);
         }
     }
-
     return rops;
 }
 
