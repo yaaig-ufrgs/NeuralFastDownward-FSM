@@ -32,8 +32,8 @@ RegressionEffectProxy::RegressionEffectProxy(const AbstractTask &task, const Reg
 RegressionEffectProxy::RegressionEffectProxy(const AbstractTask &task, int var_id, int value)
     : RegressionEffectProxy(task, RegressionEffect(var_id, value)) { }
 
-RegressionOperator::RegressionOperator(OperatorProxy &op, const int undefined_value)
-    : original_index(op.get_id()),
+RegressionOperator::RegressionOperator(OperatorProxy &op, const int op_idx, const int undefined_value)
+    : original_index(op_idx == -1 ? op.get_id() : op_idx),
       cost(op.get_cost()),
       name(op.get_name()),
       is_an_axiom(op.is_axiom()) {
@@ -101,7 +101,8 @@ inline shared_ptr<vector<RegressionOperator>> extract_regression_operators(const
     task_properties::verify_no_axioms(tp);
     task_properties::verify_no_conditional_effects(tp);
 
-    bool VISITALL_WITHOUT_UNDEFINED_HACK = false;
+    bool VISITALL_WITHOUT_UNDEFINED_HACK = true;
+    int op_idx_offset = OperatorsProxy(task).size();
 
     auto rops = make_shared<vector<RegressionOperator>>();
     for (OperatorProxy op : OperatorsProxy(task)) {
@@ -113,10 +114,10 @@ inline shared_ptr<vector<RegressionOperator>> extract_regression_operators(const
             // - No need to worry about applying this rule wrongly to robot
             // atoms because only tile atoms come into case 3.
             OperatorProxy op2 = op;
-            RegressionOperator o(op, 0);
-            rops->emplace_back(op, 0);
-            RegressionOperator o2(op2, 1);
-            rops->emplace_back(op2, 1);
+            RegressionOperator o(op, op.get_id(), 0);
+            rops->emplace_back(op, op.get_id(), 0);
+            RegressionOperator o2(op2, op.get_id() + op_idx_offset, 1);
+            rops->emplace_back(op2, op.get_id() + op_idx_offset, 1);
         } else {
             RegressionOperator o(op);
             rops->emplace_back(op);
