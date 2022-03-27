@@ -115,6 +115,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     pa.estimated_heuristic = 0;
     vector<shared_ptr<PartialAssignment>> samples;
 
+    bool VISITALL_ROBOT_TILE_HACK = false;
+
     if (technique == "rw") {
         samples.push_back(make_shared<PartialAssignment>(pa));
         // Attempts to find a new state when performing each step
@@ -131,6 +133,13 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             );
             if (pa_ == pa) // there is no applicable operator
                 break;
+
+            if (VISITALL_ROBOT_TILE_HACK) {
+                vector<int> v = pa_.get_values();
+                if (v[0] != 10)
+                    v[(v[0] < 10) ? 15-v[0] : 16-v[0]] = 0;
+                pa_ = PartialAssignment(pa, move(v));
+            }
 
             if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
                 // if it is goal state then set h to 0
@@ -185,6 +194,13 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 // or -1 if all operators have already been tested
                 if (idx_op == -1)
                     break;
+
+                if (VISITALL_ROBOT_TILE_HACK) {
+                    vector<int> v = pa_.get_values();
+                    if (v[0] != 10)
+                        v[(v[0] < 10) ? 15-v[0] : 16-v[0]] = 0;
+                    pa_ = PartialAssignment(pa, move(v));
+                }
 
                 if ((allow_duplicates_intrarollout && pa_ != pa && technique[0] != 'b') || hash_table.find(pa_) == hash_table.end()) {
                     pa_.estimated_heuristic = pa.estimated_heuristic + 1; // TODO: non-unitary operator
@@ -247,6 +263,13 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                         if (pa_ == pa) {
                             attempts = RW_MAX_ATTEMPTS;
                             break;
+                        }
+
+                        if (VISITALL_ROBOT_TILE_HACK) {
+                            vector<int> v = pa_.get_values();
+                            if (v[0] != 10)
+                                v[(v[0] < 10) ? 15-v[0] : 16-v[0]] = 0;
+                            pa_ = PartialAssignment(pa, move(v));
                         }
 
                         if (allow_duplicates_intrarollout || hash_table_leaf[i].find(pa_) == hash_table_leaf[i].end()) {
