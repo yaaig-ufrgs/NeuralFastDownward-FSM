@@ -71,12 +71,19 @@ RegressionOperator::RegressionOperator(OperatorProxy &op, const int op_idx, cons
         }
     }
 
+    bool VISITALL_REMOVE_RPRE_VISITED_HACK = false;
+
     // Handle case 3 where preconditions are undefined.
     for (EffectProxy effect : op.get_effects()) {
         FactProxy fact = effect.get_fact();
         int var_id = fact.get_variable().get_id();
         if (precondition_vars.count(var_id) == 0) {
-            preconditions.emplace_back(var_id, fact.get_value());
+            if (VISITALL_REMOVE_RPRE_VISITED_HACK) {
+                assert(var_id != 0);           // is a 'visited' tile (not robot tile)
+                assert(fact.get_value() == 0); // value is visited
+            } else {
+                preconditions.emplace_back(var_id, fact.get_value());
+            }
             effects.emplace_back(var_id, undefined_value);
         }
     }
@@ -101,7 +108,7 @@ inline shared_ptr<vector<RegressionOperator>> extract_regression_operators(const
     task_properties::verify_no_axioms(tp);
     task_properties::verify_no_conditional_effects(tp);
 
-    bool VISITALL_WITHOUT_UNDEFINED_HACK = false;
+    bool VISITALL_WITHOUT_UNDEFINED_HACK = true;
     int op_idx = 0;
 
     auto rops = make_shared<vector<RegressionOperator>>();
