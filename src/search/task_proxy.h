@@ -813,6 +813,18 @@ public:
             bool check_mutexes, utils::RandomNumberGenerator &rng) const;
 
     const causal_graph::CausalGraph &get_causal_graph() const;
+
+    void print_variables() const {
+        for (VariableProxy var: get_variables()) {
+            std::cout << "id=" << var.get_id() << ", name=" << var.get_name() << std::endl;
+            for (int j = 0; j < var.get_domain_size(); j++) {
+                std::cout << "    Fact #" << j << " : name=" << var.get_fact(j).get_name() << ", "
+                          << "value=" << var.get_fact(j).get_value() << " | "
+                          << "pair=(var:" << var.get_fact(j).get_pair().var << ", "
+                          << "value:" << var.get_fact(j).get_pair().value << ")" << std::endl;
+            }
+        }
+    }
 };
 
 inline bool PartialAssignment::assigned(std::size_t var_id) const {
