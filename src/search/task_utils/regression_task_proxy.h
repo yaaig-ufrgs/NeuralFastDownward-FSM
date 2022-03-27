@@ -266,7 +266,8 @@ class RegressionOperator {
 
 
 public:
-    explicit RegressionOperator(OperatorProxy &op);
+    explicit RegressionOperator(
+        OperatorProxy &op, const int undefined_value = PartialAssignment::UNASSIGNED);
     ~RegressionOperator() = default;
 
     bool operator==(const RegressionOperator &other) const {

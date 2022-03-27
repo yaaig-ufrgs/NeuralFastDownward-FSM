@@ -32,7 +32,7 @@ RegressionEffectProxy::RegressionEffectProxy(const AbstractTask &task, const Reg
 RegressionEffectProxy::RegressionEffectProxy(const AbstractTask &task, int var_id, int value)
     : RegressionEffectProxy(task, RegressionEffect(var_id, value)) { }
 
-RegressionOperator::RegressionOperator(OperatorProxy &op)
+RegressionOperator::RegressionOperator(OperatorProxy &op, const int undefined_value)
     : original_index(op.get_id()),
       cost(op.get_cost()),
       name(op.get_name()),
@@ -77,7 +77,7 @@ RegressionOperator::RegressionOperator(OperatorProxy &op)
         int var_id = fact.get_variable().get_id();
         if (precondition_vars.count(var_id) == 0) {
             preconditions.emplace_back(var_id, fact.get_value());
-            effects.emplace_back(var_id, PartialAssignment::UNASSIGNED);
+            effects.emplace_back(var_id, undefined_value);
         }
     }
 }
@@ -97,16 +97,32 @@ bool RegressionOperator::is_applicable(const PartialAssignment &assignment) cons
         });
 }
 
-
 inline shared_ptr<vector<RegressionOperator>> extract_regression_operators(const AbstractTask &task, TaskProxy &tp) {
     task_properties::verify_no_axioms(tp);
     task_properties::verify_no_conditional_effects(tp);
 
+    bool VISITALL_WITHOUT_UNDEFINED_HACK = false;
+
     auto rops = make_shared<vector<RegressionOperator>>();
     for (OperatorProxy op : OperatorsProxy(task)) {
-        RegressionOperator o(op);
-        rops->emplace_back(op);
+        if (VISITALL_WITHOUT_UNDEFINED_HACK) {
+            // For each operator whose effect is undefined, it generates
+            // n operators with the n possibilities of values.
+            // - Specific implementation for visitall!!!!
+            // (undefined can become 2 values: 0=visited or 1=not visited)
+            // - No need to worry about applying this rule wrongly to robot
+            // atoms because only tile atoms come into case 3.
+            OperatorProxy op2 = op;
+            RegressionOperator o(op, 0);
+            rops->emplace_back(op, 0);
+            RegressionOperator o2(op2, 1);
+            rops->emplace_back(op2, 1);
+        } else {
+            RegressionOperator o(op);
+            rops->emplace_back(op);
+        }
     }
+
     return rops;
 }
 
