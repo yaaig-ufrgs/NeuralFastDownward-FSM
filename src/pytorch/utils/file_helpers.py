@@ -23,7 +23,7 @@ def save_git_diff(dirname: str):
     """
     filename = f"{dirname}/git.diff"
     with open(filename, "w") as f:
-        f.write(check_output(["git", "diff"]).decode("ascii").strip())
+        f.write(check_output(["git", "diff"]).decode("utf-8").strip())
 
 
 def create_train_directory(args: Namespace) -> str:
