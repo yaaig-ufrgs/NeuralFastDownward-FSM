@@ -108,7 +108,7 @@ inline shared_ptr<vector<RegressionOperator>> extract_regression_operators(const
     task_properties::verify_no_axioms(tp);
     task_properties::verify_no_conditional_effects(tp);
 
-    bool VISITALL_WITHOUT_UNDEFINED_HACK = true;
+    bool VISITALL_WITHOUT_UNDEFINED_HACK = false;
     int op_idx = 0;
 
     auto rops = make_shared<vector<RegressionOperator>>();
