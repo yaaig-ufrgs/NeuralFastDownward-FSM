@@ -1256,6 +1256,13 @@ def get_sample_args():
         help="Number of samples per search. (default: %(default)s)",
     )
     parser.add_argument(
+        "-bm",
+        "--bound-multiplier",
+        type=float,
+        default=default_args.SAMPLES_BOUND_MULTIPLIER,
+        help="Multiplies the bound of each rollout by the given value. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-s",
         "--seed",
         type=int,

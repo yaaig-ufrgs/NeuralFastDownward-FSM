@@ -113,6 +113,7 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
           searches(opts.get<int>("searches")),
           samples_per_search(opts.get<int>("samples_per_search")),
           max_samples(opts.get<int>("max_samples")),
+          bound_multiplier(opts.get<double>("bound_multiplier")),
           remove_duplicates(opts.get<bool>("remove_duplicates")),
 //          dump_directory(opts.get<string>("dump")),
           check_mutexes(opts.get<bool>("check_mutexes")),
@@ -371,6 +372,11 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
             "max_samples",
             "Force searches until reaching max_samples samples.",
             "-1"
+    );
+    parser.add_option<double>(
+            "bound_multiplier",
+            "Multiplies the bound of each rollout by the given value.",
+            "1.0"
     );
     parser.add_option<bool>(
             "remove_duplicates",

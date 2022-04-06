@@ -99,6 +99,7 @@ def yaaig_ferber(args, meth):
                            f'--build release {instance} '
                            f'--search \"sampling_search_yaaig({search_algo}, '
                            f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, max_samples={args.max_samples}, '
+                           f'bound_multiplier={args.bound_multiplier}, '
                            f'technique={args.technique}, subtechnique={args.subtechnique}, depth_k={args.k_depth}, random_seed={i}, '
                            f'restart_h_when_goal_state={args.restart_h_when_goal_state}, allow_duplicates={args.allow_dups})], '
                            f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, '

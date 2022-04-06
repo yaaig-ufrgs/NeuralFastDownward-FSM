@@ -44,6 +44,7 @@ protected:
     const int searches;
     int samples_per_search;
     const int max_samples;
+    double bound_multiplier;
     const bool remove_duplicates;
 //    const std::string dump_directory;
     const bool check_mutexes;

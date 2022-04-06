@@ -30,6 +30,7 @@
         "max-samples": 6599,
         "searches": 500,
         "samples-per-search": 200,
+        "bound-multiplier": 1.0,
         "seed": 1,
         "mult-seed": 9,
         "allow-dups": "all",
