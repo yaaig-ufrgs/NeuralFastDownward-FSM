@@ -117,6 +117,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
     bool VISITALL_ROBOT_TILE_HACK = false;
 
+    if (samples_per_search == -1)
+        samples_per_search = max_samples;
+
     if (technique == "rw") {
         samples.push_back(make_shared<PartialAssignment>(pa));
         // Attempts to find a new state when performing each step

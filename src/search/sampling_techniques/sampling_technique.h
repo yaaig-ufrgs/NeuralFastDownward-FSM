@@ -42,7 +42,7 @@ protected:
     options::Registry *registry;
     const options::Predefinitions *predefinitions;
     const int searches;
-    const int samples_per_search;
+    int samples_per_search;
     const int max_samples;
     const bool remove_duplicates;
 //    const std::string dump_directory;
