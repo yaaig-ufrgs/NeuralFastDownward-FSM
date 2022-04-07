@@ -239,9 +239,18 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             else
                 bound_n = samples_per_search;
         } else if (bound == "propositions") {
-            // TODO
+            bound_n = pa.to_binary().length();
         } else if (bound == "propositions_per_mean_effects") {
-            // TODO
+            int num_props = pa.to_binary().length();
+            int num_effects = 0;
+            for (OperatorProxy op : task_proxy.get_operators()) {
+                for (EffectProxy eff : op.get_effects()) {
+                    num_effects++;
+                    // TODO weighting
+                }
+                
+            }
+            bound_n = ceil(num_props / num_effects);
         }
     }
 
