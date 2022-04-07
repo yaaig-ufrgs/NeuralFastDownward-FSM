@@ -1256,6 +1256,13 @@ def get_sample_args():
         help="Number of samples per search. (default: %(default)s)",
     )
     parser.add_argument(
+        "-b",
+        "--bound",
+        type=str,
+        default=default_args.SAMPLES_BOUND,
+        help="How to bound each rollout: default, propositions, propositions_per_mean_effects, digit (number). (default: %(default)s)",
+    )
+    parser.add_argument(
         "-bm",
         "--bound-multiplier",
         type=float,

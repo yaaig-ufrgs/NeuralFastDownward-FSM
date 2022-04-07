@@ -43,6 +43,7 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
         : SamplingTechnique(opts),
           technique(opts.get<string>("technique")),
           subtechnique(opts.get<string>("subtechnique")),
+          bound(opts.get<string>("bound")),
           depth_k(opts.get<int>("depth_k")),
           allow_duplicates_interrollout(
               opts.get<string>("allow_duplicates") == "all" || opts.get<string>("allow_duplicates") == "interrollout"
@@ -334,6 +335,11 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "subtechnique",
             "If dfs_rw or bfs_rw: round_robin, round_robin_fashion, random_leaf",
             "random_leaf"
+    );
+    parser.add_option<string>(
+            "bound",
+            "How to bound each rollout: default, propositions, propositions_per_mean_effects, digit",
+            "default"
     );
     parser.add_option<int>(
             "depth_k",
