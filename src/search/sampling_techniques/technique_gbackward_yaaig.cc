@@ -35,6 +35,11 @@ static int compute_heuristic(
     return bias->compute_heuristic(state);
 }
 
+bool is_number(const string& s) {
+    return !s.empty() && find_if(s.begin(), 
+        s.end(), [](unsigned char c) { return !isdigit(c); }) == s.end();
+}
+
 const string &TechniqueGBackwardYaaig::get_name() const {
     return name;
 }
@@ -121,7 +126,30 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     if (samples_per_search == -1)
         samples_per_search = max_samples;
 
-    samples_per_search = ceil(samples_per_search * bound_multiplier);
+    int bound_n = -1;
+
+    if (is_number(bound)) {
+        bound_n = stoi(bound);
+    } else {
+        if (bound == "default") {
+            if (technique == "dfs" || technique == "bfs")
+                bound_n = depth_k;
+            else
+                bound_n = samples_per_search;
+        } else if (bound == "propositions") {
+            // TODO
+        } else if (bound == "propositions_per_mean_effects") {
+            // TODO
+        }
+    }
+
+    assert(bound_n != -1);
+
+    // TODO Recheck this.
+    if (technique == "rw" || technique == "bfs_rw")
+        samples_per_search = ceil(bound_multiplier * bound_n);
+    else if (technique == "dfs" || technique == "bfs")
+        depth_k = ceil(bound_multiplier * bound_n);
 
     if (technique == "rw") {
         samples.push_back(make_shared<PartialAssignment>(pa));

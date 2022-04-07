@@ -20,7 +20,7 @@ protected:
     const std::string technique;
     const std::string subtechnique;
     const std::string bound;
-    const int depth_k;
+    int depth_k;
     const bool allow_duplicates_interrollout;
     const bool allow_duplicates_intrarollout;
     const bool wrap_partial_assignment;
