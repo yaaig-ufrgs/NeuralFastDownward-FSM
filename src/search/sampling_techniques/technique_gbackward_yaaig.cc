@@ -66,7 +66,7 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           bias_reload_frequency(opts.get<int>("bias_reload_frequency")),
           bias_reload_counter(0) {
     if (technique == "bfs_rw" || technique == "dfs_rw")
-        assert(subtechnique == "round_robin" || subtechnique == "round_robin_fashion" || subtechnique == "random_leaf");
+        assert(subtechnique == "round_robin" || subtechnique == "random_leaf");
 }
 
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_random_walk(
@@ -330,8 +330,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
                 if (all_leaves_dead) {
                     if (subtechnique == "round_robin") {
-                        break;
-                    } else if (subtechnique == "round_robin_fashion") {
                         for (unsigned i = 0; i < leaves.size(); i++) {
                             leaves[i] = original_leaves[i];
                             dead_leaf[i] = false;
@@ -362,7 +360,7 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
     );
     parser.add_option<string>(
             "subtechnique",
-            "If dfs_rw or bfs_rw: round_robin, round_robin_fashion, random_leaf",
+            "If dfs_rw or bfs_rw: round_robin, random_leaf",
             "random_leaf"
     );
     parser.add_option<string>(
