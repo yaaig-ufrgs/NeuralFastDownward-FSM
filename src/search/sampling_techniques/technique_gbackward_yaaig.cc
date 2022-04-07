@@ -243,14 +243,16 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         } else if (bound == "propositions_per_mean_effects") {
             int num_props = pa.to_binary().length();
             int num_effects = 0;
+            int num_ops = 0;
             for (OperatorProxy op : task_proxy.get_operators()) {
+                num_ops++;
                 for (EffectProxy eff : op.get_effects()) {
                     num_effects++;
-                    // TODO weighting
                 }
                 
             }
-            bound_n = ceil(num_props / num_effects);
+            float mean_num_effects = num_effects / num_ops;
+            bound_n = ceil(num_props / mean_num_effects);
         }
     }
 
