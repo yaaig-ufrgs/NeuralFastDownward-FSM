@@ -88,7 +88,8 @@ EXP_ONLY_EVAL = False
 EXP_TRAINED_MODEL = ""
 
 # Sampling
-SAMPLE_STATESPACE = "../NeuralFastDownward-results/resnets/blocks-7-0_tests/samples/random-sample/statespace_blocks_probBLOCKS-7-0_none_fs_inf_ss1"
+SAMPLE_STATESPACE = ""
+SAMPLE_TEST_TASKS_DIR = ""
 SAMPLE_METHOD = "yaaig"
 SAMPLE_TECHNIQUE = "rw"
 SAMPLE_SUBTECHNIQUE = "random_leaf"

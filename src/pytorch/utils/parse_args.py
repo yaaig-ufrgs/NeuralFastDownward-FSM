@@ -1151,6 +1151,13 @@ def get_sample_args():
         help="Sampling base method to use. (default: %(default)s)",
     )
     parser.add_argument(
+        "-tst-dir",
+        "--test-tasks-dir",
+        type=str,
+        default=default_args.SAMPLE_TEST_TASKS_DIR,
+        help="Path to the directory where the test instances are located. Only used if `bound=max_task_hstar`. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-stp",
         "--statespace",
         type=str,
@@ -1258,7 +1265,7 @@ def get_sample_args():
     parser.add_argument(
         "-b",
         "--bound",
-        choices=["default", "propositions", "propositions_per_mean_effects", "max_hstar", "digit"],
+        choices=["default", "propositions", "propositions_per_mean_effects", "max_task_hstar", "digit"],
         default=default_args.SAMPLES_BOUND,
         help="How to bound each rollout. (default: %(default)s)",
     )

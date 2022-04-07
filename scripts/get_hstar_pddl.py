@@ -11,7 +11,7 @@ from subprocess import check_output, CalledProcessError
 from re import findall
 from os import remove
 
-def get_hstar(path: str, problem_pddl_files: [str]) -> [int]:
+def get_hstar_tasks(path: str, problem_pddl_files: [str]) -> [int]:
     FD = ("." if "scripts" in path else "..") + "/fast-downward.py"
     domain_pddl_file = f"./{'/'.join(problem_pddl_files[0].split('/')[:-1])}/domain.pddl"
 
@@ -62,4 +62,4 @@ def get_hstar(path: str, problem_pddl_files: [str]) -> [int]:
     return hstars
 
 if __name__ == "__main__":
-    get_hstar(argv[0], argv[1:])
+    get_hstar_tasks(argv[0], argv[1:])

@@ -15,6 +15,7 @@ import os
 from glob import glob
 from src.pytorch.utils.parse_args import get_sample_args
 from src.pytorch.utils.default_args import SAMPLE_TECHNIQUE
+from scripts.get_hstar_pddl import get_hstar_tasks
 
 COUNT = 0
 ID_COUNT = 0
@@ -68,6 +69,12 @@ def yaaig_ferber(args, meth):
 
     if args.technique == "dfs" or args.technique == "dfs_rw": # recheck this
         args.samples_per_search = int(1.0/args.searches*args.max_samples+0.999)
+
+    if args.bound == "max_task_hstar":
+        assert(args.test_tasks_dir != "")
+        test_tasks = glob(f"{args.test_tasks_dir}/*")
+        args.bound = max(get_hstar_tasks("scripts", test_tasks))
+        assert(args.bound > 0)
 
     state_repr = get_full_state_repr_name(args.state_representation)
     instances = glob(f"{args.instances_dir}/*.pddl")
