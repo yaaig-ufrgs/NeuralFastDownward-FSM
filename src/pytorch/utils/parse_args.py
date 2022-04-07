@@ -1258,9 +1258,9 @@ def get_sample_args():
     parser.add_argument(
         "-b",
         "--bound",
-        type=str,
+        choices=["default", "propositions", "propositions_per_mean_effects", "max_hstar", "digit"],
         default=default_args.SAMPLES_BOUND,
-        help="How to bound each rollout: default, propositions, propositions_per_mean_effects, digit (number). (default: %(default)s)",
+        help="How to bound each rollout. (default: %(default)s)",
     )
     parser.add_argument(
         "-bm",
