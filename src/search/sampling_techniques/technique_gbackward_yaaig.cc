@@ -69,6 +69,110 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
         assert(subtechnique == "round_robin" || subtechnique == "round_robin_fashion" || subtechnique == "random_leaf");
 }
 
+vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_random_walk(
+    PartialAssignment initial_state,
+    const ValidStateDetector &is_valid_state,
+    const PartialAssignmentBias *bias,
+    const TaskProxy &task_proxy
+) {
+    PartialAssignment pa = initial_state;
+    vector<shared_ptr<PartialAssignment>> samples = {
+        make_shared<PartialAssignment>(pa)
+    };
+    // Attempts to find a new state when performing each step
+    int attempts = 0;
+    while (samples.size() < (unsigned)samples_per_search) {
+        PartialAssignment pa_ = rrws->sample_state_length(
+            pa,
+            1,
+            deprioritize_undoing_steps,
+            is_valid_state,
+            bias,
+            bias_probabilistic,
+            bias_adapt
+        );
+        if (pa_ == pa) // there is no applicable operator
+            break;
+
+        if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
+            // if it is goal state then set h to 0
+            pa_.estimated_heuristic = (
+                restart_h_when_goal_state &&
+                task_properties::is_goal_assignment(task_proxy, pa_)
+            ) ? 0 : pa.estimated_heuristic + 1;
+
+            hash_table.insert(pa_);
+            samples.push_back(make_shared<PartialAssignment>(pa_));
+            pa = pa_;
+            attempts = 0;
+        } else if (++attempts >= RW_MAX_ATTEMPTS) {
+            break;
+        }
+    }
+    return samples;
+}
+
+vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_or_dfs(
+    string technique,
+    PartialAssignment initial_state,
+    const ValidStateDetector &is_valid_state
+) {
+    PartialAssignment pa = initial_state;
+    vector<shared_ptr<PartialAssignment>> samples;
+    // Each element of the stack is (state, operator index used to achieve the state)
+    stack<PartialAssignment> stack;
+    queue<PartialAssignment> queue;
+    
+    if (technique == "dfs")
+        stack.push(pa);
+    else
+        queue.push(pa);
+
+    hash_table.insert(pa);
+    while (samples.size() < (unsigned)samples_per_search) {
+        if ((technique == "dfs" && stack.empty()) || (technique == "bfs" && queue.empty()))
+            break;
+        
+        if (technique == "dfs") {
+            pa = stack.top();
+            stack.pop();
+        } else {
+            pa = queue.front();
+            queue.pop();
+        }
+        samples.push_back(make_shared<PartialAssignment>(pa));
+
+        int idx_op = 0;
+        int rng_seed = (*rng)(INT32_MAX - 1);
+        while (idx_op != -1) {
+            PartialAssignment pa_ = dfss->sample_state_length(
+                pa,
+                rng_seed,
+                idx_op,
+                is_valid_state
+            );
+            // idx_op has the index of the operator that was used,
+            // or -1 if all operators have already been tested
+            if (idx_op == -1)
+                break;
+
+            if ((allow_duplicates_intrarollout && pa_ != pa && technique == "dfs") || hash_table.find(pa_) == hash_table.end()) {
+                pa_.estimated_heuristic = pa.estimated_heuristic + 1; // TODO: non-unitary operator
+
+                if (pa_.estimated_heuristic <= depth_k) {
+                    hash_table.insert(pa_);
+                    if (technique == "dfs")
+                        stack.push(pa_);
+                    else
+                        queue.push(pa_);
+                }
+            }
+            idx_op++;
+        }
+    }
+    return samples;
+}
+
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         shared_ptr<AbstractTask> seed_task, const TaskProxy &task_proxy) {
     if (seed_task != last_task) {
@@ -121,8 +225,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     pa.estimated_heuristic = 0;
     vector<shared_ptr<PartialAssignment>> samples;
 
-    bool VISITALL_ROBOT_TILE_HACK = false;
-
     if (samples_per_search == -1)
         samples_per_search = max_samples;
 
@@ -137,17 +239,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             else
                 bound_n = samples_per_search;
         } else if (bound == "propositions") {
-            bound_n = pa.to_binary().length();
+            // TODO
         } else if (bound == "propositions_per_mean_effects") {
-            int num_props = pa.to_binary().length();
-            int effects = 0;
-            for (OperatorProxy op : task_proxy.get_operators()) {
-                for (EffectProxy eff : op.get_effects()) {
-                    // TODO 
-                }
-                
-            }
-            bound_n = ceil(num_props / effects);
+            // TODO
         }
     }
 
@@ -160,105 +254,11 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         depth_k = ceil(bound_multiplier * bound_n);
 
     if (technique == "rw") {
-        samples.push_back(make_shared<PartialAssignment>(pa));
-        // Attempts to find a new state when performing each step
-        int attempts = 0;
-        while (samples.size() < (unsigned)samples_per_search) {
-            PartialAssignment pa_ = rrws->sample_state_length(
-                pa,
-                1,
-                deprioritize_undoing_steps,
-                is_valid_state,
-                func_bias,
-                bias_probabilistic,
-                bias_adapt
-            );
-            if (pa_ == pa) // there is no applicable operator
-                break;
+        samples = sample_with_random_walk(pa, is_valid_state, func_bias, task_proxy);
 
-            if (VISITALL_ROBOT_TILE_HACK) {
-                vector<int> v = pa_.get_values();
-                if (v[0] != 10)
-                    v[(v[0] < 10) ? 15-v[0] : 16-v[0]] = 0;
-                pa_ = PartialAssignment(pa, move(v));
-            }
-
-            if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
-                // if it is goal state then set h to 0
-                pa_.estimated_heuristic = (
-                    restart_h_when_goal_state &&
-                    task_properties::is_goal_assignment(task_proxy, pa_)
-                ) ? 0 : pa.estimated_heuristic + 1;
-
-                hash_table.insert(pa_);
-                samples.push_back(make_shared<PartialAssignment>(pa_));
-                pa = pa_;
-                attempts = 0;
-            } else if (++attempts >= RW_MAX_ATTEMPTS) {
-                break;
-            }
-        }
     } else if (technique == "dfs" || technique == "bfs" || technique == "dfs_rw" || technique == "bfs_rw") {
-        // Each element of the stack is (state, operator index used to achieve the state)
-        stack<PartialAssignment> stack;
-        queue<PartialAssignment> queue;
-        
-        if (technique == "dfs" || technique == "dfs_rw")
-            stack.push(pa);
-        else
-            queue.push(pa);
-
-        hash_table.insert(pa);
-        while (samples.size() < (unsigned)samples_per_search) {
-            if (((technique == "dfs" || technique == "dfs_rw") && stack.empty()) ||
-                ((technique == "bfs" || technique == "bfs_rw") && queue.empty()))
-                break;
-            
-            if (technique == "dfs" || technique == "dfs_rw") {
-                pa = stack.top();
-                stack.pop();
-            } else {
-                pa = queue.front();
-                queue.pop();
-            }
-            samples.push_back(make_shared<PartialAssignment>(pa));
-
-            int idx_op = 0;
-            int rng_seed = (*rng)(INT32_MAX - 1);
-            while (idx_op != -1) {
-                PartialAssignment pa_ = dfss->sample_state_length(
-                    pa,
-                    rng_seed,
-                    idx_op,
-                    is_valid_state
-                );
-                // idx_op has the index of the operator that was used,
-                // or -1 if all operators have already been tested
-                if (idx_op == -1)
-                    break;
-
-                if (VISITALL_ROBOT_TILE_HACK) {
-                    vector<int> v = pa_.get_values();
-                    if (v[0] != 10)
-                        v[(v[0] < 10) ? 15-v[0] : 16-v[0]] = 0;
-                    pa_ = PartialAssignment(pa, move(v));
-                }
-
-                if ((allow_duplicates_intrarollout && pa_ != pa && technique[0] != 'b') || hash_table.find(pa_) == hash_table.end()) {
-                    pa_.estimated_heuristic = pa.estimated_heuristic + 1; // TODO: non-unitary operator
-
-                    if (pa_.estimated_heuristic <= depth_k) {
-                        hash_table.insert(pa_);
-                        if (technique == "dfs" || technique == "dfs_rw")
-                            stack.push(pa_);
-                        else
-                            queue.push(pa_);
-                    }
-                }
-                idx_op++;
-            }
-        }
-        if (technique == "dfs_rw" || technique == "bfs_rw") {
+        samples = sample_with_bfs_or_dfs(technique.substr(0, 3), pa, is_valid_state);
+        if (technique.substr(technique.size() - 2) == "rw") { // dfs_rw or bfs_rw
             vector<PartialAssignment> leaves, original_leaves;
             int leaf_h = 0;
             for (shared_ptr<PartialAssignment> pa : samples) {
@@ -305,13 +305,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                         if (pa_ == pa) {
                             attempts = RW_MAX_ATTEMPTS;
                             break;
-                        }
-
-                        if (VISITALL_ROBOT_TILE_HACK) {
-                            vector<int> v = pa_.get_values();
-                            if (v[0] != 10)
-                                v[(v[0] < 10) ? 15-v[0] : 16-v[0]] = 0;
-                            pa_ = PartialAssignment(pa, move(v));
                         }
 
                         if (allow_duplicates_intrarollout || hash_table_leaf[i].find(pa_) == hash_table_leaf[i].end()) {

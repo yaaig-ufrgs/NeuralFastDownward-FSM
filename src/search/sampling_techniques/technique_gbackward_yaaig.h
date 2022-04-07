@@ -7,6 +7,8 @@
 
 #include "../utils/distribution.h"
 
+#include "../task_utils/sampling.h"
+
 class StateRegistry;
 class RegressionTaskProxy;
 namespace sampling {
@@ -14,12 +16,14 @@ class RandomRegressionWalkSampler;
 class DFSSampler;
 }
 
+using namespace std;
+
 namespace sampling_technique {
 class TechniqueGBackwardYaaig : public SamplingTechnique {
 protected:
-    const std::string technique;
-    const std::string subtechnique;
-    const std::string bound;
+    const string technique;
+    const string subtechnique;
+    const string bound;
     int depth_k;
     const bool allow_duplicates_interrollout;
     const bool allow_duplicates_intrarollout;
@@ -31,18 +35,18 @@ protected:
     const bool bias_probabilistic;
     const double bias_adapt;
     utils::HashMap<PartialAssignment, int> cache;
-    std::shared_ptr<Heuristic> bias = nullptr;
+    shared_ptr<Heuristic> bias = nullptr;
     const int bias_reload_frequency;
     int bias_reload_counter;
-    std::shared_ptr<StateRegistry> state_registry = nullptr;
-    std::shared_ptr<AbstractTask> last_partial_wrap_task = nullptr;
-    std::shared_ptr<RegressionTaskProxy> regression_task_proxy = nullptr;
-    std::shared_ptr<sampling::RandomRegressionWalkSampler> rrws = nullptr;
-    std::shared_ptr<sampling::DFSSampler> dfss = nullptr;
+    shared_ptr<StateRegistry> state_registry = nullptr;
+    shared_ptr<AbstractTask> last_partial_wrap_task = nullptr;
+    shared_ptr<RegressionTaskProxy> regression_task_proxy = nullptr;
+    shared_ptr<sampling::RandomRegressionWalkSampler> rrws = nullptr;
+    shared_ptr<sampling::DFSSampler> dfss = nullptr;
     utils::HashSet<PartialAssignment> hash_table;
 
-    virtual std::vector<std::shared_ptr<PartialAssignment>> create_next_all(
-            std::shared_ptr<AbstractTask> seed_task,
+    virtual vector<shared_ptr<PartialAssignment>> create_next_all(
+            shared_ptr<AbstractTask> seed_task,
             const TaskProxy &task_proxy) override;
 
     // virtual void do_upgrade_parameters() override ;
@@ -51,10 +55,24 @@ public:
     explicit TechniqueGBackwardYaaig(const options::Options &opts);
     virtual ~TechniqueGBackwardYaaig() override = default;
 
-    // virtual void dump_upgradable_parameters(std::ostream &/*stream*/) const override;
+    // virtual void dump_upgradable_parameters(ostream &/*stream*/) const override;
 
-    virtual const std::string &get_name() const override;
-    const static std::string name;
+    virtual const string &get_name() const override;
+    const static string name;
+
+private:
+    vector<shared_ptr<PartialAssignment>> sample_with_random_walk(
+        PartialAssignment initial_state,
+        const ValidStateDetector &is_valid_state,
+        const PartialAssignmentBias *bias,
+        const TaskProxy &task_proxy
+    );
+
+    vector<shared_ptr<PartialAssignment>> sample_with_bfs_or_dfs(
+        string technique,
+        PartialAssignment initial_state,
+        const ValidStateDetector &is_valid_state
+    );
 };
 }
 #endif
