@@ -266,97 +266,32 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
     if (technique == "rw") {
         samples = sample_with_random_walk(pa, is_valid_state, func_bias, task_proxy);
-
     } else if (technique == "dfs" || technique == "bfs" || technique == "dfs_rw" || technique == "bfs_rw") {
         samples = sample_with_bfs_or_dfs(technique.substr(0, 3), pa, is_valid_state);
         if (technique.substr(technique.size() - 2) == "rw") { // dfs_rw or bfs_rw
-            vector<PartialAssignment> leaves, original_leaves;
+            vector<PartialAssignment> leaves;
             int leaf_h = 0;
             for (shared_ptr<PartialAssignment> pa : samples) {
                 if (pa->estimated_heuristic > leaf_h) {
                     leaf_h = pa->estimated_heuristic;
-                    original_leaves.clear();
                     leaves.clear();
                 }
-                if (pa->estimated_heuristic == leaf_h) {
-                    original_leaves.push_back(*pa);
+                if (pa->estimated_heuristic == leaf_h)
                     leaves.push_back(*pa);
-                }
             }
-            if (subtechnique == "random_leaf") {
-                leaves.clear();
-                int lid = (*rng)(INT32_MAX - 1) % original_leaves.size();
-                leaves.push_back(original_leaves[lid]);
-            }
-
-            vector<bool> dead_leaf = vector<bool>(leaves.size(), false);
-            vector<utils::HashSet<PartialAssignment>> hash_table_leaf(leaves.size());
-
-            cout << "Starting random walk search from " << leaves.size() << " leaves (depth = " << leaf_h << ")" << endl;
-            cout << "Looking for " << (samples_per_search - samples.size()) << " more samples..." << endl;
-
+            cout << "Starting random walk search (" << subtechnique << ") from "
+                 << leaves.size() << " leaves (depth = " << leaf_h << ")" << endl
+                 << "Looking for " << (samples_per_search - samples.size()) << " more samples..." << endl;
+            int lid = 0;
             while (samples.size() < (unsigned)samples_per_search) {
-                bool all_leaves_dead = true;
-                for (unsigned i = 0; i < leaves.size(); i++) {
-                    if (dead_leaf[i])
-                        continue;
-                    // Adapted from RW code
-                    PartialAssignment pa = leaves[i];
-                    unsigned attempts;
-                    for (attempts = 0; attempts < RW_MAX_ATTEMPTS; attempts++) {
-                        PartialAssignment pa_ = rrws->sample_state_length(
-                            pa,
-                            1,
-                            deprioritize_undoing_steps,
-                            is_valid_state,
-                            func_bias,
-                            bias_probabilistic,
-                            bias_adapt
-                        );
-                        if (pa_ == pa) {
-                            attempts = RW_MAX_ATTEMPTS;
-                            break;
-                        }
-
-                        if (allow_duplicates_intrarollout || hash_table_leaf[i].find(pa_) == hash_table_leaf[i].end()) {
-                            // if it is goal state then set h to 0
-                            pa_.estimated_heuristic = (
-                                restart_h_when_goal_state &&
-                                task_properties::is_goal_assignment(task_proxy, pa_)
-                            ) ? 0 : pa.estimated_heuristic + 1;
-
-                            hash_table_leaf[i].insert(pa_);
-                            samples.push_back(make_shared<PartialAssignment>(pa_));
-                            leaves[i] = pa_;
-                            break;
-                        }
-                    }
-                    if (attempts == RW_MAX_ATTEMPTS)
-                        dead_leaf[i] = true;
-                    if (!dead_leaf[i])
-                        all_leaves_dead = false;
-                    if (samples.size() >= (unsigned)samples_per_search)
-                        break;
-                }
-
-                if (all_leaves_dead) {
-                    if (subtechnique == "round_robin") {
-                        for (unsigned i = 0; i < leaves.size(); i++) {
-                            leaves[i] = original_leaves[i];
-                            dead_leaf[i] = false;
-                            hash_table_leaf[i].clear();
-                        }
-                    } else if (subtechnique == "random_leaf") {
-                        int lid = (*rng)(INT32_MAX - 1) % original_leaves.size();
-                        leaves[0] = original_leaves[lid];
-                        dead_leaf[0] = false;
-                        hash_table_leaf[0].clear();
-                    }
-                }
+                lid = (subtechnique == "round_robin") ? // round_robin or random_leaf
+                    (lid + 1) % leaves.size() : (*rng)(INT32_MAX - 1) % leaves.size();
+                vector<shared_ptr<PartialAssignment>> samples_rw = sample_with_random_walk(
+                    leaves[lid], is_valid_state, func_bias, task_proxy);
+                samples.insert(samples.end(), samples_rw.begin(), samples_rw.end());
             }
         }
     }
-
     return samples;
 }
 
