@@ -139,9 +139,19 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         } else if (bound == "propositions") {
             bound_n = pa.to_binary().length();
         } else if (bound == "propositions_per_mean_effects") {
-            // TODO
+            int num_props = pa.to_binary().length();
+            int effects = 0;
+            for (OperatorProxy op : task_proxy.get_operators()) {
+                for (EffectProxy eff : op.get_effects()) {
+                    // TODO 
+                }
+                
+            }
+            bound_n = ceil(num_props / effects);
         }
     }
+
+    exit(1);
 
     assert(bound_n != -1);
 
