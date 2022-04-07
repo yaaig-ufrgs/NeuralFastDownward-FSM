@@ -151,8 +151,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         }
     }
 
-    exit(1);
-
     assert(bound_n != -1);
 
     // TODO Recheck this.
