@@ -33,7 +33,7 @@ See [`src/pytorch/utils/default_args.py`](https://github.com/yaaig-ufrgs/NeuralF
 ```
 usage: fast_sample.py [-h] [-stp STATESPACE]
                       [-tech {rw,dfs,bfs,dfs_rw,bfs_rw,countBoth,countAdds,countDels}]
-                      [-stech {round_robin,round_robin_fashion,random_leaf}]
+                      [-stech {round_robin,random_leaf,percentage}]
                       [-search {greedy,astar}] [-heur {ff,lmcut}]
                       [-ftech {forward,backward}]
                       [-fst {random_state,entire_plan,init_state}]

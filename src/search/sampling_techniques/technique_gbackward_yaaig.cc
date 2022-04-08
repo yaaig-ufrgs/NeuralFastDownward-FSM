@@ -65,7 +65,9 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           bias_adapt(opts.get<double>("bias_adapt")),
           bias_reload_frequency(opts.get<int>("bias_reload_frequency")),
           bias_reload_counter(0) {
-    if (technique == "bfs_rw" || technique == "dfs_rw")
+    if (technique == "bfs_rw")
+        assert(subtechnique == "round_robin" || subtechnique == "random_leaf" || subtechnique == "percentage");
+    if (technique == "dfs_rw")
         assert(subtechnique == "round_robin" || subtechnique == "random_leaf");
 }
 
@@ -76,9 +78,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
     const TaskProxy &task_proxy
 ) {
     PartialAssignment pa = initial_state;
-    vector<shared_ptr<PartialAssignment>> samples = {
-        make_shared<PartialAssignment>(pa)
-    };
+    vector<shared_ptr<PartialAssignment>> samples = {make_shared<PartialAssignment>(pa)};
     // Attempts to find a new state when performing each step
     int attempts = 0;
     while (samples.size() < (unsigned)samples_per_search) {
@@ -142,8 +142,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
         }
         samples.push_back(make_shared<PartialAssignment>(pa));
 
-        int idx_op = 0;
-        int rng_seed = (*rng)(INT32_MAX - 1);
+        int idx_op = 0, rng_seed = (*rng)(INT32_MAX - 1);
         while (idx_op != -1) {
             PartialAssignment pa_ = dfss->sample_state_length(
                 pa,
@@ -169,6 +168,56 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
             }
             idx_op++;
         }
+    }
+    return samples;
+}
+
+vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_percentage_limited_bfs(
+    float bfs_percentage,
+    PartialAssignment initial_state,
+    const ValidStateDetector &is_valid_state,
+    vector<PartialAssignment> &leaves
+) {
+    assert(bfs_percentage >= 0.0 && bfs_percentage <= 1.0);
+    float bfs_samples = bfs_percentage * max_samples;
+    vector<PartialAssignment> vk = {initial_state}, vk1 = {}; // vector_k, vector_k+1
+    vector<shared_ptr<PartialAssignment>> samples = {make_shared<PartialAssignment>(initial_state)};
+    bool state_skipped = false;
+    while (samples.size() < bfs_samples && !state_skipped) {
+        rng->shuffle(vk);
+        leaves.clear();
+        for (PartialAssignment& s : vk) {
+            vector<PartialAssignment> succ_s;
+            int idx_op = 0, rng_seed = (*rng)(INT32_MAX - 1);
+            while (idx_op != -1) {
+                PartialAssignment s_ = dfss->sample_state_length(
+                    s,
+                    rng_seed,
+                    idx_op,
+                    is_valid_state
+                );
+                if (idx_op == -1)
+                    break;
+                if (hash_table.find(s_) == hash_table.end()) {
+                    s_.estimated_heuristic = s.estimated_heuristic + 1; // TODO: non-unitary operator
+                    hash_table.insert(s_);
+                    succ_s.push_back(s_);
+                }
+                idx_op++;
+            }
+            if (samples.size() + succ_s.size() > bfs_samples) {
+                leaves.push_back(s);
+                state_skipped = true;
+            } else {
+                for (PartialAssignment& s_ : succ_s) {
+                    samples.push_back(make_shared<PartialAssignment>(s_));
+                    vk1.push_back(s_);
+                    leaves.push_back(s_);
+                }
+            }
+        }
+        vk = vk1;
+        vk1.clear();
     }
     return samples;
 }
@@ -224,6 +273,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     PartialAssignment pa = regression_task_proxy->get_goal_assignment();
     pa.estimated_heuristic = 0;
     vector<shared_ptr<PartialAssignment>> samples;
+    vector<PartialAssignment> leaves;
 
     if (samples_per_search == -1)
         samples_per_search = max_samples;
@@ -266,10 +316,15 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
     if (technique == "rw") {
         samples = sample_with_random_walk(pa, is_valid_state, func_bias, task_proxy);
+
+    } else if (technique == "bfs_rw" && subtechnique == "percentage") {
+        float bfs_percentage = 0.1; // TODO: argument
+        samples = sample_with_percentage_limited_bfs(bfs_percentage, pa, is_valid_state, leaves);
+
     } else if (technique == "dfs" || technique == "bfs" || technique == "dfs_rw" || technique == "bfs_rw") {
+        assert(subtechnique != "percentage");
         samples = sample_with_bfs_or_dfs(technique.substr(0, 3), pa, is_valid_state);
         if (technique.substr(technique.size() - 2) == "rw") { // dfs_rw or bfs_rw
-            vector<PartialAssignment> leaves;
             int leaf_h = 0;
             for (shared_ptr<PartialAssignment> pa : samples) {
                 if (pa->estimated_heuristic > leaf_h) {
@@ -279,17 +334,21 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 if (pa->estimated_heuristic == leaf_h)
                     leaves.push_back(*pa);
             }
-            cout << "Starting random walk search (" << subtechnique << ") from "
-                 << leaves.size() << " leaves (depth = " << leaf_h << ")" << endl
-                 << "Looking for " << (samples_per_search - samples.size()) << " more samples..." << endl;
-            int lid = 0;
-            while (samples.size() < (unsigned)samples_per_search) {
-                lid = (subtechnique == "round_robin") ? // round_robin or random_leaf
-                    (lid + 1) % leaves.size() : (*rng)(INT32_MAX - 1) % leaves.size();
-                vector<shared_ptr<PartialAssignment>> samples_rw = sample_with_random_walk(
-                    leaves[lid], is_valid_state, func_bias, task_proxy);
-                samples.insert(samples.end(), samples_rw.begin(), samples_rw.end());
-            }
+        }
+    }
+
+    // pos-dfs/bfs random walk step
+    if (technique == "dfs_rw" || technique == "bfs_rw") {
+        assert(leaves.size() > 0);
+        cout << "Starting random walk search (" << subtechnique << ") from " << leaves.size() << " leaves" << endl
+             << "Looking for " << (samples_per_search - samples.size()) << " more samples..." << endl;
+        int lid = 0;
+        while (samples.size() < (unsigned)samples_per_search) {
+            lid = (subtechnique == "round_robin") ? // round_robin or random_leaf (random_leaf if percentage)
+                (lid + 1) % leaves.size() : (*rng)(INT32_MAX - 1) % leaves.size();
+            vector<shared_ptr<PartialAssignment>> samples_rw = sample_with_random_walk(
+                leaves[lid], is_valid_state, func_bias, task_proxy);
+            samples.insert(samples.end(), samples_rw.begin(), samples_rw.end());
         }
     }
     return samples;
@@ -301,12 +360,13 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
     SamplingTechnique::add_options_to_parser(parser);
     parser.add_option<string>(
             "technique",
-            "Search technique (rw, dfs, bfs, dfs_rw, bfs_rw). If dfs_rw or bfs_rw, set depth_k.",
+            "Search technique (rw, dfs, bfs, dfs_rw, bfs_rw). "
+            "If dfs_rw or bfs_rw and subtechnique != percentage, set depth_k.",
             "rw"
     );
     parser.add_option<string>(
             "subtechnique",
-            "If dfs_rw or bfs_rw: round_robin, random_leaf",
+            "If dfs_rw or bfs_rw: round_robin, random_leaf, percentage",
             "random_leaf"
     );
     parser.add_option<string>(

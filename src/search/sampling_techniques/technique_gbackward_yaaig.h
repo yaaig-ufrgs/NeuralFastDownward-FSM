@@ -73,6 +73,13 @@ private:
         PartialAssignment initial_state,
         const ValidStateDetector &is_valid_state
     );
+
+    vector<shared_ptr<PartialAssignment>> sample_with_percentage_limited_bfs(
+        float bfs_percentage,
+        PartialAssignment initial_state,
+        const ValidStateDetector &is_valid_state,
+        vector<PartialAssignment> &leaves
+    );
 };
 }
 #endif
