@@ -1,4 +1,5 @@
 #include <stack>
+#include <algorithm>
 
 #include "technique_gbackward_yaaig.h"
 
@@ -73,15 +74,22 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
 
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_random_walk(
     PartialAssignment initial_state,
+    const unsigned steps,
     const ValidStateDetector &is_valid_state,
     const PartialAssignmentBias *bias,
-    const TaskProxy &task_proxy
+    const TaskProxy &task_proxy,
+    const bool sample_initial_state,
+    const bool global_hash_table
 ) {
     PartialAssignment pa = initial_state;
-    vector<shared_ptr<PartialAssignment>> samples = {make_shared<PartialAssignment>(pa)};
+    vector<shared_ptr<PartialAssignment>> samples = {};
+    if (sample_initial_state)
+        samples.push_back(make_shared<PartialAssignment>(pa));
+    utils::HashSet<PartialAssignment> local_hash_table;
+    utils::HashSet<PartialAssignment> *ht_pointer = global_hash_table ? &hash_table : &local_hash_table;
     // Attempts to find a new state when performing each step
     int attempts = 0;
-    while (samples.size() < (unsigned)samples_per_search) {
+    while (samples.size() < steps) {
         PartialAssignment pa_ = rrws->sample_state_length(
             pa,
             1,
@@ -93,15 +101,13 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
         );
         if (pa_ == pa) // there is no applicable operator
             break;
-
-        if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
+        if (allow_duplicates_intrarollout || ht_pointer->find(pa_) == ht_pointer->end()) {
             // if it is goal state then set h to 0
             pa_.estimated_heuristic = (
                 restart_h_when_goal_state &&
                 task_properties::is_goal_assignment(task_proxy, pa_)
             ) ? 0 : pa.estimated_heuristic + 1;
-
-            hash_table.insert(pa_);
+            ht_pointer->insert(pa_);
             samples.push_back(make_shared<PartialAssignment>(pa_));
             pa = pa_;
             attempts = 0;
@@ -115,7 +121,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_or_dfs(
     string technique,
     PartialAssignment initial_state,
-    const ValidStateDetector &is_valid_state
+    const unsigned steps,
+    const ValidStateDetector &is_valid_state,
+    const TaskProxy &task_proxy
 ) {
     PartialAssignment pa = initial_state;
     vector<shared_ptr<PartialAssignment>> samples;
@@ -129,7 +137,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
         queue.push(pa);
 
     hash_table.insert(pa);
-    while (samples.size() < (unsigned)samples_per_search) {
+    while (samples.size() < steps) {
         if ((technique == "dfs" && stack.empty()) || (technique == "bfs" && queue.empty()))
             break;
         
@@ -152,11 +160,18 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
             );
             // idx_op has the index of the operator that was used,
             // or -1 if all operators have already been tested
-            if (idx_op == -1)
+            if (idx_op == -1) {
+                assert(pa == pa_);
                 break;
+            }
+            if (pa_ == pa)
+                continue;
 
-            if ((allow_duplicates_intrarollout && pa_ != pa && technique == "dfs") || hash_table.find(pa_) == hash_table.end()) {
-                pa_.estimated_heuristic = pa.estimated_heuristic + 1; // TODO: non-unitary operator
+            if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
+                pa_.estimated_heuristic = (
+                    restart_h_when_goal_state &&
+                    task_properties::is_goal_assignment(task_proxy, pa_)
+                ) ? 0 : pa.estimated_heuristic + 1;
 
                 if (pa_.estimated_heuristic <= depth_k) {
                     hash_table.insert(pa_);
@@ -176,43 +191,42 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
     float bfs_percentage,
     PartialAssignment initial_state,
     const ValidStateDetector &is_valid_state,
-    vector<PartialAssignment> &leaves
+    vector<PartialAssignment> &leaves,
+    const TaskProxy &task_proxy
 ) {
     assert(bfs_percentage >= 0.0 && bfs_percentage <= 1.0);
     float bfs_samples = bfs_percentage * max_samples;
     vector<PartialAssignment> vk = {initial_state}, vk1 = {}; // vector_k, vector_k+1
     vector<shared_ptr<PartialAssignment>> samples = {make_shared<PartialAssignment>(initial_state)};
-    bool state_skipped = false;
-    while (samples.size() < bfs_samples && !state_skipped) {
+    leaves.push_back(initial_state);
+    while (samples.size() < bfs_samples && !vk.empty()) {
         rng->shuffle(vk);
-        leaves.clear();
         for (PartialAssignment& s : vk) {
             vector<PartialAssignment> succ_s;
             int idx_op = 0, rng_seed = (*rng)(INT32_MAX - 1);
-            while (idx_op != -1) {
+            while (true) {
                 PartialAssignment s_ = dfss->sample_state_length(
-                    s,
-                    rng_seed,
-                    idx_op,
-                    is_valid_state
+                    s, rng_seed, idx_op, is_valid_state
                 );
                 if (idx_op == -1)
                     break;
-                if (hash_table.find(s_) == hash_table.end()) {
-                    s_.estimated_heuristic = s.estimated_heuristic + 1; // TODO: non-unitary operator
-                    hash_table.insert(s_);
+                if (find(succ_s.begin(), succ_s.end(), s_) == succ_s.end()
+                    && (allow_duplicates_intrarollout || hash_table.find(s_) == hash_table.end())) {
+                    s_.estimated_heuristic = (
+                        restart_h_when_goal_state &&
+                        task_properties::is_goal_assignment(task_proxy, s_)
+                    ) ? 0 : s.estimated_heuristic + 1;
                     succ_s.push_back(s_);
                 }
                 idx_op++;
             }
-            if (samples.size() + succ_s.size() > bfs_samples) {
-                leaves.push_back(s);
-                state_skipped = true;
-            } else {
+            if (samples.size() + succ_s.size() <= bfs_samples) {
+                leaves.erase(find(leaves.begin(), leaves.end(), s));
                 for (PartialAssignment& s_ : succ_s) {
                     samples.push_back(make_shared<PartialAssignment>(s_));
                     vk1.push_back(s_);
                     leaves.push_back(s_);
+                    hash_table.insert(s_);
                 }
             }
         }
@@ -278,15 +292,14 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     if (samples_per_search == -1)
         samples_per_search = max_samples;
 
-    int bound_n = -1;
-
+    float bound_n = -1;
     if (is_number(bound)) {
         bound_n = stoi(bound);
     } else {
         if (bound == "default") {
             if (technique == "dfs" || technique == "bfs")
                 bound_n = depth_k;
-            else
+            else // rw, bfs_rw, dfs_rw
                 bound_n = samples_per_search;
         } else if (bound == "propositions") {
             bound_n = pa.to_binary().length();
@@ -299,56 +312,66 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 for (EffectProxy eff : op.get_effects()) {
                     num_effects++;
                 }
-                
             }
             float mean_num_effects = num_effects / num_ops;
-            bound_n = ceil(num_props / mean_num_effects);
+            bound_n = (float)num_props / mean_num_effects;
         }
     }
 
-    assert(bound_n != -1);
+    assert(bound_n > 0);
 
-    // TODO Recheck this.
-    if (technique == "rw" || technique == "bfs_rw")
+    if (technique == "rw" || technique == "bfs_rw" || technique == "dfs_rw")
         samples_per_search = ceil(bound_multiplier * bound_n);
     else if (technique == "dfs" || technique == "bfs")
         depth_k = ceil(bound_multiplier * bound_n);
 
     if (technique == "rw") {
-        samples = sample_with_random_walk(pa, is_valid_state, func_bias, task_proxy);
+        samples = sample_with_random_walk(pa, samples_per_search, is_valid_state, func_bias, task_proxy);
 
     } else if (technique == "bfs_rw" && subtechnique == "percentage") {
-        float bfs_percentage = 0.1; // TODO: argument
-        samples = sample_with_percentage_limited_bfs(bfs_percentage, pa, is_valid_state, leaves);
+        float bfs_percentage = 1; // TODO: argument
+        samples = sample_with_percentage_limited_bfs(bfs_percentage, pa, is_valid_state, leaves, task_proxy);
 
-    } else if (technique == "dfs" || technique == "bfs" || technique == "dfs_rw" || technique == "bfs_rw") {
-        assert(subtechnique != "percentage");
-        samples = sample_with_bfs_or_dfs(technique.substr(0, 3), pa, is_valid_state);
-        if (technique.substr(technique.size() - 2) == "rw") { // dfs_rw or bfs_rw
-            int leaf_h = 0;
-            for (shared_ptr<PartialAssignment> pa : samples) {
-                if (pa->estimated_heuristic > leaf_h) {
-                    leaf_h = pa->estimated_heuristic;
-                    leaves.clear();
-                }
-                if (pa->estimated_heuristic == leaf_h)
-                    leaves.push_back(*pa);
-            }
-        }
+    } else if (technique == "dfs" || technique == "bfs") {
+        do {
+            vector<shared_ptr<PartialAssignment>> samples_ = sample_with_bfs_or_dfs(
+                technique.substr(0, 3), pa, max_samples-samples.size(), is_valid_state, task_proxy
+            );
+            samples.insert(samples.end(), samples_.begin(), samples_.end());
+            hash_table.clear();
+        } while (samples.size() < (unsigned)max_samples);
+        
+    } else if (technique == "dfs_rw" || technique == "bfs_rw") {
+        cout << technique << " (" << subtechnique << ") not implemented!" << endl;
+        exit(1);
     }
 
     // pos-dfs/bfs random walk step
     if (technique == "dfs_rw" || technique == "bfs_rw") {
         assert(leaves.size() > 0);
         cout << "Starting random walk search (" << subtechnique << ") from " << leaves.size() << " leaves" << endl
-             << "Looking for " << (samples_per_search - samples.size()) << " more samples..." << endl;
+             << "Looking for " << (max_samples - samples.size()) << " more samples..." << endl;
         int lid = 0;
-        while (samples.size() < (unsigned)samples_per_search) {
-            lid = (subtechnique == "round_robin") ? // round_robin or random_leaf (random_leaf if percentage)
-                (lid + 1) % leaves.size() : (*rng)(INT32_MAX - 1) % leaves.size();
-            vector<shared_ptr<PartialAssignment>> samples_rw = sample_with_random_walk(
-                leaves[lid], is_valid_state, func_bias, task_proxy);
-            samples.insert(samples.end(), samples_rw.begin(), samples_rw.end());
+        vector<bool> leaves_used(leaves.size(), false);
+        while (samples.size() < (unsigned)max_samples) {
+            do {
+                lid = (subtechnique == "round_robin") ? // round_robin or random_leaf (random_leaf if percentage)
+                    (lid + 1) % leaves.size() : (*rng)(INT32_MAX - 1) % leaves.size();
+            } while (leaves_used[lid]);
+            leaves_used[lid] = true;
+            if (all_of(leaves_used.begin(), leaves_used.end(), [](bool v) {return v;}))
+                for (unsigned i = 0; i < leaves.size(); i++)
+                    leaves_used[i] = false;
+            vector<shared_ptr<PartialAssignment>> samples_ = sample_with_random_walk(
+                leaves[lid],
+                min(samples_per_search, (int)(max_samples-samples.size())),
+                is_valid_state,
+                func_bias,
+                task_proxy,
+                false,
+                !allow_duplicates_interrollout
+            );
+            samples.insert(samples.end(), samples_.begin(), samples_.end());
         }
     }
     return samples;

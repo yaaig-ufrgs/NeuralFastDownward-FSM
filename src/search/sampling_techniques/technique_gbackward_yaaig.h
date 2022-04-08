@@ -63,22 +63,28 @@ public:
 private:
     vector<shared_ptr<PartialAssignment>> sample_with_random_walk(
         PartialAssignment initial_state,
+        const unsigned steps,
         const ValidStateDetector &is_valid_state,
         const PartialAssignmentBias *bias,
-        const TaskProxy &task_proxy
+        const TaskProxy &task_proxy,
+        const bool sample_initial_state = true,
+        const bool global_hash_table = true
     );
 
     vector<shared_ptr<PartialAssignment>> sample_with_bfs_or_dfs(
         string technique,
         PartialAssignment initial_state,
-        const ValidStateDetector &is_valid_state
+        const unsigned steps,
+        const ValidStateDetector &is_valid_state,
+        const TaskProxy &task_proxy
     );
 
     vector<shared_ptr<PartialAssignment>> sample_with_percentage_limited_bfs(
         float bfs_percentage,
         PartialAssignment initial_state,
         const ValidStateDetector &is_valid_state,
-        vector<PartialAssignment> &leaves
+        vector<PartialAssignment> &leaves,
+        const TaskProxy &task_proxy
     );
 };
 }

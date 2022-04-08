@@ -73,6 +73,7 @@ def yaaig_ferber(args, meth):
     if args.bound == "max_task_hstar":
         assert(args.test_tasks_dir != "")
         test_tasks = glob(f"{args.test_tasks_dir}/*")
+        test_tasks += glob(f"{args.test_tasks_dir}/../*.pddl")
         args.bound = max(get_hstar_tasks("scripts", test_tasks))
         assert(args.bound > 0)
 
