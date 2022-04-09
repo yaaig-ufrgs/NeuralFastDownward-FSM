@@ -68,7 +68,8 @@ private:
         const PartialAssignmentBias *bias,
         const TaskProxy &task_proxy,
         const bool sample_initial_state = true,
-        const bool global_hash_table = true
+        const bool global_hash_table = true,
+        const utils::HashSet<PartialAssignment> states_to_avoid = utils::HashSet<PartialAssignment>()
     );
 
     vector<shared_ptr<PartialAssignment>> sample_with_bfs_or_dfs(

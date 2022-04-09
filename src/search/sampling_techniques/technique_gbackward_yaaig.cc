@@ -79,10 +79,11 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
     const PartialAssignmentBias *bias,
     const TaskProxy &task_proxy,
     const bool sample_initial_state,
-    const bool global_hash_table
+    const bool global_hash_table,
+    const utils::HashSet<PartialAssignment> states_to_avoid
 ) {
     PartialAssignment pa = initial_state;
-    vector<shared_ptr<PartialAssignment>> samples = {};
+    vector<shared_ptr<PartialAssignment>> samples;
     if (sample_initial_state)
         samples.push_back(make_shared<PartialAssignment>(pa));
     utils::HashSet<PartialAssignment> local_hash_table;
@@ -101,7 +102,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
         );
         if (pa_ == pa) // there is no applicable operator
             break;
-        if (allow_duplicates_intrarollout || ht_pointer->find(pa_) == ht_pointer->end()) {
+        if ((allow_duplicates_intrarollout || ht_pointer->find(pa_) == ht_pointer->end())
+            && (states_to_avoid.find(pa_) == states_to_avoid.end())) {
             // if it is goal state then set h to 0
             pa_.estimated_heuristic = (
                 restart_h_when_goal_state &&
@@ -115,6 +117,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
             break;
         }
     }
+    assert(samples.size() <= steps);
     return samples;
 }
 
@@ -184,6 +187,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
             idx_op++;
         }
     }
+    assert(samples.size() <= steps);
     return samples;
 }
 
@@ -305,8 +309,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             bound_n = pa.to_binary().length();
         } else if (bound == "propositions_per_mean_effects") {
             int num_props = pa.to_binary().length();
-            int num_effects = 0;
-            int num_ops = 0;
+            int num_effects = 0, num_ops = 0;
             for (OperatorProxy op : task_proxy.get_operators()) {
                 num_ops++;
                 for (EffectProxy eff : op.get_effects()) {
@@ -317,7 +320,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             bound_n = (float)num_props / mean_num_effects;
         }
     }
-
     assert(bound_n > 0);
 
     if (technique == "rw" || technique == "bfs_rw" || technique == "dfs_rw")
@@ -329,7 +331,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         samples = sample_with_random_walk(pa, samples_per_search, is_valid_state, func_bias, task_proxy);
 
     } else if (technique == "bfs_rw" && subtechnique == "percentage") {
-        float bfs_percentage = 1; // TODO: argument
+        float bfs_percentage = 0.1; // TODO: argument
         samples = sample_with_percentage_limited_bfs(bfs_percentage, pa, is_valid_state, leaves, task_proxy);
 
     } else if (technique == "dfs" || technique == "bfs") {
@@ -349,6 +351,13 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     // pos-dfs/bfs random walk step
     if (technique == "dfs_rw" || technique == "bfs_rw") {
         assert(leaves.size() > 0);
+
+        utils::HashSet<PartialAssignment> bfs_core; // or dfs_core
+        bool avoid_bfs_core = true;
+        if (avoid_bfs_core)
+            for (shared_ptr<PartialAssignment>& s : samples)
+                bfs_core.insert(*s);
+
         cout << "Starting random walk search (" << subtechnique << ") from " << leaves.size() << " leaves" << endl
              << "Looking for " << (max_samples - samples.size()) << " more samples..." << endl;
         int lid = 0;
@@ -360,8 +369,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             } while (leaves_used[lid]);
             leaves_used[lid] = true;
             if (all_of(leaves_used.begin(), leaves_used.end(), [](bool v) {return v;}))
-                for (unsigned i = 0; i < leaves.size(); i++)
-                    leaves_used[i] = false;
+                fill(leaves_used.begin(), leaves_used.end(), false);
+
             vector<shared_ptr<PartialAssignment>> samples_ = sample_with_random_walk(
                 leaves[lid],
                 min(samples_per_search, (int)(max_samples-samples.size())),
@@ -369,7 +378,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 func_bias,
                 task_proxy,
                 false,
-                !allow_duplicates_interrollout
+                !allow_duplicates_interrollout,
+                bfs_core
             );
             samples.insert(samples.end(), samples_.begin(), samples_.end());
         }
