@@ -10,6 +10,8 @@
 
 #include <iostream>
 
+// usage: ./fast-downward.py problem.pddl --search "astar(pdb(hstar_pattern([])))"
+
 using namespace std;
 
 namespace pdbs {
