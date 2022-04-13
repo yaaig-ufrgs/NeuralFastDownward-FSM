@@ -206,9 +206,12 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
     vector<shared_ptr<PartialAssignment>> tasks;
     bool max_samples_reached = false;
     utils::HashSet<PartialAssignment> hash_table;
+    size_t total_samples_size = 0;
     while (!empty() || (max_samples != -1 && !max_samples_reached)) {
         update_alternative_task_mutexes(seed_task);
         vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
+        size_t sample_size = sizeof(vector<shared_ptr<PartialAssignment>>) + (sizeof(shared_ptr<PartialAssignment>) * next_tasks.size());
+        total_samples_size += sample_size;
         for (shared_ptr<PartialAssignment>& task : next_tasks) {
             if (remove_duplicates) {
                 if (hash_table.count(*task))
@@ -224,6 +227,12 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         }
         counter++;
     }
+    cout << "#### SAMPLE_SIZE_ALL: " << total_samples_size << endl;
+    size_t sample_size_final = sizeof(vector<shared_ptr<PartialAssignment>>) + (sizeof(shared_ptr<PartialAssignment>) * tasks.size());
+    cout << "#### SAMPLE_SIZE_NO_DUPLICATES: " << sample_size_final << endl;
+    size_t hash_table_size_final = sizeof(utils::HashSet<PartialAssignment>) + (sizeof(PartialAssignment) * hash_table.size());
+    cout << "#### HASH_TABLE_SIZE_FINAL: " << hash_table_size_final << endl;
+
     return tasks;
 }
 
