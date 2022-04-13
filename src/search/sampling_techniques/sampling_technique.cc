@@ -227,9 +227,9 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         }
         counter++;
     }
-    cout << "#### SAMPLE_SIZE_ALL: " << total_samples_size << endl;
+    cout << "#### SAMPLE_SIZE_FINAL: " << total_samples_size << endl;
     size_t sample_size_final = sizeof(vector<shared_ptr<PartialAssignment>>) + (sizeof(shared_ptr<PartialAssignment>) * tasks.size());
-    cout << "#### SAMPLE_SIZE_NO_DUPLICATES: " << sample_size_final << endl;
+    cout << "#### SAMPLE_SIZE_FINAL_NO_DUPLICATES: " << sample_size_final << endl;
     size_t hash_table_size_final = sizeof(utils::HashSet<PartialAssignment>) + (sizeof(PartialAssignment) * hash_table.size());
     cout << "#### HASH_TABLE_SIZE_FINAL: " << hash_table_size_final << endl;
 

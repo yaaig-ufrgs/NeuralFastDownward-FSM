@@ -90,8 +90,10 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
 ) {
     PartialAssignment pa = initial_state;
     vector<shared_ptr<PartialAssignment>> samples;
-    if (sample_initial_state)
+    if (sample_initial_state) {
         samples.push_back(make_shared<PartialAssignment>(pa));
+        mem_samples += sizeof(shared_ptr<PartialAssignment>);
+    }
     utils::HashSet<PartialAssignment> local_hash_table;
     utils::HashSet<PartialAssignment> *ht_pointer = global_hash_table ? &hash_table : &local_hash_table;
     // Attempts to find a new state when performing each step
@@ -406,10 +408,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             mem_samples += sizeof(shared_ptr<PartialAssignment>) * samples_.size();
         }
     }
-    /*
-    size_t sample_size = sizeof(vector<shared_ptr<PartialAssignment>>) + (sizeof(shared_ptr<PartialAssignment>) * samples.size());
-    cout << "#### SAMPLE_SIZE_PARTIAL: " << sample_size << endl;
-    */
+    cout << "#### SAMPLE_SIZE_PARTIAL: " << mem_samples << endl;
     return samples;
 }
 
