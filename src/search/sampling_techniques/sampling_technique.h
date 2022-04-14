@@ -60,6 +60,7 @@ protected:
     std::unique_ptr<utils::CountdownTimer> sampling_timer;
     int mem_limit;
     int mem_samples = 0;
+    int mem_presampling_mb = utils::get_peak_memory_in_kb() / 1024;
     int counter = 0;
 
 protected:
@@ -95,6 +96,7 @@ public:
     int get_counter() const;
     bool empty() const;
     bool stop_sampling() const;
+    int mem_usage_mb() const;
 
     std::shared_ptr<AbstractTask> next(
         const std::shared_ptr<AbstractTask> &seed_task = tasks::g_root_task);

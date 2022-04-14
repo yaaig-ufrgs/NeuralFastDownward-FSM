@@ -191,7 +191,11 @@ bool SamplingTechnique::empty() const {
 
 bool SamplingTechnique::stop_sampling() const {
     return (sampling_timer->is_expired() ||
-            utils::get_peak_memory_in_kb() >= mem_limit);
+            utils::get_peak_memory_in_kb() - mem_presampling_mb >= mem_limit);
+}
+
+int SamplingTechnique::mem_usage_mb() const {
+    return (utils::get_peak_memory_in_kb() / 1024) - mem_presampling_mb;
 }
 
 shared_ptr<AbstractTask> SamplingTechnique::next(

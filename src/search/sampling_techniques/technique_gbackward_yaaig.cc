@@ -213,6 +213,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
     leaves.push_back(initial_state);
     mem_samples += sizeof(shared_ptr<PartialAssignment>) + (sizeof(PartialAssignment) * 2);
     while (samples.size() < bfs_samples && !vk.empty()) {
+        if (mem_usage_mb() >= 200 || sampling_timer->get_elapsed_time() >= 120.0)
+            break;
         rng->shuffle(vk);
         for (PartialAssignment& s : vk) {
             vector<PartialAssignment> succ_s;
@@ -402,7 +404,12 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             mem_samples += sizeof(shared_ptr<PartialAssignment>) * samples_.size();
         }
     }
+    /*
     cout << "#### SAMPLE_SIZE_PARTIAL: " << mem_samples << endl;
+    cout << "#### MEM_USAGE: " << mem_usage_mb() << endl;
+    cout << "#### MEM_PRE_SAMPLING: " << mem_presampling_mb << endl;
+    cout << "#### SAMPLING_TIME: " << sampling_timer->get_elapsed_time() << endl;
+    */
     return samples;
 }
 
