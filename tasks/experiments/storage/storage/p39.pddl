@@ -1,15 +1,15 @@
-; Map of the Depots:         
+; map of the depots:         
 ; 0*
 ;
 ; 1*
 ;  1
 ;----
 ; 0: depot0 area
-; *: Depot access point
-; =: Transit area
+; *: depot access point
+; =: transit area
 
 (define (problem storage-7)
-(:domain Storage-Propositional)
+(:domain storage-propositional)
 (:objects
 	depot0-2-1 depot0-2-2
 
@@ -24,29 +24,32 @@
 	loadarea - transitarea)
 
 (:init
+	(at hoist0 container-0-1)
+	(at hoist1 container-0-0)
+	(available hoist0)
+	(clear container-0-2)
+	(clear depot0-2-1)
+	(clear depot0-2-2)
+	(clear depot1-2-2)
+	(in crate1 depot1)
+	(in crate2 depot1)
+	(lifting hoist1 crate0)
+	(on crate1 depot1-1-1)
+	(on crate2 depot1-1-2)
 	(connected depot0-2-1 depot0-2-2)
 	(connected depot0-2-2 depot0-2-1)
 	(connected depot1-1-1 depot1-1-2)
 	(connected depot1-1-2 depot1-2-2)
 	(connected depot1-1-2 depot1-1-1)
 	(connected depot1-2-2 depot1-1-2)
-
 	(in depot0-2-1 depot0)
 	(in depot0-2-2 depot0)
 	(in depot1-1-1 depot1)
 	(in depot1-1-2 depot1)
 	(in depot1-2-2 depot1)
-
-	(on crate0 container-0-0)
-	(on crate1 container-0-1)
-	(on crate2 container-0-2)
-	(in crate0 container0)
-	(in crate1 container0)
-	(in crate2 container0)
 	(in container-0-0 container0)
 	(in container-0-1 container0)
 	(in container-0-2 container0)
-
 	(connected loadarea container-0-0) 
 	(connected container-0-0 loadarea)
 	(connected loadarea container-0-1) 
@@ -57,17 +60,6 @@
 	(connected loadarea depot0-2-2)
 	(connected depot1-1-2 loadarea)
 	(connected loadarea depot1-1-2)
-
-	(clear depot0-2-1)
-	(clear depot0-2-2)
-	(clear depot1-1-1)
-	(clear depot1-1-2)
-	(clear depot1-2-2)
-
-	(at hoist0 depot0-2-2)
-	(available hoist0)
-	(at hoist1 depot1-2-2)
-	(available hoist1)
 )
 
 (:goal (and
@@ -76,3 +68,4 @@
 	(in crate2 depot1)
 ))
 )
+

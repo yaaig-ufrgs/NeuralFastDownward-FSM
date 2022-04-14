@@ -22,7 +22,7 @@
 
 	(crate crate0) (surface crate0)
 	(on crate0 crate1)
-	(at crate0 distributor0)
+	(at crate0 distributor1)
 	(clear crate0)
 
 	(crate crate1) (surface crate1)
