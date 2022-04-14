@@ -403,7 +403,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         }
     }
     cout << "#### SAMPLE_SIZE_PARTIAL: " << mem_samples << endl;
-    cout << "#### SAMPLING_TIMER: " << sampling_timer->get_elapsed_time() << endl;
     return samples;
 }
 

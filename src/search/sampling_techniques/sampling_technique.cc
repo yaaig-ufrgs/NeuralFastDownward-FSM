@@ -140,9 +140,9 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
     }
 
     if (mem_limit_mb != -1)
-        mem_limit = mem_limit_mb * 1024;
+        mem_limit = mem_limit_mb * 1024; // KB
     else
-        mem_limit = SIZE_MAX;
+        mem_limit = numeric_limits<int>::max();
 
     if (max_time == -1.0)
         max_time = numeric_limits<double>::max();
@@ -187,6 +187,11 @@ int SamplingTechnique::get_counter() const {
 
 bool SamplingTechnique::empty() const {
     return counter >= searches;
+}
+
+bool SamplingTechnique::stop_sampling() const {
+    return (sampling_timer->is_expired() ||
+            utils::get_peak_memory_in_kb() >= mem_limit);
 }
 
 shared_ptr<AbstractTask> SamplingTechnique::next(

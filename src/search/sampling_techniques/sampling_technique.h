@@ -58,8 +58,8 @@ protected:
     const options::ParseTree eval_parse_tree;
     const std::unique_ptr<options::OptionParser> option_parser;
     std::unique_ptr<utils::CountdownTimer> sampling_timer;
-    size_t mem_limit;
-    size_t mem_samples = 0;
+    int mem_limit;
+    int mem_samples = 0;
     int counter = 0;
 
 protected:
@@ -94,6 +94,7 @@ public:
     int get_count() const;
     int get_counter() const;
     bool empty() const;
+    bool stop_sampling() const;
 
     std::shared_ptr<AbstractTask> next(
         const std::shared_ptr<AbstractTask> &seed_task = tasks::g_root_task);
@@ -110,7 +111,7 @@ public:
     static void add_options_to_parser(options::OptionParser &parser);
     static std::vector<int> extractInitialState(const State &state);
     static std::vector<FactPair> extractGoalFacts(const GoalsProxy &goals_proxy);
-   static std::vector<FactPair> extractGoalFacts(const State &state);
+    static std::vector<FactPair> extractGoalFacts(const State &state);
 
     virtual bool has_upgradeable_parameters() const;
     virtual void upgrade_parameters();
