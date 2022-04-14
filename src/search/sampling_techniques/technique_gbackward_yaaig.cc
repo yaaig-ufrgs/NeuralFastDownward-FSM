@@ -336,7 +336,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                     num_effects++;
                 }
             }
-            float mean_num_effects = num_effects / num_ops;
+            float mean_num_effects = (float)num_effects / num_ops;
             bound_n = (float)num_props / mean_num_effects;
         }
     }
