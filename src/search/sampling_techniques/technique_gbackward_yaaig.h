@@ -31,7 +31,6 @@ protected:
     const bool deprioritize_undoing_steps;
     const bool is_valid_walk;
     const bool restart_h_when_goal_state;
-    const int mem_limit_mb;
     const options::ParseTree bias_evaluator_tree;
     const bool bias_probabilistic;
     const double bias_adapt;
@@ -45,9 +44,6 @@ protected:
     shared_ptr<sampling::RandomRegressionWalkSampler> rrws = nullptr;
     shared_ptr<sampling::DFSSampler> dfss = nullptr;
     utils::HashSet<PartialAssignment> hash_table;
-    size_t mem_limit;
-    size_t mem_samples = 0;
-    //size_t mem_hash_table = 0;
 
     virtual vector<shared_ptr<PartialAssignment>> create_next_all(
             shared_ptr<AbstractTask> seed_task,

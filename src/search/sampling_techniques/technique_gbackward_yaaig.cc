@@ -61,17 +61,11 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
           is_valid_walk(opts.get<bool>("is_valid_walk")),
           restart_h_when_goal_state(opts.get<bool>("restart_h_when_goal_state")),
-          mem_limit_mb(opts.get<int>("mem_limit_mb")),
           bias_evaluator_tree(opts.get_parse_tree("bias", options::ParseTree())),
           bias_probabilistic(opts.get<bool>("bias_probabilistic")),
           bias_adapt(opts.get<double>("bias_adapt")),
           bias_reload_frequency(opts.get<int>("bias_reload_frequency")),
           bias_reload_counter(0) {
-    if (mem_limit_mb != -1) {
-        mem_limit = mem_limit_mb * 1024 * 1024;
-    } else {
-        mem_limit = SIZE_MAX;
-    }
     if (technique == "bfs_rw")
         assert(subtechnique == "round_robin" || subtechnique == "random_leaf" || subtechnique == "percentage");
     if (technique == "dfs_rw")
@@ -409,6 +403,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         }
     }
     cout << "#### SAMPLE_SIZE_PARTIAL: " << mem_samples << endl;
+    cout << "#### SAMPLING_TIMER: " << sampling_timer->get_elapsed_time() << endl;
     return samples;
 }
 
@@ -466,12 +461,6 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "restart_h_when_goal_state",
             "Restart h value when goal state is sampled (only random walk)",
             "true"
-    );
-    parser.add_option<int>(
-            "mem_limit_mb",
-            "Memory limit to consider when sampling."
-            "If -1, no limit is given.",
-            "-1"
     );
     parser.add_option<shared_ptr<Heuristic>>(
             "bias",

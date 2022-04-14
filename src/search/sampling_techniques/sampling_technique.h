@@ -7,6 +7,8 @@
 
 #include "../utils/hash.h"
 #include "../utils/rng_options.h"
+#include "../utils/countdown_timer.h"
+#include "../utils/memory.h"
 
 #include <memory>
 #include <ostream>
@@ -44,7 +46,9 @@ protected:
     const int searches;
     int samples_per_search;
     const int max_samples;
-    double bound_multiplier;
+    const double bound_multiplier;
+    double max_time;
+    const int mem_limit_mb;
     const bool remove_duplicates;
 //    const std::string dump_directory;
     const bool check_mutexes;
@@ -53,6 +57,9 @@ protected:
     const std::vector<std::vector<std::string>> alternative_mutexes;
     const options::ParseTree eval_parse_tree;
     const std::unique_ptr<options::OptionParser> option_parser;
+    std::unique_ptr<utils::CountdownTimer> sampling_timer;
+    size_t mem_limit;
+    size_t mem_samples = 0;
     int counter = 0;
 
 protected:

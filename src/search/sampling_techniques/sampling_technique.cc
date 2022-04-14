@@ -5,6 +5,8 @@
 #include "../option_parser.h"
 #include "../plugin.h"
 #include "../state_registry.h"
+#include "../utils/system.h"
+#include <limits>
 
 #include <fstream>
 #include <sstream>
@@ -114,6 +116,8 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
           samples_per_search(opts.get<int>("samples_per_search")),
           max_samples(opts.get<int>("max_samples")),
           bound_multiplier(opts.get<double>("bound_multiplier")),
+          max_time(opts.get<double>("max_time")),
+          mem_limit_mb(opts.get<int>("mem_limit_mb")),
           remove_duplicates(opts.get<bool>("remove_duplicates")),
 //          dump_directory(opts.get<string>("dump")),
           check_mutexes(opts.get<bool>("check_mutexes")),
@@ -134,6 +138,16 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
                  << endl;
         }
     }
+
+    if (mem_limit_mb != -1)
+        mem_limit = mem_limit_mb * 1024;
+    else
+        mem_limit = SIZE_MAX;
+
+    if (max_time == -1.0)
+        max_time = numeric_limits<double>::max();
+    sampling_timer = utils::make_unique_ptr<utils::CountdownTimer>(max_time);
+
 }
 
 SamplingTechnique::SamplingTechnique(
@@ -147,6 +161,9 @@ SamplingTechnique::SamplingTechnique(
           searches(searches),
           samples_per_search(-1),
           max_samples(-1),
+          bound_multiplier(1.0),
+          max_time(-1.0),
+          mem_limit_mb(-1),
           remove_duplicates(false),
 //          dump_directory(move(dump_directory)),
           check_mutexes(check_mutexes),
@@ -207,6 +224,8 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
     bool max_samples_reached = false;
     utils::HashSet<PartialAssignment> hash_table;
     size_t total_samples_size = 0;
+    cout << "[START SAMPLING t=" << utils::g_timer << ", "
+         << utils::get_peak_memory_in_kb() << " KB] ";
     while (!empty() || (max_samples != -1 && !max_samples_reached)) {
         update_alternative_task_mutexes(seed_task);
         vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
@@ -227,6 +246,8 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         }
         counter++;
     }
+    cout << "[FINISH SAMPLING t=" << utils::g_timer << ", "
+         << utils::get_peak_memory_in_kb() << " KB] ";
     cout << "#### SAMPLE_SIZE_FINAL: " << total_samples_size << endl;
     size_t sample_size_final = sizeof(vector<shared_ptr<PartialAssignment>>) + (sizeof(shared_ptr<PartialAssignment>) * tasks.size());
     cout << "#### SAMPLE_SIZE_FINAL_NO_DUPLICATES: " << sample_size_final << endl;
@@ -386,6 +407,17 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
             "bound_multiplier",
             "Multiplies the bound of each rollout by the given value.",
             "1.0"
+    );
+    parser.add_option<double>(
+            "max_time",
+            "Max time to consider when doing sampling.",
+            "-1.0"
+    );
+    parser.add_option<int>(
+            "mem_limit_mb",
+            "Memory limit to consider when sampling."
+            "If -1, no limit is given.",
+            "-1"
     );
     parser.add_option<bool>(
             "remove_duplicates",
