@@ -407,7 +407,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     /*
     cout << "#### SAMPLE_SIZE_PARTIAL: " << mem_samples << endl;
     cout << "#### MEM_USAGE: " << mem_usage_mb() << endl;
-    cout << "#### MEM_PRE_SAMPLING: " << mem_presampling_mb << endl;
+    cout << "#### MEM_PRE_SAMPLING: " << mem_presampling << endl;
     cout << "#### SAMPLING_TIME: " << sampling_timer->get_elapsed_time() << endl;
     */
     return samples;

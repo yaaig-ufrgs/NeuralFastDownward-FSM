@@ -60,7 +60,7 @@ protected:
     std::unique_ptr<utils::CountdownTimer> sampling_timer;
     int mem_limit;
     int mem_samples = 0;
-    int mem_presampling_mb = utils::get_peak_memory_in_kb() / 1024;
+    int mem_presampling = utils::get_peak_memory_in_kb();
     int counter = 0;
 
 protected:
