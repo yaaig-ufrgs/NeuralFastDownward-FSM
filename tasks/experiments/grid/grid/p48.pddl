@@ -7,15 +7,14 @@
              square circle
              key0 key1 key2)
    (:init
-	(arm-empty)
 	(at key0 node2-3)
-	(at key1 node1-3)
-	(at key2 node2-0)
+	(at key2 node3-1)
 	(at-robot node2-1)
-	(locked node2-2)
+	(holding key1)
 	(locked node2-3)
 	(locked node3-2)
 	(locked node3-3)
+	(open node2-2)
 	(place node0-0)
 	(place node0-1)
 	(place node0-2)

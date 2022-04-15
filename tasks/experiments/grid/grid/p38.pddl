@@ -9,9 +9,9 @@
    (:init
 	(arm-empty)
 	(at key0 node2-3)
-	(at key1 node1-3)
-	(at key2 node3-1)
-	(at-robot node0-0)
+	(at key1 node0-0)
+	(at key2 node1-0)
+	(at-robot node2-3)
 	(locked node2-2)
 	(locked node3-2)
 	(locked node3-3)
