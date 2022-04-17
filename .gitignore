@@ -11,6 +11,6 @@
 /sas_plan*
 /defaults.txt
 __pycache__/
-results/
+results*/
 scripts/create_hstar_sampling
-samples/
+samples*/
