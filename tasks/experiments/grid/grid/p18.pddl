@@ -8,10 +8,10 @@
              key0 key1 key2)
    (:init
 	(arm-empty)
-	(at key0 node1-3)
-	(at key1 node0-2)
-	(at key2 node1-0)
-	(at-robot node0-0)
+	(at key0 node2-3)
+	(at key1 node0-3)
+	(at key2 node0-3)
+	(at-robot node3-0)
 	(locked node2-2)
 	(locked node3-2)
 	(open node2-3)
@@ -105,5 +105,9 @@
 	(key key2)
 	(key-shape key2 circle)
 )
-   (:goal (and (at key0 node1-1))))
+   (:goal (and
+      (at key0 node1-1)
+      (at key1 node3-1)
+      (at key2 node1-3)
+   )))
 

@@ -7,14 +7,15 @@
              square circle
              key0 key1 key2)
    (:init
+	(arm-empty)
 	(at key0 node1-3)
-	(at key2 node0-1)
-	(at-robot node1-3)
-	(holding key1)
+	(at key1 node0-2)
+	(at key2 node1-3)
+	(at-robot node2-1)
+	(locked node2-2)
+	(locked node3-2)
 	(locked node3-3)
-	(open node2-2)
 	(open node2-3)
-	(open node3-2)
 	(place node0-0)
 	(place node0-1)
 	(place node0-2)
@@ -104,5 +105,9 @@
 	(key key2)
 	(key-shape key2 circle)
 )
-   (:goal (and (at key0 node1-1))))
+   (:goal (and
+      (at key0 node1-1)
+      (at key1 node3-1)
+      (at key2 node1-3)
+   )))
 

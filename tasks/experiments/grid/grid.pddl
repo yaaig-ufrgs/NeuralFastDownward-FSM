@@ -103,4 +103,8 @@
           (key-shape key2 circle)
           (at key2 node0-1)
           (at-robot node2-1))
-   (:goal (and (at key0 node1-1))))
+   (:goal (and
+      (at key0 node1-1)
+      (at key1 node3-1)
+      (at key2 node1-3)
+   )))
