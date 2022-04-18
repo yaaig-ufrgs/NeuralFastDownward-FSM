@@ -60,6 +60,17 @@ def get_full_state_repr_name(state_repr):
     return state_repr
 
 
+def get_bound_type(bound):
+    if str(bound).isdigit():
+        return str(bound)
+    if bound == "default":
+        return "def"
+    elif bound == "propositions":
+        return "props"
+    elif bound == "propositions_per_mean_effects":
+        return "propseff"
+
+
 def yaaig_ferber(args, meth):
     search_algo = ""
     if args.search_algorithm == "greedy":
@@ -88,19 +99,24 @@ def yaaig_ferber(args, meth):
         domain = instance_split[-2]
         if instance_name != "domain" and instance_name != "source":
             for i in range(start, end):
-                cmd, out, subtech, depthk, avik, avits, dups = "", "", "", "", "", "", ""
+                cmd, out, subtech, depthk, avik, avits, dups, bound = "", "", "", "", "", "", "", ""
+                tech = args.technique.replace('_', '')
                 if args.technique == "dfs_rw" or args.technique == "bfs_rw":
-                    subtech = f"_{args.subtechnique}"
-                    depthk = f"_k{args.k_depth}"
+                    subtech = f"_subtech-{args.subtechnique.replace('_', '')}"
+                    if args.k_depth < 99999:
+                        depthk = f"_depthk-{args.k_depth}"
                 if args.avi_k > 0:
-                    avik = f"_avi-k-{args.avi_k}"
-                    avi_iterations = "max" if args.avi_its >= 9999 else args.avi_its
-                    avits = f"_it-{avi_iterations}"
+                    avik = f"_avi-{args.avi_k}"
+                    #avi_iterations = "max" if args.avi_its >= 9999 else args.avi_its
+                    #avits = f"_it-{avi_iterations}"
                 if args.allow_dups != "none":
                     dups = "ir" if args.allow_dups == "interrollout" else args.allow_dups
-                sps = f"{args.searches}x{args.samples_per_search}-{args.max_samples}" if args.samples_per_search != -1 else f"{args.max_samples}"
+                #sps = f"srch-{args.searches}_sps-{args.samples_per_search}_maxs-{args.max_samples}" if args.samples_per_search != -1 else f"maxs-{args.max_samples}"
+                sps = f"maxs-{args.max_samples}"
+                boundtype = f"bnd-{get_bound_type(args.bound)}"
+                boundmult = "" if args.bound_multiplier == 1.0 else f"bmul-{str(args.bound_multiplier).replace('.', '-')}_"
                 if meth == "yaaig":
-                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.technique}{subtech}{depthk}{avik}{avits}_dups-{dups}_min-{args.minimization}_{args.state_representation}_{sps}_ss{i}'
+                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{subtech}{depthk}{avik}{avits}_dups-{dups}_min-{args.minimization}_repr-{args.state_representation}_{boundtype}_{boundmult}{sps}_ss{i}'
                     rmse_out = out + "_rmse"
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
