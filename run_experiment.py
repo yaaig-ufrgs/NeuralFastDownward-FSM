@@ -49,9 +49,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
         instance = sample_name_split[2]
         technique = sample_name_split[3]
         sample_size = sample_name_split[4]
-        trained_model_dir = (
-            f"{args.train_output_folder}/nfd_train.{sample_name}.ns{net_seed}"
-        )
+        trained_model_dir = f"{args.train_output_folder}/nfd_train.{sample_name}.ns{net_seed}" if not args.exp_only_test else f"{args.test_model_dir}/nfd_train.{sample_name}.ns{net_seed}"
 
         train_args = (
             f"{sample} -mdl {args.train_model} -pat {args.train_patience} "
