@@ -686,6 +686,9 @@ def main():
         task = pddl_parser.open(
             domain_filename=options.domain, task_filename=options.task)
 
+    if options.use_unit_cost:
+        task.use_min_cost_metric = False
+
     with timers.timing("Normalizing task"):
         normalize.normalize(task)
 
