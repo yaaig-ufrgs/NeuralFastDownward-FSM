@@ -16,6 +16,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 class AbstractTask;
 class GoalsProxy;
@@ -50,7 +51,8 @@ protected:
     double max_time;
     const int mem_limit_mb;
     const bool remove_duplicates;
-//    const std::string dump_directory;
+    // const std::string dump_directory;
+    const std::string statespace_file;
     const bool check_mutexes;
     const bool check_solvable;
     const bool use_alternative_mutexes;
@@ -62,6 +64,7 @@ protected:
     int mem_samples = 0;
     int mem_presampling = utils::get_peak_memory_in_kb();
     int counter = 0;
+    std::unordered_set<std::string> statespace;
 
 protected:
     int remaining_upgrades;

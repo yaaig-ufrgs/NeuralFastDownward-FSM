@@ -119,7 +119,8 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
           max_time(opts.get<double>("max_time")),
           mem_limit_mb(opts.get<int>("mem_limit_mb")),
           remove_duplicates(opts.get<bool>("remove_duplicates")),
-//          dump_directory(opts.get<string>("dump")),
+          statespace_file(opts.get<string>("statespace_file")),
+          // dump_directory(opts.get<string>("dump")),
           check_mutexes(opts.get<bool>("check_mutexes")),
           check_solvable(opts.get<bool>("check_solvable")),
           use_alternative_mutexes(opts.get<string>("mutexes") != "none"),
@@ -131,12 +132,25 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
                   false, false)),
           remaining_upgrades(opts.get<int>("max_upgrades", 0)),
           rng(utils::parse_rng_from_options(opts)) {
+
     for (const shared_ptr<Evaluator> &e:
             option_parser->start_parsing<vector<shared_ptr<Evaluator>>>()) {
         if (!e->dead_ends_are_reliable()) {
             cout << "Warning: A given dead end detection evaluator is not safe."
                  << endl;
         }
+    }
+
+    if (statespace_file != "none") {
+        ifstream f(statespace_file);
+        string line;
+        while (getline(f, line)) {
+            if (line[0] == '#') continue;
+            size_t comma_pos = line.find(";");
+            string state = line.substr(comma_pos + 1, line.size()-1);
+            statespace.insert(state);
+        }
+        f.close();
     }
 
     if (mem_limit_mb != -1)
@@ -165,6 +179,7 @@ SamplingTechnique::SamplingTechnique(
           max_time(-1.0),
           mem_limit_mb(-1),
           remove_duplicates(false),
+          statespace_file(""),
 //          dump_directory(move(dump_directory)),
           check_mutexes(check_mutexes),
           check_solvable(check_solvable),
@@ -434,6 +449,11 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
             "remove_duplicates",
             "Remove duplicated samples.",
             "false"
+    );
+    parser.add_option<string>(
+            "statespace_file",
+            "Path to file containing the statespace of an instance in binary format.",
+            "none"
     );
     parser.add_list_option<shared_ptr<Evaluator>>(
             "evals",
