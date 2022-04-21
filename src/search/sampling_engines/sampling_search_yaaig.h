@@ -43,6 +43,7 @@ protected:
     const std::string header;
     std::shared_ptr<utils::RandomNumberGenerator> rng;
     const bool compute_mse;
+    trie::trie<int> trie_statespace; // with h*
 
     virtual std::vector<std::string> extract_samples() override;
     virtual std::string construct_header() const;
@@ -54,7 +55,8 @@ public:
     virtual ~SamplingSearchYaaig() override = default;
 
 private:
-    double mse(trie::trie<int> trie_mse, bool root = false);
+    void create_trie_statespace();
+    double mse(bool root = false);
     void approximate_value_iteration();
     void do_minimization(std::vector<std::shared_ptr<PartialAssignment>>& states);
     void do_minimization(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& states);
@@ -63,6 +65,7 @@ private:
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& values_set, int percentage);
     std::vector<std::string> values_to_samples(
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> values_set);
+    void compute_sampling_statistics(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> samples);
 };
 }
 #endif

@@ -202,11 +202,14 @@ vector<string> SamplingSearchYaaig::values_to_samples(
     return samples;
 }
 
-double SamplingSearchYaaig::mse(trie::trie<int> trie_mse, bool root) {
+double SamplingSearchYaaig::mse(bool root) {
     double sum = 0.0;
     for (shared_ptr<PartialAssignment>& pa: sampling_technique::modified_tasks) {
         int best_h = INT_MAX;
-        for (int& hs: trie_mse.find_all_compatible(pa->get_values(), "v_vu"))
+        vector<int> key;
+        for (char& b : pa->to_binary())
+            key.push_back((int)b - '0');
+        for (int& hs: trie_statespace.find_all_compatible(key, "v_vu"))
             best_h = min(best_h, hs);
         assert(best_h != INT_MAX);
         int err = best_h - pa->estimated_heuristic;
@@ -216,6 +219,30 @@ double SamplingSearchYaaig::mse(trie::trie<int> trie_mse, bool root) {
     return root ? sqrt(e) : e;
 }
 
+void SamplingSearchYaaig::create_trie_statespace() {
+    if (mse_hstar_file == "none") {
+        cout << "Could not create trie_statespace: missing state space file." << endl;
+        return;
+    }
+    if (!trie_statespace.empty()) // was already created in a previous call
+        return;
+    auto t_start_avi = std::chrono::high_resolution_clock::now();
+    string h_sample;
+    ifstream f(mse_hstar_file);
+    while (getline(f, h_sample)) {
+        if (h_sample[0] == '#')
+            continue;
+        int h = stoi(h_sample.substr(0, h_sample.find(';')));
+        vector<int> key;
+        for (char& b : h_sample.substr(h_sample.find(';') + 1, h_sample.size()))
+            key.push_back((int)b - '0');
+        trie_statespace.insert(key, h);
+    }
+    f.close();
+    cout << "Time creating trie_statespace: " << (std::chrono::duration<double, std::milli>(
+        std::chrono::high_resolution_clock::now() - t_start_avi).count() / 1000.0) << "s" << endl;
+}
+
 void SamplingSearchYaaig::approximate_value_iteration() {
     if (avi_k <= 0 || avi_its <= 0)
         return;
@@ -223,24 +250,8 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     auto t_start_avi = std::chrono::high_resolution_clock::now();
     cout << endl;
 
-    trie::trie<int> trie_mse;
-    if (compute_mse) {
-        string h_sample;
-        ifstream f(mse_hstar_file);
-        while (getline(f, h_sample)) {
-            if (h_sample[0] == '#')
-                continue;
-            int h = stoi(h_sample.substr(0, h_sample.find(';')));
-            vector<int> key;
-            for (char& b : h_sample.substr(h_sample.find(';') + 1, h_sample.size()))
-                key.push_back((int)b - '0');
-            trie_mse.insert(key, h);
-        }
-        f.close();
-
-        cout << "[AVI] Time creating trie_mse: " << (std::chrono::duration<double, std::milli>(
-            std::chrono::high_resolution_clock::now() - t_start_avi).count() / 1000.0) << "s" << endl;
-    }
+    if (compute_mse)
+        create_trie_statespace();
 
     auto t_start_avi_trie = std::chrono::high_resolution_clock::now();
     unordered_map<string,int> min_pairs_pre;
@@ -259,8 +270,8 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         std::chrono::high_resolution_clock::now() - t_start_avi_trie).count() / 1000.0) << "s" << endl;
 
     ofstream mse_result(mse_result_file);
-    if (!trie_mse.empty()) {
-        double e = mse(trie_mse);
+    if (!trie_statespace.empty()) {
+        double e = mse();
         double re = sqrt(e);
         cout << "[AVI] Iteration #" << 0 << endl;
         cout << "[AVI] - RMSE: " << re << endl;
@@ -268,7 +279,6 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         mse_result << "avi_it,mse,rmse,success_rate,time (sec)" << endl;
         mse_result << 0 << "," << e << "," << re << ",," << endl;
     }
-
 
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
@@ -310,8 +320,8 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                 success_count++;
         }
         cout << "[AVI] Iteration #" << (i+1) << endl;
-        if (!trie_mse.empty()) {
-            double e = mse(trie_mse);
+        if (!trie_statespace.empty()) {
+            double e = mse();
             double re = sqrt(e);
             cout << "[AVI] - RMSE: " << re << endl;
             mse_result << (i+1) << "," << e << "," << re;
@@ -325,7 +335,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         cout << "[AVI] - Success rate: " << success_count << "/" << total_samples << " (" << success_rate << "%)" << endl;
         cout << "[AVI] - Time: " << it_time << "s" << endl;
 
-        if (!trie_mse.empty())
+        if (!trie_statespace.empty())
             mse_result << "," << success_count << "/" << total_samples << " (" << success_rate << "%)" << "," << it_time << endl;
         if (early_stop)
             cout << "[AVI] Early stopped." << endl;
@@ -391,7 +401,43 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     if (contrasting_samples > 0)
         create_contrasting_samples(values_set, contrasting_samples);
 
+    compute_sampling_statistics(values_set);
+
     return values_to_samples(values_set);
+}
+
+void SamplingSearchYaaig::compute_sampling_statistics(
+    vector<pair<int,pair<vector<int>,string>>> samples
+) {
+    create_trie_statespace();
+    if (!trie_statespace.empty()) {
+        int not_in_statespace = 0;
+        int underestimates = 0;
+        int with_hstar = 0;
+        for (auto& s : samples) {
+            int h = s.first;
+            vector<int> key;
+            for (char& b : s.second.second)
+                key.push_back((int)b - '0');
+            vector<int> hs = trie_statespace.find_all_compatible(key, "v_v");
+            if (hs.size() == 0) {
+                not_in_statespace++;
+            } else {
+                assert(hs.size() == 1);
+                int hstar = hs[0];
+                if (h == hstar)
+                    with_hstar++;
+                else if (h < hstar)
+                    underestimates++;
+            }
+        }
+        cout << "[STATS] Samples: " << samples.size() << endl;
+        cout << "[STATS] Samples with h*: " << with_hstar << endl;
+        cout << "[STATS] Samples underestimating h*: " << underestimates << endl;
+        cout << "[STATS] Samples not in state space: " << not_in_statespace << endl;
+    } else {
+        // cout << "[STATS] trie_statespace was not created." << endl;
+    }
 }
 
 SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)

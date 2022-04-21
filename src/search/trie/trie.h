@@ -177,11 +177,11 @@ typename std::vector<T> trie<T>::find_all_compatible_rec(std::vector<int> key, u
         if (pos == key.size()) {
             values.push_back(n->get());
         } else {
+            values = find_all_compatible_rec(key, pos + 1, n->getChild(key[pos]), rule);
             // let 0 = undefined, v = any other value
             if (rule == "vu_u") {
                 // v -> v || u
                 // u -> u
-                values = find_all_compatible_rec(key, pos + 1, n->getChild(key[pos]), rule);
                 if (key[pos] != 0) { // if (key[pos] == v)
                     std::vector<T> values_ = find_all_compatible_rec(key, pos + 1, n->getChild(0), rule);
                     values.insert(values.end(), values_.begin(), values_.end());
@@ -189,7 +189,6 @@ typename std::vector<T> trie<T>::find_all_compatible_rec(std::vector<int> key, u
             } else if (rule == "v_vu") {
                 // v -> v
                 // u -> v || u
-                values = find_all_compatible_rec(key, pos + 1, n->getChild(key[pos]), rule);
                 if (key[pos] == 0) { // if (key[pos] == u)
                     for (int i = 1; i < MAX_CHILDREN-1; i++) {
                         std::vector<T> values_ = find_all_compatible_rec(key, pos + 1, n->getChild(i), rule);
