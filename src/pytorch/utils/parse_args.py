@@ -1165,6 +1165,13 @@ def get_sample_args():
         help="Path to the full statespace sampling file. (default: %(default)s)",
     )
     parser.add_argument(
+        "-sos",
+        "--sample-only-statespace",
+        type=str2bool,
+        default=default_args.SAMPLE_ONLY_STATESPACE,
+        help="Only sample states that are in the statespace. If `True`, considers the statespace given in the `statespace` argument. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-tech",
         "--technique",
         choices=["rw", "dfs", "bfs", "dfs_rw", "bfs_rw", "countBoth", "countAdds", "countDels"],

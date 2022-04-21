@@ -256,6 +256,11 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         size_t sample_size = sizeof(vector<shared_ptr<PartialAssignment>>) + (sizeof(shared_ptr<PartialAssignment>) * next_tasks.size());
         total_samples_size += sample_size;
         for (shared_ptr<PartialAssignment>& task : next_tasks) {
+            if (statespace_file != "none") {
+                string s = task->to_binary();
+                if (statespace.find(s) == statespace.end())
+                    continue;
+            } 
             if (remove_duplicates) {
                 if (hash_table.count(*task))
                     continue;
