@@ -115,6 +115,7 @@ def yaaig_ferber(args, meth):
                 sps = f"maxs-{args.max_samples}"
                 boundtype = f"bnd-{get_bound_type(args.bound)}"
                 boundmult = "" if args.bound_multiplier == 1.0 else f"bmul-{str(args.bound_multiplier).replace('.', '-')}_"
+                statespace_file = "none" if not args.sample_only_statespace else args.statespace
                 if meth == "yaaig":
                     out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{subtech}{depthk}{avik}{avits}_dups-{dups}_min-{args.minimization}_repr-{args.state_representation}_{boundtype}_{boundmult}{sps}_ss{i}'
                     rmse_out = out + "_rmse"
@@ -124,8 +125,8 @@ def yaaig_ferber(args, meth):
                            f'--search \"sampling_search_yaaig({search_algo}, '
                            f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, max_samples={args.max_samples}, '
                            f'bound_multiplier={args.bound_multiplier}, 'f'technique={args.technique}, subtechnique={args.subtechnique}, '
-                           f'bound={args.bound}, depth_k={args.k_depth}, random_seed={i}, '
-                           f'restart_h_when_goal_state={args.restart_h_when_goal_state}, allow_duplicates={args.allow_dups})], '
+                           f'bound={args.bound}, depth_k={args.k_depth}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state}, '
+                           f'allow_duplicates={args.allow_dups}, statespace_file={statespace_file})], '
                            f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, '
                            f'avi_k={args.avi_k}, avi_its={args.avi_its}, avi_epsilon={args.avi_eps}, '
                            f'avi_rule={args.avi_rule}, sort_h={args.sort_h}, '
