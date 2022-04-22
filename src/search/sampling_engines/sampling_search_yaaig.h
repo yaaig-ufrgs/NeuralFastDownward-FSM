@@ -36,6 +36,7 @@ protected:
     const std::string avi_rule;
     const double avi_epsilon;
     const bool avi_symmetric_statespace;
+    const bool avi_unit_cost;
     const bool sort_h;
     const std::string mse_hstar_file;
     const std::string mse_result_file;

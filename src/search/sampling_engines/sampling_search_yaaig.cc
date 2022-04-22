@@ -302,13 +302,13 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                 if (succ_pa.violates_mutexes())
                     continue;
                 for (shared_ptr<PartialAssignment>& _pa_succ: trie.find_all_compatible(succ_pa.get_values(), avi_rule)) {
-                    int candidate_heuristic = _pa_succ->estimated_heuristic + op_proxy.get_cost();
+                    int candidate_heuristic = _pa_succ->estimated_heuristic + (avi_unit_cost ? 1 : op_proxy.get_cost());
                     if (candidate_heuristic < pa->estimated_heuristic) {
                         pa->estimated_heuristic = candidate_heuristic;
                         success = true;
                     }
                     if (avi_symmetric_statespace) {
-                        candidate_heuristic = pa->estimated_heuristic + op_proxy.get_cost();
+                        candidate_heuristic = pa->estimated_heuristic + (avi_unit_cost ? 1 : op_proxy.get_cost());
                         if (candidate_heuristic < _pa_succ->estimated_heuristic) {
                             _pa_succ->estimated_heuristic = candidate_heuristic;
                             success = true;
@@ -402,7 +402,6 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         create_contrasting_samples(values_set, contrasting_samples);
 
     compute_sampling_statistics(values_set);
-
     return values_to_samples(values_set);
 }
 
@@ -411,9 +410,7 @@ void SamplingSearchYaaig::compute_sampling_statistics(
 ) {
     create_trie_statespace();
     if (!trie_statespace.empty()) {
-        int not_in_statespace = 0;
-        int underestimates = 0;
-        int with_hstar = 0;
+        int not_in_statespace = 0, underestimates = 0, with_hstar = 0;
         for (auto& s : samples) {
             int h = s.first;
             vector<int> key;
@@ -453,6 +450,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       avi_rule(opts.get<string>("avi_rule")),
       avi_epsilon(stod(opts.get<string>("avi_epsilon"))),
       avi_symmetric_statespace(opts.get<bool>("avi_symmetric_statespace")),
+      avi_unit_cost(opts.get<bool>("avi_unit_cost")),
       sort_h(opts.get<bool>("sort_h")),
       mse_hstar_file(opts.get<string>("mse_hstar_file")),
       mse_result_file(opts.get<string>("mse_result_file")),
@@ -517,6 +515,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
     parser.add_option<bool>(
             "avi_symmetric_statespace",
             "AVI iterates both ways if domain state space is symmetric.",
+            "false");
+    parser.add_option<bool>(
+            "avi_unit_cost",
+            "Increments h by unit cost instead of operator cost.",
             "false");
     parser.add_option<bool>(
             "sort_h",
