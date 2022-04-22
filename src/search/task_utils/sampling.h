@@ -127,6 +127,7 @@ public:
     */
     PartialAssignment sample_state(
         int init_h,
+        OperatorID &applied_op,
         bool deprioritize_undoing_steps = false,
         const ValidStateDetector &is_valid_state = [](const PartialAssignment &) {return true;},
         const PartialAssignmentBias *bias = nullptr,
@@ -135,6 +136,7 @@ public:
 
     PartialAssignment sample_state_length(
         const PartialAssignment &goals, int length,
+        OperatorID &applied_op,
         bool deprioritize_undoing_steps = false,
         const ValidStateDetector &is_valid_state = [](const PartialAssignment &) {return true;},
         const PartialAssignmentBias *bias = nullptr,
@@ -166,7 +168,7 @@ public:
     ~DFSSampler();
 
     PartialAssignment sample_state_length(
-        const PartialAssignment &goals, int rng_seed, int &idx_op,
+        const PartialAssignment &goals, int rng_seed, int &idx_op, OperatorID &applied_op,
         const ValidStateDetector &is_valid_state = [](const PartialAssignment &) {return true;},
         const PartialDeadEndDetector &is_dead_end = [](const PartialAssignment &) {return false;}) const;
 };

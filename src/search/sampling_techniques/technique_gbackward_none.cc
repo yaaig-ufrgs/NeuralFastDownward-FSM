@@ -87,10 +87,12 @@ std::shared_ptr<AbstractTask> TechniqueGBackwardNone::create_next(
     }
 
     while (true) {
+        OperatorID applied_op = OperatorID::no_operator;
         PartialAssignment partial_assignment =
                 rrws->sample_state_length(
                         regression_task_proxy->get_goal_assignment(),
                         steps->next(),
+                        applied_op,
                         deprioritize_undoing_steps,
                         is_valid_state,
                         func_bias,

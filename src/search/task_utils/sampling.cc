@@ -13,7 +13,7 @@ using namespace std;
 
 namespace sampling {
 template<typename S, typename G>
-bool sample_next_state_with_random_walk(
+bool  sample_next_state_with_random_walk(
         S &current_state,
         S &previous_state,
         S &pre_previous_state,
@@ -25,6 +25,7 @@ bool sample_next_state_with_random_walk(
         const function<int (S &)> *bias,
         bool probabilistic_bias,
         double adapt_bias,
+        OperatorID &applied_op,
         const function<bool (S &)> *is_dead_end = nullptr,
         const function<bool (S &)> *is_valid_state = nullptr) {
 
@@ -58,6 +59,7 @@ bool sample_next_state_with_random_walk(
                 continue;
             }
             found_successor = true;
+            applied_op = applicable_operators[idx_op];
 
             // manage depriorization of reversing states
             bool non_reversing_state = (
@@ -135,6 +137,7 @@ S sample_with_random_walk(
         const function<int (S &)> *bias,
         bool probabilistic_bias,
         double adapt_bias,
+        OperatorID &applied_op,
         const function<bool (S &)> *is_dead_end = nullptr,
         const function<bool (S &)> *is_valid_state = nullptr) {
     // Sample one state with a random walk of length length.
@@ -158,6 +161,7 @@ S sample_with_random_walk(
                 bias,
                 probabilistic_bias,
                 adapt_bias,
+                applied_op,
                 is_dead_end,
                 is_valid_state)) {
             if (is_dead_end != nullptr && (*is_dead_end)(current_state)) {
@@ -192,6 +196,7 @@ static State sample_state_with_random_forward_walk(
         return s.get_unregistered_successor(op_proxy);
     };
 
+    OperatorID applied_op = OperatorID::no_operator; // dummy
     return sample_with_random_walk(
             initial_state,
             length,
@@ -202,6 +207,7 @@ static State sample_state_with_random_forward_walk(
             bias,
             probabilistic_bias,
             adapt_bias,
+            applied_op,
             &is_dead_end);
 }
 
@@ -255,6 +261,7 @@ static PartialAssignment sample_partial_assignment_with_random_backward_walk(
     const PartialAssignmentBias *bias,
     bool probabilistic_bias,
     double adapt_bias,
+    OperatorID &applied_op,
     const PartialDeadEndDetector &is_dead_end) {
 
     const function<PartialAssignment (const PartialAssignment &, const OperatorID &)>
@@ -275,6 +282,7 @@ static PartialAssignment sample_partial_assignment_with_random_backward_walk(
             bias,
             probabilistic_bias,
             adapt_bias,
+            applied_op,
             &is_dead_end,
             &is_valid_state
             );
@@ -291,6 +299,7 @@ static PartialAssignment sample_partial_assignments_with_random_backward_walks(
     const ValidStateDetector  &is_valid_state,
     const PartialAssignmentBias *bias,
     bool probabilistic_bias,
+    OperatorID &applied_op,
     const PartialDeadEndDetector &is_dead_end) {
     int n;
     if (init_h == 0) {
@@ -322,7 +331,7 @@ static PartialAssignment sample_partial_assignments_with_random_backward_walks(
     return sample_partial_assignment_with_random_backward_walk(
         regression_task_proxy, goals, predecessor_generator,
         length, rng, deprioritize_undoing_steps, is_valid_state, bias,
-        probabilistic_bias, -1, is_dead_end);
+        probabilistic_bias, -1, applied_op, is_dead_end);
 }
 
 
@@ -383,6 +392,7 @@ RandomRegressionWalkSampler::~RandomRegressionWalkSampler() {
 
 PartialAssignment RandomRegressionWalkSampler::sample_state(
     int init_h,
+    OperatorID &applied_op,
     bool deprioritize_undoing_steps,
     const ValidStateDetector  &is_valid_state,
     const PartialAssignmentBias *bias,
@@ -398,12 +408,14 @@ PartialAssignment RandomRegressionWalkSampler::sample_state(
         deprioritize_undoing_steps,
         is_valid_state,
         bias, probabilistic_bias,
+        applied_op,
         is_dead_end);
 }
 
 PartialAssignment RandomRegressionWalkSampler::sample_state_length(
     const PartialAssignment &goals,
     int length,
+    OperatorID &applied_op,
     bool deprioritize_undoing_steps,
     const ValidStateDetector &is_valid_state,
     const PartialAssignmentBias *bias,
@@ -419,6 +431,7 @@ PartialAssignment RandomRegressionWalkSampler::sample_state_length(
         deprioritize_undoing_steps,
         is_valid_state,
         bias, probabilistic_bias, adapt_bias,
+        applied_op,
         is_dead_end);
 }
 
@@ -504,6 +517,7 @@ bool sample_next_state_with_depth_first_search(
         S &pre_previous_state,
         int rng_seed,
         int &idx_op,
+        OperatorID &applied_op,
         const G &generator,
         const function<S (const S &, const OperatorID &)> &construct_candidate,
         const function<bool (S &)> *is_dead_end = nullptr,
@@ -525,6 +539,7 @@ bool sample_next_state_with_depth_first_search(
             continue;
         }
         current_state = move(candidate_state);
+        applied_op = applicable_operators[idx_op];
         return true;
     }
     idx_op = -1;
@@ -537,6 +552,7 @@ S sample_with_depth_first_search(
         const S &state,
         int rng_seed,
         int &idx_op,
+        OperatorID &applied_op,
         const G &generator,
         //utils::RandomNumberGenerator &rng,
         const function<S (const S &, const OperatorID &)> &construct_candidate,
@@ -553,6 +569,7 @@ S sample_with_depth_first_search(
             pre_previous_state,
             rng_seed,
             idx_op,
+            applied_op,
             generator,
             construct_candidate,
             is_dead_end,
@@ -569,6 +586,7 @@ static PartialAssignment sample_partial_assignment_with_depth_first_search(
     const predecessor_generator::PredecessorGenerator &predecessor_generator,
     int rng_seed,
     int &idx_op,
+    OperatorID &applied_op,
     const ValidStateDetector & is_valid_state,
     const PartialDeadEndDetector &is_dead_end) {
 
@@ -584,6 +602,7 @@ static PartialAssignment sample_partial_assignment_with_depth_first_search(
             goals,
             rng_seed,
             idx_op,
+            applied_op,
             predecessor_generator,
             construct_candidate,
             &is_dead_end,
@@ -608,6 +627,7 @@ PartialAssignment DFSSampler::sample_state_length(
     const PartialAssignment &goals,
     int rng_seed,
     int &idx_op,
+    OperatorID &applied_op,
     const ValidStateDetector &is_valid_state,
     const PartialDeadEndDetector &is_dead_end) const {
     return sample_partial_assignment_with_depth_first_search(
@@ -616,6 +636,7 @@ PartialAssignment DFSSampler::sample_state_length(
         *predecessor_generator,
         rng_seed,
         idx_op,
+        applied_op,
         is_valid_state,
         is_dead_end);
 }

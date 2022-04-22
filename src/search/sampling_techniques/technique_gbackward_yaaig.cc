@@ -82,6 +82,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
     const bool global_hash_table,
     const utils::HashSet<PartialAssignment> states_to_avoid
 ) {
+    OperatorsProxy ops = task_proxy.get_operators();
     PartialAssignment pa = initial_state;
     vector<shared_ptr<PartialAssignment>> samples;
     if (sample_initial_state) {
@@ -93,24 +94,31 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
     // Attempts to find a new state when performing each step
     int attempts = 0;
     while (samples.size() < steps) {
+        OperatorID applied_op = OperatorID::no_operator;
         PartialAssignment pa_ = rrws->sample_state_length(
             pa,
             1,
+            applied_op,
             deprioritize_undoing_steps,
             is_valid_state,
             bias,
             bias_probabilistic,
             bias_adapt
         );
+        assert(
+            (pa_ == pa && applied_op == OperatorID::no_operator) ||
+            (pa_ != pa && applied_op != OperatorID::no_operator)
+        );
         if (pa_ == pa) // there is no applicable operator
             break;
+
         if ((allow_duplicates_intrarollout || ht_pointer->find(pa_) == ht_pointer->end())
             && (states_to_avoid.find(pa_) == states_to_avoid.end())) {
             // if it is goal state then set h to 0
             pa_.estimated_heuristic = (
                 restart_h_when_goal_state &&
                 task_properties::is_goal_assignment(task_proxy, pa_)
-            ) ? 0 : pa.estimated_heuristic + 1;
+            ) ? 0 : pa.estimated_heuristic + ops[applied_op].get_cost();
             ht_pointer->insert(pa_);
             samples.push_back(make_shared<PartialAssignment>(pa_));
             //mem_hash_table += sizeof(PartialAssignment);
@@ -132,6 +140,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
     const ValidStateDetector &is_valid_state,
     const TaskProxy &task_proxy
 ) {
+    OperatorsProxy ops = task_proxy.get_operators();
     PartialAssignment pa = initial_state;
     vector<shared_ptr<PartialAssignment>> samples;
     // Each element of the stack is (state, operator index used to achieve the state)
@@ -162,14 +171,20 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
 
         int idx_op = 0, rng_seed = (*rng)(INT32_MAX - 1);
         while (idx_op != -1) {
+            OperatorID applied_op = OperatorID::no_operator;
             PartialAssignment pa_ = dfss->sample_state_length(
                 pa,
                 rng_seed,
                 idx_op,
+                applied_op,
                 is_valid_state
             );
             // idx_op has the index of the operator that was used,
             // or -1 if all operators have already been tested
+            assert(
+                (idx_op == -1 && applied_op == OperatorID::no_operator) ||
+                (idx_op != -1 && applied_op != OperatorID::no_operator)
+            );
             if (idx_op == -1) {
                 assert(pa == pa_);
                 break;
@@ -181,7 +196,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
                 pa_.estimated_heuristic = (
                     restart_h_when_goal_state &&
                     task_properties::is_goal_assignment(task_proxy, pa_)
-                ) ? 0 : pa.estimated_heuristic + 1;
+                ) ? 0 : pa.estimated_heuristic + ops[applied_op].get_cost();
 
                 if (pa_.estimated_heuristic <= depth_k) {
                     hash_table.insert(pa_);
@@ -207,6 +222,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
     const TaskProxy &task_proxy
 ) {
     assert(bfs_percentage >= 0.0 && bfs_percentage <= 1.0);
+    OperatorsProxy ops = task_proxy.get_operators();
     float bfs_samples = bfs_percentage * max_samples;
     vector<PartialAssignment> vk = {initial_state}, vk1 = {}; // vector_k, vector_k+1
     vector<shared_ptr<PartialAssignment>> samples = {make_shared<PartialAssignment>(initial_state)};
@@ -220,8 +236,13 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
             vector<PartialAssignment> succ_s;
             int idx_op = 0, rng_seed = (*rng)(INT32_MAX - 1);
             while (true) {
+                OperatorID applied_op = OperatorID::no_operator;
                 PartialAssignment s_ = dfss->sample_state_length(
-                    s, rng_seed, idx_op, is_valid_state
+                    s, rng_seed, idx_op, applied_op, is_valid_state
+                );
+                assert(
+                    (idx_op == -1 && applied_op == OperatorID::no_operator) ||
+                    (idx_op != -1 && applied_op != OperatorID::no_operator)
                 );
                 if (idx_op == -1)
                     break;
@@ -230,7 +251,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
                     s_.estimated_heuristic = (
                         restart_h_when_goal_state &&
                         task_properties::is_goal_assignment(task_proxy, s_)
-                    ) ? 0 : s.estimated_heuristic + 1;
+                    ) ? 0 : s.estimated_heuristic + ops[applied_op].get_cost();
                     succ_s.push_back(s_);
                     mem_samples += sizeof(PartialAssignment);
                 }
