@@ -106,6 +106,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
             bias_probabilistic,
             bias_adapt
         );
+        // TODO: if op.index() != regression_op.index()
         assert(
             (pa_ == pa && applied_op == OperatorID::no_operator) ||
             (pa_ != pa && applied_op != OperatorID::no_operator)

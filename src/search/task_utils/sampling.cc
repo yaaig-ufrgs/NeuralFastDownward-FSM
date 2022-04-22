@@ -53,13 +53,13 @@ bool  sample_next_state_with_random_walk(
             }
             S candidate_state = construct_candidate(
                     previous_state, applicable_operators[idx_op]);
+            applied_op = applicable_operators[idx_op];
             applicable_operators.erase(applicable_operators.begin() + idx_op);
             if ((is_valid_state != nullptr && !(*is_valid_state)(candidate_state)) ||
                     (is_dead_end != nullptr && (*is_dead_end)(candidate_state))) {
                 continue;
             }
             found_successor = true;
-            applied_op = applicable_operators[idx_op];
 
             // manage depriorization of reversing states
             bool non_reversing_state = (
