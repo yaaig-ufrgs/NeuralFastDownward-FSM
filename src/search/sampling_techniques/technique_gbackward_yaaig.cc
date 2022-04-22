@@ -51,6 +51,7 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           subtechnique(opts.get<string>("subtechnique")),
           bound(opts.get<string>("bound")),
           depth_k(opts.get<int>("depth_k")),
+          unit_cost(opts.get<bool>("unit_cost")),
           allow_duplicates_interrollout(
               opts.get<string>("allow_duplicates") == "all" || opts.get<string>("allow_duplicates") == "interrollout"
           ),
@@ -115,10 +116,11 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
         if ((allow_duplicates_intrarollout || ht_pointer->find(pa_) == ht_pointer->end())
             && (states_to_avoid.find(pa_) == states_to_avoid.end())) {
             // if it is goal state then set h to 0
-            pa_.estimated_heuristic = (
-                restart_h_when_goal_state &&
-                task_properties::is_goal_assignment(task_proxy, pa_)
-            ) ? 0 : pa.estimated_heuristic + ops[applied_op].get_cost();
+            if (restart_h_when_goal_state && task_properties::is_goal_assignment(task_proxy, pa_))
+                pa_.estimated_heuristic = 0;
+            else
+                pa_.estimated_heuristic = pa.estimated_heuristic + (unit_cost ? 1 : ops[applied_op].get_cost());
+
             ht_pointer->insert(pa_);
             samples.push_back(make_shared<PartialAssignment>(pa_));
             //mem_hash_table += sizeof(PartialAssignment);
@@ -193,10 +195,11 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
                 continue;
 
             if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
-                pa_.estimated_heuristic = (
-                    restart_h_when_goal_state &&
-                    task_properties::is_goal_assignment(task_proxy, pa_)
-                ) ? 0 : pa.estimated_heuristic + ops[applied_op].get_cost();
+                // if it is goal state then set h to 0
+                if (restart_h_when_goal_state && task_properties::is_goal_assignment(task_proxy, pa_))
+                    pa_.estimated_heuristic = 0;
+                else
+                    pa_.estimated_heuristic = pa.estimated_heuristic + (unit_cost ? 1 : ops[applied_op].get_cost());
 
                 if (pa_.estimated_heuristic <= depth_k) {
                     hash_table.insert(pa_);
@@ -248,10 +251,12 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
                     break;
                 if (find(succ_s.begin(), succ_s.end(), s_) == succ_s.end()
                     && (allow_duplicates_intrarollout || hash_table.find(s_) == hash_table.end())) {
-                    s_.estimated_heuristic = (
-                        restart_h_when_goal_state &&
-                        task_properties::is_goal_assignment(task_proxy, s_)
-                    ) ? 0 : s.estimated_heuristic + ops[applied_op].get_cost();
+                    // if it is goal state then set h to 0
+                    if (restart_h_when_goal_state && task_properties::is_goal_assignment(task_proxy, s_))
+                        s_.estimated_heuristic = 0;
+                    else
+                        s_.estimated_heuristic = s.estimated_heuristic + (unit_cost ? 1 : ops[applied_op].get_cost());
+
                     succ_s.push_back(s_);
                     mem_samples += sizeof(PartialAssignment);
                 }
@@ -460,6 +465,11 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "Maximum depth using the dfs/bfs algorithm. "
             "If it doesn't reach max_samples, complete with random walks of each leaf state.",
             "99999"
+    );
+    parser.add_option<bool>(
+            "unit_cost",
+            "Increments h by unit cost instead of operator cost.",
+            "false"
     );
     parser.add_option<string>(
             "allow_duplicates",
