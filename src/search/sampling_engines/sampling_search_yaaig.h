@@ -35,6 +35,7 @@ protected:
     const int avi_its;
     const std::string avi_rule;
     const double avi_epsilon;
+    const std::string avi_state_representation;
     const bool avi_symmetric_statespace;
     const bool avi_unit_cost;
     const bool sort_h;
@@ -57,8 +58,11 @@ public:
 
 private:
     void create_trie_statespace();
-    double mse(bool root = false);
-    void approximate_value_iteration();
+    double mse(std::vector<std::shared_ptr<PartialAssignment>>& samples, bool root = false);
+    void approximate_value_iteration(
+        std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> sample_pairs =
+            std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>()
+    );
     void do_minimization(std::vector<std::shared_ptr<PartialAssignment>>& states);
     void do_minimization(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& states);
     std::vector<State> assign_undefined_state(std::shared_ptr<PartialAssignment>& pa, int max_attempts);

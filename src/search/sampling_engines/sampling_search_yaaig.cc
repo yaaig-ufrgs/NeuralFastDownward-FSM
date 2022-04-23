@@ -202,9 +202,9 @@ vector<string> SamplingSearchYaaig::values_to_samples(
     return samples;
 }
 
-double SamplingSearchYaaig::mse(bool root) {
+double SamplingSearchYaaig::mse(vector<shared_ptr<PartialAssignment>>& samples, bool root) {
     double sum = 0.0;
-    for (shared_ptr<PartialAssignment>& pa: sampling_technique::modified_tasks) {
+    for (shared_ptr<PartialAssignment>& pa: samples) {
         int best_h = INT_MAX;
         vector<int> key;
         for (char& b : pa->to_binary())
@@ -215,13 +215,13 @@ double SamplingSearchYaaig::mse(bool root) {
         int err = best_h - pa->estimated_heuristic;
         sum += (err * err);
     }
-    double e = sum / sampling_technique::modified_tasks.size();
+    double e = sum / samples.size();
     return root ? sqrt(e) : e;
 }
 
 void SamplingSearchYaaig::create_trie_statespace() {
     if (mse_hstar_file == "none") {
-        cout << "Could not create trie_statespace: missing state space file." << endl;
+        // cout << "Could not create trie_statespace: missing state space file." << endl;
         return;
     }
     if (!trie_statespace.empty()) // was already created in a previous call
@@ -229,26 +229,45 @@ void SamplingSearchYaaig::create_trie_statespace() {
     auto t_start_avi = std::chrono::high_resolution_clock::now();
     string h_sample;
     ifstream f(mse_hstar_file);
-    while (getline(f, h_sample)) {
-        if (h_sample[0] == '#')
-            continue;
-        int h = stoi(h_sample.substr(0, h_sample.find(';')));
-        vector<int> key;
-        for (char& b : h_sample.substr(h_sample.find(';') + 1, h_sample.size()))
-            key.push_back((int)b - '0');
-        trie_statespace.insert(key, h);
+    if (f.is_open()) {
+        while (getline(f, h_sample)) {
+            if (h_sample[0] == '#')
+                continue;
+            int h = stoi(h_sample.substr(0, h_sample.find(';')));
+            vector<int> key;
+            for (char& b : h_sample.substr(h_sample.find(';') + 1, h_sample.size()))
+                key.push_back((int)b - '0');
+            trie_statespace.insert(key, h);
+        }
+        f.close();
+        cout << "Time creating trie_statespace: " << (std::chrono::duration<double, std::milli>(
+            std::chrono::high_resolution_clock::now() - t_start_avi).count() / 1000.0) << "s" << endl;
+    } else {
+        cout << "*** Could not open state space file! ***" << endl;
     }
-    f.close();
-    cout << "Time creating trie_statespace: " << (std::chrono::duration<double, std::milli>(
-        std::chrono::high_resolution_clock::now() - t_start_avi).count() / 1000.0) << "s" << endl;
 }
 
-void SamplingSearchYaaig::approximate_value_iteration() {
+void SamplingSearchYaaig::approximate_value_iteration(
+    std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> sample_pairs
+) {
     if (avi_k <= 0 || avi_its <= 0)
         return;
 
     auto t_start_avi = std::chrono::high_resolution_clock::now();
     cout << endl;
+
+    vector<shared_ptr<PartialAssignment>> samples;
+    if (sample_pairs.empty()) {
+        samples = sampling_technique::modified_tasks;
+    } else {
+        for (auto& p : sample_pairs) {
+            vector<int> values(p.second.first);
+            shared_ptr<PartialAssignment> pa = make_shared<PartialAssignment>(*task, move(values));
+            pa->estimated_heuristic = p.first;
+            samples.push_back(pa);
+        }
+    }
+    assert(samples.size() == sampling_technique::modified_tasks.size());
 
     if (compute_mse)
         create_trie_statespace();
@@ -256,7 +275,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     auto t_start_avi_trie = std::chrono::high_resolution_clock::now();
     unordered_map<string,int> min_pairs_pre;
     trie::trie<shared_ptr<PartialAssignment>> trie;
-    for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
+    for (shared_ptr<PartialAssignment>& partialAssignment: samples) {
         string bin = partialAssignment->to_binary();
         int h = partialAssignment->estimated_heuristic;
         // Maintain a mapping to keep the smallest h-value
@@ -271,11 +290,9 @@ void SamplingSearchYaaig::approximate_value_iteration() {
 
     ofstream mse_result(mse_result_file);
     if (!trie_statespace.empty()) {
-        double e = mse();
+        double e = mse(samples);
         double re = sqrt(e);
-        cout << "[AVI] Iteration #" << 0 << endl;
-        cout << "[AVI] - RMSE: " << re << endl;
-
+        cout << "[AVI] Iteration #" << 0 << " | RMSE: " << re << endl;
         mse_result << "avi_it,mse,rmse,success_rate,time (sec)" << endl;
         mse_result << 0 << "," << e << "," << re << ",," << endl;
     }
@@ -286,13 +303,13 @@ void SamplingSearchYaaig::approximate_value_iteration() {
 
     double last_loss = __DBL_MAX__;
     bool early_stop = false;
-    int total_samples = sampling_technique::modified_tasks.size();
-    for (int i = 0; (i < avi_its) && !early_stop; i++) {
+    int total_samples = samples.size();
+    for (int it = 1; (it <= avi_its) && !early_stop; it++) {
         int success_count = 0;
         auto t_start_avi_it = std::chrono::high_resolution_clock::now();
         // for v in succ(u)
         //   h(u) := min { h(u), h(v)+1 }
-        for (shared_ptr<PartialAssignment>& pa: sampling_technique::modified_tasks) {
+        for (shared_ptr<PartialAssignment>& pa: samples) {
             bool success = false;
             vector<OperatorID> applicable_operators;
             succ_generator->generate_applicable_ops(*pa, applicable_operators);
@@ -319,12 +336,11 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             if (success)
                 success_count++;
         }
-        cout << "[AVI] Iteration #" << (i+1) << endl;
+        cout << "[AVI] Iteration #" << it;
         if (!trie_statespace.empty()) {
-            double e = mse();
-            double re = sqrt(e);
-            cout << "[AVI] - RMSE: " << re << endl;
-            mse_result << (i+1) << "," << e << "," << re;
+            double e = mse(samples), re = sqrt(e);
+            cout << " | RMSE: " << re;
+            mse_result << it << "," << e << "," << re;
             early_stop = (last_loss - re <= avi_epsilon);
             last_loss = re;
         }
@@ -332,11 +348,13 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         double it_time = (std::chrono::duration<double, std::milli>(
             std::chrono::high_resolution_clock::now() - t_start_avi_it).count() / 1000.0);
 
-        cout << "[AVI] - Success rate: " << success_count << "/" << total_samples << " (" << success_rate << "%)" << endl;
-        cout << "[AVI] - Time: " << it_time << "s" << endl;
+        cout << " | Success rate: " << success_count << "/" << total_samples << " (" << success_rate << "%)";
+        cout << " | Time: " << it_time << "s" << endl;
 
         if (!trie_statespace.empty())
             mse_result << "," << success_count << "/" << total_samples << " (" << success_rate << "%)" << "," << it_time << endl;
+
+        early_stop |= success_count == 0;
         if (early_stop)
             cout << "[AVI] Early stopped." << endl;
     }
@@ -358,7 +376,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         );
     }
 
-    if (avi_k > 0)
+    if (avi_state_representation == "partial")
         approximate_value_iteration();
     if (minimization == "partial" || minimization == "both")
         do_minimization(sampling_technique::modified_tasks);
@@ -400,6 +418,9 @@ vector<string> SamplingSearchYaaig::extract_samples() {
 
     if (contrasting_samples > 0)
         create_contrasting_samples(values_set, contrasting_samples);
+
+    if (avi_state_representation == "complete")
+        approximate_value_iteration(values_set);
 
     compute_sampling_statistics(values_set);
     return values_to_samples(values_set);
@@ -449,6 +470,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       avi_its(opts.get<int>("avi_its")),
       avi_rule(opts.get<string>("avi_rule")),
       avi_epsilon(stod(opts.get<string>("avi_epsilon"))),
+      avi_state_representation(opts.get<string>("avi_state_representation")),
       avi_symmetric_statespace(opts.get<bool>("avi_symmetric_statespace")),
       avi_unit_cost(opts.get<bool>("avi_unit_cost")),
       sort_h(opts.get<bool>("sort_h")),
@@ -511,7 +533,11 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
     parser.add_option<string>(
             "avi_epsilon",
             "RMSE no-improvement threshold for AVI early stop.",
-            "0");
+            "-1");
+    parser.add_option<string>(
+            "avi_state_representation",
+            "State representation when the AVI should be applied. (partial, complete).",
+            "partial");
     parser.add_option<bool>(
             "avi_symmetric_statespace",
             "AVI iterates both ways if domain state space is symmetric.",
