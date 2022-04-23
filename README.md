@@ -16,7 +16,7 @@ list of contributors, history, etc.), see [here](https://github.com/PatrickFerbe
 
 3. `cd` to the directory where the root of the cloned repository is located, then:
     ```
-    export Torch_DIR=p
+    export Torch_DIR=p   OR   export PATH_TORCH=p
     pip install -r requirements.txt
     ./build.py release
     ```
