@@ -498,6 +498,13 @@ def get_test_args():
         default=default_args.SAVE_DOWNWARD_LOGS,
         help="Save each instance's Fast-Downward log or not. (default: %(default)s)",
     )
+    parser.add_argument(
+        "-unit-cost",
+        "--unit-cost",
+        type=str2bool,
+        default=default_args.UNIT_COST,
+        help="Test with unit cost instead of operator cost. (default: %(default)s)",
+    )
 
     return parser.parse_args()
 
@@ -1063,6 +1070,13 @@ def get_exp_args():
         help="Save each instance's Fast-Downward log or not. (default: %(default)s)",
     )
     parser.add_argument(
+        "-tst-unit-cost",
+        "--test-unit-cost",
+        type=str2bool,
+        default=default_args.UNIT_COST,
+        help="Test with unit cost instead of operator cost. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-evl-mdl",
         "--eval-trained-models",
         type=str,
@@ -1388,6 +1402,13 @@ def get_sample_args():
         type=int,
         default=default_args.SAMPLE_K_DEPTH,
         help="Depth `k` for DFS or BFS. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-s-unit-cost",
+        "--sample-unit-cost",
+        type=str2bool,
+        default=default_args.SAMPLE_UNIT_COST,
+        help="Increments h by unit cost instead of operator cost. (default: %(default)s)",
     )
     parser.add_argument(
         "-rsl-states",

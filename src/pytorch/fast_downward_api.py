@@ -1,3 +1,4 @@
+from distutils.filelist import translate_pattern
 import logging
 from os import path, makedirs
 from subprocess import check_output, CalledProcessError
@@ -90,7 +91,8 @@ def save_downward_log(folder: str, instance_pddl: str, output: str):
 def solve_instance_with_fd(
     domain_pddl: str,
     instance_pddl: str,
-    opts: str = "astar(lmcut())",
+    translate_options: str = "",
+    search_options: str = "astar(lmcut())",
     memory_limit: int = default_args.MAX_SEARCH_MEMORY,
     save_log_to=None,
     save_log_bool: bool = default_args.SAVE_DOWNWARD_LOGS,
@@ -103,10 +105,12 @@ def solve_instance_with_fd(
             _FD,
             "--search-memory-limit",
             str(memory_limit),
-            instance_pddl,
-            "--search",
-            opts,
+            instance_pddl
         ]
+        if translate_options:
+            cl += f"--translate-options {translate_options} --search-options".split(" ")
+        cl += ["--search", search_options]
+
         if domain_pddl != default_args.DOMAIN_PDDL:
             cl.insert(3, domain_pddl)
         if save_log_to != None:
@@ -153,6 +157,7 @@ def solve_instance_with_fd_nh(
     defaults_file: str = default_args.DEF_VALUES_FILE,
     save_log_to=None,
     save_log_bool: bool = default_args.SAVE_DOWNWARD_LOGS,
+    unit_cost: bool = default_args.UNIT_COST,
 ) -> dict:
     """
     Tries to solve a PDDL instance with the torch_sampling_network.
@@ -182,13 +187,15 @@ def solve_instance_with_fd_nh(
     if search_algorithm == "eager_greedy":
         opt_heuristic = f"[{opt_heuristic}]"
 
-    opts = search_algorithm + "(" + opt_heuristic
+    search_opts = search_algorithm + "(" + opt_heuristic
     if time_limit != default_args.MAX_SEARCH_TIME:
-        opts += f", max_time={time_limit}"
+        search_opts += f", max_time={time_limit}"
     if max_expansions != default_args.MAX_EXPANSIONS:
-        opts += f", max_expansions={max_expansions}"
-    opts += ")"
+        search_opts += f", max_expansions={max_expansions}"
+    search_opts += ")"
+
+    translate_opts = "--unit-cost" if unit_cost else ""
 
     return solve_instance_with_fd(
-        domain_pddl, problem_pddl, (opts), memory_limit, save_log_to, save_log_bool
+        domain_pddl, problem_pddl, translate_opts, (search_opts), memory_limit, save_log_to, save_log_bool
     )
