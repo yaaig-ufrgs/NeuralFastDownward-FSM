@@ -2,7 +2,6 @@
 
 import logging
 import sys
-from json import load
 
 from src.pytorch.fast_downward_api import solve_instance_with_fd_nh
 from src.pytorch.log import setup_full_logging
@@ -39,10 +38,10 @@ def test_main(args):
         if args.heuristic != "nn":
             example = ("nfd_train.fd_blocks_probBLOCKS-7-0_eager-greedy_lmcut_ss0.ns0"
                 " (if it doesn't exist, it will be created at runtime)")
-        raise Exception(f"train_folder example: {example}")
+        _log.error(f"train_folder example: {example}")
+        return
 
     args.save_git_diff = True
-    print(args.domain, args.problem)
     if len(args.train_folder_compare) > 0:
         domain_cmp, problem_cmp = get_problem_by_sample_filename(
             str(args.train_folder_compare).split(".")[1]
@@ -97,7 +96,7 @@ def test_main(args):
         if args.problem_pddls == []:
             return
 
-    cmd_line = " ".join(sys.argv[0:])
+    cmd_line = " ".join(sys.argv)
     logging_test_config(args, dirname, cmd_line)
 
     for i in range(len(models)):
