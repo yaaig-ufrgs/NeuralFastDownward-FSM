@@ -29,6 +29,7 @@ protected:
     const bool store_state;
     const std::string state_representation;
     const std::string minimization;
+    const bool minimization_before_avi;
     const int assignments_by_undefined_state;
     const int contrasting_samples;
     const int avi_k;

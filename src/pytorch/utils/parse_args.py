@@ -1355,6 +1355,13 @@ def get_sample_args():
         help="Sample h-value minimization strategy to use. (default: %(default)s)",
     )
     parser.add_argument(
+        "-minbavi",
+        "--minimization-before-avi",
+        type=str2bool,
+        default=default_args.SAMPLE_MINIMIZATION_BEFORE_AVI,
+        help="Perform minimization before the AVI procedure. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-sorth",
         "--sort-h",
         type=str2bool,

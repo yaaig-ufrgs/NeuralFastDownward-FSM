@@ -376,9 +376,11 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         );
     }
 
+    if (minimization_before_avi && (minimization == "partial" || minimization == "both"))
+        do_minimization(sampling_technique::modified_tasks);
     if (avi_state_representation == "partial")
         approximate_value_iteration();
-    if (minimization == "partial" || minimization == "both")
+    if (!minimization_before_avi && (minimization == "partial" || minimization == "both"))
         do_minimization(sampling_technique::modified_tasks);
 
     vector<pair<int,pair<vector<int>,string>>> values_set;
@@ -412,7 +414,8 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         }
     }
 
-    if ((minimization == "complete" || minimization == "both")
+    if (minimization_before_avi
+        && (minimization == "complete" || minimization == "both")
         && !(state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char"))
         do_minimization(values_set);
 
@@ -421,6 +424,11 @@ vector<string> SamplingSearchYaaig::extract_samples() {
 
     if (avi_state_representation == "complete")
         approximate_value_iteration(values_set);
+
+    if (!minimization_before_avi
+        && (minimization == "complete" || minimization == "both")
+        && !(state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char"))
+        do_minimization(values_set);
 
     compute_sampling_statistics(values_set);
     return values_to_samples(values_set);
@@ -464,6 +472,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       store_state(opts.get<bool>("store_state")),
       state_representation(opts.get<string>("state_representation")),
       minimization(opts.get<string>("minimization")),
+      minimization_before_avi(opts.get<bool>("minimization_before_avi")),
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
       contrasting_samples(opts.get<int>("contrasting_samples")),
       avi_k(opts.get<int>("avi_k")),
@@ -510,6 +519,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "minimization",
             "Identical states receive the best heuristic value assigned between them (minimization in : none, partial, complete, both).",
             "none");
+    parser.add_option<bool>(
+            "minimization_before_avi",
+            "When using ps, perform minimization before the AVI procedure",
+            "false");
     parser.add_option<int>(
             "assignments_by_undefined_state",
             "Number of states generated from each undefined state (only with assign_undefined).",
