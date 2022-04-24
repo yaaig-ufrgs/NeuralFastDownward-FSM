@@ -114,12 +114,19 @@ def add_train_arg(dirname: str, key, value):
         dump(data, f, indent=4)
 
 
-def get_problem_by_sample_filename(sample_filename: str) -> str:
-    return sample_filename.split("/")[-1].split("_")[1:3]
+def get_problem_by_sample_filename(sample_filename: str, train_folder: str = None) -> (str, str):
+    domain, problem = sample_filename.split("/")[-1].split("_")[1:3]
+    if train_folder:
+        with open(f"{train_folder}/train_args.json") as f:
+            data = load(f)
+            assert domain == data["domain"]
+            assert problem == data["problem"]
+    return domain, problem
 
 
 def get_test_tasks_from_problem(
-    train_folder: str,
+    domain: str,
+    problem: str,
     tasks_folder: str = default_args.AUTO_TASKS_FOLDER,
     n: int = default_args.AUTO_TASKS_N,
     shuffle_seed: int = default_args.AUTO_TASKS_SEED,
@@ -128,13 +135,6 @@ def get_test_tasks_from_problem(
     From the given training training problem, automatically return `n` random test instances
     from `tasks_folder`.
     """
-    with open(
-        f"{train_folder}/train_args.json",
-    ) as f:
-        data = load(f)
-
-    domain = data["domain"]
-    problem = data["problem"]
     possible_parent_dirs = [
         f"experiments/{domain}",
         "ferber21/test_states",
@@ -202,12 +202,8 @@ def get_defaults_and_facts_files(
         )
         defaults_file = ""
 
-    with open(f"{args.train_folder}/train_args.json", "r") as f:
-        train_args = load(f)
-    if (not facts_file) and ("domain" in train_args) and ("problem" in train_args):
-        facts_file = facts_filename_format.format(
-            domain=train_args["domain"], problem=train_args["problem"]
-        )
+    if not facts_file:
+        facts_file = facts_filename_format.format(domain=args.domain, problem=args.problem)
         if not os.path.exists(facts_file):
             facts_file = ""
 

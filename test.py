@@ -2,7 +2,7 @@
 
 import logging
 import sys
-from os import path
+from json import load
 
 from src.pytorch.fast_downward_api import solve_instance_with_fd_nh
 from src.pytorch.log import setup_full_logging
@@ -29,11 +29,20 @@ _log = logging.getLogger(__name__)
 
 
 def test_main(args):
-    args.domain, args.problem = get_problem_by_sample_filename(
-        str(args.train_folder).split(".")[1]
-    )
-    args.save_git_diff = True
+    try:
+        args.domain, args.problem = get_problem_by_sample_filename(
+            sample_filename=str(args.train_folder).split(".")[1],
+            train_folder=args.train_folder if args.heuristic == "nn" else None
+        )
+    except:
+        example = "nfd_train.yaaig_blocks_probBLOCKS-7-0_tech-rw_avi-1_maxs-6376_ss0.ns0"
+        if args.heuristic != "nn":
+            example = ("nfd_train.fd_blocks_probBLOCKS-7-0_eager-greedy_lmcut_ss0.ns0"
+                " (if it doesn't exist, it will be created at runtime)")
+        raise Exception(f"train_folder example: {example}")
 
+    args.save_git_diff = True
+    print(args.domain, args.problem)
     if len(args.train_folder_compare) > 0:
         domain_cmp, problem_cmp = get_problem_by_sample_filename(
             str(args.train_folder_compare).split(".")[1]
@@ -79,7 +88,8 @@ def test_main(args):
 
     if args.problem_pddls == []:
         args.problem_pddls = get_test_tasks_from_problem(
-            train_folder=args.train_folder,
+            domain=args.domain,
+            problem=args.problem,
             tasks_folder=args.auto_tasks_folder,
             n=args.auto_tasks_n,
             shuffle_seed=args.auto_tasks_seed,
