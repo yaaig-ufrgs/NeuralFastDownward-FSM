@@ -21,3 +21,5 @@ for i in $(eval echo {0..$(($N-1))}); do
     ./change_pddl_init_via_sas.py $SOURCE_PDDL "sas_plan${i}" > "$DEST_FOLDER/p${i}.pddl"
     rm "sas_plan${i}"
 done
+
+./check_duplicated_tasks.sh $DEST_FOLDER
