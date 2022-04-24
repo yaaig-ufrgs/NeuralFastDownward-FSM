@@ -81,7 +81,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
             f"-a {args.test_search_algorithm} -m {args.test_max_search_memory} "
             f"-sdir {args.test_samples_dir} -atn {args.test_auto_tasks_n} "
             f"-ats {args.test_auto_tasks_seed} -pt {args.test_test_model} "
-            f"-dlog {args.test_downward_logs} -unit-cost {args.unit_cost} "
+            f"-dlog {args.test_downward_logs} -unit-cost {args.test_unit_cost} "
             f"{trained_model_dir}"
         )
 
