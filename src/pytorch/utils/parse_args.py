@@ -1376,6 +1376,13 @@ def get_sample_args():
         help="Rule used to check if a state s' is compatible with s'' during AVI. (default: %(default)s)",
     )
     parser.add_argument(
+        "-avirepr",
+        "--avi-state-representation",
+        choices=["ps", "fs"],
+        default=default_args.SAMPLE_AVI_STATE_REPRESENTATION,
+        help="When to perform AVI: while samples are `partial (ps)` states or when samples are `complete (fs)` states. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-kd",
         "--k-depth",
         type=int,

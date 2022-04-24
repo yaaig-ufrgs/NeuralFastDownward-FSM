@@ -89,6 +89,7 @@ def yaaig_ferber(args, meth):
         assert(args.bound > 0)
 
     state_repr = get_full_state_repr_name(args.state_representation)
+    avi_state_repr = get_full_state_repr_name(args.avi_state_representation)
     instances = glob(f"{args.instances_dir}/*.pddl")
     start = args.seed
     end = args.seed+1 if args.mult_seed <= 1 else args.mult_seed+1
@@ -106,7 +107,7 @@ def yaaig_ferber(args, meth):
                     if args.k_depth < 99999:
                         depthk = f"_depthk-{args.k_depth}"
                 if args.avi_k > 0:
-                    avik = f"_avi-{args.avi_k}"
+                    avik = f"_avi-{args.avi_state_representation}-{args.avi_k}"
                     #avi_iterations = "max" if args.avi_its >= 9999 else args.avi_its
                     #avits = f"_it-{avi_iterations}"
                 if args.allow_dups != "none":
@@ -129,7 +130,7 @@ def yaaig_ferber(args, meth):
                            f'allow_duplicates={args.allow_dups}, statespace_file={statespace_file})], '
                            f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, '
                            f'avi_k={args.avi_k}, avi_its={args.avi_its}, avi_epsilon={args.avi_eps}, '
-                           f'avi_rule={args.avi_rule}, sort_h={args.sort_h}, '
+                           f'avi_rule={args.avi_rule}, avi_state_representation={avi_state_repr}, sort_h={args.sort_h}, '
                            f'avi_symmetric_statespace={args.symm_statespace}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
                            f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting})\"')
                 elif meth == "ferber":
