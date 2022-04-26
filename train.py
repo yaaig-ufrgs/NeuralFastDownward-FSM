@@ -294,11 +294,11 @@ def post_training_evaluation(trained_model: str, args: Namespace, dirname: str) 
     ).get_fold(0)
 
     if train_data != None:
-        eval_workflow(model, args.samples, dirname, train_data, "training", None, False, True, args.scatter_plot)
+        eval_workflow(model, args.samples, dirname, train_data, "training", None, False, args.save_heuristic_pred, args.scatter_plot)
     if val_data != None:
-        eval_workflow(model, args.samples, dirname, val_data, "validation", None, False, True, args.scatter_plot)
+        eval_workflow(model, args.samples, dirname, val_data, "validation", None, False, args.save_heuristic_pred, args.scatter_plot)
     if test_data != None:
-        eval_workflow(model, args.samples, dirname, test_data, "test", None, False, True, args.scatter_plot)
+        eval_workflow(model, args.samples, dirname, test_data, "test", None, False, args.save_heuristic_pred, args.scatter_plot)
 
 
 def set_seeds(args: Namespace, shuffle_seed: bool = True):
