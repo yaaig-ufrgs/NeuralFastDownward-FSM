@@ -1028,6 +1028,13 @@ def get_exp_args():
         help="Algorithm to be used in the search. (default: %(default)s)",
     )
     parser.add_argument(
+        "-tst-heu",
+        "--test-heuristic",
+        choices=["nn", "add", "blind", "ff", "goalcount", "hmax", "lmcut"],
+        default=default_args.HEURISTIC,
+        help="Heuristic to be used in the search. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-tst-t",
         "--test-max-search-time",
         type=int,

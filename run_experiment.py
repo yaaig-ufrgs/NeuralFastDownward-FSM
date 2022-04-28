@@ -53,7 +53,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
 
         train_args = (
             f"{sample} -mdl {args.train_model} -pte {args.train_post_train_eval} -pat {args.train_patience} "
-            f"-hl {args.train_hidden_layers} -hu {args.train_hidden_units} "
+            f"-hl {args.train_hidden_layers} "
             f"-b {args.train_batch_size} -e {args.train_max_epochs} -a {args.train_activation} "
             f"-o {args.train_output_layer} -sb {args.train_save_best_epoch_model} "
             f"-lo {args.train_linear_output} -f {args.train_num_folds} -clp {args.train_clamping} "
@@ -68,7 +68,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
             f"-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} "
             f"-tsize {args.train_training_size} -spt {args.train_sample_percentage} "
             f"-us {args.train_unique_samples} -ust {args.train_unique_states} "
-            f"-lf {args.train_loss_function} -wm {args.train_weights_method}"
+            f"-lf {args.train_loss_function} -wm {args.train_weights_method} -hu {args.train_hidden_units}"
         )
 
         if args.train_max_training_time != default_args.MAX_TRAINING_TIME:
@@ -78,7 +78,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
             train_args += f" -addfn {args.train_additional_folder_name}"
 
         test_args = (
-            f"-a {args.test_search_algorithm} -m {args.test_max_search_memory} "
+            f"-a {args.test_search_algorithm} -heu {args.test_heuristic} -m {args.test_max_search_memory} "
             f"-sdir {args.test_samples_dir} -atn {args.test_auto_tasks_n} "
             f"-ats {args.test_auto_tasks_seed} -pt {args.test_test_model} "
             f"-dlog {args.test_downward_logs} -unit-cost {args.test_unit_cost} "
@@ -163,8 +163,9 @@ def experiment(args):
     args.train_hidden_units = (
         default_args.HIDDEN_UNITS[0]
         if args.train_hidden_units == default_args.HIDDEN_UNITS
-        else args.train_hidden_units
+        else args.train_hidden_units[0]
     )
+    # args.train_hidden_units = " ".join(map(str, args.train_hidden_units))
     args.test_max_search_time = (
         99999999
         if args.test_max_search_time == default_args.MAX_SEARCH_TIME
