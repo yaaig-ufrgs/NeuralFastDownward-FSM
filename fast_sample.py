@@ -91,8 +91,13 @@ def yaaig_ferber(args, meth):
     state_repr = get_full_state_repr_name(args.state_representation)
     avi_state_repr = get_full_state_repr_name(args.avi_state_representation)
     instances = glob(f"{args.instances_dir}/*.pddl")
-    start = args.seed
-    end = args.seed+1 if args.mult_seed <= 1 else args.mult_seed+1
+
+    if ".." in args.seed:
+        start, end = [int(n) for n in args.seed.split('..')]
+    else:
+        start = int(args.seed)
+        end = int(args.seed)+1 if int(args.mult_seed) <= 0 else int(args.mult_seed)+1
+
     domain = ""
     for instance in instances:
         instance_split = instance.split('/')

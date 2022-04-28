@@ -1315,7 +1315,7 @@ def get_sample_args():
     parser.add_argument(
         "-s",
         "--seed",
-        type=int,
+        type=str,
         default=default_args.SAMPLE_SEED,
         help="Sample seed. (default: %(default)s)",
     )
@@ -1329,7 +1329,7 @@ def get_sample_args():
     parser.add_argument(
         "-ms",
         "--mult-seed",
-        type=int,
+        type=str,
         default=default_args.SAMPLE_MULT_SEEDS,
         help="Sample mult seeds (1..n). (default: %(default)s)",
     )
