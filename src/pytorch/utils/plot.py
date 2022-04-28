@@ -60,7 +60,8 @@ def save_y_pred_scatter(data: list, t: int, fold_idx: int, directory: str, prefi
     ax.set_xlabel("h^sample")
     ax.set_ylabel("h^NN")
     epoch = "\nepoch " + str(t)
-    ax.set_title(prefix + plot_title + epoch, fontsize=10)
+    hl = round(len(plot_title) / 2)
+    ax.set_title(prefix + plot_title[:hl] + "\n" + plot_title[hl:] + epoch, fontsize=9)
 
     fig.savefig(directory + "/" + plot_filename + ".png")
 
@@ -68,7 +69,7 @@ def save_y_pred_scatter(data: list, t: int, fold_idx: int, directory: str, prefi
     plt.close(fig)
 
 
-def save_y_pred_scatter_eval(data: list, directory: str, data_type: str, prefix: str):
+def save_y_pred_scatter_eval(data: list, directory: str, data_type: str):
     """
     Create and save real y and predicted y scatter plot for eval.
     """
@@ -79,7 +80,8 @@ def save_y_pred_scatter_eval(data: list, directory: str, data_type: str, prefix:
         makedirs(directory)
 
     plot_title = get_plot_title(directory)
-    plot_filename = f"eval_best_{data_type}_{plot_title}_{prefix}"
+    #plot_filename = f"eval_best_{data_type}_{plot_title}_{suffix}"
+    plot_filename = f"eval_best_{data_type}_{plot_title}"
 
     real = [round(d[1]) for d in data]
     pred = [round(d[2]) for d in data]
@@ -99,7 +101,9 @@ def save_y_pred_scatter_eval(data: list, directory: str, data_type: str, prefix:
 
     ax.set_xlabel("h^sample")
     ax.set_ylabel("h^NN")
-    ax.set_title(data_type + "_" + plot_title + "\n" + prefix, fontsize=10)
+    hl = round(len(plot_title) / 2)
+    #ax.set_title(data_type + "_" + plot_title[:hl] + "\n" + plot_title[hl:] + suffix, fontsize=9)
+    ax.set_title(data_type + "_" + plot_title[:hl] + "\n" + plot_title[hl:], fontsize=9)
 
     fig.savefig(directory + "/" + plot_filename + ".png")
 
@@ -107,7 +111,7 @@ def save_y_pred_scatter_eval(data: list, directory: str, data_type: str, prefix:
     plt.close(fig)
 
 
-def save_pred_error_bar_eval(data: list, directory: str, data_type: str, prefix: str):
+def save_pred_error_bar_eval(data: list, directory: str, data_type: str):
     """
     Create and save error count histogram plot for eval.
     """
@@ -118,7 +122,8 @@ def save_pred_error_bar_eval(data: list, directory: str, data_type: str, prefix:
         makedirs(directory)
 
     plot_title = get_plot_title(directory)
-    plot_filename = f"eval_error_{data_type}_{plot_title}_{prefix}"
+    #plot_filename = f"eval_error_{data_type}_{plot_title}_{suffix}"
+    plot_filename = f"eval_error_{data_type}_{plot_title}"
 
     rounded_errors = [round(d[3]) for d in data]
 
@@ -139,7 +144,9 @@ def save_pred_error_bar_eval(data: list, directory: str, data_type: str, prefix:
 
     ax.set_xlabel("abs(y-pred) error")
     ax.set_ylabel("count")
-    ax.set_title(data_type + "_" + plot_title + "\n" + prefix, fontsize=10)
+    hl = round(len(plot_title) / 2)
+    #ax.set_title(data_type + "_" + + plot_title[:hl] + "\n" + plot_title[hl:], fontsize=9)
+    ax.set_title(data_type + "_" + plot_title[:hl] + "\n" + plot_title[hl:], fontsize=9)
     ax.text(0.70, 0.90, f'max_error = {max(rounded_errors)}\navg_error = {round(sum(rounded_errors) / len(rounded_errors), 2)}\nmax_count = {max(d_error_count, key=d_error_count.get)}',
             horizontalalignment='left',
             verticalalignment='center',
@@ -192,7 +199,7 @@ def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h: str) -> dict:
 
     plot_name = get_plot_title(directory)
 
-    ax.set_title(plot_name, fontsize=10)
+    ax.set_title(plot_name, fontsize=9)
 
     compared_heuristic = csv_h.split("/")[-2]
     if compared_heuristic == "hstar":

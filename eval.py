@@ -89,9 +89,9 @@ def eval_main(args: Namespace):
         ).get_fold(0)
 
         if train_data != None:
-            eval_workflow(model, sample, dirname, train_data, "training", f_results, args.log_states, args.save_preds, args.save_plots)
+            eval_workflow(model, sample, dirname, train_data, "train", f_results, args.log_states, args.save_preds, args.save_plots)
         if val_data != None:
-            eval_workflow(model, sample, dirname, val_data, "validation", f_results, args.log_states, args.save_preds, args.save_plots)
+            eval_workflow(model, sample, dirname, val_data, "val", f_results, args.log_states, args.save_preds, args.save_plots)
         if test_data != None:
             eval_workflow(model, sample, dirname, test_data, "test", f_results, args.log_states, args.save_preds, args.save_plots)
 
@@ -141,8 +141,8 @@ def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data
 
     if save_plots:
         plots_dir = f"{dirname}/plots"
-        save_y_pred_scatter_eval(y_pred_loss, plots_dir, data_type, data_name)
-        save_pred_error_bar_eval(y_pred_loss, plots_dir, data_type, data_name)
+        save_y_pred_scatter_eval(y_pred_loss, plots_dir, data_type)
+        save_pred_error_bar_eval(y_pred_loss, plots_dir, data_type)
         _log.info(f"Saved {data_name} plots for {data_type} dataset to {plots_dir}")
 
     if f_results != None:
