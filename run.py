@@ -15,6 +15,7 @@ import time
 from sys import argv
 from json import load
 from glob import glob
+from natsort import natsorted
 
 
 def build_args(d: dict, prefix: str) -> str:
@@ -58,7 +59,33 @@ def remove_leftover_files(output_dir: str):
             os.remove(sf)
 
 
+def sort_list_intercalate(files: [str]) -> [str]:
+    ret = []
+    d = {}
+    files = natsorted(files)
+    for f in files:
+        f_split = f.split('/')[-1].split('_')
+        domain = f_split[0]
+        if domain not in d:
+            d[domain] = []
+        d[domain].append(f)
+
+    count = 0
+    while count < len(d):
+        for k in d:
+            if not d[k]:
+                continue
+            ret.append(d[k].pop(0))
+            if not d[k]:
+                count += 1
+
+    return ret
+
+
 def main(exp_paths: [str]):
+    intercalate = False
+    if intercalate:
+        exp_paths = sort_list_intercalate(exp_paths) 
     for exp_path in exp_paths:
         full_exp = {}
         with open(exp_path, "r") as exp_file:
