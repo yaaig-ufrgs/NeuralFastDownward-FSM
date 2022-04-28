@@ -26,6 +26,13 @@ def get_train_args():
         help="Saves the best model from the best epoch instead of the last one. (default: %(default)s)",
     )
     parser.add_argument(
+        "-pte",
+        "--post-train-eval",
+        type=str2bool,
+        default=default_args.POST_TRAIN_EVAL,
+        help="Perform a post-training evaluation on the trained model with the same dataset used in training. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-pat",
         "--patience",
         type=int,
@@ -656,6 +663,13 @@ def get_exp_args():
         choices=["hnn", "resnet"],
         default=default_args.MODEL,
         help="Network model to use. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-pte",
+        "--train-post-train-eval",
+        type=str2bool,
+        default=default_args.POST_TRAIN_EVAL,
+        help="Perform a post-training evaluation on the trained model with the same dataset used in training. (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-sb",

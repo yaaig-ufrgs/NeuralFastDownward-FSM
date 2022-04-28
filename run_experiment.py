@@ -52,7 +52,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
         trained_model_dir = f"{args.train_output_folder}/nfd_train.{sample_name}.ns{net_seed}" if not args.exp_only_test else f"{args.test_model_dir}/nfd_train.{sample_name}.ns{net_seed}"
 
         train_args = (
-            f"{sample} -mdl {args.train_model} -pat {args.train_patience} "
+            f"{sample} -mdl {args.train_model} -pte {args.train_post_train_eval} -pat {args.train_patience} "
             f"-hl {args.train_hidden_layers} -hu {args.train_hidden_units} "
             f"-b {args.train_batch_size} -e {args.train_max_epochs} -a {args.train_activation} "
             f"-o {args.train_output_layer} -sb {args.train_save_best_epoch_model} "

@@ -45,6 +45,7 @@ SWAP_SAMPLES_FROM = ""
 UNIQUE_SAMPLES = False # considers both x and y
 UNIQUE_STATES = False # only considers x
 USE_GPU = False
+POST_TRAIN_EVAL = False
 ADDITIONAL_FOLDER_NAME = []
 
 # Test

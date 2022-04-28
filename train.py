@@ -130,9 +130,10 @@ def train_main(args: Namespace):
     make_extra_plots(args, dirname, best_fold)
 
     # POST-TRAINING EVALUATION OF THE BEST MODEL
-    _log.info("Performing post-training evaluation...")
-    post_training_evaluation(f"{dirname}/models/traced_best_val_loss.pt", args, dirname)
-    _log.info("Finished!")
+    if args.post_train_eval:
+        _log.info("Performing post-training evaluation...")
+        post_training_evaluation(f"{dirname}/models/traced_best_val_loss.pt", args, dirname)
+        _log.info("Finished!")
 
 
 def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int, Timer):
