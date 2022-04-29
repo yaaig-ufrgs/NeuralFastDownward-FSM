@@ -94,6 +94,7 @@ def yaaig_ferber(args, meth):
 
     if ".." in args.seed:
         start, end = [int(n) for n in args.seed.split('..')]
+        end += 1
     else:
         start = int(args.seed)
         end = int(args.seed)+1 if int(args.mult_seed) <= 0 else int(args.mult_seed)+1
