@@ -11,6 +11,25 @@ Examples:
 import json
 from sys import argv
 
+
+def is_float(s: str) -> bool:
+    if '.' in s:
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
+    return False
+
+
+def fix_input(s: str):
+    if is_float(s):
+        val = float(s)
+    else:
+        val = int(s) if s.isdigit() else s
+    return val
+
+
 section = argv[1]
 key = argv[2]
 
@@ -18,9 +37,9 @@ add_to_value = True if argv[3][0] == '+' else False
 
 if add_to_value:
     v = argv[3][1:]
-    value = int(v) if v.isdigit() else v
+    value = fix_input(v)
 else:
-    value = int(argv[3]) if argv[3].isdigit() else argv[3]
+    value = fix_input(argv[3])
 
 for json_file in argv[4:]:
     with open(json_file) as jf:
