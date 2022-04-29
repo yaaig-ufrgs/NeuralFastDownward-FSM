@@ -16,12 +16,13 @@ from sys import argv
 from json import load
 from glob import glob
 from natsort import natsorted
+from scripts.create_random_sample import random_sample_statespace
 
 
 def build_args(d: dict, prefix: str) -> str:
     args = ""
     for k, v in d.items():
-        if v == "" or k == "exp-only-sampling":
+        if v == "" or k == "exp-only-sampling" or k == "modify-sample":
             continue
         if k in ["samples", "problem-pddls", "method", "instances_dir"]:
             args += f" {v}"
@@ -82,6 +83,11 @@ def sort_list_intercalate(files: [str]) -> [str]:
     return ret
 
 
+def do_sample_mod(mod: str, samples_dir: str, statespace: str, min_seed: int, max_seed: int):
+    if mod == "random-sample":
+        random_sample_statespace(statespace, samples_dir, min_seed, max_seed)
+
+
 def main(exp_paths: [str]):
     intercalate = False
     if intercalate:
@@ -109,7 +115,12 @@ def main(exp_paths: [str]):
         only_test = str2bool(exp["exp-only-test"])
         only_eval = str2bool(exp["exp-only-eval"])
 
-        if sampling and not any([only_train, only_test, only_eval]):
+        mod_sample = "default" if "modify-sample" not in exp else exp["modify-sample"]
+        if mod_sample != "default":
+            min_seed, max_seed = [int(n) for n in exp['exp-sample-seed'].split('..')]
+            do_sample_mod(mod_sample, exp["samples"], sampling["statespace"], min_seed, max_seed)
+
+        if sampling and not any([only_train, only_test, only_eval]) and mod_sample == "default":
             args = "./fast_sample.py"
             args += build_args(sampling, "--")
             print(args, end="\n\n")
