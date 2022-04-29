@@ -117,7 +117,11 @@ def main(exp_paths: [str]):
 
         mod_sample = "default" if "modify-sample" not in exp else exp["modify-sample"]
         if mod_sample != "default":
-            min_seed, max_seed = [int(n) for n in exp['exp-sample-seed'].split('..')]
+            if type(exp['exp-sample-seed']) == str and ".." in exp['exp-sample-seed']:
+                min_seed, max_seed = [int(n) for n in exp['exp-sample-seed'].split('..')]
+            else:
+                min_seed = int(exp['exp-sample-seed'])
+                max_seed = min_seed
             do_sample_mod(mod_sample, exp["samples"], sampling["statespace"], min_seed, max_seed)
 
         if sampling and not any([only_train, only_test, only_eval]) and mod_sample == "default":
