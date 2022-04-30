@@ -12,6 +12,7 @@ from `src/pytorch/utils/default_args.py`.
 
 import os
 import time
+import re
 from sys import argv
 from json import load
 from glob import glob
@@ -85,8 +86,8 @@ def sort_list_intercalate(files: [str]) -> [str]:
 
 def do_sample_mod(mod: str, samples_dir: str, statespace: str, min_seed: int, max_seed: int):
     if mod == "random-sample":
-        random_sample_statespace(statespace, samples_dir, min_seed, max_seed)
-
+        pct = float(re.findall(".*-(\d*)pct.*", samples_dir)[0]) * 0.01
+        random_sample_statespace(statespace, samples_dir, min_seed, max_seed, [pct])
 
 def main(exp_paths: [str]):
     intercalate = False
