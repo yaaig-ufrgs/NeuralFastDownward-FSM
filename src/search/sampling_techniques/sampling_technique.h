@@ -46,7 +46,7 @@ protected:
     const options::Predefinitions *predefinitions;
     const int searches;
     int samples_per_search;
-    const int max_samples;
+    int max_samples;
     const double bound_multiplier;
     double max_time;
     const int mem_limit_mb;
@@ -61,9 +61,9 @@ protected:
     const std::unique_ptr<options::OptionParser> option_parser;
     std::unique_ptr<utils::CountdownTimer> sampling_timer;
     int mem_limit;
-    int mem_samples = 0;
     int mem_presampling = utils::get_peak_memory_in_kb();
     int counter = 0;
+    bool stopped = false;
     std::unordered_set<std::string> statespace;
 
 protected:
@@ -98,7 +98,7 @@ public:
     int get_count() const;
     int get_counter() const;
     bool empty() const;
-    bool stop_sampling(bool is_bfs, float bfs_pct) const;
+    bool stop_sampling(bool is_bfs = false, float bfs_pct = 0.1) const;
     int mem_usage_mb() const;
 
     std::shared_ptr<AbstractTask> next(
