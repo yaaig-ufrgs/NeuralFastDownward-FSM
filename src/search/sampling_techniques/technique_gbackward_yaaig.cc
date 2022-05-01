@@ -88,7 +88,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
     vector<shared_ptr<PartialAssignment>> samples;
     if (sample_initial_state) {
         samples.push_back(make_shared<PartialAssignment>(pa));
-        mem_samples += sizeof(shared_ptr<PartialAssignment>);
     }
     utils::HashSet<PartialAssignment> local_hash_table;
     utils::HashSet<PartialAssignment> *ht_pointer = global_hash_table ? &hash_table : &local_hash_table;
@@ -124,8 +123,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
 
             ht_pointer->insert(pa_);
             samples.push_back(make_shared<PartialAssignment>(pa_));
-            //mem_hash_table += sizeof(PartialAssignment);
-            mem_samples += sizeof(shared_ptr<PartialAssignment>) + sizeof(PartialAssignment);
             pa = pa_;
             attempts = 0;
         } else if (++attempts >= RW_MAX_ATTEMPTS) {
@@ -156,8 +153,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
         queue.push(pa);
 
     hash_table.insert(pa);
-    mem_samples += sizeof(PartialAssignment) * 2;
     while (samples.size() < steps) {
+
         if ((technique == "dfs" && stack.empty()) || (technique == "bfs" && queue.empty()))
             break;
         
@@ -168,9 +165,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
             pa = queue.front();
             queue.pop();
         }
-        mem_samples -= sizeof(PartialAssignment);
         samples.push_back(make_shared<PartialAssignment>(pa));
-        mem_samples += sizeof(shared_ptr<PartialAssignment>);
 
         int idx_op = 0, rng_seed = (*rng)(INT32_MAX - 1);
         while (idx_op != -1) {
@@ -208,7 +203,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
                         stack.push(pa_);
                     else
                         queue.push(pa_);
-                    mem_samples += sizeof(PartialAssignment) * 2;
                 }
             }
             idx_op++;
@@ -231,10 +225,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
     vector<PartialAssignment> vk = {initial_state}, vk1 = {}; // vector_k, vector_k+1
     vector<shared_ptr<PartialAssignment>> samples = {make_shared<PartialAssignment>(initial_state)};
     leaves.push_back(initial_state);
-    mem_samples += sizeof(shared_ptr<PartialAssignment>) + (sizeof(PartialAssignment) * 2);
+
     while (samples.size() < bfs_samples && !vk.empty()) {
-        //if (mem_usage_mb() >= 200 || sampling_timer->get_elapsed_time() >= 120.0)
-        //    break;
         rng->shuffle(vk);
         for (PartialAssignment& s : vk) {
             vector<PartialAssignment> succ_s;
@@ -259,25 +251,20 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
                         s_.estimated_heuristic = s.estimated_heuristic + (unit_cost ? 1 : ops[applied_op].get_cost());
 
                     succ_s.push_back(s_);
-                    mem_samples += sizeof(PartialAssignment);
                 }
                 idx_op++;
             }
             if (samples.size() + succ_s.size() <= bfs_samples) {
                 leaves.erase(find(leaves.begin(), leaves.end(), s));
-                mem_samples -= sizeof(PartialAssignment);
                 for (PartialAssignment& s_ : succ_s) {
                     samples.push_back(make_shared<PartialAssignment>(s_));
                     vk1.push_back(s_);
                     leaves.push_back(s_);
                     hash_table.insert(s_);
-                    mem_samples += sizeof(PartialAssignment) * 3;
                 }
             }
-            mem_samples -= sizeof(PartialAssignment) * succ_s.size();
         }
         vk = vk1;
-        mem_samples -= sizeof(PartialAssignment) * vk1.size();
         vk1.clear();
     }
     return samples;
@@ -400,14 +387,12 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         if (avoid_bfs_core)
             for (shared_ptr<PartialAssignment> &s : samples) {
                 bfs_core.insert(*s);
-                mem_samples += sizeof(shared_ptr<PartialAssignment>);
             }
 
         cout << "Starting random walk search (" << subtechnique << ") from " << leaves.size() << " leaves" << endl
              << "Looking for " << (max_samples - samples.size()) << " more samples..." << endl;
         int lid = 0;
         vector<bool> leaves_used(leaves.size(), false);
-        mem_samples += sizeof(bool) * leaves.size();
         while (samples.size() < (unsigned)max_samples) {
             do {
                 lid = (subtechnique == "round_robin") ? // round_robin or random_leaf (random_leaf if percentage)
@@ -428,16 +413,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 bfs_core
             );
             samples.insert(samples.end(), samples_.begin(), samples_.end());
-            mem_samples += sizeof(shared_ptr<PartialAssignment>) * samples_.size();
         }
     }
-    /*
-    cout << "#### MEM_USAGE: " << mem_usage_mb() << endl;
-    cout << "#### SAMPLE_SIZE_PARTIAL: " << mem_samples << endl;
-    cout << "#### MEM_USAGE: " << mem_usage_mb() << endl;
-    cout << "#### MEM_PRE_SAMPLING: " << mem_presampling << endl;
-    cout << "#### SAMPLING_TIME: " << sampling_timer->get_elapsed_time() << endl;
-    */
     return samples;
 }
 

@@ -98,7 +98,7 @@ public:
     int get_count() const;
     int get_counter() const;
     bool empty() const;
-    bool stop_sampling() const;
+    bool stop_sampling(bool is_bfs, float bfs_pct) const;
     int mem_usage_mb() const;
 
     std::shared_ptr<AbstractTask> next(

@@ -204,13 +204,17 @@ bool SamplingTechnique::empty() const {
     return counter >= searches;
 }
 
-bool SamplingTechnique::stop_sampling() const {
+bool SamplingTechnique::stop_sampling(bool is_bfs = false, float bfs_pct = 0.1) const {
+    if (!is_bfs) {
+        return (sampling_timer->is_expired() ||
+                utils::get_curr_memory_in_kb() >= mem_limit);
+    } 
     return (sampling_timer->is_expired() ||
-            utils::get_peak_memory_in_kb() - mem_presampling >= mem_limit);
+            utils::get_curr_memory_in_kb() >= (mem_limit - mem_presampling) * bfs_pct + mem_presampling);
 }
 
 int SamplingTechnique::mem_usage_mb() const {
-    return ((utils::get_peak_memory_in_kb() / 1024) - (mem_presampling / 1024));
+    return (utils::get_curr_memory_in_kb() / 1024);
 }
 
 shared_ptr<AbstractTask> SamplingTechnique::next(
@@ -244,17 +248,13 @@ shared_ptr<AbstractTask> SamplingTechnique::next(
 
 vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         const shared_ptr<AbstractTask> &seed_task) {
+    mem_presampling = utils::get_curr_memory_in_kb();
     vector<shared_ptr<PartialAssignment>> tasks;
     bool max_samples_reached = false;
     utils::HashSet<PartialAssignment> hash_table;
-    size_t total_samples_size = 0;
-    cout << "[START SAMPLING t=" << utils::g_timer << ", "
-         << utils::get_peak_memory_in_kb() - mem_presampling << " KB] ";
     while (!empty() || (max_samples != -1 && !max_samples_reached)) {
         update_alternative_task_mutexes(seed_task);
         vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
-        size_t sample_size = sizeof(vector<shared_ptr<PartialAssignment>>) + (sizeof(shared_ptr<PartialAssignment>) * next_tasks.size());
-        total_samples_size += sample_size;
         for (shared_ptr<PartialAssignment>& task : next_tasks) {
             if (statespace_file != "none") {
                 string s = task->to_binary();
@@ -275,16 +275,6 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         }
         counter++;
     }
-    cout << "[FINISH SAMPLING t=" << utils::g_timer << ", "
-         << utils::get_peak_memory_in_kb() - mem_presampling << " KB] ";
-    /*
-    cout << "#### SAMPLE_SIZE_FINAL: " << total_samples_size << endl;
-    size_t sample_size_final = sizeof(vector<shared_ptr<PartialAssignment>>) + (sizeof(shared_ptr<PartialAssignment>) * tasks.size());
-    cout << "#### SAMPLE_SIZE_FINAL_NO_DUPLICATES: " << sample_size_final << endl;
-    size_t hash_table_size_final = sizeof(utils::HashSet<PartialAssignment>) + (sizeof(PartialAssignment) * hash_table.size());
-    cout << "#### HASH_TABLE_SIZE_FINAL: " << hash_table_size_final << endl;
-    */
-
     return tasks;
 }
 
