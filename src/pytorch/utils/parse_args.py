@@ -1301,7 +1301,7 @@ def get_sample_args():
         "-sscs",
         "--samples-per-search",
         type=int,
-        default=default_args.SAMPLES_PER_SEARCH,
+        default=default_args.SAMPLE_PER_SEARCH,
         help="Number of samples per search. (default: %(default)s)",
     )
     parser.add_argument(
@@ -1309,14 +1309,14 @@ def get_sample_args():
         "--bound",
         type=str,
         # choices=["default", "propositions", "propositions_per_mean_effects", "max_task_hstar", "digit"],
-        default=default_args.SAMPLES_BOUND,
+        default=default_args.SAMPLE_BOUND,
         help="How to bound each rollout. Choices=[default, propositions, propositions_per_mean_effects, max_task_hstar, digit] (default: %(default)s)",
     )
     parser.add_argument(
         "-bm",
         "--bound-multiplier",
         type=float,
-        default=default_args.SAMPLES_BOUND_MULTIPLIER,
+        default=default_args.SAMPLE_BOUND_MULTIPLIER,
         help="Multiplies the bound of each rollout by the given value. (default: %(default)s)",
     )
     parser.add_argument(
@@ -1472,6 +1472,20 @@ def get_sample_args():
         type=int,
         default=default_args.SAMPLE_THREADS,
         help="Threads to use. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-t",
+        "--max-time",
+        type=float,
+        default=default_args.SAMPLE_MAX_TIME,
+        help="Max time to consider when doing sampling. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-m",
+        "--mem-limit",
+        type=int,
+        default=default_args.SAMPLE_MEM_LIMIT_MB,
+        help="Memory limit to consider when sampling. (default: %(default)s)",
     )
 
     return parser.parse_args()
