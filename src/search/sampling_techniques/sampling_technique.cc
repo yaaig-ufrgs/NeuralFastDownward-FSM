@@ -212,8 +212,11 @@ bool SamplingTechnique::stop_sampling(bool is_bfs, float bfs_pct) const {
         return (sampling_timer->is_expired() ||
                 utils::get_curr_memory_in_kb() >= mem_limit);
     }
-    return (sampling_timer->is_expired() ||
-            utils::get_curr_memory_in_kb() >= ((mem_limit - mem_presampling) * bfs_pct) + mem_presampling);
+
+    double time_reserved_bfs = max_time * bfs_pct;
+    int mem_reserved_bfs = (mem_limit - mem_presampling) * bfs_pct + mem_presampling;
+    return (sampling_timer->get_elapsed_time() >= time_reserved_bfs  ||
+            utils::get_curr_memory_in_kb() >= mem_reserved_bfs);
 }
 
 int SamplingTechnique::mem_usage_mb() const {
