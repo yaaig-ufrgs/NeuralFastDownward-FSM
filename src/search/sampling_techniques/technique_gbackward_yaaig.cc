@@ -71,10 +71,6 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
         assert(subtechnique == "round_robin" || subtechnique == "random_leaf" || subtechnique == "percentage");
     if (technique == "dfs_rw")
         assert(subtechnique == "round_robin" || subtechnique == "random_leaf");
-    
-    cout << "max_time = " << max_time << endl;
-    cout << "mem_limit_mb = " << mem_limit_mb << endl;
-    exit(0);
 }
 
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_random_walk(
@@ -419,16 +415,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             samples.insert(samples.end(), samples_.begin(), samples_.end());
         }
     }
-<<<<<<< HEAD
-=======
-
-    cout << "#### MEM_USAGE: " << mem_usage_mb() << endl;
-    cout << "#### MEM_USAGE (PEAK): " << utils::get_peak_memory_in_kb() << endl;
-    // cout << "#### MEM_USAGE (CURRENT): " << utils::get_memory_in_kb() << endl;
-    cout << "#### SAMPLE_SIZE_PARTIAL: " << mem_samples << endl;
-    cout << "#### MEM_PRE_SAMPLING: " << mem_presampling << endl;
-    cout << "#### SAMPLING_TIME: " << sampling_timer->get_elapsed_time() << endl;
->>>>>>> 6c9156f1331db5312f6f74cadf7bba1007f7aece
     return samples;
 }
 
