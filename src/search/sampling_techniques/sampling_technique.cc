@@ -153,6 +153,9 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
         f.close();
     }
 
+    if (max_samples == -1)
+        max_samples = numeric_limits<int>::max(); // ~2 billion samples
+
     if (mem_limit_mb != -1)
         mem_limit = mem_limit_mb * 1024; // KB
     else
@@ -204,13 +207,13 @@ bool SamplingTechnique::empty() const {
     return counter >= searches;
 }
 
-bool SamplingTechnique::stop_sampling(bool is_bfs = false, float bfs_pct = 0.1) const {
+bool SamplingTechnique::stop_sampling(bool is_bfs, float bfs_pct) const {
     if (!is_bfs) {
         return (sampling_timer->is_expired() ||
                 utils::get_curr_memory_in_kb() >= mem_limit);
-    } 
+    }
     return (sampling_timer->is_expired() ||
-            utils::get_curr_memory_in_kb() >= (mem_limit - mem_presampling) * bfs_pct + mem_presampling);
+            utils::get_curr_memory_in_kb() >= ((mem_limit - mem_presampling) * bfs_pct) + mem_presampling);
 }
 
 int SamplingTechnique::mem_usage_mb() const {
@@ -248,11 +251,10 @@ shared_ptr<AbstractTask> SamplingTechnique::next(
 
 vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         const shared_ptr<AbstractTask> &seed_task) {
-    mem_presampling = utils::get_curr_memory_in_kb();
     vector<shared_ptr<PartialAssignment>> tasks;
     bool max_samples_reached = false;
     utils::HashSet<PartialAssignment> hash_table;
-    while (!empty() || (max_samples != -1 && !max_samples_reached)) {
+    while ((!empty() || (max_samples != -1 && !max_samples_reached)) && !stopped) {
         update_alternative_task_mutexes(seed_task);
         vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
         for (shared_ptr<PartialAssignment>& task : next_tasks) {
@@ -421,7 +423,8 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
     );
     parser.add_option<int>(
             "max_samples",
-            "Force searches until reaching max_samples samples.",
+            "Force searches until reaching max_samples samples."
+            "If -1, max_samples is qual to numeric_limits<int>.",
             "-1"
     );
     parser.add_option<double>(

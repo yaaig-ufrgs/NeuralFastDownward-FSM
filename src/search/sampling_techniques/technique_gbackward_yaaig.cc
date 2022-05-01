@@ -93,7 +93,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
     utils::HashSet<PartialAssignment> *ht_pointer = global_hash_table ? &hash_table : &local_hash_table;
     // Attempts to find a new state when performing each step
     int attempts = 0;
-    while (samples.size() < steps) {
+    while ((samples.size() < steps) && !stopped) {
         OperatorID applied_op = OperatorID::no_operator;
         PartialAssignment pa_ = rrws->sample_state_length(
             pa,
@@ -128,6 +128,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
         } else if (++attempts >= RW_MAX_ATTEMPTS) {
             break;
         }
+        stopped = stop_sampling();
     }
     assert(samples.size() <= steps);
     return samples;
@@ -153,11 +154,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
         queue.push(pa);
 
     hash_table.insert(pa);
-    while (samples.size() < steps) {
-
+    while ((samples.size() < steps) && !stopped) {
         if ((technique == "dfs" && stack.empty()) || (technique == "bfs" && queue.empty()))
             break;
-        
         if (technique == "dfs") {
             pa = stack.top();
             stack.pop();
@@ -206,6 +205,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
                 }
             }
             idx_op++;
+            stopped = stop_sampling();
+            if (stopped) break;
         }
     }
     assert(samples.size() <= steps);
@@ -226,7 +227,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
     vector<shared_ptr<PartialAssignment>> samples = {make_shared<PartialAssignment>(initial_state)};
     leaves.push_back(initial_state);
 
-    while (samples.size() < bfs_samples && !vk.empty()) {
+    while ((samples.size() < bfs_samples && !vk.empty()) && !stopped) {
         rng->shuffle(vk);
         for (PartialAssignment& s : vk) {
             vector<PartialAssignment> succ_s;
@@ -253,6 +254,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
                     succ_s.push_back(s_);
                 }
                 idx_op++;
+                stopped = stop_sampling(true, bfs_percentage);
             }
             if (samples.size() + succ_s.size() <= bfs_samples) {
                 leaves.erase(find(leaves.begin(), leaves.end(), s));
@@ -267,6 +269,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
         vk = vk1;
         vk1.clear();
     }
+    stopped = false;
     return samples;
 }
 
@@ -371,7 +374,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             );
             samples.insert(samples.end(), samples_.begin(), samples_.end());
             hash_table.clear();
-        } while (samples.size() < (unsigned)max_samples);
+        } while ((samples.size() < (unsigned)max_samples) && !stopped);
 
     } else if (technique == "dfs_rw" || technique == "bfs_rw") {
         cout << technique << " (" << subtechnique << ") not implemented!" << endl;
@@ -393,7 +396,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
              << "Looking for " << (max_samples - samples.size()) << " more samples..." << endl;
         int lid = 0;
         vector<bool> leaves_used(leaves.size(), false);
-        while (samples.size() < (unsigned)max_samples) {
+        while ((samples.size() < (unsigned)max_samples) && !stopped) {
             do {
                 lid = (subtechnique == "round_robin") ? // round_robin or random_leaf (random_leaf if percentage)
                     (lid + 1) % leaves.size() : (*rng)(INT32_MAX - 1) % leaves.size();
