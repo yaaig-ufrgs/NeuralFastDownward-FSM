@@ -208,15 +208,22 @@ bool SamplingTechnique::empty() const {
 }
 
 bool SamplingTechnique::stop_sampling(bool is_bfs, float bfs_pct) const {
+    bool stop = false;
     if (!is_bfs) {
-        return (sampling_timer->is_expired() ||
+        stop = (sampling_timer->is_expired() ||
                 utils::get_curr_memory_in_kb() >= mem_limit);
+    } else {
+        double time_reserved_bfs = max_time * bfs_pct;
+        int mem_reserved_bfs = (mem_limit - mem_presampling) * bfs_pct + mem_presampling;
+        stop = (sampling_timer->get_elapsed_time() >= time_reserved_bfs ||
+                utils::get_curr_memory_in_kb() >= mem_reserved_bfs);
     }
-
-    double time_reserved_bfs = max_time * bfs_pct;
-    int mem_reserved_bfs = (mem_limit - mem_presampling) * bfs_pct + mem_presampling;
-    return (sampling_timer->get_elapsed_time() >= time_reserved_bfs  ||
-            utils::get_curr_memory_in_kb() >= mem_reserved_bfs);
+    if (stop) {
+        cout << "[STOP] Time/memory limit breached. Stopping sampling..." << endl
+             << "[STOP] Current time:   " << sampling_timer->get_elapsed_time() << "/" << max_time << "s" << endl
+             << "[STOP] Current memory: " << utils::get_curr_memory_in_kb() << "/" << mem_limit << endl;
+    }
+    return stop;
 }
 
 int SamplingTechnique::mem_usage_mb() const {

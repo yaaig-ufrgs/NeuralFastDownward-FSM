@@ -265,6 +265,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
                     hash_table.insert(s_);
                 }
             }
+            stopped = stop_sampling(true, bfs_percentage);
         }
         vk = vk1;
         vk1.clear();
@@ -383,7 +384,11 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
     // pos-dfs/bfs random walk step
     if (technique == "dfs_rw" || technique == "bfs_rw") {
-        assert(leaves.size() > 0);
+        if (leaves.size() <= 0) {
+            cout << "The whole statespace was sampled. Skipping Random Walk." << endl;
+            stopped = true;
+            return samples;
+        }
 
         utils::HashSet<PartialAssignment> bfs_core; // or dfs_core
         bool avoid_bfs_core = true;
