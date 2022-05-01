@@ -49,7 +49,7 @@ usage: fast_sample.py [-h] [-stp STATESPACE]
                       [-rsl-states RSL_NUM_STATES] [-rsl-demos RSL_NUM_DEMOS]
                       [-rsl-len-demo RSL_MAX_LEN_DEMO] [-rsl-inv RSL_CHECK_INVARS]
                       [-threads THREADS]
-                      instances_dir {ferber,yaaig,rsl}
+                      instance {ferber,yaaig,rsl}
 ```
 
 The example below takes all the instances in the `blocks` directory and saves the

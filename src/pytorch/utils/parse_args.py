@@ -1175,9 +1175,9 @@ def get_exp_args():
 def get_sample_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "instances_dir",
+        "instance",
         type=str,
-        help="Path to directory with instances to be used for sampling.",
+        help="Path to pddl or directory with instances to be used for sampling.",
     )
     parser.add_argument(
         "method",

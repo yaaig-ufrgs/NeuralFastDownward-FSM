@@ -90,7 +90,7 @@ def yaaig_ferber(args, meth):
 
     state_repr = get_full_state_repr_name(args.state_representation)
     avi_state_repr = get_full_state_repr_name(args.avi_state_representation)
-    instances = glob(f"{args.instances_dir}/*.pddl")
+    instances = [args.instance] if args.instance.endswith(".pddl") else glob(f"{args.instance}/*.pddl")
 
     if ".." in args.seed:
         start, end = [int(n) for n in args.seed.split('..')]
@@ -166,7 +166,8 @@ def yaaig_ferber(args, meth):
 def rsl(args):
     global COUNT
     global ID_COUNT
-    instances = glob(f"{args.instances_dir}/*.pddl")
+    instances = [args.instance] if args.instance.endswith(".pddl") else glob(f"{args.instance}/*.pddl")
+
     start = args.seed
     end = args.seed+1 if args.mult_seed <= 1 else args.mult_seed+1
     print(start, end)
