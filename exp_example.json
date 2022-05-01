@@ -12,7 +12,7 @@
         "trained-model": ""
     },
     "sampling": {
-        "instances_dir": "tasks/experiments/blocks",
+        "instance": "tasks/experiments/blocks",
         "method": "yaaig",
         "technique": "bfs_rw",
         "subtechnique": "percentage",

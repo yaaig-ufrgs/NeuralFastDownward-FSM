@@ -25,7 +25,7 @@ def build_args(d: dict, prefix: str) -> str:
     for k, v in d.items():
         if v == "" or k == "exp-only-sampling" or k == "modify-sample":
             continue
-        if k in ["samples", "problem-pddls", "method", "instances_dir"]:
+        if k in ["samples", "problem-pddls", "method", "instance"]:
             args += f" {v}"
         else:
             arg = prefix + k
