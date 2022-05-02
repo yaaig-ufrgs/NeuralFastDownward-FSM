@@ -180,9 +180,7 @@ def get_test_tasks_from_problem(
 def get_defaults_and_facts_files(
     args: Namespace,
     test_folder: str,
-    problem_pddl: str,
-    # facts_filename_format: str = "tasks/ferber21/training_tasks/{domain}/{problem}_facts.txt",
-    facts_filename_format: str = "tasks/experiments/{domain}/{problem}_facts.txt",
+    problem_pddl: str
 ) -> (str, str):
     """
     Return its `facts` and `defaults` files.

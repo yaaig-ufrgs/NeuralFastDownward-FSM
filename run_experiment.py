@@ -78,7 +78,8 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
             train_args += f" -addfn {args.train_additional_folder_name}"
 
         test_args = (
-            f"-a {args.test_search_algorithm} -heu {args.test_heuristic} -m {args.test_max_search_memory} "
+            f"-a {args.test_search_algorithm} -heu {args.test_heuristic} "
+            f"-t {args.test_max_search_time} -m {args.test_max_search_memory} "
             f"-sdir {args.test_samples_dir} -atn {args.test_auto_tasks_n} "
             f"-ats {args.test_auto_tasks_seed} -pt {args.test_test_model} "
             f"-dlog {args.test_downward_logs} -unit-cost {args.test_unit_cost} "
