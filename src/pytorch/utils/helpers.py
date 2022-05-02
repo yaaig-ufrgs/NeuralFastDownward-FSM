@@ -203,9 +203,15 @@ def get_defaults_and_facts_files(
         defaults_file = ""
 
     if not facts_file:
-        facts_file = facts_filename_format.format(domain=args.domain, problem=args.problem)
-        if not os.path.exists(facts_file):
-            facts_file = ""
+        facts_filename_format = [
+            "tasks/ferber21/training_tasks/{domain}/{problem}_facts.txt",
+            "tasks/experiments/{domain}/{problem}_facts.txt",
+        ]
+        for filename in facts_filename_format:
+            candidate_filename = filename.format(domain=args.domain, problem=args.problem)
+            if os.path.exists(candidate_filename):
+                facts_file = candidate_filename
+                break
 
     if (not defaults_file) and facts_file:
         defaults_file = create_defaults_file(problem_pddl, facts_file, test_folder)

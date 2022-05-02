@@ -113,18 +113,19 @@ def yaaig_ferber(args, meth):
                     if args.k_depth < 99999:
                         depthk = f"_depthk-{args.k_depth}"
                 if args.avi_k > 0:
-                    avik = f"_avi-{args.avi_state_representation}-{args.avi_k}"
-                    #avi_iterations = "max" if args.avi_its >= 9999 else args.avi_its
-                    #avits = f"_it-{avi_iterations}"
+                    avik = f"_avi-{args.avi_k}"
+                    # avik = f"_avi-{args.avi_state_representation}-{args.avi_k}"
+                    # avi_iterations = "max" if args.avi_its >= 9999 else args.avi_its
+                    # avits = f"_it-{avi_iterations}"
                 if args.allow_dups != "none":
-                    dups = "ir" if args.allow_dups == "interrollout" else args.allow_dups
-                #sps = f"srch-{args.searches}_sps-{args.samples_per_search}_maxs-{args.max_samples}" if args.samples_per_search != -1 else f"maxs-{args.max_samples}"
+                    dups = "_dups-" + ("ir" if args.allow_dups == "interrollout" else args.allow_dups)
+                # sps = f"srch-{args.searches}_sps-{args.samples_per_search}_maxs-{args.max_samples}" if args.samples_per_search != -1 else f"maxs-{args.max_samples}"
                 sps = f"maxs-{args.max_samples}"
                 boundtype = f"bnd-{get_bound_type(args.bound)}"
                 boundmult = "" if args.bound_multiplier == 1.0 else f"bmul-{str(args.bound_multiplier).replace('.', '-')}_"
                 statespace_file = "none" if not args.sample_only_statespace else args.statespace
                 if meth == "yaaig":
-                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{subtech}{depthk}{avik}{avits}_dups-{dups}_min-{args.minimization}_repr-{args.state_representation}_{boundtype}_{boundmult}{sps}_ss{i}'
+                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{subtech}{depthk}{avik}{avits}{dups}_min-{args.minimization}_repr-{args.state_representation}_{boundtype}_{boundmult}{sps}_ss{i}'
                     rmse_out = out + "_rmse"
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
