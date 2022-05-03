@@ -52,7 +52,8 @@ class InstanceDataset(Dataset):
 
 
 def load_training_state_value_pairs(
-        samples_file: str, clamping: int, remove_goals: bool,  unique_samples: bool, unique_states: bool
+        samples_file: str, clamping: int, remove_goals: bool,  loss_function: str,
+        unique_samples: bool, unique_states: bool
 ) -> ([([int], int)], int):
     """
     Load state-value pairs from a sampling output, returning a tuple
@@ -104,7 +105,7 @@ def load_training_state_value_pairs(
                 uniques_x.append(state)
 
             state = [int(s) for s in state]
-            state_value_pairs.append([state, h_int])
+            state_value_pairs.append([state, h_int, 1])
 
             # Gets the domain max h value.
             if h_int > max_h:
@@ -119,17 +120,18 @@ def load_training_state_value_pairs(
                 state_value_pairs[i][1] = max_h
 
     # Appends weights (counts) to state_value_pairs:
-    for sv in state_value_pairs:
-        if unique_samples: # Weighting based on quant of unique states + heuristic.
-            st = "".join([str(s) for s in sv[0]])
-            h = str(sv[1])
-            h_st = h + ";" + st
-            sv.append(sample_count[h_st])
-        elif unique_states: # Weighting based on quant. of unique states.
-            st = "".join([str(s) for s in sv[0]])
-            sv.append(state_count[st])
-        else: # No weighting.
-            sv.append(1)
+    if loss_function == "mse_weighted":
+        for sv in state_value_pairs:
+            if unique_samples: # Weighting based on quant of unique states + heuristic.
+                st = "".join([str(s) for s in sv[0]])
+                h = str(sv[1])
+                h_st = h + ";" + st
+                sv.append(sample_count[h_st])
+            elif unique_states: # Weighting based on quant. of unique states.
+                st = "".join([str(s) for s in sv[0]])
+                sv.append(state_count[st])
+            else: # No weighting, use default (1).
+                break
             
     return state_value_pairs, domain_max_value
 
