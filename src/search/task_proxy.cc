@@ -201,12 +201,16 @@ pair<bool, State> TaskProxy::convert_to_full_state(
     return assignment.get_full_state(check_mutexes, rng);
 }
 
-string PartialAssignment::to_binary() const {
+string PartialAssignment::to_binary(bool use_undefined) const {
     const vector<FactPair> relevant_facts = task_properties::get_strips_fact_pairs(task);
     const vector<int> values = get_unpacked_values();
     assert(values.size() > 0);
     string bin = "";
-    for (unsigned i = 0; i < relevant_facts.size(); i++)
-        bin += (values[relevant_facts[i].var] == relevant_facts[i].value ? "1" : "0");
+    for (unsigned i = 0; i < relevant_facts.size(); i++) {
+        if (use_undefined && values[relevant_facts[i].var] == PartialAssignment::UNASSIGNED)
+            bin += '*';
+        else
+            bin += (values[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
+    }
     return bin;
 }
