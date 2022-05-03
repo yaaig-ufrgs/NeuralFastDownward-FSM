@@ -210,7 +210,7 @@ string PartialAssignment::to_binary(bool use_undefined) const {
         if (use_undefined && values[relevant_facts[i].var] == PartialAssignment::UNASSIGNED)
             bin += '*';
         else
-            bin += (values[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
+            bin += (values[relevant_facts[i].var] == relevant_facts[i].value ? '1' : '0');
     }
     return bin;
 }
