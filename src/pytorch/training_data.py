@@ -126,10 +126,10 @@ def load_training_state_value_pairs(
                 st = "".join([str(s) for s in sv[0]])
                 h = str(sv[1])
                 h_st = h + ";" + st
-                sv.append(sample_count[h_st])
+                sv[2] = sample_count[h_st]
             elif unique_states: # Weighting based on quant. of unique states.
                 st = "".join([str(s) for s in sv[0]])
-                sv.append(state_count[st])
+                sv[2] = state_count[st]
             else: # No weighting, use default (1).
                 break
             
