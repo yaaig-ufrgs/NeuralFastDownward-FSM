@@ -37,6 +37,7 @@ class KFoldTrainingData:
         intercalate_samples: int = default_args.INTERCALATE_SAMPLES,
         cut_non_intercalated_samples: bool = default_args.CUT_NON_INTERCALATED_SAMPLES,
         sample_percentage: float = default_args.SAMPLE_PERCENTAGE,
+        loss_function: str = default_args.LOSS_FUNCTION,
         unique_samples: bool = default_args.UNIQUE_SAMPLES,
         unique_states: bool = default_args.UNIQUE_STATES,
         model: str = default_args.MODEL,
@@ -50,6 +51,7 @@ class KFoldTrainingData:
             samples_file,
             clamping,
             remove_goals,
+            loss_function,
             unique_samples,
             unique_states,
         )
