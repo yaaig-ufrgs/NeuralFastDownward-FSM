@@ -96,34 +96,40 @@ def train_main(args: Namespace):
     _log.info(f"Elapsed time: {round(train_timer.current_time(), 4)}s")
     if num_retries:
         _log.info(f"Restarts needed: {num_retries}")
+    
+    if best_fold['fold'] != -1:
+        try:
+            h_pred_files = glob.glob(f"{dirname}/heuristic_pred*.csv")
+            if len(h_pred_files) > 1:
+                remove_csv_except_best(dirname, best_fold["fold"])
+                os.rename(
+                    f"{dirname}/heuristic_pred_{best_fold['fold']}.csv",
+                    f"{dirname}/heuristic_pred.csv",
+                )
+            else:
+                os.rename(
+                    f"{dirname}/heuristic_pred_0.csv",
+                    f"{dirname}/heuristic_pred.csv",
+                )
+        except:
+            _log.error(f"Failed to save heuristic_pred.csv.")
 
-    h_pred_files = glob.glob(f"{dirname}/heuristic_pred*.csv")
-    if len(h_pred_files) > 1:
-        remove_csv_except_best(dirname, best_fold["fold"])
-        os.rename(
-            f"{dirname}/heuristic_pred_{best_fold['fold']}.csv",
-            f"{dirname}/heuristic_pred.csv",
-        )
+        try:
+            if args.training_size != 1.0:
+                _log.info(
+                    f"Saving traced_{best_fold['fold']}.pt as best "
+                    f"model (by val loss = {best_fold['val_loss']})"
+                )
+                copyfile(
+                    f"{dirname}/models/traced_{best_fold['fold']}.pt",
+                    f"{dirname}/models/traced_best_val_loss.pt",
+                )
+        except:
+            _log.error(f"Failed to save best fold.")
+
+        _log.info("Training complete!")
     else:
-        os.rename(
-            f"{dirname}/heuristic_pred_0.csv",
-            f"{dirname}/heuristic_pred.csv",
-        )
-
-    try:
-        if args.training_size != 1.0:
-            _log.info(
-                f"Saving traced_{best_fold['fold']}.pt as best "
-                f"model (by val loss = {best_fold['val_loss']})"
-            )
-            copyfile(
-                f"{dirname}/models/traced_{best_fold['fold']}.pt",
-                f"{dirname}/models/traced_best_val_loss.pt",
-            )
-    except:
-        _log.error(f"Failed to save best fold.")
-
-    _log.info("Training complete!")
+        _log.error("Training incomplete! No trained networks.")
 
     # OTHER PLOTS
     make_extra_plots(args, dirname, best_fold)
@@ -227,40 +233,40 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                 patience=args.patience,
             )
 
-            fold_val_loss, born_dead = train_wf.run(fold_idx, train_timer)
+            fold_val_loss = train_wf.run(fold_idx, train_timer)
 
+            born_dead = fold_val_loss is None
             if born_dead and args.num_folds == 1:
                 args.seed += args.seed_increment_when_born_dead
                 _log.info(f"Updated seed: {args.seed}")
                 set_seeds(args, False)
                 num_retries += 1
                 add_train_arg(dirname, "updated_seed", args.seed)
-                break
+            else:
+                heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
 
-            heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
-
-            if fold_val_loss != None:
-                if fold_val_loss < best_fold["val_loss"]:
+                if fold_val_loss != None:
+                    if fold_val_loss < best_fold["val_loss"]:
+                        save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
+                        _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
+                        best_fold["fold"] = fold_idx
+                        best_fold["val_loss"] = fold_val_loss
+                    else:
+                        _log.info(
+                            f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
+                        )
+                else:  # Only using training data
                     save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
-                    _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
                     best_fold["fold"] = fold_idx
-                    best_fold["val_loss"] = fold_val_loss
-                else:
-                    _log.info(
-                        f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
-                    )
-            else:  # Only using training data
-                save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
-                best_fold["fold"] = fold_idx
-                best_fold["train_loss"] = train_wf.cur_train_loss
+                    best_fold["train_loss"] = train_wf.cur_train_loss
 
-            train_wf.save_traced_model(
-                f"{dirname}/models/traced_{fold_idx}.pt", args.model
-            )
+                train_wf.save_traced_model(
+                    f"{dirname}/models/traced_{fold_idx}.pt", args.model
+                )
 
-            if train_timer.check_timeout():
-                _log.info(f"Maximum training time reached. Stopping training.")
-                break
+        if train_timer.check_timeout():
+            _log.info(f"Maximum training time reached. Stopping training.")
+            break
 
     return best_fold, num_retries, train_timer
 
@@ -367,7 +373,7 @@ def make_extra_plots(args: Namespace, dirname: str, best_fold: dict):
             except:
                 _log.error(f"Failed making box plot.")
 
-    if args.save_heuristic_pred == False:
+    if args.save_heuristic_pred and os.path.exists(heuristic_pred_file):
         os.remove(heuristic_pred_file)
 
 

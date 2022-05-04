@@ -176,60 +176,56 @@ class TrainWorkflow:
         traced_model = torch.jit.trace(self.best_epoch_model.to("cpu"), example_input)
         traced_model.save(filename)
 
-    def run(self, fold_idx: int, train_timer: Timer) -> (float, bool):
+    def run(self, fold_idx: int, train_timer: Timer) -> float:
         """
         Network train/eval main loop.
         """
         best_loss, best_epoch = None, None
+        cur_train_loss, cur_val_loss = None, None
         born_dead = False
         t = 0
         while t < self.max_epochs and not self.early_stopped and not train_timer.check_timeout():
             cur_train_loss = self.train_loop(t, fold_idx)
-            # Check if born dead
-            if t == 0:
+            # Check if born dead (or died during training)
+            if (t == 0 or not t % 10) and not born_dead:
                 if self.dead():
                     if self.restart_no_conv:
                         _log.warning(
                             "All predictions are 0 (born dead). Restarting training with a new seed..."
                         )
-                        return None, True
+                        return None
                     else:
                         _log.warning(
                             "All predictions are 0 (born dead), but restart is disabled."
                         )
                         born_dead = True
-            # Check if the network died during training
-            elif not born_dead and self.dead():
-                _log.warning("All predictions are 0.")
 
             epoch_log = f"Epoch {t} | avg_train_loss={cur_train_loss:>7f}"
 
             if self.validation:
                 cur_val_loss = self.val_loop(t, fold_idx)
                 epoch_log += f" | avg_val_loss={cur_val_loss:>7f}"
-                if best_loss is None or best_loss > cur_val_loss:
-                    best_loss, best_epoch = cur_val_loss, t
-                    self.best_epoch_model = deepcopy(self.model)
-                if best_epoch < t - self.patience:
-                    self.early_stopped = True
-            else:
-                if best_loss is None or best_loss > cur_train_loss:
-                    best_loss, best_epoch = cur_train_loss, t
-                    self.best_epoch_model = deepcopy(self.model)
+
+            cur_loss = cur_val_loss if self.validation else cur_train_loss
+            if not best_loss or best_loss > cur_loss:
+                best_loss, best_epoch = cur_loss, t
+                self.best_epoch_model = deepcopy(self.model)
+            if best_epoch < t - self.patience:
+                self.early_stopped = True
 
             if self.testing:
                 cur_test_loss = self.test_loop()
                 epoch_log += f" | avg_test_loss={cur_test_loss:>7f}"
 
             _log.info(epoch_log)
-
-            if self.early_stopped:
-                _log.info(f"Early stop. Best epoch: {best_epoch}/{t}")
-            if train_timer.check_timeout():
-                _log.info(f"Training time reached. Best epoch: {best_epoch}/{t}")
-            if t == self.max_epochs - 1:
-                _log.info(f"Max epoch reached. Best epoch: {best_epoch}/{t}")
             t += 1
+
+        if self.early_stopped:
+            _log.info(f"Early stop. Best epoch: {best_epoch}/{t}")
+        if train_timer.check_timeout():
+            _log.info(f"Training time reached. Best epoch: {best_epoch}/{t}")
+        if t == self.max_epochs:
+            _log.info(f"Max epoch reached. Best epoch: {best_epoch}/{t}")
 
         if not self.save_best:
             self.best_epoch_model = self.model
@@ -238,7 +234,7 @@ class TrainWorkflow:
         if self.scatter_plot:
             self.save_post_scatter_plot(fold_idx)
 
-        return best_loss, False  # (best_epoch, is_dead_born)
+        return best_loss
 
     def save_post_scatter_plot(self, fold_idx: int):
         """
