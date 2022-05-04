@@ -111,7 +111,8 @@ void SamplingSearchYaaig::create_contrasting_samples(
 ) {
     if (percentage == 0)
         return;
-    assert(percentage > 0 && percentage <= 100);
+    // assert(percentage > 0 && percentage <= 100);
+    if (!(percentage > 0 && percentage <= 100)) exit(10);
 
     const size_t n_atoms = sampling_technique::modified_tasks[0]->get_values().size();
     PartialAssignment pa(
@@ -213,7 +214,8 @@ double SamplingSearchYaaig::mse(vector<shared_ptr<PartialAssignment>>& samples, 
             key.push_back((int)b - '0');
         for (int& hs: trie_statespace.find_all_compatible(key, "v_vu"))
             best_h = min(best_h, hs);
-        assert(best_h != INT_MAX);
+        // assert(best_h != INT_MAX);
+        if (!(best_h != INT_MAX)) exit(10);
         int err = best_h - pa->estimated_heuristic;
         sum += (err * err);
     }
@@ -286,9 +288,11 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                 for (shared_ptr<PartialAssignment>& t_:
                         trie.find_all_compatible(t.get_values(), avi_rule)) {
                     string t_key = t_->to_binary(true);
-                    assert(avi_mapping[s_key].successors.count(t_key) == 0);
+                    // assert(avi_mapping[s_key].successors.count(t_key) == 0);
+                    if (!(avi_mapping[s_key].successors.count(t_key) == 0)) exit(10);
                     avi_mapping[s_key].successors.insert(t_key);
-                    assert(avi_mapping[t_key].predecessors.count(s_key) == 0);
+                    // assert(avi_mapping[t_key].predecessors.count(s_key) == 0);
+                    if (!(avi_mapping[t_key].predecessors.count(s_key) == 0)) exit(10);
                     avi_mapping[t_key].predecessors.insert(s_key);
                 }
             }
@@ -319,7 +323,8 @@ void SamplingSearchYaaig::old_approximate_value_iteration(
             samples.push_back(pa);
         }
     }
-    assert(samples.size() == sampling_technique::modified_tasks.size());
+    // assert(samples.size() == sampling_technique::modified_tasks.size());
+    if (!(samples.size() == sampling_technique::modified_tasks.size())) exit(10);
 
     if (compute_mse)
         create_trie_statespace();
@@ -501,7 +506,8 @@ void SamplingSearchYaaig::compute_sampling_statistics(
             if (hs.size() == 0) {
                 not_in_statespace++;
             } else {
-                assert(hs.size() == 1);
+                // assert(hs.size() == 1);
+                if (!(hs.size() == 1)) exit(10);
                 int hstar = hs[0];
                 if (h == hstar)
                     with_hstar++;
@@ -541,10 +547,14 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       header(construct_header()),
       rng(utils::parse_rng_from_options(opts)),
       compute_mse(mse_hstar_file != "none") {
-    assert(contrasting_samples >= 0 && contrasting_samples <= 100);
-    assert(assignments_by_undefined_state > 0);
-    assert(avi_k == 0 || avi_k == 1);
-    assert(avi_its > 0);
+    // assert(contrasting_samples >= 0 && contrasting_samples <= 100);
+    if (!(contrasting_samples >= 0 && contrasting_samples <= 100)) exit(10);
+    // assert(assignments_by_undefined_state > 0);
+    if (!(assignments_by_undefined_state > 0)) exit(10);
+    // assert(avi_k == 0 || avi_k == 1);
+    if (!(avi_k == 0 || avi_k == 1)) exit(10);
+    // assert(avi_its > 0);
+    if (!(avi_its > 0)) exit(10);
 }
 
 static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parser) {
