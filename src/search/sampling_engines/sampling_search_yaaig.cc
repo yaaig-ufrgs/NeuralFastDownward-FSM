@@ -186,6 +186,8 @@ vector<string> SamplingSearchYaaig::values_to_samples(
                     if (i < p.second.first.size() - 1)
                         oss << ' ';
                 }
+            } else if (state_representation == "valid") {
+                exit(10); // not implemented
             } else {
                 for (unsigned i = 0; i < relevant_facts.size(); i++) {
                     if ((state_representation == "undefined") && (i == 0 || relevant_facts[i].var != relevant_facts[i-1].var))
@@ -397,7 +399,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             values_set.push_back(
                 make_pair(h, make_pair(s.get_values(), s.to_binary()))
             );
-        } else if (state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial" || state_representation == "facts_partial") {
+        } else if (state_representation == "partial" || state_representation == "valid" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial" || state_representation == "facts_partial") {
             if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
                 h = 0;
             values_set.push_back(
@@ -513,7 +515,7 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "true");
     parser.add_option<string>(
             "state_representation",
-            "State facts representation format (complete, complete_no_mutex, partial, undefined, assign_undefined, undefined_char, values_partial, values_complete, facts_partial, or facts_complete).",
+            "State facts representation format (complete, complete_no_mutex, partial, valid, undefined, assign_undefined, undefined_char, values_partial, values_complete, facts_partial, or facts_complete).",
             "complete");
     parser.add_option<string>(
             "minimization",

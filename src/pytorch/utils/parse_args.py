@@ -1272,7 +1272,7 @@ def get_sample_args():
     parser.add_argument(
         "-st",
         "--state-representation",
-        choices=["fs", "fs-nomutex", "ps", "us", "au", "uc"],  # full state, full state no mutex, partial state, undefined, assign undefined, undefined char
+        choices=["fs", "fs-nomutex", "ps", "us", "au", "uc", "vs"],  # full state, full state no mutex, partial state, undefined, assign undefined, undefined char, valid state
         default=default_args.SAMPLE_STATE_REPRESENTATION,
         help="Output state representation. (default: %(default)s)",
     )

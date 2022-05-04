@@ -57,6 +57,8 @@ def get_full_state_repr_name(state_repr):
         return "values_partial"
     elif state_repr == "vfs":
         return "values_complete"
+    elif state_repr == "vs":
+        return "valid"
     return state_repr
 
 
