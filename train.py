@@ -93,8 +93,9 @@ def train_main(args: Namespace):
     best_fold, num_retries, train_timer = train_nn(args, dirname, device)
 
     _log.info("Finishing training.")
-    _log.info(f"Elapsed time: {train_timer.current_time()}")
-    _log.info(f"Restarts needed: {num_retries}")
+    _log.info(f"Elapsed time: {round(train_timer.current_time(), 4)}s")
+    if num_retries:
+        _log.info(f"Restarts needed: {num_retries}")
 
     h_pred_files = glob.glob(f"{dirname}/heuristic_pred*.csv")
     if len(h_pred_files) > 1:
@@ -122,8 +123,6 @@ def train_main(args: Namespace):
     except:
         _log.error(f"Failed to save best fold.")
 
-
-    _log.info(f"Restarts needed: {num_retries}")
     _log.info("Training complete!")
 
     # OTHER PLOTS
@@ -147,7 +146,9 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
     losses = {"mse": (nn.MSELoss(), False), "mse_weighted": (MSELossWeighted(), True), "rmse": (RMSELoss(), False)}
     chosen_loss_function, is_weighted = losses[args.loss_function]
 
+    train_timer = Timer(args.max_training_time).start()
     while born_dead:
+        starting_time = train_timer.current_time()
         kfold = KFoldTrainingData(
             args.samples,
             device=device,
@@ -171,12 +172,12 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
             unique_states=args.unique_states,
             model=args.model,
         )
+        _log.info(f"Loading the training data took {round(train_timer.current_time() - starting_time, 4)}s.")
 
         if args.normalize_output:
             # Add the reference value in train_args.json to denormalize in the test
             add_train_arg(dirname, "max_h", kfold.domain_max_value)
 
-        train_timer = Timer(args.max_training_time).start()
         best_fold = {"fold": -1, "val_loss": float("inf")}
 
         for fold_idx in range(args.num_folds):

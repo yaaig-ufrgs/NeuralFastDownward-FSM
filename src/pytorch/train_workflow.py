@@ -182,7 +182,8 @@ class TrainWorkflow:
         """
         best_loss, best_epoch = None, None
         born_dead = False
-        for t in range(self.max_epochs):
+        t = 0
+        while t < self.max_epochs and not self.early_stopped and not train_timer.check_timeout():
             cur_train_loss = self.train_loop(t, fold_idx)
             # Check if born dead
             if t == 0:
@@ -224,13 +225,11 @@ class TrainWorkflow:
 
             if self.early_stopped:
                 _log.info(f"Early stop. Best epoch: {best_epoch}/{t}")
-                break
-            # Check once every 10 epochs
-            if (t % 10 == 0) and train_timer.check_timeout():
+            if train_timer.check_timeout():
                 _log.info(f"Training time reached. Best epoch: {best_epoch}/{t}")
-                break
             if t == self.max_epochs - 1:
                 _log.info(f"Max epoch reached. Best epoch: {best_epoch}/{t}")
+            t += 1
 
         if not self.save_best:
             self.best_epoch_model = self.model
