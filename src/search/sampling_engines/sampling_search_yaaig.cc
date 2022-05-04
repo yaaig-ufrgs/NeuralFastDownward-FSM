@@ -249,7 +249,57 @@ void SamplingSearchYaaig::create_trie_statespace() {
     }
 }
 
-void SamplingSearchYaaig::approximate_value_iteration(
+void SamplingSearchYaaig::approximate_value_iteration() {
+    // Trie
+    auto t = std::chrono::high_resolution_clock::now();
+    unordered_map<string,int> min_pairs_pre;
+    trie::trie<shared_ptr<PartialAssignment>> trie;
+    for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
+        string bin = partialAssignment->to_binary();
+        int h = partialAssignment->estimated_heuristic;
+        // Maintain a mapping to keep the smallest h-value
+        // in the trie in case there are duplicate samples
+        if (min_pairs_pre.count(bin) == 0 || h < min_pairs_pre[bin]) {
+            trie.insert(partialAssignment->get_values(), partialAssignment);
+            min_pairs_pre[bin] = h;
+        }
+    }
+    cout << endl << "[AVI] Time creating trie: " << (std::chrono::duration<double, std::milli>(
+        std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
+
+    // Mapping
+    t = std::chrono::high_resolution_clock::now();
+    const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
+        utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
+    const OperatorsProxy operators = task_proxy.get_operators();
+
+    unordered_map<string,AviNode> avi_mapping;
+    for (shared_ptr<PartialAssignment>& s : sampling_technique::modified_tasks) {
+        string s_key = s->to_binary(true);
+        if (avi_mapping.count(s_key) == 0) {
+            vector<OperatorID> applicable_operators;
+            succ_generator->generate_applicable_ops(*s, applicable_operators);
+            for (OperatorID& op_id : applicable_operators) {
+                OperatorProxy op_proxy = operators[op_id];
+                PartialAssignment t = s->get_partial_successor(op_proxy);
+                if (t.violates_mutexes()) continue;
+                for (shared_ptr<PartialAssignment>& t_:
+                        trie.find_all_compatible(t.get_values(), avi_rule)) {
+                    string t_key = t_->to_binary(true);
+                    assert(avi_mapping[s_key].successors.count(t_key) == 0);
+                    avi_mapping[s_key].successors.insert(t_key);
+                    assert(avi_mapping[t_key].predecessors.count(s_key) == 0);
+                    avi_mapping[t_key].predecessors.insert(s_key);
+                }
+            }
+        }
+        avi_mapping[s_key].samples.push_back(s);
+    }
+    cout << "[AVI] Time creating AVI mapping: " << (std::chrono::duration<double, std::milli>(
+        std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
+}
+
+void SamplingSearchYaaig::old_approximate_value_iteration(
     std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> sample_pairs
 ) {
     if (avi_k <= 0 || avi_its <= 0)
@@ -425,7 +475,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         create_contrasting_samples(values_set, contrasting_samples);
 
     if (avi_state_representation == "complete")
-        approximate_value_iteration(values_set);
+        old_approximate_value_iteration(values_set);
 
     if (!minimization_before_avi
         && (minimization == "complete" || minimization == "both")

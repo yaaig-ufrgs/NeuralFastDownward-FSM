@@ -60,7 +60,8 @@ public:
 private:
     void create_trie_statespace();
     double mse(std::vector<std::shared_ptr<PartialAssignment>>& samples, bool root = false);
-    void approximate_value_iteration(
+    void approximate_value_iteration();
+    void old_approximate_value_iteration(
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> sample_pairs =
             std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>()
     );
@@ -72,6 +73,13 @@ private:
     std::vector<std::string> values_to_samples(
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> values_set);
     void compute_sampling_statistics(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> samples);
+};
+
+class AviNode {
+public:
+    std::vector<std::shared_ptr<PartialAssignment>> samples;
+    std::unordered_set<std::string> predecessors;
+    std::unordered_set<std::string> successors;
 };
 }
 #endif
