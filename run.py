@@ -92,7 +92,7 @@ def do_sample_mod(mod: str, samples_dir: str, statespace: str, min_seed: int, ma
 def main(exp_paths: [str]):
     intercalate = False
     if intercalate:
-        exp_paths = sort_list_intercalate(exp_paths) 
+        exp_paths = sort_list_intercalate(exp_paths)
     for exp_path in exp_paths:
         full_exp = {}
         with open(exp_path, "r") as exp_file:
@@ -110,7 +110,8 @@ def main(exp_paths: [str]):
             sampling["output-dir"] = exp["samples"]
         if train is not None and test is not None:
             test["model-dir"] = train["output-folder"]
-            test["save-git-diff"] = train["save-git-diff"]
+            if "save-git-diff" in train:
+                test["save-git-diff"] = train["save-git-diff"]
 
         only_sampling = str2bool(exp["exp-only-sampling"])
         only_train = str2bool(exp["exp-only-train"])
