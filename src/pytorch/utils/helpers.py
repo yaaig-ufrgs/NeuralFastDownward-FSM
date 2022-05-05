@@ -51,6 +51,16 @@ def get_datetime() -> str:
     return datetime.now(timezone.utc).strftime("%d %B %Y %H:%M:%S UTC")
 
 
+def get_curr_memory_usage_mb():
+    """
+    Get current memory in MB.
+    """
+
+    with open('/proc/self/status') as f:
+        memusage = f.read().split('VmRSS:')[1].split('\n')[0][:-3]
+
+    return round(int(memusage.strip()) / 1024)
+
 def get_fixed_max_epochs(args, model="resnet_ferber21", time="1800") -> int:
     """
     If argument `-e` equals -1, returns a default number of training epochs

@@ -6,6 +6,7 @@ import random
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle as skshuffle
 from torch.utils.data import DataLoader
+from src.pytorch.utils.helpers import get_curr_memory_usage_mb
 import src.pytorch.utils.default_args as default_args
 
 from src.pytorch.training_data import (
@@ -55,6 +56,8 @@ class KFoldTrainingData:
             unique_samples,
             unique_states,
         )
+
+        _log.info(f"Mem usage after loading data: {get_curr_memory_usage_mb()} MB")
 
         self.normalize = normalize
         if self.normalize:
@@ -189,6 +192,7 @@ class KFoldTrainingData:
             )
 
             kfolds.append((train_dataloader, val_dataloader, test_dataloader))
+            _log.info(f"Mem usage after creating fold(s): {get_curr_memory_usage_mb()} MB")
 
         return kfolds
 
