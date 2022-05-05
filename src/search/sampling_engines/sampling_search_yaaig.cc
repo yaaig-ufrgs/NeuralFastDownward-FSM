@@ -303,7 +303,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             avi_mapping[s_key].best_h = s->estimated_heuristic;
         avi_mapping[s_key].samples.push_back(s);
     }
-     if (minimization == "partial" || minimization == "both") {
+    if (minimization == "partial" || minimization == "both") {
         for (pair<string,AviNode> p: avi_mapping)
             for (shared_ptr<PartialAssignment>& t : p.second.samples)
                 t->estimated_heuristic = p.second.best_h;
@@ -503,10 +503,11 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         );
     }
 
-    if (avi_k > 0 && avi_its > 0)
-        old_approximate_value_iteration();
-    else if (minimization == "partial" || minimization == "both")
+    if (avi_k > 0 && avi_its > 0) {
+        approximate_value_iteration();
+    } else if (minimization == "partial" || minimization == "both") {
         do_minimization(sampling_technique::modified_tasks);
+    }
 
     vector<pair<int,pair<vector<int>,string>>> values_set;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
@@ -543,8 +544,9 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         create_contrasting_samples(values_set, contrasting_samples);
 
     if ((minimization == "complete" || minimization == "both")
-        && !(state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char"))
+            && !(state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char")) {
         do_minimization(values_set);
+    }
 
     compute_sampling_statistics(values_set);
     return values_to_samples(values_set);
