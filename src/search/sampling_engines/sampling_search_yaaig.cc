@@ -12,7 +12,6 @@
 #include <sstream>
 #include <fstream>
 #include <string>
-#include <limits.h>
 #include <chrono>
 
 using namespace std;
@@ -215,9 +214,10 @@ double SamplingSearchYaaig::mse(vector<shared_ptr<PartialAssignment>>& samples, 
         for (int& hs: trie_statespace.find_all_compatible(key, "v_vu"))
             best_h = min(best_h, hs);
         // assert(best_h != INT_MAX);
-        if (!(best_h != INT_MAX)) exit(10);
-        int err = best_h - pa->estimated_heuristic;
-        sum += (err * err);
+        if (best_h != INT_MAX) {
+            int err = best_h - pa->estimated_heuristic;
+            sum += (err * err);
+        }
     }
     double e = sum / samples.size();
     return root ? sqrt(e) : e;
@@ -274,11 +274,11 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
     const OperatorsProxy operators = task_proxy.get_operators();
-
     unordered_map<string,AviNode> avi_mapping;
+    int min_fail = 0;
     for (shared_ptr<PartialAssignment>& s : sampling_technique::modified_tasks) {
         string s_key = s->to_binary(true);
-        if (avi_mapping.count(s_key) == 0) {
+        if (avi_mapping.count(s_key) == 0 || true) {
             vector<OperatorID> applicable_operators;
             succ_generator->generate_applicable_ops(*s, applicable_operators);
             for (OperatorID& op_id : applicable_operators) {
@@ -288,19 +288,97 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                 for (shared_ptr<PartialAssignment>& t_:
                         trie.find_all_compatible(t.get_values(), avi_rule)) {
                     string t_key = t_->to_binary(true);
-                    // assert(avi_mapping[s_key].successors.count(t_key) == 0);
-                    if (!(avi_mapping[s_key].successors.count(t_key) == 0)) exit(10);
-                    avi_mapping[s_key].successors.insert(t_key);
-                    // assert(avi_mapping[t_key].predecessors.count(s_key) == 0);
-                    if (!(avi_mapping[t_key].predecessors.count(s_key) == 0)) exit(10);
-                    avi_mapping[t_key].predecessors.insert(s_key);
+                    pair<string,int> pair = make_pair(t_key, op_proxy.get_cost());
+                    if (find(avi_mapping[s_key].successors.begin(), avi_mapping[s_key].successors.end(), pair)
+                            == avi_mapping[s_key].successors.end()) {
+                        avi_mapping[s_key].successors.push_back(pair);
+                        avi_mapping[t_key].predecessors.push_back(make_pair(s_key, op_proxy.get_cost()));
+                    }
                 }
+            }
+        }
+        if (s->estimated_heuristic < avi_mapping[s_key].best_h) {
+            avi_mapping[s_key].best_h = s->estimated_heuristic;
+            // Minimization!
+            for (shared_ptr<PartialAssignment>& s : avi_mapping[s_key].samples) {
+                if (s->estimated_heuristic != avi_mapping[s_key].best_h)
+                    min_fail++; // cout << s->estimated_heuristic << " " << avi_mapping[s_key].best_h << endl;
+                s->estimated_heuristic = min(s->estimated_heuristic, avi_mapping[s_key].best_h);
             }
         }
         avi_mapping[s_key].samples.push_back(s);
     }
+    cout << "min_fail=" << min_fail << endl;
     cout << "[AVI] Time creating AVI mapping: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
+
+    // Iterations
+    if (compute_mse)
+        create_trie_statespace();
+    ofstream mse_result(mse_result_file);
+    if (!trie_statespace.empty()) {
+        double e = mse(sampling_technique::modified_tasks);
+        double re = sqrt(e);
+        cout << "[AVI] Iteration #" << 0 << " | RMSE: " << re << endl;
+        mse_result << "avi_it,mse,rmse,success_rate,time (sec)" << endl;
+        mse_result << 0 << "," << e << "," << re << ",," << endl;
+    }
+
+    t = std::chrono::high_resolution_clock::now();
+    double last_loss = __DBL_MAX__;
+    bool early_stop = false;
+    int total_samples = sampling_technique::modified_tasks.size();
+    for (int it = 1; (it <= avi_its) && !early_stop; it++) {
+        auto t_start_avi_it = std::chrono::high_resolution_clock::now();
+        int success_count = 0;
+        for (pair<string,AviNode> p: avi_mapping) {
+            int success = 0;
+            for (pair<string,int> s_ : p.second.successors) { // pair<binary,op_cost>
+                int candidate_heuristic = avi_mapping[s_.first].best_h + (avi_unit_cost ? 1 : s_.second);
+                // why don't work?
+                // if (candidate_heuristic < avi_mapping[p.first].best_h) {
+                //     avi_mapping[p.first].best_h = candidate_heuristic;
+                //     for (shared_ptr<PartialAssignment>& s : p.second.samples) {
+                //         if (candidate_heuristic < s->estimated_heuristic) {
+                //             s->estimated_heuristic = candidate_heuristic;
+                //             success++;
+                //         }
+                //     }
+                // }
+                avi_mapping[p.first].best_h = min(avi_mapping[p.first].best_h, candidate_heuristic);
+                for (shared_ptr<PartialAssignment>& s : p.second.samples) {
+                    if (candidate_heuristic < s->estimated_heuristic) {
+                        s->estimated_heuristic = candidate_heuristic;
+                        success++;
+                    }
+                }
+            }
+            success_count += success; // TODO fix it: a state is counted more than once if more
+                                      // than one operator is applicable and reduces its h-value
+        }
+
+        cout << "[AVI] Iteration #" << it;
+        if (!trie_statespace.empty()) {
+            double e = mse(sampling_technique::modified_tasks), re = sqrt(e);
+            cout << " | RMSE: " << re;
+            mse_result << it << "," << e << "," << re;
+            early_stop = (last_loss - re <= avi_epsilon);
+            last_loss = re;
+        }
+        double success_rate = (100 * (double)success_count / total_samples);
+        double it_time = (std::chrono::duration<double, std::milli>(
+            std::chrono::high_resolution_clock::now() - t_start_avi_it).count() / 1000.0);
+        cout << " | Success rate: " << success_count << "/" << total_samples << " (" << success_rate << "%)";
+        cout << " | Time: " << it_time << "s" << endl;
+        if (!trie_statespace.empty())
+            mse_result << "," << success_count << "/" << total_samples << " (" << success_rate << "%)" << "," << it_time << endl;
+        early_stop |= success_count == 0;
+        if (early_stop)
+            cout << "[AVI] Early stopped." << endl;
+    }
+    cout << "[AVI] Total time: " << (std::chrono::duration<double, std::milli>(
+        std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
+    mse_result.close();
 }
 
 void SamplingSearchYaaig::old_approximate_value_iteration(
@@ -436,7 +514,8 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     if (minimization_before_avi && (minimization == "partial" || minimization == "both"))
         do_minimization(sampling_technique::modified_tasks);
     if (avi_state_representation == "partial")
-        approximate_value_iteration();
+        old_approximate_value_iteration();
+    // TODO: why twice?
     if (!minimization_before_avi && (minimization == "partial" || minimization == "both"))
         do_minimization(sampling_technique::modified_tasks);
 

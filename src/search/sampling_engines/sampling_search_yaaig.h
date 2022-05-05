@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <random>
+#include <limits.h>
 
 #include <unordered_map>
 #include <unordered_set>
@@ -78,8 +79,9 @@ private:
 class AviNode {
 public:
     std::vector<std::shared_ptr<PartialAssignment>> samples;
-    std::unordered_set<std::string> predecessors;
-    std::unordered_set<std::string> successors;
+    std::vector<std::pair<std::string,int>> predecessors;
+    std::vector<std::pair<std::string,int>> successors;
+    int best_h = INT_MAX;
 };
 }
 #endif
