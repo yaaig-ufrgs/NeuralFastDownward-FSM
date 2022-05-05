@@ -240,7 +240,7 @@ int get_curr_memory_in_kb() {
     string word;
     while (procfile.good()) {
         procfile >> word;
-        if (word == "VmSize:") {
+        if (word == "VmRSS:") {
             procfile >> memory_in_kb;
             break;
         }

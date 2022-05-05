@@ -23,6 +23,7 @@ from src.pytorch.utils.helpers import (
     get_fixed_max_epochs,
     add_train_arg,
     get_problem_by_sample_filename,
+    get_curr_memory_usage_mb,
 )
 from src.pytorch.utils.file_helpers import (
     create_train_directory,
@@ -130,6 +131,8 @@ def train_main(args: Namespace):
         _log.info("Training complete!")
     else:
         _log.error("Training incomplete! No trained networks.")
+
+    _log.info(f"Mem usage END: {get_curr_memory_usage_mb()} MB")
 
     # OTHER PLOTS
     make_extra_plots(args, dirname, best_fold)

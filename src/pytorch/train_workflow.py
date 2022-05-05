@@ -6,7 +6,7 @@ from copy import deepcopy
 from torch.utils.data import DataLoader
 from src.pytorch.model import HNN
 from src.pytorch.utils.plot import save_y_pred_scatter
-from src.pytorch.utils.helpers import prefix_to_h
+from src.pytorch.utils.helpers import prefix_to_h, get_curr_memory_usage_mb
 from src.pytorch.utils.timer import Timer
 
 _log = logging.getLogger(__name__)
@@ -218,6 +218,10 @@ class TrainWorkflow:
                 epoch_log += f" | avg_test_loss={cur_test_loss:>7f}"
 
             _log.info(epoch_log)
+
+            if t % 10 == 0:
+                _log.info(f"Mem usage: {get_curr_memory_usage_mb()} MB")
+
             t += 1
 
         if self.early_stopped:

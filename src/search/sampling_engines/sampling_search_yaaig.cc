@@ -447,7 +447,7 @@ void SamplingSearchYaaig::old_approximate_value_iteration(
         for (shared_ptr<PartialAssignment>& pa: samples) {
             bool success = false;
             vector<OperatorID> applicable_operators;
-            succ_generator->generate_applicable_ops(*pa, applicable_operators);
+            succ_generator->generate_applicable_ops(*pa, applicable_operators, true);
             for (OperatorID& op_id : applicable_operators) {
                 OperatorProxy op_proxy = operators[op_id];
                 PartialAssignment succ_pa = pa->get_partial_successor(op_proxy);
