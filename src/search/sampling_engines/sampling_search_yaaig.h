@@ -30,15 +30,12 @@ protected:
     const bool store_state;
     const std::string state_representation;
     const std::string minimization;
-    const bool minimization_before_avi;
     const int assignments_by_undefined_state;
     const int contrasting_samples;
     const int avi_k;
     const int avi_its;
     const std::string avi_rule;
     const double avi_epsilon;
-    const std::string avi_state_representation;
-    const bool avi_symmetric_statespace;
     const bool avi_unit_cost;
     const bool sort_h;
     const std::string mse_hstar_file;

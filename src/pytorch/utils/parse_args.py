@@ -1362,25 +1362,11 @@ def get_sample_args():
         help="Directory where the samples will be saved. (default: %(default)s)",
     )
     parser.add_argument(
-        "-sym",
-        "--symm-statespace",
-        type=str2bool,
-        default=default_args.SAMPLE_SYMMETRIC_STATESPACE,
-        help="AVI iterates both ways if domain state space is symmetric. (default: %(default)s)",
-    )
-    parser.add_argument(
         "-min",
         "--minimization",
         choices=["none", "partial", "complete", "both"],
         default=default_args.SAMPLE_MINIMIZATION,
         help="Sample h-value minimization strategy to use. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-minbavi",
-        "--minimization-before-avi",
-        type=str2bool,
-        default=default_args.SAMPLE_MINIMIZATION_BEFORE_AVI,
-        help="Perform minimization before the AVI procedure. (default: %(default)s)",
     )
     parser.add_argument(
         "-sorth",
@@ -1416,13 +1402,6 @@ def get_sample_args():
         choices=["vu_u", "v_vu"], # v -> v | u,  u -> u :::: v -> v,  u -> v | u
         default=default_args.SAMPLE_AVI_RULE,
         help="Rule used to check if a state s' is compatible with s'' during AVI. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-avirepr",
-        "--avi-state-representation",
-        choices=["ps", "fs"],
-        default=default_args.SAMPLE_AVI_STATE_REPRESENTATION,
-        help="When to perform AVI: while samples are `partial (ps)` states or when samples are `complete (fs)` states. (default: %(default)s)",
     )
     parser.add_argument(
         "-kd",

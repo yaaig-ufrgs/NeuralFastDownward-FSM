@@ -252,6 +252,9 @@ void SamplingSearchYaaig::create_trie_statespace() {
 }
 
 void SamplingSearchYaaig::approximate_value_iteration() {
+    if (avi_k <= 0 || avi_its <= 0)
+        return;
+
     // Trie
     auto t = std::chrono::high_resolution_clock::now();
     unordered_map<string,int> min_pairs_pre;
@@ -275,12 +278,11 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
     const OperatorsProxy operators = task_proxy.get_operators();
     unordered_map<string,AviNode> avi_mapping;
-    int min_fail = 0;
     for (shared_ptr<PartialAssignment>& s : sampling_technique::modified_tasks) {
         string s_key = s->to_binary(true);
-        if (avi_mapping.count(s_key) == 0 || true) {
+        if (avi_mapping.count(s_key) == 0) {
             vector<OperatorID> applicable_operators;
-            succ_generator->generate_applicable_ops(*s, applicable_operators);
+            succ_generator->generate_applicable_ops(*s, applicable_operators, true);
             for (OperatorID& op_id : applicable_operators) {
                 OperatorProxy op_proxy = operators[op_id];
                 PartialAssignment t = s->get_partial_successor(op_proxy);
@@ -297,18 +299,15 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                 }
             }
         }
-        if (s->estimated_heuristic < avi_mapping[s_key].best_h) {
+        if (s->estimated_heuristic < avi_mapping[s_key].best_h)
             avi_mapping[s_key].best_h = s->estimated_heuristic;
-            // Minimization!
-            for (shared_ptr<PartialAssignment>& s : avi_mapping[s_key].samples) {
-                if (s->estimated_heuristic != avi_mapping[s_key].best_h)
-                    min_fail++; // cout << s->estimated_heuristic << " " << avi_mapping[s_key].best_h << endl;
-                s->estimated_heuristic = min(s->estimated_heuristic, avi_mapping[s_key].best_h);
-            }
-        }
         avi_mapping[s_key].samples.push_back(s);
     }
-    cout << "min_fail=" << min_fail << endl;
+     if (minimization == "partial" || minimization == "both") {
+        for (pair<string,AviNode> p: avi_mapping)
+            for (shared_ptr<PartialAssignment>& t : p.second.samples)
+                t->estimated_heuristic = p.second.best_h;
+    }
     cout << "[AVI] Time creating AVI mapping: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 
@@ -459,13 +458,6 @@ void SamplingSearchYaaig::old_approximate_value_iteration(
                         pa->estimated_heuristic = candidate_heuristic;
                         success = true;
                     }
-                    if (avi_symmetric_statespace) {
-                        candidate_heuristic = pa->estimated_heuristic + (avi_unit_cost ? 1 : op_proxy.get_cost());
-                        if (candidate_heuristic < _pa_succ->estimated_heuristic) {
-                            _pa_succ->estimated_heuristic = candidate_heuristic;
-                            success = true;
-                        }
-                    }
                 }
             }
             if (success)
@@ -511,12 +503,9 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         );
     }
 
-    if (minimization_before_avi && (minimization == "partial" || minimization == "both"))
-        do_minimization(sampling_technique::modified_tasks);
-    if (avi_state_representation == "partial")
+    if (avi_k > 0 && avi_its > 0)
         old_approximate_value_iteration();
-    // TODO: why twice?
-    if (!minimization_before_avi && (minimization == "partial" || minimization == "both"))
+    else if (minimization == "partial" || minimization == "both")
         do_minimization(sampling_technique::modified_tasks);
 
     vector<pair<int,pair<vector<int>,string>>> values_set;
@@ -550,19 +539,10 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         }
     }
 
-    if (minimization_before_avi
-        && (minimization == "complete" || minimization == "both")
-        && !(state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char"))
-        do_minimization(values_set);
-
     if (contrasting_samples > 0)
         create_contrasting_samples(values_set, contrasting_samples);
 
-    if (avi_state_representation == "complete")
-        old_approximate_value_iteration(values_set);
-
-    if (!minimization_before_avi
-        && (minimization == "complete" || minimization == "both")
+    if ((minimization == "complete" || minimization == "both")
         && !(state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char"))
         do_minimization(values_set);
 
@@ -609,15 +589,12 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       store_state(opts.get<bool>("store_state")),
       state_representation(opts.get<string>("state_representation")),
       minimization(opts.get<string>("minimization")),
-      minimization_before_avi(opts.get<bool>("minimization_before_avi")),
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
       contrasting_samples(opts.get<int>("contrasting_samples")),
       avi_k(opts.get<int>("avi_k")),
       avi_its(opts.get<int>("avi_its")),
       avi_rule(opts.get<string>("avi_rule")),
       avi_epsilon(stod(opts.get<string>("avi_epsilon"))),
-      avi_state_representation(opts.get<string>("avi_state_representation")),
-      avi_symmetric_statespace(opts.get<bool>("avi_symmetric_statespace")),
       avi_unit_cost(opts.get<bool>("avi_unit_cost")),
       sort_h(opts.get<bool>("sort_h")),
       mse_hstar_file(opts.get<string>("mse_hstar_file")),
@@ -633,7 +610,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
     // assert(avi_k == 0 || avi_k == 1);
     if (!(avi_k == 0 || avi_k == 1)) exit(10);
     // assert(avi_its > 0);
-    if (!(avi_its > 0)) exit(10);
+    if (!(avi_its >= 0)) exit(10);
 }
 
 static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parser) {
@@ -660,10 +637,6 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "minimization",
             "Identical states receive the best heuristic value assigned between them (minimization in : none, partial, complete, both).",
             "none");
-    parser.add_option<bool>(
-            "minimization_before_avi",
-            "When using ps, perform minimization before the AVI procedure",
-            "false");
     parser.add_option<int>(
             "assignments_by_undefined_state",
             "Number of states generated from each undefined state (only with assign_undefined).",
@@ -688,14 +661,6 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "avi_epsilon",
             "RMSE no-improvement threshold for AVI early stop.",
             "-1");
-    parser.add_option<string>(
-            "avi_state_representation",
-            "State representation when the AVI should be applied. (partial, complete).",
-            "partial");
-    parser.add_option<bool>(
-            "avi_symmetric_statespace",
-            "AVI iterates both ways if domain state space is symmetric.",
-            "false");
     parser.add_option<bool>(
             "avi_unit_cost",
             "Increments h by unit cost instead of operator cost.",
