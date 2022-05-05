@@ -27,9 +27,9 @@ public:
     ~SuccessorGenerator();
 
     void generate_applicable_ops(
-        const State &state, std::vector<OperatorID> &applicable_ops) const;
+        const State &state, std::vector<OperatorID> &applicable_ops, bool reject_unassigned = false) const;
     void generate_applicable_ops(
-    const PartialAssignment &paritalAssignment, std::vector<OperatorID> &applicable_ops) const;
+        const PartialAssignment &paritalAssignment, std::vector<OperatorID> &applicable_ops, bool reject_unassigned = false) const;
 };
 
 extern PerTaskInformation<SuccessorGenerator> g_successor_generators;

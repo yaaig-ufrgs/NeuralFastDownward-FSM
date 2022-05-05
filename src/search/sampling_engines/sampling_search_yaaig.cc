@@ -215,9 +215,18 @@ double SamplingSearchYaaig::mse(vector<shared_ptr<PartialAssignment>>& samples, 
         for (int& hs: trie_statespace.find_all_compatible(key, "v_vu"))
             best_h = min(best_h, hs);
         // assert(best_h != INT_MAX);
+        if (best_h != INT_MAX) {
+            int err = best_h - pa->estimated_heuristic;
+            sum += (err * err);
+        }
+        /*
+        for (int& hs: trie_statespace.find_all_compatible(key, "v_vu"))
+            best_h = min(best_h, hs);
+        // assert(best_h != INT_MAX);
         if (!(best_h != INT_MAX)) exit(10);
         int err = best_h - pa->estimated_heuristic;
         sum += (err * err);
+        */
     }
     double e = sum / samples.size();
     return root ? sqrt(e) : e;
@@ -369,7 +378,7 @@ void SamplingSearchYaaig::old_approximate_value_iteration(
         for (shared_ptr<PartialAssignment>& pa: samples) {
             bool success = false;
             vector<OperatorID> applicable_operators;
-            succ_generator->generate_applicable_ops(*pa, applicable_operators);
+            succ_generator->generate_applicable_ops(*pa, applicable_operators, true);
             for (OperatorID& op_id : applicable_operators) {
                 OperatorProxy op_proxy = operators[op_id];
                 PartialAssignment succ_pa = pa->get_partial_successor(op_proxy);
@@ -436,7 +445,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     if (minimization_before_avi && (minimization == "partial" || minimization == "both"))
         do_minimization(sampling_technique::modified_tasks);
     if (avi_state_representation == "partial")
-        approximate_value_iteration();
+        old_approximate_value_iteration();
     if (!minimization_before_avi && (minimization == "partial" || minimization == "both"))
         do_minimization(sampling_technique::modified_tasks);
 

@@ -13,15 +13,15 @@ SuccessorGenerator::SuccessorGenerator(const TaskProxy &task_proxy)
 SuccessorGenerator::~SuccessorGenerator() = default;
 
 void SuccessorGenerator::generate_applicable_ops(
-    const State &state, vector<OperatorID> &applicable_ops) const {
+    const State &state, vector<OperatorID> &applicable_ops, bool reject_unassigned) const {
     state.unpack();
-    root->generate_applicable_ops(state.get_unpacked_values(), applicable_ops);
+    root->generate_applicable_ops(state.get_unpacked_values(), applicable_ops, reject_unassigned);
 }
 
 void SuccessorGenerator::generate_applicable_ops(
-    const PartialAssignment &partialAssignment, vector<OperatorID> &applicable_ops) const {
+    const PartialAssignment &partialAssignment, vector<OperatorID> &applicable_ops, bool reject_unassigned) const {
     assert(partialAssignment.get_unpacked_values().size() > 0);
-    root->generate_applicable_ops(partialAssignment.get_unpacked_values(), applicable_ops);
+    root->generate_applicable_ops(partialAssignment.get_unpacked_values(), applicable_ops, reject_unassigned);
 }
 
 PerTaskInformation<SuccessorGenerator> g_successor_generators;
