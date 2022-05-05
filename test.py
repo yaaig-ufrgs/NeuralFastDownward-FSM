@@ -41,7 +41,6 @@ def test_main(args):
         _log.error(f"train_folder example: {example}")
         return
 
-    args.save_git_diff = True
     if len(args.train_folder_compare) > 0:
         domain_cmp, problem_cmp = get_problem_by_sample_filename(
             str(args.train_folder_compare).split(".")[1]

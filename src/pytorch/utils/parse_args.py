@@ -26,6 +26,13 @@ def get_train_args():
         help="Saves the best model from the best epoch instead of the last one. (default: %(default)s)",
     )
     parser.add_argument(
+        "-diff",
+        "--save-git-diff",
+        type=str2bool,
+        default=default_args.SAVE_GIT_DIFF,
+        help="Saves git diff or not. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-pte",
         "--post-train-eval",
         type=str2bool,
@@ -394,6 +401,13 @@ def get_test_args():
         "problem_pddls", type=str, nargs="*", default=[], help="Path to problems PDDL."
     )
     parser.add_argument(
+        "-diff",
+        "--save-git-diff",
+        type=str2bool,
+        default=default_args.SAVE_GIT_DIFF,
+        help="Saves git diff or not. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-d",
         "--domain_pddl",
         type=str,
@@ -663,6 +677,13 @@ def get_exp_args():
         choices=["hnn", "resnet"],
         default=default_args.MODEL,
         help="Network model to use. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-diff",
+        "--train-save-git-diff",
+        type=str2bool,
+        default=default_args.SAVE_GIT_DIFF,
+        help="Saves git diff or not. (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-pte",
@@ -1012,6 +1033,13 @@ def get_exp_args():
         "--test-model-dir",
         type=Path,
         help="Path to training folder with trained model. Only used if only testing.",
+    )
+    parser.add_argument(
+        "-tst-diff",
+        "--test-save-git-diff",
+        type=str2bool,
+        default=default_args.SAVE_GIT_DIFF,
+        help="Saves git diff or not. (default: %(default)s)",
     )
     parser.add_argument(
         "-tst-pt",

@@ -52,8 +52,8 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
         trained_model_dir = f"{args.train_output_folder}/nfd_train.{sample_name}.ns{net_seed}" if not args.exp_only_test else f"{args.test_model_dir}/nfd_train.{sample_name}.ns{net_seed}"
 
         train_args = (
-            f"{sample} -mdl {args.train_model} -pte {args.train_post_train_eval} -pat {args.train_patience} "
-            f"-hl {args.train_hidden_layers} "
+            f"{sample} -mdl {args.train_model} -diff {args.train_save_git_diff} "
+            f"-pte {args.train_post_train_eval} -pat {args.train_patience} -hl {args.train_hidden_layers} "
             f"-b {args.train_batch_size} -e {args.train_max_epochs} -a {args.train_activation} "
             f"-o {args.train_output_layer} -sb {args.train_save_best_epoch_model} "
             f"-lo {args.train_linear_output} -f {args.train_num_folds} -clp {args.train_clamping} "
@@ -78,7 +78,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
             train_args += f" -addfn {args.train_additional_folder_name}"
 
         test_args = (
-            f"-a {args.test_search_algorithm} -heu {args.test_heuristic} "
+            f"-diff {args.test_save_git_diff} -a {args.test_search_algorithm} -heu {args.test_heuristic} "
             f"-t {args.test_max_search_time} -m {args.test_max_search_memory} "
             f"-sdir {args.test_samples_dir} -atn {args.test_auto_tasks_n} "
             f"-ats {args.test_auto_tasks_seed} -pt {args.test_test_model} "

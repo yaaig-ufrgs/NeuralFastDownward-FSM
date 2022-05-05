@@ -29,6 +29,7 @@ def logging_train_config(
         "hostname": get_hostname(),
         "date": get_datetime(),
         "commit": get_git_commit(),
+        "save_git_diff": args.save_git_diff,
         "command_line": cmd_line,
         "domain": args.domain,
         "problem": args.problem,

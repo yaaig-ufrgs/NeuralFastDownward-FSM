@@ -110,6 +110,7 @@ def main(exp_paths: [str]):
             sampling["output-dir"] = exp["samples"]
         if train is not None and test is not None:
             test["model-dir"] = train["output-folder"]
+            test["save-git-diff"] = train["save-git-diff"]
 
         only_sampling = str2bool(exp["exp-only-sampling"])
         only_train = str2bool(exp["exp-only-train"])
