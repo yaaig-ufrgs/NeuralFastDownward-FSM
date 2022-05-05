@@ -280,33 +280,33 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     unordered_map<string,AviNode> avi_mapping;
     for (shared_ptr<PartialAssignment>& s : sampling_technique::modified_tasks) {
         string s_key = s->to_binary(true);
-        if (avi_mapping.count(s_key) == 0) {
+        if (avi_mapping[s_key].samples.size() == 0) {
             vector<OperatorID> applicable_operators;
             succ_generator->generate_applicable_ops(*s, applicable_operators, true);
             for (OperatorID& op_id : applicable_operators) {
                 OperatorProxy op_proxy = operators[op_id];
                 PartialAssignment t = s->get_partial_successor(op_proxy);
-                if (t.violates_mutexes()) continue;
-                for (shared_ptr<PartialAssignment>& t_:
-                        trie.find_all_compatible(t.get_values(), avi_rule)) {
-                    string t_key = t_->to_binary(true);
-                    pair<string,int> pair = make_pair(t_key, op_proxy.get_cost());
-                    if (find(avi_mapping[s_key].successors.begin(), avi_mapping[s_key].successors.end(), pair)
-                            == avi_mapping[s_key].successors.end()) {
-                        avi_mapping[s_key].successors.push_back(pair);
-                        avi_mapping[t_key].predecessors.push_back(make_pair(s_key, op_proxy.get_cost()));
+                if (!t.violates_mutexes()) {
+                    for (shared_ptr<PartialAssignment>& t_: trie.find_all_compatible(t.get_values(), avi_rule)) {
+                        string t_key = t_->to_binary(true);
+                        pair<string,int> pair = make_pair(t_key, op_proxy.get_cost());
+                        if (find(avi_mapping[s_key].successors.begin(), avi_mapping[s_key].successors.end(), pair)
+                                == avi_mapping[s_key].successors.end()) {
+                            avi_mapping[s_key].successors.push_back(pair);
+                            avi_mapping[t_key].predecessors.push_back(make_pair(s_key, op_proxy.get_cost()));
+                        }
                     }
                 }
             }
         }
+        avi_mapping[s_key].samples.push_back(s);
         if (s->estimated_heuristic < avi_mapping[s_key].best_h)
             avi_mapping[s_key].best_h = s->estimated_heuristic;
-        avi_mapping[s_key].samples.push_back(s);
     }
     if (minimization == "partial" || minimization == "both") {
         for (pair<string,AviNode> p: avi_mapping)
-            for (shared_ptr<PartialAssignment>& t : p.second.samples)
-                t->estimated_heuristic = p.second.best_h;
+            for (shared_ptr<PartialAssignment>& s : p.second.samples)
+                s->estimated_heuristic = p.second.best_h;
     }
     cout << "[AVI] Time creating AVI mapping: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
@@ -334,19 +334,9 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             int success = 0;
             for (pair<string,int> s_ : p.second.successors) { // pair<binary,op_cost>
                 int candidate_heuristic = avi_mapping[s_.first].best_h + (avi_unit_cost ? 1 : s_.second);
-                // why don't work?
-                // if (candidate_heuristic < avi_mapping[p.first].best_h) {
-                //     avi_mapping[p.first].best_h = candidate_heuristic;
-                //     for (shared_ptr<PartialAssignment>& s : p.second.samples) {
-                //         if (candidate_heuristic < s->estimated_heuristic) {
-                //             s->estimated_heuristic = candidate_heuristic;
-                //             success++;
-                //         }
-                //     }
-                // }
-                avi_mapping[p.first].best_h = min(avi_mapping[p.first].best_h, candidate_heuristic);
-                for (shared_ptr<PartialAssignment>& s : p.second.samples) {
-                    if (candidate_heuristic < s->estimated_heuristic) {
+                if (candidate_heuristic < avi_mapping[p.first].best_h) {
+                    avi_mapping[p.first].best_h = candidate_heuristic;
+                    for (shared_ptr<PartialAssignment>& s : p.second.samples) {
                         s->estimated_heuristic = candidate_heuristic;
                         success++;
                     }
@@ -504,7 +494,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     }
 
     if (avi_k > 0 && avi_its > 0) {
-        approximate_value_iteration();
+        old_approximate_value_iteration();
     } else if (minimization == "partial" || minimization == "both") {
         do_minimization(sampling_technique::modified_tasks);
     }
@@ -610,7 +600,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
     // assert(assignments_by_undefined_state > 0);
     if (!(assignments_by_undefined_state > 0)) exit(10);
     // assert(avi_k == 0 || avi_k == 1);
-    if (!(avi_k == 0 || avi_k == 1)) exit(10);
+    // if (!(avi_k == 0 || avi_k == 1)) exit(10);
     // assert(avi_its > 0);
     if (!(avi_its >= 0)) exit(10);
 }
