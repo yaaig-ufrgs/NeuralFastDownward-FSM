@@ -122,7 +122,7 @@ def yaaig_ferber(args, meth):
                 if args.allow_dups != "none":
                     dups = "_dups-" + ("ir" if args.allow_dups == "interrollout" else args.allow_dups)
                 # sps = f"srch-{args.searches}_sps-{args.samples_per_search}_maxs-{args.max_samples}" if args.samples_per_search != -1 else f"maxs-{args.max_samples}"
-                sps = f"maxs-{args.max_samples}"
+                sps = f"maxs-{args.max_samples}" if args.max_samples != -1 else ""
                 boundtype = f"bnd-{get_bound_type(args.bound)}"
                 boundmult = "" if args.bound_multiplier == 1.0 else f"bmul-{str(args.bound_multiplier).replace('.', '-')}_"
                 statespace_file = "none" if not args.sample_only_statespace else args.statespace
