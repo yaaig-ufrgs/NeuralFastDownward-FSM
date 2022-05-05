@@ -34,6 +34,7 @@ section = argv[1]
 key = argv[2]
 
 add_to_value = True if argv[3][0] == '+' else False
+remove_key = True if argv[3][0] == '-' or argv[3] == 'remove' else False
 
 if add_to_value:
     v = argv[3][1:]
@@ -47,10 +48,14 @@ for json_file in argv[4:]:
 
     if add_to_value:
         json_decoded[section][key] += value
+    elif remove_key:
+        if key in json_decoded[section]:
+            del json_decoded[section][key]
     else:
         json_decoded[section][key] = value
 
-    print(f"{json_file}[{section}][{key}] = {json_decoded[section][key]}\n")
+    if key in json_decoded[section]:
+        print(f"{json_file}[{section}][{key}] = {json_decoded[section][key]}\n")
 
     with open(json_file, 'w') as jf:
         json.dump(json_decoded, jf, indent=4)
