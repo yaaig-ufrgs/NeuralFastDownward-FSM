@@ -43,7 +43,6 @@ protected:
     const std::vector<FactPair> relevant_facts;
     const std::string header;
     std::shared_ptr<utils::RandomNumberGenerator> rng;
-    const bool compute_mse;
     trie::trie<int> trie_statespace; // with h*
 
     virtual std::vector<std::string> extract_samples() override;
@@ -58,6 +57,7 @@ public:
 private:
     void create_trie_statespace();
     double mse(std::vector<std::shared_ptr<PartialAssignment>>& samples, bool root = false);
+    void log_mse(int updates);
     void approximate_value_iteration();
     void old_approximate_value_iteration(
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> sample_pairs =
@@ -79,6 +79,10 @@ public:
     std::vector<std::pair<std::string,int>> predecessors;
     std::vector<std::pair<std::string,int>> successors;
     int best_h = INT_MAX;
+
+    bool operator()(AviNode& a, AviNode& b) {
+        return a.best_h < b.best_h;
+    }
 };
 }
 #endif
