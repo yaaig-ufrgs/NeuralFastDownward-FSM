@@ -260,8 +260,10 @@ void GeneratorSwitchHash::generate_applicable_ops(
             generator_for_val->generate_applicable_ops(state, applicable_ops, reject_unassigned);
         }
     } else {
-        for (auto &iter: generator_for_value){
-            iter.second->generate_applicable_ops(state, applicable_ops, reject_unassigned);
+        if (!reject_unassigned) {
+            for (auto &iter: generator_for_value){
+                iter.second->generate_applicable_ops(state, applicable_ops, reject_unassigned);
+            }
         }
     }
 }
