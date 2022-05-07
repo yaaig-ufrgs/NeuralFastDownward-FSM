@@ -10,24 +10,39 @@ from itertools import chain, zip_longest
 
 _log = logging.getLogger(__name__)
 
+
 class InstanceDataset(Dataset):
     def __init__(
-        self, states: list, heuristics: list, weights: list, domain_max_value: int, output_layer: str
+        self,
+        states: list,
+        heuristics: list,
+        weights: list,
+        domain_max_value: int,
+        output_layer: str,
     ):
 
         self.output_layer = output_layer
         self.domain_max_value = domain_max_value
 
-        self.weights = torch.tensor(np.array(weights), dtype=torch.float32).unsqueeze(1)
+        # We don't need extra memory usage.
+        if len(weights) > 0:
+            self.weights = torch.tensor(
+                np.array(weights), dtype=torch.float32
+            ).unsqueeze(1)
+        else:
+            self.weights = []
 
+        # Is there a better way to do this?
         st = []
         for s in states:
             st.append(np.fromiter(s, dtype=np.int8))
-            
+
         self.states = torch.tensor(np.array(st), dtype=torch.float32)
 
         if output_layer == "regression":
-            self.hvalues = torch.tensor(np.array(heuristics), dtype=torch.float32).unsqueeze(1)
+            self.hvalues = torch.tensor(
+                np.array(heuristics), dtype=torch.float32
+            ).unsqueeze(1)
 
         elif output_layer == "prefix":
             self.hvalues = torch.tensor(
@@ -61,8 +76,13 @@ class InstanceDataset(Dataset):
 
 
 def load_training_state_value_pairs(
-        samples_file: str, clamping: int, remove_goals: bool,  loss_function: str,
-        unique_samples: bool, unique_states: bool):
+    samples_file: str,
+    clamping: int,
+    remove_goals: bool,
+    loss_function: str,
+    unique_samples: bool,
+    unique_states: bool,
+):
     """
     Loads the data.
     """
@@ -111,7 +131,6 @@ def load_training_state_value_pairs(
 
                 states.append(state)
                 heuristics.append(h_int)
-                weights.append(1)
 
                 # Gets the domain max h value.
                 if h_int > max_h:
@@ -130,14 +149,14 @@ def load_training_state_value_pairs(
         for i in range(states):
             curr_st = states[i]
             curr_h = heuristics[i]
-            if unique_samples: # Weighting based on quant of unique states + heuristic.
+            if unique_samples:  # Weighting based on quant of unique states + heuristic.
                 h_st = str(curr_h) + ";" + curr_st
                 weights.append(sample_count[h_st])
-            elif unique_states: # Weighting based on quant. of unique states.
+            elif unique_states:  # Weighting based on quant. of unique states.
                 weights.append(state_count[curr_st])
-            #else: # No weighting, use default (1).
-            #    weights.append(1)
-            
+            else:  # No weighting, use default (1).
+                weights.append(1)
+
     return states, heuristics, weights, domain_max_value
 
 

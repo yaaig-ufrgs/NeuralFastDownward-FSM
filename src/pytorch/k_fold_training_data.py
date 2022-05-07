@@ -49,7 +49,12 @@ class KFoldTrainingData:
         self.device = device
 
         _log.info("Reading and preparing data...")
-        self.states, self.heuristics, self.weights, self.domain_max_value = load_training_state_value_pairs(
+        (
+            self.states,
+            self.heuristics,
+            self.weights,
+            self.domain_max_value,
+        ) = load_training_state_value_pairs(
             samples_file,
             clamping,
             remove_goals,
@@ -91,43 +96,107 @@ class KFoldTrainingData:
         kfolds = []
         instances_per_fold = int(len(self.states) / self.num_folds)
         for i in range(self.num_folds):
-            x_train, x_val, x_test, y_train, y_val, y_test, w_train, w_val, w_test = [], [], [], [], [], [], [], [], []
+            x_train, x_val, x_test, y_train, y_val, y_test, w_train, w_val, w_test = (
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+            )
             if self.num_folds == 1:
                 # Test set = complement of training+val set
                 if self.sample_percentage < 1.0:
-                    self.states, x_test, self.heuristics, y_test, self.weights, w_test = train_test_split(
-                        self.states, self.heuristics, self.weights,
-                        train_size=self.sample_percentage,
-                        shuffle=self.shuffle,
-                        random_state=self.shuffle_seed,
-                    )
+                    if len(self.weights) > 0:
+                        (
+                            self.states,
+                            x_test,
+                            self.heuristics,
+                            y_test,
+                            self.weights,
+                            w_test,
+                        ) = train_test_split(
+                            self.states,
+                            self.heuristics,
+                            self.weights,
+                            train_size=self.sample_percentage,
+                            shuffle=self.shuffle,
+                            random_state=self.shuffle_seed,
+                        )
+                    else:
+                        self.states, x_test, self.heuristics, y_test = train_test_split(
+                            self.states,
+                            self.heuristics,
+                            train_size=self.sample_percentage,
+                            shuffle=self.shuffle,
+                            random_state=self.shuffle_seed,
+                        )
 
                 if self.training_size == 1.0:
-                    x_train, y_train, w_train = (
-                        skshuffle(
-                            self.states, self.heuristics, self.weights, random_state=self.shuffle_seed
+                    if len(self.weights) > 0:
+                        x_train, y_train, w_train = (
+                            skshuffle(
+                                self.states,
+                                self.heuristics,
+                                self.weights,
+                                random_state=self.shuffle_seed,
+                            )
+                            if self.shuffle
+                            else (self.states, self.heuristics, self.weights)
                         )
-                        if self.shuffle
-                        else (self.states, self.heuristics, self.weights)
-                    )
+                    else:
+                        x_train, y_train = (
+                            skshuffle(
+                                self.states,
+                                self.heuristics,
+                                random_state=self.shuffle_seed,
+                            )
+                            if self.shuffle
+                            else (self.states, self.heuristics)
+                        )
+
                 else:
-                    x_train, x_val, y_train, y_val, w_train, w_val = train_test_split(
-                        self.states, self.heuristics, self.weights,
-                        train_size=self.training_size,
-                        shuffle=self.shuffle,
-                        random_state=self.shuffle_seed,
-                    )
+                    if len(self.weights) > 0:
+                        (
+                            x_train,
+                            x_val,
+                            y_train,
+                            y_val,
+                            w_train,
+                            w_val,
+                        ) = train_test_split(
+                            self.states,
+                            self.heuristics,
+                            self.weights,
+                            train_size=self.training_size,
+                            shuffle=self.shuffle,
+                            random_state=self.shuffle_seed,
+                        )
+                    else:
+                        x_train, x_val, y_train, y_val = train_test_split(
+                            self.states,
+                            self.heuristics,
+                            train_size=self.training_size,
+                            shuffle=self.shuffle,
+                            random_state=self.shuffle_seed,
+                        )
+
             else:
                 # TODO: `sample_percentage` and `test_set` not implemented here!
                 for j in range(len(self.states)):
                     if int(j / instances_per_fold) == i:
                         x_test.append(self.states[j])
                         y_test.append(self.heuristics[j])
-                        w_test.append(self.weights[j])
+                        if len(self.weights) > 0:
+                            w_test.append(self.weights[j])
                     else:
                         x_train.append(self.states[j])
                         y_train.append(self.heuristics[j])
-                        w_train.append(self.weights[j])
+                        if len(self.weights) > 0:
+                            w_train.append(self.weights[j])
 
             del self.states[:]
             del self.states
@@ -160,7 +229,9 @@ class KFoldTrainingData:
 
             pin_mem = True if self.device == torch.device("cuda:0") else False
 
-            _log.info(f"Mem usage before train_dataloader: {get_curr_memory_usage_mb()} MB")
+            _log.info(
+                f"Mem usage before train_dataloader: {get_curr_memory_usage_mb()} MB"
+            )
             train_dataloader = DataLoader(
                 dataset=InstanceDataset(
                     x_train, y_train, w_train, self.domain_max_value, self.output_layer
@@ -212,7 +283,9 @@ class KFoldTrainingData:
             _log.info(f"Mem usage: {get_curr_memory_usage_mb()} MB")
 
             kfolds.append((train_dataloader, val_dataloader, test_dataloader))
-            _log.info(f"Mem usage after creating fold(s): {get_curr_memory_usage_mb()} MB")
+            _log.info(
+                f"Mem usage after creating fold(s): {get_curr_memory_usage_mb()} MB"
+            )
 
         return kfolds
 
