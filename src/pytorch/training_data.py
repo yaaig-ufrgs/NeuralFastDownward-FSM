@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from src.pytorch.utils.helpers import to_prefix, to_onehot
 import src.pytorch.fast_downward_api as fd_api
@@ -7,30 +8,32 @@ from itertools import chain, zip_longest
 
 class InstanceDataset(Dataset):
     def __init__(
-        self, state_value_pairs: list, domain_max_value: int, output_layer: str
+        self, sv: list, domain_max_value: int, output_layer: str
     ):
-        states, hvalues, weights = [], [], []
-        for pair in state_value_pairs:
-            states.append([int(s) for s in pair[0]])
-            hvalues.append(pair[1])
-            if len(pair) == 3:
-                weights.append(pair[2])
 
         self.output_layer = output_layer
         self.domain_max_value = domain_max_value
 
-        if len(weights) > 0:
-            self.weights = torch.tensor(weights, dtype=torch.float32).unsqueeze(1)
+        if len(sv[0]) == 3:
+            self.weights = torch.tensor(sv[:,2].astype(np.float), dtype=torch.float32).unsqueeze(1)
         else:
             self.weights = []
-        self.states = torch.tensor(states, dtype=torch.float32)
+
+        states = sv[:,0]
+        s = []
+        for st in states:
+            s.append(np.fromiter(st, dtype=np.int8))
+            
+        self.states = torch.tensor(s, dtype=torch.float32)
+
+        print(sv[:,1].astype(np.float))
 
         if output_layer == "regression":
-            self.hvalues = torch.tensor(hvalues, dtype=torch.float32).unsqueeze(1)
+            self.hvalues = torch.tensor(sv[:,1].astype(np.float), dtype=torch.float32).unsqueeze(1)
 
         elif output_layer == "prefix":
             self.hvalues = torch.tensor(
-                [to_prefix(n, self.domain_max_value) for n in hvalues],
+                [to_prefix(n, self.domain_max_value) for n in sv[:,1]],
                 dtype=torch.float32,
             )
 

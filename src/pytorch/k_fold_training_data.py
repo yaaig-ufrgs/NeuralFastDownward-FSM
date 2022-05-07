@@ -152,7 +152,7 @@ class KFoldTrainingData:
 
             train_dataloader = DataLoader(
                 dataset=InstanceDataset(
-                    training_set, self.domain_max_value, self.output_layer
+                    np.array(training_set), self.domain_max_value, self.output_layer
                 ),
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
@@ -167,7 +167,7 @@ class KFoldTrainingData:
             val_dataloader = (
                 DataLoader(
                     dataset=InstanceDataset(
-                        val_set, self.domain_max_value, self.output_layer
+                        np.array(val_set), self.domain_max_value, self.output_layer
                     ),
                     batch_size=self.batch_size,
                     shuffle=self.shuffle,
@@ -185,7 +185,7 @@ class KFoldTrainingData:
             test_dataloader = (
                 DataLoader(
                     dataset=InstanceDataset(
-                        test_set, self.domain_max_value, self.output_layer
+                        np.array(test_set), self.domain_max_value, self.output_layer
                     ),
                     batch_size=self.batch_size,
                     shuffle=self.shuffle,
