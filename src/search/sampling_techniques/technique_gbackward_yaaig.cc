@@ -399,14 +399,14 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         } while ((samples.size() < (unsigned)max_samples) && !stopped);
 
     } else if (technique == "dfs_rw" || technique == "bfs_rw") {
-        cout << technique << " (" << subtechnique << ") not implemented!" << endl;
+        utils::g_log << technique << " (" << subtechnique << ") not implemented!" << endl;
         exit(1);
     }
 
     // pos-dfs/bfs random walk step
     if (technique == "dfs_rw" || technique == "bfs_rw") {
         if (leaves.size() <= 0) {
-            cout << "The whole statespace was sampled. Skipping Random Walk." << endl;
+            utils::g_log << "The whole statespace was sampled. Skipping Random Walk." << endl;
             stopped = true;
             return samples;
         }
@@ -418,7 +418,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 bfs_core.insert(*s);
             }
 
-        cout << "Starting random walk search (" << subtechnique << ") from " << leaves.size() << " leaves" << endl
+        utils::g_log << "Starting random walk search (" << subtechnique << ") from " << leaves.size() << " leaves" << endl
              << "Looking for " << (max_samples - samples.size()) << " more samples..." << endl;
         int lid = 0;
         vector<bool> leaves_used(leaves.size(), false);

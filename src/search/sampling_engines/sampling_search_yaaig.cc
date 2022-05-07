@@ -230,7 +230,7 @@ double SamplingSearchYaaig::mse(vector<shared_ptr<PartialAssignment>>& samples, 
 }
 
 void SamplingSearchYaaig::log_mse(int updates) {
-    ostringstream file_str, cout_str;
+    ostringstream file_str, log_str;
     static chrono::_V2::system_clock::time_point start;
     if (updates == 0) {
         start = std::chrono::high_resolution_clock::now();
@@ -243,23 +243,22 @@ void SamplingSearchYaaig::log_mse(int updates) {
         re = sqrt(e);
         file_str << updates << "," << e << "," << re << ",," << endl;
     }
-    cout_str << "[AVI] Updates: " << updates;
+    log_str << "[AVI] Updates: " << updates;
     if (re != -1)
-        cout_str << " | RMSE: " << re;
-    cout_str << " | Time: " << fixed << (chrono::duration<double, milli>(
+        log_str << " | RMSE: " << re;
+    log_str << " | Time: " << fixed << (chrono::duration<double, milli>(
             chrono::high_resolution_clock::now() - start).count() / 1000.0) << "s";
-    cout_str << endl;
     if (mse_result_file != "none" && !trie_statespace.empty()) {
         ofstream mse_result(mse_result_file);
         mse_result << file_str.str();
         mse_result.close();
     }
-    cout << cout_str.str();
+    utils::g_log << log_str.str() << "\n";
 }
 
 void SamplingSearchYaaig::create_trie_statespace() {
     if (mse_hstar_file == "none") {
-        // cout << "Could not create trie_statespace: missing state space file." << endl;
+        // utils::g_log << "Could not create trie_statespace: missing state space file." << endl;
         return;
     }
     if (!trie_statespace.empty()) // was already created in a previous call
@@ -278,10 +277,10 @@ void SamplingSearchYaaig::create_trie_statespace() {
             trie_statespace.insert(key, h);
         }
         f.close();
-        cout << "Time creating trie_statespace: " << (std::chrono::duration<double, std::milli>(
+        utils::g_log << "Time creating trie_statespace: " << (std::chrono::duration<double, std::milli>(
             std::chrono::high_resolution_clock::now() - t_start_avi).count() / 1000.0) << "s" << endl;
     } else {
-        cout << "*** Could not open state space file! ***" << endl;
+        utils::g_log << "*** Could not open state space file! ***" << endl;
     }
 }
 
@@ -292,7 +291,8 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         create_trie_statespace();
 
     // Trie
-    auto t = std::chrono::high_resolution_clock::now();
+    auto t_avi = std::chrono::high_resolution_clock::now();
+    auto t = t_avi;
     unordered_map<string,int> min_pairs_pre;
     trie::trie<shared_ptr<PartialAssignment>> trie;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
@@ -305,7 +305,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             min_pairs_pre[bin] = h;
         }
     }
-    cout << "[AVI] Time creating trie: " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[AVI] Time creating trie: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 
     // Mapping
@@ -344,10 +344,11 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             for (shared_ptr<PartialAssignment>& s : p.second.samples)
                 s->estimated_heuristic = p.second.best_h;
     }
-    cout << "[AVI] Time creating AVI mapping: " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[AVI] Time creating AVI mapping: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 
     // AVI loop
+    utils::g_log << "Starting AVI updates...\n";
     t = std::chrono::high_resolution_clock::now();
     int updates = 0, updates_between_rmse = sampling_technique::modified_tasks.size() * 0.25;
     log_mse(updates);
@@ -375,11 +376,16 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         queue.erase(it);
     }
     log_mse(updates);
-    cout << "[AVI] Total time: " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[AVI] Time updating h-values: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
+
+    utils::g_log << "[AVI] Total time: " << (std::chrono::duration<double, std::milli>(
+        std::chrono::high_resolution_clock::now() - t_avi).count() / 1000.0) << "s" << endl;
 }
 
 vector<string> SamplingSearchYaaig::extract_samples() {
+    utils::g_log << endl;
+
     if (sort_h) {
         sort(
             sampling_technique::modified_tasks.begin(),
@@ -444,6 +450,7 @@ void SamplingSearchYaaig::compute_sampling_statistics(
     vector<pair<int,pair<vector<int>,string>>> samples
 ) {
     create_trie_statespace();
+    utils::g_log << "Generating statistics on samples...\n";
     if (!trie_statespace.empty()) {
         int not_in_statespace = 0, underestimates = 0, with_hstar = 0, sum_h = 0;
         for (auto& s : samples) {
@@ -465,13 +472,13 @@ void SamplingSearchYaaig::compute_sampling_statistics(
                     underestimates++;
             }
         }
-        cout << "[STATS] Samples: " << samples.size() << endl;
-        cout << "[STATS] Samples with h*: " << with_hstar << endl;
-        cout << "[STATS] Samples underestimating h*: " << underestimates << endl;
-        cout << "[STATS] Samples not in state space: " << not_in_statespace << endl;
-        cout << "[STATS] Average h value: " << ((float)sum_h / samples.size()) << endl;
+        utils::g_log << "[STATS] Samples: " << samples.size() << "\n";
+        utils::g_log << "[STATS] Samples with h*: " << with_hstar << "\n";
+        utils::g_log << "[STATS] Samples underestimating h*: " << underestimates << "\n";
+        utils::g_log << "[STATS] Samples not in state space: " << not_in_statespace << "\n";
+        utils::g_log << "[STATS] Average h value: " << ((float)sum_h / samples.size()) << "\n";
     } else {
-        // cout << "[STATS] trie_statespace was not created." << endl;
+        // utils::g_log << "[STATS] trie_statespace was not created." << endl;
     }
 }
 
