@@ -121,12 +121,12 @@ def yaaig_ferber(args, meth):
                 if args.allow_dups != "none":
                     dups = "_dups-" + ("ir" if args.allow_dups == "interrollout" else args.allow_dups)
                 # sps = f"srch-{args.searches}_sps-{args.samples_per_search}_maxs-{args.max_samples}" if args.samples_per_search != -1 else f"maxs-{args.max_samples}"
-                sps = f"maxs-{args.max_samples}" if args.max_samples != -1 else ""
+                sps = f"_maxs-{args.max_samples}" if args.max_samples != -1 else ""
                 boundtype = f"bnd-{get_bound_type(args.bound)}"
-                boundmult = "" if args.bound_multiplier == 1.0 else f"bmul-{str(args.bound_multiplier).replace('.', '-')}_"
+                boundmult = "" if args.bound_multiplier == 1.0 else f"_bmul-{str(args.bound_multiplier).replace('.', '-')}"
                 statespace_file = "none" if not args.sample_only_statespace else args.statespace
                 if meth == "yaaig":
-                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{subtech}{depthk}{avik}{avits}{dups}_min-{args.minimization}_repr-{args.state_representation}_{boundtype}_{boundmult}{sps}_ss{i}'
+                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{subtech}{depthk}{avik}{avits}{dups}_min-{args.minimization}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}_ss{i}'
                     rmse_out = out + "_rmse"
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
