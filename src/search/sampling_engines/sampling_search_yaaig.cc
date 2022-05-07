@@ -379,118 +379,6 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 }
 
-void SamplingSearchYaaig::old_approximate_value_iteration(
-    std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> sample_pairs
-) {
-    if (avi_k <= 0 || avi_its <= 0)
-        return;
-
-    auto t_start_avi = std::chrono::high_resolution_clock::now();
-    cout << endl;
-
-    vector<shared_ptr<PartialAssignment>> samples;
-    if (sample_pairs.empty()) {
-        samples = sampling_technique::modified_tasks;
-    } else {
-        for (auto& p : sample_pairs) {
-            vector<int> values(p.second.first);
-            shared_ptr<PartialAssignment> pa = make_shared<PartialAssignment>(*task, move(values));
-            pa->estimated_heuristic = p.first;
-            samples.push_back(pa);
-        }
-    }
-    // assert(samples.size() == sampling_technique::modified_tasks.size());
-    if (!(samples.size() == sampling_technique::modified_tasks.size())) exit(10);
-
-    if (mse_hstar_file != "none")
-        create_trie_statespace();
-
-    auto t_start_avi_trie = std::chrono::high_resolution_clock::now();
-    unordered_map<string,int> min_pairs_pre;
-    trie::trie<shared_ptr<PartialAssignment>> trie;
-    for (shared_ptr<PartialAssignment>& partialAssignment: samples) {
-        string bin = partialAssignment->to_binary(true);
-        int h = partialAssignment->estimated_heuristic;
-        // Maintain a mapping to keep the smallest h-value
-        // in the trie in case there are duplicate samples
-        if (min_pairs_pre.count(bin) == 0 || h < min_pairs_pre[bin]) {
-            trie.insert(partialAssignment->get_values(), partialAssignment);
-            min_pairs_pre[bin] = h;
-        }
-    }
-    cout << "[AVI] Time creating trie: " << (std::chrono::duration<double, std::milli>(
-        std::chrono::high_resolution_clock::now() - t_start_avi_trie).count() / 1000.0) << "s" << endl;
-
-    ofstream mse_result(mse_result_file);
-    if (!trie_statespace.empty()) {
-        double e = mse(samples);
-        double re = sqrt(e);
-        cout << "[AVI] Iteration #" << 0 << " | RMSE: " << re << endl;
-        mse_result << "avi_it,mse,rmse,success_rate,time (sec)" << endl;
-        mse_result << 0 << "," << e << "," << re << ",," << endl;
-    }
-
-    const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
-        utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
-    const OperatorsProxy operators = task_proxy.get_operators();
-
-    double last_loss = __DBL_MAX__;
-    bool early_stop = false;
-    int total_samples = samples.size();
-    for (int it = 1; (it <= avi_its) && !early_stop; it++) {
-        int success_count = 0;
-        auto t_start_avi_it = std::chrono::high_resolution_clock::now();
-        // for v in succ(u)
-        //   h(u) := min { h(u), h(v)+1 }
-        for (shared_ptr<PartialAssignment>& pa: samples) {
-            bool success = false;
-            vector<OperatorID> applicable_operators;
-            succ_generator->generate_applicable_ops(*pa, applicable_operators, true);
-            for (OperatorID& op_id : applicable_operators) {
-                OperatorProxy op_proxy = operators[op_id];
-                PartialAssignment succ_pa = pa->get_partial_successor(op_proxy);
-                if (succ_pa.violates_mutexes())
-                    continue;
-                for (shared_ptr<PartialAssignment>& _pa_succ: trie.find_all_compatible(succ_pa.get_values(), avi_rule)) {
-                    int candidate_heuristic = _pa_succ->estimated_heuristic + (avi_unit_cost ? 1 : op_proxy.get_cost());
-                    if (candidate_heuristic < pa->estimated_heuristic) {
-                        pa->estimated_heuristic = candidate_heuristic;
-                        success = true;
-                    }
-                }
-            }
-            if (success)
-                success_count++;
-        }
-        cout << "[AVI] Iteration #" << it;
-        if (!trie_statespace.empty()) {
-            double e = mse(samples), re = sqrt(e);
-            cout << " | RMSE: " << re;
-            mse_result << it << "," << e << "," << re;
-            early_stop = (last_loss - re <= avi_epsilon);
-            last_loss = re;
-        }
-        double success_rate = (100 * (double)success_count / total_samples);
-        double it_time = (std::chrono::duration<double, std::milli>(
-            std::chrono::high_resolution_clock::now() - t_start_avi_it).count() / 1000.0);
-
-        cout << " | Success rate: " << success_count << "/" << total_samples << " (" << success_rate << "%)";
-        cout << " | Time: " << it_time << "s" << endl;
-
-        if (!trie_statespace.empty())
-            mse_result << "," << success_count << "/" << total_samples << " (" << success_rate << "%)" << "," << it_time << endl;
-
-        early_stop |= success_count == 0;
-        if (early_stop)
-            cout << "[AVI] Early stopped." << endl;
-    }
-
-    cout << "[AVI] Total time: " << (std::chrono::duration<double, std::milli>(
-        std::chrono::high_resolution_clock::now() - t_start_avi).count() / 1000.0) << "s" << endl;
-
-    mse_result.close();
-}
-
 vector<string> SamplingSearchYaaig::extract_samples() {
     if (sort_h) {
         sort(
@@ -503,14 +391,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     }
 
     if (avi_k > 0 && avi_its > 0) {
-        bool old_avi = false;
-        if (old_avi) {
-            old_approximate_value_iteration();
-            if (minimization == "partial" || minimization == "both")
-                do_minimization(sampling_technique::modified_tasks);
-        } else {
-            approximate_value_iteration();
-        }
+        approximate_value_iteration();
     } else if (minimization == "partial" || minimization == "both") {
         do_minimization(sampling_technique::modified_tasks);
     }
@@ -554,7 +435,8 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         do_minimization(values_set);
     }
 
-    compute_sampling_statistics(values_set);
+    if (state_representation == "complete" || state_representation == "complete_no_mutex" || state_representation == "partial" || state_representation == "valid")
+        compute_sampling_statistics(values_set);
     return values_to_samples(values_set);
 }
 
@@ -563,9 +445,10 @@ void SamplingSearchYaaig::compute_sampling_statistics(
 ) {
     create_trie_statespace();
     if (!trie_statespace.empty()) {
-        int not_in_statespace = 0, underestimates = 0, with_hstar = 0;
+        int not_in_statespace = 0, underestimates = 0, with_hstar = 0, sum_h = 0;
         for (auto& s : samples) {
             int h = s.first;
+            sum_h += h;
             vector<int> key;
             for (char& b : s.second.second)
                 key.push_back((int)b - '0');
@@ -586,6 +469,7 @@ void SamplingSearchYaaig::compute_sampling_statistics(
         cout << "[STATS] Samples with h*: " << with_hstar << endl;
         cout << "[STATS] Samples underestimating h*: " << underestimates << endl;
         cout << "[STATS] Samples not in state space: " << not_in_statespace << endl;
+        cout << "[STATS] Average h value: " << ((float)sum_h / samples.size()) << endl;
     } else {
         // cout << "[STATS] trie_statespace was not created." << endl;
     }
