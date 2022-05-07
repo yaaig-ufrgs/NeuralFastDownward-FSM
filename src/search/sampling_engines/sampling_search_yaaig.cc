@@ -49,7 +49,7 @@ void SamplingSearchYaaig::do_minimization(vector<shared_ptr<PartialAssignment>>&
     unordered_map<string,pair<int,vector<int*>>> pairs;
 
     for (shared_ptr<PartialAssignment>& s: states) {
-        string bin = s->to_binary();
+        string bin = s->to_binary(true);
         if (pairs.count(bin) == 0) {
             pairs[bin] = make_pair(
                 s->estimated_heuristic,
@@ -187,17 +187,22 @@ vector<string> SamplingSearchYaaig::values_to_samples(
                     if (i < p.second.first.size() - 1)
                         oss << ' ';
                 }
+            } else if (
+                    state_representation == "complete" ||
+                    state_representation == "complete_no_mutex" ||
+                    state_representation == "partial" ||
+                    state_representation == "undefined_char") {
+                oss << p.second.second;
             } else if (state_representation == "valid") {
                 exit(10); // not implemented
-            } else {
+            } else if (state_representation == "undefined" || state_representation == "assign_undefined") {
                 for (unsigned i = 0; i < relevant_facts.size(); i++) {
                     if ((state_representation == "undefined") && (i == 0 || relevant_facts[i].var != relevant_facts[i-1].var))
                         oss << (p.second.first[relevant_facts[i].var] == PartialAssignment::UNASSIGNED);
-                    if (state_representation == "undefined_char" && p.second.first[relevant_facts[i].var] == PartialAssignment::UNASSIGNED)
-                        oss << '*';
-                    else
-                        oss << (p.second.first[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
+                    oss << (p.second.first[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
                 }
+            } else {
+                exit(10); // not implemented
             }
         }
         samples.push_back(oss.str());
@@ -210,8 +215,8 @@ double SamplingSearchYaaig::mse(vector<shared_ptr<PartialAssignment>>& samples, 
     for (shared_ptr<PartialAssignment>& pa: samples) {
         int best_h = INT_MAX;
         vector<int> key;
-        for (char& b : pa->to_binary())
-            key.push_back((int)b - '0');
+        for (char& b : pa->to_binary(true))
+            key.push_back(b == '*' ? -1 : (int)b - '0');
         for (int& hs: trie_statespace.find_all_compatible(key, "v_vu"))
             best_h = min(best_h, hs);
         // assert(best_h != INT_MAX);
@@ -291,7 +296,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     unordered_map<string,int> min_pairs_pre;
     trie::trie<shared_ptr<PartialAssignment>> trie;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
-        string bin = partialAssignment->to_binary();
+        string bin = partialAssignment->to_binary(true);
         int h = partialAssignment->estimated_heuristic;
         // Maintain a mapping to keep the smallest h-value
         // in the trie in case there are duplicate samples
@@ -404,7 +409,7 @@ void SamplingSearchYaaig::old_approximate_value_iteration(
     unordered_map<string,int> min_pairs_pre;
     trie::trie<shared_ptr<PartialAssignment>> trie;
     for (shared_ptr<PartialAssignment>& partialAssignment: samples) {
-        string bin = partialAssignment->to_binary();
+        string bin = partialAssignment->to_binary(true);
         int h = partialAssignment->estimated_heuristic;
         // Maintain a mapping to keep the smallest h-value
         // in the trie in case there are duplicate samples
@@ -498,7 +503,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     }
 
     if (avi_k > 0 && avi_its > 0) {
-        bool old_avi = true;
+        bool old_avi = false;
         if (old_avi) {
             old_approximate_value_iteration();
             if (minimization == "partial" || minimization == "both")
@@ -528,7 +533,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
                 h = 0;
             values_set.push_back(
-                make_pair(h, make_pair(partialAssignment->get_values(), partialAssignment->to_binary()))
+                make_pair(h, make_pair(partialAssignment->get_values(), partialAssignment->to_binary(state_representation == "undefined_char")))
             );
         } else if (state_representation == "assign_undefined") {
             for (State &s : assign_undefined_state(partialAssignment, 5 * assignments_by_undefined_state)) {
