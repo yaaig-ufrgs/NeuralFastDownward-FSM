@@ -13,20 +13,27 @@ class InstanceDataset(Dataset):
         for pair in state_value_pairs:
             states.append(pair[0])
             hvalues.append(pair[1])
-            weights.append(pair[2])
+            if len(pair) == 3:
+                weights.append(pair[2])
 
         self.output_layer = output_layer
         self.domain_max_value = domain_max_value
 
-        self.weights = torch.tensor(weights, dtype=torch.float32).unsqueeze(1)
+        if len(weights) > 0:
+            self.weights = torch.tensor(weights, dtype=torch.float32).unsqueeze(1)
+        else:
+            self.weights = []
         self.states = torch.tensor(states, dtype=torch.float32)
+
         if output_layer == "regression":
             self.hvalues = torch.tensor(hvalues, dtype=torch.float32).unsqueeze(1)
+
         elif output_layer == "prefix":
             self.hvalues = torch.tensor(
                 [to_prefix(n, self.domain_max_value) for n in hvalues],
                 dtype=torch.float32,
             )
+
         elif output_layer == "one-hot":
             self.hvalues = torch.tensor(
                 [to_onehot(n, self.domain_max_value) for n in hvalues],
@@ -36,7 +43,9 @@ class InstanceDataset(Dataset):
             raise RuntimeError(f"Invalid output layer: {output_layer}")
 
     def __getitem__(self, idx: int) -> (torch.Tensor, torch.Tensor, torch.Tensor):
-        return self.states[idx], self.hvalues[idx], self.weights[idx]
+        if len(self.weights) > 0:
+            return self.states[idx], self.hvalues[idx], self.weights[idx]
+        return self.states[idx], self.hvalues[idx]
 
     def __len__(self):
         return len(self.states)
@@ -105,7 +114,7 @@ def load_training_state_value_pairs(
                     uniques_x.append(state)
 
                 state = [int(s) for s in state]
-                state_value_pairs.append([state, h_int, 1])
+                state_value_pairs.append([state, h_int])
 
                 # Gets the domain max h value.
                 if h_int > max_h:
@@ -126,12 +135,12 @@ def load_training_state_value_pairs(
                 st = "".join([str(s) for s in sv[0]])
                 h = str(sv[1])
                 h_st = h + ";" + st
-                sv[2] = sample_count[h_st]
+                sv.append(sample_count[h_st])
             elif unique_states: # Weighting based on quant. of unique states.
                 st = "".join([str(s) for s in sv[0]])
-                sv[2] = state_count[st]
+                sv.append(state_count[st])
             else: # No weighting, use default (1).
-                break
+                sv.append(1)
             
     return state_value_pairs, domain_max_value
 

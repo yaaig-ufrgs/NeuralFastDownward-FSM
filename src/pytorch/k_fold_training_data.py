@@ -161,6 +161,8 @@ class KFoldTrainingData:
                 generator=g,
                 pin_memory=pin_mem,
             )
+            _log.info(f"Created train dataloader.")
+            _log.info(f"Mem usage: {get_curr_memory_usage_mb()} MB")
 
             val_dataloader = (
                 DataLoader(
@@ -177,6 +179,8 @@ class KFoldTrainingData:
                 if len(val_set) != 0
                 else None
             )
+            _log.info(f"Created validation dataloader.")
+            _log.info(f"Mem usage: {get_curr_memory_usage_mb()} MB")
 
             test_dataloader = (
                 DataLoader(
@@ -193,6 +197,8 @@ class KFoldTrainingData:
                 if len(test_set) != 0
                 else None
             )
+            _log.info(f"Created test dataloader.")
+            _log.info(f"Mem usage: {get_curr_memory_usage_mb()} MB")
 
             kfolds.append((train_dataloader, val_dataloader, test_dataloader))
             _log.info(f"Mem usage after creating fold(s): {get_curr_memory_usage_mb()} MB")
