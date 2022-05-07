@@ -1,45 +1,43 @@
 import torch
+import logging
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from src.pytorch.utils.helpers import to_prefix, to_onehot
 import src.pytorch.fast_downward_api as fd_api
 import src.pytorch.utils.default_args as default_args
+from src.pytorch.utils.helpers import get_curr_memory_usage_mb
 from itertools import chain, zip_longest
+
+_log = logging.getLogger(__name__)
 
 class InstanceDataset(Dataset):
     def __init__(
-        self, sv: list, domain_max_value: int, output_layer: str
+        self, states: list, heuristics: list, weights: list, domain_max_value: int, output_layer: str
     ):
 
         self.output_layer = output_layer
         self.domain_max_value = domain_max_value
 
-        if len(sv[0]) == 3:
-            self.weights = torch.tensor(sv[:,2].astype(np.float), dtype=torch.float32).unsqueeze(1)
-        else:
-            self.weights = []
+        self.weights = torch.tensor(np.array(weights), dtype=torch.float32).unsqueeze(1)
 
-        states = sv[:,0]
-        s = []
-        for st in states:
-            s.append(np.fromiter(st, dtype=np.int8))
+        st = []
+        for s in states:
+            st.append(np.fromiter(s, dtype=np.int8))
             
-        self.states = torch.tensor(s, dtype=torch.float32)
-
-        print(sv[:,1].astype(np.float))
+        self.states = torch.tensor(np.array(st), dtype=torch.float32)
 
         if output_layer == "regression":
-            self.hvalues = torch.tensor(sv[:,1].astype(np.float), dtype=torch.float32).unsqueeze(1)
+            self.hvalues = torch.tensor(np.array(heuristics), dtype=torch.float32).unsqueeze(1)
 
         elif output_layer == "prefix":
             self.hvalues = torch.tensor(
-                [to_prefix(n, self.domain_max_value) for n in sv[:,1]],
+                [to_prefix(n, self.domain_max_value) for n in np.array(heuristics)],
                 dtype=torch.float32,
             )
 
         elif output_layer == "one-hot":
             self.hvalues = torch.tensor(
-                [to_onehot(n, self.domain_max_value) for n in hvalues],
+                [to_onehot(n, self.domain_max_value) for n in np.array(heuristics)],
                 dtype=torch.float32,
             )
         else:
@@ -64,19 +62,14 @@ class InstanceDataset(Dataset):
 
 def load_training_state_value_pairs(
         samples_file: str, clamping: int, remove_goals: bool,  loss_function: str,
-        unique_samples: bool, unique_states: bool
-) -> ([(int, int)], int):
+        unique_samples: bool, unique_states: bool):
     """
-    Load state-value pairs from a sampling output, returning a tuple
-    containing a list of state-value pairs and the domain max value.
-    This is the training data.
+    Loads the data.
     """
-    state_value_pairs = []
+    states, heuristics, weights = [], [], []
     domain_max_value, max_h = 0, 0
-    uniques_xy = []
-    uniques_x = []
-    state_count = {}
-    sample_count = {}
+    uniques_xy, uniques_x = [], []
+    state_count, sample_count = {}, {}
 
     with open(samples_file) as f:
         for line in f:
@@ -116,7 +109,9 @@ def load_training_state_value_pairs(
                         continue
                     uniques_x.append(state)
 
-                state_value_pairs.append([state, h_int])
+                states.append(state)
+                heuristics.append(h_int)
+                weights.append(1)
 
                 # Gets the domain max h value.
                 if h_int > max_h:
@@ -132,19 +127,18 @@ def load_training_state_value_pairs(
 
     # Appends weights (counts) to state_value_pairs:
     if loss_function == "mse_weighted":
-        for sv in state_value_pairs:
+        for i in range(states):
+            curr_st = states[i]
+            curr_h = heuristics[i]
             if unique_samples: # Weighting based on quant of unique states + heuristic.
-                st = "".join([str(s) for s in sv[0]])
-                h = str(sv[1])
-                h_st = h + ";" + st
-                sv.append(sample_count[h_st])
+                h_st = str(curr_h) + ";" + curr_st
+                weights.append(sample_count[h_st])
             elif unique_states: # Weighting based on quant. of unique states.
-                st = "".join([str(s) for s in sv[0]])
-                sv.append(state_count[st])
-            else: # No weighting, use default (1).
-                sv.append(1)
+                weights.append(state_count[curr_st])
+            #else: # No weighting, use default (1).
+            #    weights.append(1)
             
-    return state_value_pairs, domain_max_value
+    return states, heuristics, weights, domain_max_value
 
 
 def generate_optimal_state_value_pairs(domain, problems):

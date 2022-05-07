@@ -49,7 +49,7 @@ class KFoldTrainingData:
         self.device = device
 
         _log.info("Reading and preparing data...")
-        self.state_value_pairs, self.domain_max_value = load_training_state_value_pairs(
+        self.states, self.heuristics, self.weights, self.domain_max_value = load_training_state_value_pairs(
             samples_file,
             clamping,
             remove_goals,
@@ -61,8 +61,8 @@ class KFoldTrainingData:
 
         self.normalize = normalize
         if self.normalize:
-            for i in range(len(self.state_value_pairs)):
-                self.state_value_pairs[i][1] /= self.domain_max_value
+            for i in range(len(self.heuristics)):
+                self.heuristics[i] /= self.domain_max_value
         self.batch_size = batch_size if batch_size > 0 else None
         self.num_folds = num_folds
         self.output_layer = output_layer
@@ -89,45 +89,54 @@ class KFoldTrainingData:
         _log.info(f"Generating {self.num_folds}-fold...")
 
         kfolds = []
-        instances_per_fold = int(len(self.state_value_pairs) / self.num_folds)
+        instances_per_fold = int(len(self.states) / self.num_folds)
         for i in range(self.num_folds):
-            training_set, val_set, test_set = [], [], []
+            x_train, x_val, x_test, y_train, y_val, y_test, w_train, w_val, w_test = [], [], [], [], [], [], [], [], []
             if self.num_folds == 1:
                 # Test set = complement of training+val set
                 if self.sample_percentage < 1.0:
-                    self.state_value_pairs, test_set = train_test_split(
-                        self.state_value_pairs,
+                    self.states, x_test, self.heuristics, y_test, self.weights, w_test = train_test_split(
+                        self.states, self.heuristics, self.weights,
                         train_size=self.sample_percentage,
                         shuffle=self.shuffle,
                         random_state=self.shuffle_seed,
                     )
 
                 if self.training_size == 1.0:
-                    training_set = (
+                    x_train, y_train, w_train = (
                         skshuffle(
-                            self.state_value_pairs, random_state=self.shuffle_seed
+                            self.states, self.heuristics, self.weights, random_state=self.shuffle_seed
                         )
                         if self.shuffle
-                        else self.state_value_pairs
+                        else (self.states, self.heuristics, self.weights)
                     )
                 else:
-                    training_set, val_set = train_test_split(
-                        self.state_value_pairs,
+                    x_train, x_val, y_train, y_val, w_train, w_val = train_test_split(
+                        self.states, self.heuristics, self.weights,
                         train_size=self.training_size,
                         shuffle=self.shuffle,
                         random_state=self.shuffle_seed,
                     )
             else:
                 # TODO: `sample_percentage` and `test_set` not implemented here!
-                for j in range(len(self.state_value_pairs)):
+                for j in range(len(self.states)):
                     if int(j / instances_per_fold) == i:
-                        test_set.append(self.state_value_pairs[j])
+                        x_test.append(self.states[j])
+                        y_test.append(self.heuristics[j])
+                        w_test.append(self.weights[j])
                     else:
-                        training_set.append(self.state_value_pairs[j])
+                        x_train.append(self.states[j])
+                        y_train.append(self.heuristics[j])
+                        w_train.append(self.weights[j])
 
-            del self.state_value_pairs[:]
-            del self.state_value_pairs
+            del self.states[:]
+            del self.states
+            del self.heuristics[:]
+            del self.heuristics
+            del self.weights[:]
+            del self.weights
 
+            """
             # If necessary, change the ordering of the data.
             if (
                 self.standard_first
@@ -137,6 +146,7 @@ class KFoldTrainingData:
                 self.shuffle = False
                 training_set = self.change_sampling_order(training_set)
                 test_set = self.change_sampling_order(test_set)
+            """
 
             worker_fn = (
                 None
@@ -150,9 +160,10 @@ class KFoldTrainingData:
 
             pin_mem = True if self.device == torch.device("cuda:0") else False
 
+            _log.info(f"Mem usage before train_dataloader: {get_curr_memory_usage_mb()} MB")
             train_dataloader = DataLoader(
                 dataset=InstanceDataset(
-                    np.array(training_set), self.domain_max_value, self.output_layer
+                    x_train, y_train, w_train, self.domain_max_value, self.output_layer
                 ),
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
@@ -167,7 +178,7 @@ class KFoldTrainingData:
             val_dataloader = (
                 DataLoader(
                     dataset=InstanceDataset(
-                        np.array(val_set), self.domain_max_value, self.output_layer
+                        x_val, y_val, w_val, self.domain_max_value, self.output_layer
                     ),
                     batch_size=self.batch_size,
                     shuffle=self.shuffle,
@@ -176,7 +187,7 @@ class KFoldTrainingData:
                     generator=g,
                     pin_memory=pin_mem,
                 )
-                if len(val_set) != 0
+                if len(x_val) != 0
                 else None
             )
             _log.info(f"Created validation dataloader.")
@@ -185,7 +196,7 @@ class KFoldTrainingData:
             test_dataloader = (
                 DataLoader(
                     dataset=InstanceDataset(
-                        np.array(test_set), self.domain_max_value, self.output_layer
+                        x_test, y_test, w_test, self.domain_max_value, self.output_layer
                     ),
                     batch_size=self.batch_size,
                     shuffle=self.shuffle,
@@ -194,7 +205,7 @@ class KFoldTrainingData:
                     generator=g,
                     pin_memory=pin_mem,
                 )
-                if len(test_set) != 0
+                if len(x_test) != 0
                 else None
             )
             _log.info(f"Created test dataloader.")
@@ -214,6 +225,7 @@ class KFoldTrainingData:
 
     def change_sampling_order(self, samples: list) -> list:
         """
+        DOES NOT WORK ANYMORE AS OF 2022-05-07.
         Returns state-value pairs with a different order for samples:
         - `contrast_first`: contrasting samples appear first.
         - `standard_first`: non-contrasting samples appear first.
