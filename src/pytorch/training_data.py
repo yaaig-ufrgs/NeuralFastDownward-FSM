@@ -11,7 +11,7 @@ class InstanceDataset(Dataset):
     ):
         states, hvalues, weights = [], [], []
         for pair in state_value_pairs:
-            states.append(pair[0])
+            states.append([int(s) for s in pair[0]])
             hvalues.append(pair[1])
             if len(pair) == 3:
                 weights.append(pair[2])
@@ -62,7 +62,7 @@ class InstanceDataset(Dataset):
 def load_training_state_value_pairs(
         samples_file: str, clamping: int, remove_goals: bool,  loss_function: str,
         unique_samples: bool, unique_states: bool
-) -> ([([int], int)], int):
+) -> ([(int, int)], int):
     """
     Load state-value pairs from a sampling output, returning a tuple
     containing a list of state-value pairs and the domain max value.
@@ -113,7 +113,6 @@ def load_training_state_value_pairs(
                         continue
                     uniques_x.append(state)
 
-                state = [int(s) for s in state]
                 state_value_pairs.append([state, h_int])
 
                 # Gets the domain max h value.
