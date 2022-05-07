@@ -48,6 +48,7 @@ class KFoldTrainingData:
 
         self.device = device
 
+        _log.info("Reading and preparing data...")
         self.state_value_pairs, self.domain_max_value = load_training_state_value_pairs(
             samples_file,
             clamping,
@@ -56,7 +57,6 @@ class KFoldTrainingData:
             unique_samples,
             unique_states,
         )
-
         _log.info(f"Mem usage after loading data: {get_curr_memory_usage_mb()} MB")
 
         self.normalize = normalize
@@ -124,6 +124,9 @@ class KFoldTrainingData:
                         test_set.append(self.state_value_pairs[j])
                     else:
                         training_set.append(self.state_value_pairs[j])
+
+            del self.state_value_pairs[:]
+            del self.state_value_pairs
 
             # If necessary, change the ordering of the data.
             if (

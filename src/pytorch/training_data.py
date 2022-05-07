@@ -5,7 +5,6 @@ import src.pytorch.fast_downward_api as fd_api
 import src.pytorch.utils.default_args as default_args
 from itertools import chain, zip_longest
 
-
 class InstanceDataset(Dataset):
     def __init__(
         self, state_value_pairs: list, domain_max_value: int, output_layer: str
@@ -68,51 +67,50 @@ def load_training_state_value_pairs(
     sample_count = {}
 
     with open(samples_file) as f:
-        lines = f.readlines()
-    for line in lines:
-        if line[0] != "#":
-            line = line.split("\n")[0]
+        for line in f:
+            if line[0] != "#":
+                line = line.split("\n")[0]
 
-            # Count how many times each state + heuristic (x + y) appeared.
-            if loss_function == "mse_weighted":
-                if line in sample_count:
-                    sample_count[line] += 1
-                else:
-                    sample_count[line] = 1
+                # Count how many times each state + heuristic (x + y) appeared.
+                if loss_function == "mse_weighted":
+                    if line in sample_count:
+                        sample_count[line] += 1
+                    else:
+                        sample_count[line] = 1
 
-            # If specified, skip repeated lines (state and heuristic) if they already appeared.
-            if unique_samples:
-                if line in uniques_xy:
+                # If specified, skip repeated lines (state and heuristic) if they already appeared.
+                if unique_samples:
+                    if line in uniques_xy:
+                        continue
+                    uniques_xy.append(line)
+
+                h, state = line.split(";")
+                h_int = int(h)
+
+                # h = 0 means state x is a goal, so remove it if specified.
+                if h_int == 0 and remove_goals:
                     continue
-                uniques_xy.append(line)
 
-            h, state = line.split(";")
-            h_int = int(h)
+                # Count how many times each state (x) appeared.
+                if loss_function == "mse_weighted":
+                    if state in state_count:
+                        state_count[state] += 1
+                    else:
+                        state_count[state] = 1
 
-            # h = 0 means state x is a goal, so remove it if specified.
-            if h_int == 0 and remove_goals:
-                continue
+                # If specified, skip state (x) if it already appeared.
+                if unique_states:
+                    if state in uniques_x:
+                        continue
+                    uniques_x.append(state)
 
-            # Count how many times each state (x) appeared.
-            if loss_function == "mse_weighted":
-                if state in state_count:
-                    state_count[state] += 1
-                else:
-                    state_count[state] = 1
+                state = [int(s) for s in state]
+                state_value_pairs.append([state, h_int, 1])
 
-            # If specified, skip state (x) if it already appeared.
-            if unique_states:
-                if state in uniques_x:
-                    continue
-                uniques_x.append(state)
-
-            state = [int(s) for s in state]
-            state_value_pairs.append([state, h_int, 1])
-
-            # Gets the domain max h value.
-            if h_int > max_h:
-                max_h = h_int
-                domain_max_value = max_h
+                # Gets the domain max h value.
+                if h_int > max_h:
+                    max_h = h_int
+                    domain_max_value = max_h
 
     # Clamps the heuristic value.
     if clamping != default_args.CLAMPING:
