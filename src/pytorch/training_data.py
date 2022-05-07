@@ -74,10 +74,11 @@ def load_training_state_value_pairs(
             line = line.split("\n")[0]
 
             # Count how many times each state + heuristic (x + y) appeared.
-            if line in sample_count:
-                sample_count[line] += 1
-            else:
-                sample_count[line] = 1
+            if loss_function == "mse_weighted":
+                if line in sample_count:
+                    sample_count[line] += 1
+                else:
+                    sample_count[line] = 1
 
             # If specified, skip repeated lines (state and heuristic) if they already appeared.
             if unique_samples:
@@ -93,10 +94,11 @@ def load_training_state_value_pairs(
                 continue
 
             # Count how many times each state (x) appeared.
-            if state in state_count:
-                state_count[state] += 1
-            else:
-                state_count[state] = 1
+            if loss_function == "mse_weighted":
+                if state in state_count:
+                    state_count[state] += 1
+                else:
+                    state_count[state] = 1
 
             # If specified, skip state (x) if it already appeared.
             if unique_states:
