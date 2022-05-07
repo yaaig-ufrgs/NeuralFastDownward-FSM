@@ -49,7 +49,7 @@ bool  sample_next_state_with_random_walk(
         while(!applicable_operators.empty()){
             // Generate successor candidate
             if (bias == nullptr) {
-                idx_op = applicable_operators.size() * rng();
+                idx_op = rng(applicable_operators.size());
             }
             S candidate_state = construct_candidate(
                     previous_state, applicable_operators[idx_op]);
@@ -117,7 +117,7 @@ bool  sample_next_state_with_random_walk(
             current_state = move(*(candidate_states.begin() + candidate_index));
             current_bias = candidate_bias[candidate_index];
         } else {
-            int idx = applicable_operators.size() * rng();
+            int idx = rng(applicable_operators.size());
             current_state = move(candidate_states[idx]);
             current_bias = candidate_bias[idx];
         }

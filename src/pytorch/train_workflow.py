@@ -187,7 +187,7 @@ class TrainWorkflow:
         while t < self.max_epochs and not self.early_stopped and not train_timer.check_timeout():
             cur_train_loss = self.train_loop(t, fold_idx)
             # Check if born dead (or died during training)
-            if (t == 0 or not t % 10) and not born_dead:
+            if not born_dead:
                 if self.dead():
                     if self.restart_no_conv:
                         _log.warning(

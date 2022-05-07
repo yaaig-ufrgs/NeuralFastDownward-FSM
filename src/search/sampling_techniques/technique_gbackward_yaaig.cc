@@ -175,7 +175,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
         }
         samples.push_back(make_shared<PartialAssignment>(pa));
 
-        int idx_op = 0, rng_seed = (INT32_MAX - 1) * (*rng)();
+        int idx_op = 0, rng_seed = (*rng)(INT32_MAX - 1);
         while (idx_op != -1) {
             OperatorID applied_op = OperatorID::no_operator;
             PartialAssignment pa_ = dfss->sample_state_length(
@@ -247,7 +247,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
         rng->shuffle(vk);
         for (PartialAssignment& s : vk) {
             vector<PartialAssignment> succ_s;
-            int idx_op = 0, rng_seed = (INT32_MAX - 1) * (*rng)();
+            int idx_op = 0, rng_seed = (*rng)(INT32_MAX - 1);
             while (true) {
                 OperatorID applied_op = OperatorID::no_operator;
                 PartialAssignment s_ = dfss->sample_state_length(
@@ -425,7 +425,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         while ((samples.size() < (unsigned)max_samples) && !stopped) {
             do {
                 lid = (subtechnique == "round_robin") ? // round_robin or random_leaf (random_leaf if percentage)
-                    (lid + 1) % leaves.size() : (int)((INT32_MAX - 1) * (*rng)()) % leaves.size();
+                    (lid + 1) % leaves.size() : (*rng)(INT32_MAX - 1) % leaves.size();
             } while (leaves_used[lid]);
             leaves_used[lid] = true;
             if (all_of(leaves_used.begin(), leaves_used.end(), [](bool v) {return v;}))
