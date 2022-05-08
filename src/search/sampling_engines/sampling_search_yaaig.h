@@ -42,6 +42,7 @@ protected:
     const std::string mse_result_file;
     std::shared_ptr<Evaluator> evaluator;
     const std::vector<FactPair> relevant_facts;
+    StateRegistry registry;
     const std::string header;
     std::shared_ptr<utils::RandomNumberGenerator> rng;
     trie::trie<int> trie_statespace; // with h*

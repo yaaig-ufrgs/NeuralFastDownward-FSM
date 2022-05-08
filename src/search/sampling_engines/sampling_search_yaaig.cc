@@ -194,10 +194,9 @@ vector<string> SamplingSearchYaaig::values_to_samples(
                     state_representation == "complete" ||
                     state_representation == "complete_no_mutex" ||
                     state_representation == "partial" ||
-                    state_representation == "undefined_char") {
+                    state_representation == "undefined_char" ||
+                    state_representation == "valid") {
                 oss << p.second.second;
-            } else if (state_representation == "valid") {
-                exit(10); // not implemented
             } else if (state_representation == "undefined" || state_representation == "assign_undefined") {
                 for (unsigned i = 0; i < relevant_facts.size(); i++) {
                     if ((state_representation == "undefined") && (i == 0 || relevant_facts[i].var != relevant_facts[i-1].var))
@@ -416,10 +415,34 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 state_representation != "complete_no_mutex", *rng).second;
             if (task_properties::is_goal_state(task_proxy, s)) h = 0;
             s.unpack();
-
             values_set.push_back(
                 make_pair(h, make_pair(s.get_values(), s.to_binary()))
             );
+        } else if (state_representation == "valid") {
+            bool found = false;
+
+            // check if partialassignment \in state space
+
+            for (int i = 0; i < 10000 && !found; i++) { // MAX_TRIES = 10000
+                pair<bool,State> p = partialAssignment->get_full_state(true, *rng);
+                if (p.first) {
+                    vector<int> v = p.second.get_values();
+                    EvaluationContext eval_context(registry.insert_state(move(v)));
+                    EvaluationResult eval_results = evaluator->compute_result(eval_context);
+                    if (eval_results.is_uninitialized() || eval_results.is_infinite())
+                        continue;
+                    p.second.unpack();
+                    values_set.push_back(
+                        make_pair(h, make_pair(p.second.get_values(), p.second.to_binary()))
+                    );
+                    found = true;
+                }
+            }
+            if (!found) {
+                utils::g_log << "Sample " << partialAssignment->to_binary(true)
+                    << " not found in state space or PDB + mutex!" << endl;
+                exit(10);
+            }
         } else if (state_representation == "partial" || state_representation == "valid" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial" || state_representation == "facts_partial") {
             if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
                 h = 0;
@@ -457,18 +480,13 @@ vector<string> SamplingSearchYaaig::extract_samples() {
 void SamplingSearchYaaig::replace_h_with_evaluator(
     vector<pair<int,pair<vector<int>,string>>>& samples
 ) {
-    StateRegistry registry(task_proxy);
     for (pair<int,pair<vector<int>,string>>& p : samples) {
         vector<int> v = task_proxy.create_state(move(p.second.first)).get_values();
         EvaluationContext eval_context(registry.insert_state(move(v)));
         EvaluationResult eval_results = evaluator->compute_result(eval_context);
         // assert(!eval_results.is_uninitialized());
         if (eval_results.is_uninitialized()) exit(10);
-        if (!eval_results.is_infinite()) {
-            p.first = eval_results.get_evaluator_value();
-        } else {
-            p.first = 9999;
-        }
+        p.first = eval_results.is_infinite() ? bound_value*2 : eval_results.get_evaluator_value();
     }
 }
 
@@ -531,6 +549,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       mse_result_file(opts.get<string>("mse_result_file")),
       evaluator(opts.get<shared_ptr<Evaluator>>("evaluator")),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
+      registry(task_proxy),
       header(construct_header()),
       rng(utils::parse_rng_from_options(opts)) {
     // assert(contrasting_samples >= 0 && contrasting_samples <= 100);
