@@ -376,11 +376,13 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     }
     // assert(bound_n > 0);
     if (!(bound_n > 0)) exit(10);
+    bound_value = bound_n;
 
     if (technique == "rw" || technique == "bfs_rw" || technique == "dfs_rw")
         samples_per_search = ceil(bound_multiplier * bound_n);
     else if (technique == "dfs" || technique == "bfs")
         depth_k = ceil(bound_multiplier * bound_n);
+
 
     if (technique == "rw") {
         samples = sample_with_random_walk(pa, samples_per_search, is_valid_state, func_bias, task_proxy);
