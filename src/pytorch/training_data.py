@@ -35,13 +35,9 @@ class InstanceDataset(Dataset):
         del weights[:]
         del weights
 
-        # Is there a better way to do this?
-        st = [np.fromiter(s, dtype=np.int8) for s in states]
-
+        self.states = torch.tensor(np.array([np.fromiter(s, dtype=np.int8) for s in states]), dtype=torch.float32)
         del states[:]
         del states
-
-        self.states = torch.tensor(np.array(st), dtype=torch.float32)
 
         if output_layer == "regression":
             self.hvalues = torch.tensor(
