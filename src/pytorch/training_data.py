@@ -33,9 +33,9 @@ class InstanceDataset(Dataset):
             self.weights = []
 
         # Is there a better way to do this?
-        st = []
-        for s in states:
-            st.append(np.fromiter(s, dtype=np.int8))
+        st = [np.fromiter(s, dtype=np.int8) for s in states]
+        del states[:]
+        del states
 
         self.states = torch.tensor(np.array(st), dtype=torch.float32)
 
