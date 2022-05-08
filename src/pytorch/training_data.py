@@ -32,8 +32,12 @@ class InstanceDataset(Dataset):
         else:
             self.weights = []
 
+        del weights[:]
+        del weights
+
         # Is there a better way to do this?
         st = [np.fromiter(s, dtype=np.int8) for s in states]
+
         del states[:]
         del states
 
@@ -57,6 +61,9 @@ class InstanceDataset(Dataset):
             )
         else:
             raise RuntimeError(f"Invalid output layer: {output_layer}")
+
+        del heuristics[:]
+        del heuristics
 
     def __getitem__(self, idx: int) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         if len(self.weights) > 0:
