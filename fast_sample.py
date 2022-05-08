@@ -140,7 +140,7 @@ def yaaig_ferber(args, meth):
                            f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, '
                            f'avi_k={args.avi_k}, avi_its={args.avi_its}, avi_epsilon={args.avi_eps}, avi_unit_cost={args.sample_unit_cost}, '
                            f'avi_rule={args.avi_rule}, sort_h={args.sort_h}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
-                           f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting})\"')
+                           f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting}, evaluator={args.evaluator})\"')
                 elif meth == "ferber":
                     out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.ferber_technique}_{args.ferber_select_state.replace("_", "-")}_{args.ferber_num_tasks}_{args.ferber_min_walk_len}_{args.ferber_max_walk_len}_ss{i}'
                     cmd = (f'./fast-downward.py '

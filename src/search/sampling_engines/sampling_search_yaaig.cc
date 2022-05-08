@@ -9,6 +9,9 @@
 #include "../task_utils/task_properties.h"
 #include "../task_utils/successor_generator.h"
 
+#include "../evaluator.h"
+#include "../evaluation_context.h"
+
 #include <sstream>
 #include <fstream>
 #include <string>
@@ -401,7 +404,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     } else if (minimization == "partial" || minimization == "both") {
         do_minimization(sampling_technique::modified_tasks);
     }
-
+    
     vector<pair<int,pair<vector<int>,string>>> values_set;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         int h = -1;
@@ -413,6 +416,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 state_representation != "complete_no_mutex", *rng).second;
             if (task_properties::is_goal_state(task_proxy, s)) h = 0;
             s.unpack();
+
             values_set.push_back(
                 make_pair(h, make_pair(s.get_values(), s.to_binary()))
             );
@@ -441,9 +445,31 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         do_minimization(values_set);
     }
 
+    // blind is the default, sampling keeps the regression value
+    if (evaluator->get_description() != "blind")
+        replace_h_with_evaluator(values_set);
+
     if (state_representation == "complete" || state_representation == "complete_no_mutex" || state_representation == "partial" || state_representation == "valid")
         compute_sampling_statistics(values_set);
     return values_to_samples(values_set);
+}
+
+void SamplingSearchYaaig::replace_h_with_evaluator(
+    vector<pair<int,pair<vector<int>,string>>>& samples
+) {
+    StateRegistry registry(task_proxy);
+    for (pair<int,pair<vector<int>,string>>& p : samples) {
+        vector<int> v = task_proxy.create_state(move(p.second.first)).get_values();
+        EvaluationContext eval_context(registry.insert_state(move(v)));
+        EvaluationResult eval_results = evaluator->compute_result(eval_context);
+        // assert(!eval_results.is_uninitialized());
+        if (eval_results.is_uninitialized()) exit(10);
+        if (!eval_results.is_infinite()) {
+            p.first = eval_results.get_evaluator_value();
+        } else {
+            p.first = 9999;
+        }
+    }
 }
 
 void SamplingSearchYaaig::compute_sampling_statistics(
@@ -472,6 +498,11 @@ void SamplingSearchYaaig::compute_sampling_statistics(
                     underestimates++;
             }
         }
+        if (evaluator->get_description() == "evaluator = pdb(hstar_pattern(list))") {
+            // assert((unsigned)(with_hstar + not_in_statespace) == samples.size());
+            if (!((unsigned)(with_hstar + not_in_statespace) == samples.size())) exit(10);
+        }
+
         utils::g_log << "[STATS] Samples: " << samples.size() << "\n";
         utils::g_log << "[STATS] Samples with h*: " << with_hstar << "\n";
         utils::g_log << "[STATS] Samples underestimating h*: " << underestimates << "\n";
@@ -498,6 +529,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       sort_h(opts.get<bool>("sort_h")),
       mse_hstar_file(opts.get<string>("mse_hstar_file")),
       mse_result_file(opts.get<string>("mse_result_file")),
+      evaluator(opts.get<shared_ptr<Evaluator>>("evaluator")),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       header(construct_header()),
       rng(utils::parse_rng_from_options(opts)) {
@@ -575,6 +607,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "mse_result_file",
             "Path to save MSE results.",
             "none");
+    parser.add_option<shared_ptr<Evaluator>>(
+            "evaluator",
+            "Evaluator to use to estimate the h-values.",
+            "blind()");
 
     SearchEngine::add_options_to_parser(parser);
     Options opts = parser.parse();

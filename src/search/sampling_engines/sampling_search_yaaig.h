@@ -40,6 +40,7 @@ protected:
     const bool sort_h;
     const std::string mse_hstar_file;
     const std::string mse_result_file;
+    std::shared_ptr<Evaluator> evaluator;
     const std::vector<FactPair> relevant_facts;
     const std::string header;
     std::shared_ptr<utils::RandomNumberGenerator> rng;
@@ -70,6 +71,8 @@ private:
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& values_set, int percentage);
     std::vector<std::string> values_to_samples(
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> values_set);
+    void replace_h_with_evaluator(
+        std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& values_set);
     void compute_sampling_statistics(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> samples);
 };
 

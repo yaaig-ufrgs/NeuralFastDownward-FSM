@@ -1494,6 +1494,13 @@ def get_sample_args():
         default=default_args.SAMPLE_MEM_LIMIT_MB,
         help="Memory limit to consider when sampling. (default: %(default)s)",
     )
+    parser.add_argument(
+        "-eval",
+        "--evaluator",
+        type=str,
+        default=default_args.SAMPLE_EVALUATOR,
+        help="Evaluator to use to estimate the h-values. (default: sampling)",
+    )
 
     return parser.parse_args()
 

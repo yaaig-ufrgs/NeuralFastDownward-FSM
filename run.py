@@ -28,6 +28,8 @@ def build_args(d: dict, prefix: str) -> str:
         if k in ["samples", "problem-pddls", "method", "instance"]:
             args += f" {v}"
         else:
+            if k == "evaluator":
+                v = '"'+v+'"'
             arg = prefix + k
             args += f" {arg} {v}"
     return args
