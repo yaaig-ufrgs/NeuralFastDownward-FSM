@@ -1,12 +1,10 @@
 import torch
 import logging
 import numpy as np
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from src.pytorch.utils.helpers import to_prefix, to_onehot
 import src.pytorch.fast_downward_api as fd_api
 import src.pytorch.utils.default_args as default_args
-from src.pytorch.utils.helpers import get_curr_memory_usage_mb
-from itertools import chain, zip_longest
 
 _log = logging.getLogger(__name__)
 

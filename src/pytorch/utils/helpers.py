@@ -51,13 +51,16 @@ def get_datetime() -> str:
     return datetime.now(timezone.utc).strftime("%d %B %Y %H:%M:%S UTC")
 
 
-def get_curr_memory_usage_mb():
+def get_memory_usage_mb(peak: bool = False):
     """
     Get current memory in MB.
+
+    Peak memory if `peak` is true, otherwise current memory
     """
 
+    field = 'VmPeak:' if peak else 'VmRSS:'
     with open('/proc/self/status') as f:
-        memusage = f.read().split('VmRSS:')[1].split('\n')[0][:-3]
+        memusage = f.read().split(field)[1].split('\n')[0][:-3]
 
     return round(int(memusage.strip()) / 1024)
 

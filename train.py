@@ -23,7 +23,7 @@ from src.pytorch.utils.helpers import (
     get_fixed_max_epochs,
     add_train_arg,
     get_problem_by_sample_filename,
-    get_curr_memory_usage_mb,
+    get_memory_usage_mb,
 )
 from src.pytorch.utils.file_helpers import (
     create_train_directory,
@@ -45,7 +45,6 @@ from eval import eval_workflow
 from argparse import Namespace
 
 _log = logging.getLogger(__name__)
-
 
 def train_main(args: Namespace):
     """
@@ -127,11 +126,10 @@ def train_main(args: Namespace):
         except:
             _log.error(f"Failed to save best fold.")
 
+        _log.info(f"Peak memory usage: {get_memory_usage_mb(True)} MB")
         _log.info("Training complete!")
     else:
         _log.error("Training incomplete! No trained networks.")
-
-    _log.info(f"Mem usage END: {get_curr_memory_usage_mb()} MB")
 
     # OTHER PLOTS
     make_extra_plots(args, dirname, best_fold)

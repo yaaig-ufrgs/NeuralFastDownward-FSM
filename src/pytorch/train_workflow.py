@@ -6,7 +6,7 @@ from copy import deepcopy
 from torch.utils.data import DataLoader
 from src.pytorch.model import HNN
 from src.pytorch.utils.plot import save_y_pred_scatter
-from src.pytorch.utils.helpers import prefix_to_h, get_curr_memory_usage_mb
+from src.pytorch.utils.helpers import prefix_to_h, get_memory_usage_mb
 from src.pytorch.utils.timer import Timer
 
 _log = logging.getLogger(__name__)
@@ -167,7 +167,7 @@ class TrainWorkflow:
         """
         with torch.no_grad():
             for item in self.train_dataloader:
-                X = item[0].to(self.device)
+                X = item[0] if self.device == "cpu" else item[0].to(self.device)
                 for p in self.model(X):
                     p_list = p.tolist()
                     if type(p_list) is float:
@@ -205,7 +205,7 @@ class TrainWorkflow:
         while t < self.max_epochs and not self.early_stopped and not train_timer.check_timeout():
             cur_train_loss = self.train_loop(t, fold_idx)
             # Check if born dead (or died during training)
-            if not born_dead:
+            if not (t % 10) and not born_dead:
                 if self.dead():
                     if self.restart_no_conv:
                         _log.warning(
@@ -238,7 +238,7 @@ class TrainWorkflow:
             _log.info(epoch_log)
 
             if t % 10 == 0:
-                _log.info(f"Mem usage: {get_curr_memory_usage_mb()} MB")
+                _log.debug(f"Current mem usage: {get_memory_usage_mb()} MB")
 
             t += 1
 

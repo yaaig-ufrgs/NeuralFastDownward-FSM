@@ -6,7 +6,7 @@ import random
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle as skshuffle
 from torch.utils.data import DataLoader
-from src.pytorch.utils.helpers import get_curr_memory_usage_mb
+from src.pytorch.utils.helpers import get_memory_usage_mb
 import src.pytorch.utils.default_args as default_args
 
 from src.pytorch.training_data import (
@@ -62,7 +62,7 @@ class KFoldTrainingData:
             unique_samples,
             unique_states,
         )
-        _log.info(f"Mem usage after loading data: {get_curr_memory_usage_mb()} MB")
+        _log.debug(f"Mem usage after loading data: {get_memory_usage_mb()} MB")
 
         self.normalize = normalize
         if self.normalize:
@@ -229,8 +229,8 @@ class KFoldTrainingData:
 
             pin_mem = True if self.device == torch.device("cuda:0") else False
 
-            _log.info(
-                f"Mem usage before train_dataloader: {get_curr_memory_usage_mb()} MB"
+            _log.debug(
+                f"Mem usage before train_dataloader: {get_memory_usage_mb()} MB"
             )
             train_dataloader = DataLoader(
                 dataset=InstanceDataset(
@@ -244,7 +244,7 @@ class KFoldTrainingData:
                 pin_memory=pin_mem,
             )
             _log.info(f"Created train dataloader.")
-            _log.info(f"Mem usage: {get_curr_memory_usage_mb()} MB")
+            _log.debug(f"Mem usage: {get_memory_usage_mb()} MB")
 
             val_dataloader = (
                 DataLoader(
@@ -262,7 +262,7 @@ class KFoldTrainingData:
                 else None
             )
             _log.info(f"Created validation dataloader.")
-            _log.info(f"Mem usage: {get_curr_memory_usage_mb()} MB")
+            _log.debug(f"Mem usage: {get_memory_usage_mb()} MB")
 
             test_dataloader = (
                 DataLoader(
@@ -280,11 +280,11 @@ class KFoldTrainingData:
                 else None
             )
             _log.info(f"Created test dataloader.")
-            _log.info(f"Mem usage: {get_curr_memory_usage_mb()} MB")
+            _log.debug(f"Mem usage: {get_memory_usage_mb()} MB")
 
             kfolds.append((train_dataloader, val_dataloader, test_dataloader))
-            _log.info(
-                f"Mem usage after creating fold(s): {get_curr_memory_usage_mb()} MB"
+            _log.debug(
+                f"Mem usage after creating fold(s): {get_memory_usage_mb()} MB"
             )
 
         return kfolds
