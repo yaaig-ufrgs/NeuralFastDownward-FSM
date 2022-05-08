@@ -41,7 +41,7 @@ private:
     static int next_id;
 public:
     const int id;
-    int bound_value;
+    int bound_value = 0;
 protected:
     options::Registry *registry;
     const options::Predefinitions *predefinitions;

@@ -97,6 +97,7 @@ SearchStatus SamplingEngine::step() {
 
     if ((*current_technique)->get_name() == "gbackward_yaaig") { // TODO: use_teacher_search var
         vector<shared_ptr<PartialAssignment>> tasks_all = (*current_technique)->next_all(task);
+        bound_value = (*current_technique)->bound_value;
         vector<string> new_samples = sample_all(tasks_all);
         /*
         size_t sum_size = 0;

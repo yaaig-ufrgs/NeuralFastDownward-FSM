@@ -45,6 +45,8 @@ protected:
     virtual std::vector<std::string> sample_all(
                         std::vector<std::shared_ptr<PartialAssignment>> /*tasks*/) { return {}; };
 
+    int bound_value = 0;
+
 
 public:
     explicit SamplingEngine(const options::Options &opts);
