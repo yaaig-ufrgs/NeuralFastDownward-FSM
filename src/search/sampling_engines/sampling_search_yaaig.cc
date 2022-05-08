@@ -419,31 +419,57 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 make_pair(h, make_pair(s.get_values(), s.to_binary()))
             );
         } else if (state_representation == "valid") {
-            bool found = false;
+            bool is_valid = false;
+            State s;
 
-            // check if partialassignment \in state space
+            if (trie_statespace.empty()) create_trie_statespace();
+            if (task_properties::is_goal_assignment(task_proxy, *partialAssignment)) h = 0;
+            int best_h = INT_MAX;
+            vector<int> key;
+            for (char &b : partialAssignment->to_binary(true)) {
+                key.push_back(b == '*' ? -1 : (int)b - '0');
+            }
+            for (int &hs : trie_statespace.find_all_compatible(key, "v_vu")) {
+                cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                   << endl;
+                best_h = min(best_h, hs);
+            }
+            if (best_h != INT_MAX) {
+                cout << "### BEST_H " << best_h << endl;
+                is_valid = true;
+            } else {
+                // check PDB
+            }
+            /*
+            if (is_valid) {
+              values_set.push_back(
+                  make_pair(best_h, make_pair(s.get_values(), s.to_binary())));
+            }
+            */
 
-            for (int i = 0; i < 10000 && !found; i++) { // MAX_TRIES = 10000
+            for (int i = 0; i < 10000 && !is_valid; i++) { // MAX_TRIES = 10000
                 pair<bool,State> p = partialAssignment->get_full_state(true, *rng);
                 if (p.first) {
-                    vector<int> v = p.second.get_values();
+                    s = p.second;
+                    vector<int> v = s.get_values();
                     EvaluationContext eval_context(registry.insert_state(move(v)));
                     EvaluationResult eval_results = evaluator->compute_result(eval_context);
                     if (eval_results.is_uninitialized() || eval_results.is_infinite())
                         continue;
-                    p.second.unpack();
-                    values_set.push_back(
-                        make_pair(h, make_pair(p.second.get_values(), p.second.to_binary()))
-                    );
-                    found = true;
+                    s.unpack();
+                    is_valid = true;
                 }
             }
-            if (!found) {
+            if (is_valid) {
+                values_set.push_back(
+                    make_pair(h, make_pair(s.get_values(), s.to_binary()))
+                );
+            } else {
                 utils::g_log << "Sample " << partialAssignment->to_binary(true)
                     << " not found in state space or PDB + mutex!" << endl;
                 exit(10);
             }
-        } else if (state_representation == "partial" || state_representation == "valid" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial" || state_representation == "facts_partial") {
+        } else if (state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial" || state_representation == "facts_partial") {
             if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
                 h = 0;
             values_set.push_back(
