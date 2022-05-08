@@ -196,8 +196,6 @@ vector<string> SamplingSearchYaaig::values_to_samples(
                     state_representation == "partial" ||
                     state_representation == "undefined_char") {
                 oss << p.second.second;
-            } else if (state_representation == "valid") {
-                exit(10); // not implemented
             } else if (state_representation == "undefined" || state_representation == "assign_undefined") {
                 for (unsigned i = 0; i < relevant_facts.size(); i++) {
                     if ((state_representation == "undefined") && (i == 0 || relevant_facts[i].var != relevant_facts[i-1].var))
@@ -420,7 +418,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             values_set.push_back(
                 make_pair(h, make_pair(s.get_values(), s.to_binary()))
             );
-        } else if (state_representation == "partial" || state_representation == "valid" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial" || state_representation == "facts_partial") {
+        } else if (state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial" || state_representation == "facts_partial") {
             if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
                 h = 0;
             values_set.push_back(
@@ -434,6 +432,32 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                     make_pair(h, make_pair(s.get_values(), s.to_binary()))
                 );
             }
+        } else if (state_representation == "valid") {
+            if (trie_statespace.empty()) create_trie_statespace();
+            if (task_properties::is_goal_assignment(task_proxy, *partialAssignment)) h = 0;
+            int best_h = INT_MAX;
+            vector<int> key;
+            //bool is_valid = false;
+            for (char &b : partialAssignment->to_binary(true)) {
+                key.push_back(b == '*' ? -1 : (int)b - '0');
+            }
+            for (int &hs : trie_statespace.find_all_compatible(key, "v_vu")) {
+                cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                   << endl;
+                best_h = min(best_h, hs);
+            }
+            if (best_h != INT_MAX) {
+                cout << "### BEST_H " << best_h << endl;
+                //is_valid = true;
+            } else {
+                // check PDB
+            }
+            /*
+            if (is_valid) {
+              values_set.push_back(
+                  make_pair(best_h, make_pair(s.get_values(), s.to_binary())));
+            }
+            */
         }
     }
 
