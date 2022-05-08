@@ -246,6 +246,13 @@ class KFoldTrainingData:
             _log.info(f"Created train dataloader.")
             _log.debug(f"Mem usage: {get_memory_usage_mb()} MB")
 
+            del x_train[:]
+            del x_train
+            del y_train[:]
+            del y_train
+            del w_train[:]
+            del w_train
+
             val_dataloader = (
                 DataLoader(
                     dataset=InstanceDataset(
@@ -264,6 +271,13 @@ class KFoldTrainingData:
             _log.info(f"Created validation dataloader.")
             _log.debug(f"Mem usage: {get_memory_usage_mb()} MB")
 
+            del x_val[:]
+            del x_val
+            del y_val[:]
+            del y_val
+            del w_val[:]
+            del w_val
+
             test_dataloader = (
                 DataLoader(
                     dataset=InstanceDataset(
@@ -281,6 +295,13 @@ class KFoldTrainingData:
             )
             _log.info(f"Created test dataloader.")
             _log.debug(f"Mem usage: {get_memory_usage_mb()} MB")
+
+            del x_test[:]
+            del x_test
+            del y_test[:]
+            del y_test
+            del w_test[:]
+            del w_test
 
             kfolds.append((train_dataloader, val_dataloader, test_dataloader))
             _log.debug(
