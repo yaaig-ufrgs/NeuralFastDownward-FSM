@@ -596,7 +596,9 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       mse_hstar_file(opts.get<string>("mse_hstar_file")),
       mse_result_file(opts.get<string>("mse_result_file")),
       evaluator(opts.get<shared_ptr<Evaluator>>("evaluator")),
-      use_evaluator(evaluator->get_description() != "evaluator = blind"),
+      use_evaluator(
+          evaluator->get_description() != "evaluator = blind" &&
+          evaluator->get_description() != "blind"),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       registry(task_proxy),
       header(construct_header()),
