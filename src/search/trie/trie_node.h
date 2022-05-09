@@ -20,20 +20,20 @@ public:
     int getParentIndex();
 private:
     T mapped_value;
-    int p_index;
-    bool isEndOfWord;
-    tnode<T>* parent;
+    // int p_index;
+    // bool isEndOfWord;
+    // tnode<T>* parent;
     std::unordered_map<int,tnode<T>*> children;
-    std::vector<int> key;
+    // std::vector<int> key;
 };
 
 template <typename T>
-tnode<T>::tnode(T val, tnode<T>* p, int ascii, bool eow) {
+tnode<T>::tnode(T val, tnode<T>* /*p*/, int /*ascii*/, bool /*eow*/) {
     this->mapped_value = val;
-    this-> isEndOfWord = eow;
-    this->p_index = ascii;
-    this->key = {};
-    this->parent = p;
+    // this->isEndOfWord = eow;
+    // this->p_index = ascii;
+    // this->key = {};
+    // this->parent = p;
 }
 
 template <typename T>
@@ -43,7 +43,9 @@ void tnode<T>::addChild(tnode* child, int key) {
 
 template <typename T>
 std::vector<int> tnode<T>::getKey() {
-    return this->key;
+    exit(1516);
+    return {};
+    // return this->key;
 }
 
 template <typename T>
@@ -64,23 +66,28 @@ void tnode<T>::update(T val) {
 }
 
 template <typename T>
-void tnode<T>::markEnd(std::vector<int> key) {
-    this->key = key;
-    this->isEndOfWord = true;
+void tnode<T>::markEnd(std::vector<int> /*key*/) {
+    // this->key = key;
+    // this->isEndOfWord = true;
 }
 
 template <typename T>
 bool tnode<T>::isEnd() {
-    return this->isEndOfWord;
+    return true;
+    // return this->isEndOfWord;
 }
 
 template <typename T>
 tnode<T>* tnode<T>::getParent() {
-    return this->parent;
+    exit(1516);
+    return nullptr;
+    // return this->parent;
 }
 
 template <typename T> int tnode<T>::getParentIndex() {
-    return this->p_index;
+    exit(1516);
+    return -1;
+    // return this->p_index;
 }
 } // namespace trie
 
