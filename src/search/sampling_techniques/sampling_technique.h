@@ -53,7 +53,6 @@ protected:
     const int mem_limit_mb;
     const bool remove_duplicates;
     // const std::string dump_directory;
-    const std::string statespace_file;
     const bool check_mutexes;
     const bool check_solvable;
     const bool use_alternative_mutexes;

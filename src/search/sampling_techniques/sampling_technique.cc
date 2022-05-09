@@ -119,7 +119,6 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
           max_time(opts.get<double>("max_time")),
           mem_limit_mb(opts.get<int>("mem_limit_mb")),
           remove_duplicates(opts.get<bool>("remove_duplicates")),
-          statespace_file(opts.get<string>("statespace_file")),
           // dump_directory(opts.get<string>("dump")),
           check_mutexes(opts.get<bool>("check_mutexes")),
           check_solvable(opts.get<bool>("check_solvable")),
@@ -141,6 +140,7 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
         }
     }
 
+    /*
     if (statespace_file != "none") {
         ifstream f(statespace_file);
         string line;
@@ -152,6 +152,7 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
         }
         f.close();
     }
+    */
 
     if (max_samples == -1)
         max_samples = numeric_limits<int>::max(); // ~2 billion samples
@@ -182,7 +183,6 @@ SamplingTechnique::SamplingTechnique(
             max_time(-1.0),
             mem_limit_mb(-1),
             remove_duplicates(false),
-            statespace_file(""),
             // dump_directory(move(dump_directory)),
             check_mutexes(check_mutexes),
             check_solvable(check_solvable),
@@ -268,11 +268,13 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         update_alternative_task_mutexes(seed_task);
         vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
         for (shared_ptr<PartialAssignment>& task : next_tasks) {
+            /*
             if (statespace_file != "none") {
                 string s = task->to_binary();
                 if (statespace.find(s) == statespace.end())
                     continue;
             } 
+            */
             if (remove_duplicates) {
                 if (hash_table.count(*task))
                     continue;
@@ -457,11 +459,6 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
             "remove_duplicates",
             "Remove duplicated samples.",
             "false"
-    );
-    parser.add_option<string>(
-            "statespace_file",
-            "Path to file containing the statespace of an instance in binary format.",
-            "none"
     );
     parser.add_list_option<shared_ptr<Evaluator>>(
             "evals",
