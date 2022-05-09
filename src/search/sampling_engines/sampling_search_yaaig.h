@@ -40,7 +40,8 @@ protected:
     const bool sort_h;
     const std::string mse_hstar_file;
     const std::string mse_result_file;
-    std::shared_ptr<Evaluator> evaluator;
+    const std::shared_ptr<Evaluator> evaluator;
+    const bool use_evaluator;
     const std::vector<FactPair> relevant_facts;
     StateRegistry registry;
     const std::string header;
@@ -75,6 +76,7 @@ private:
     void replace_h_with_evaluator(
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& values_set);
     void compute_sampling_statistics(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> samples);
+    std::vector<int> binary_to_values(std::string bin);
 };
 
 class AviNode {

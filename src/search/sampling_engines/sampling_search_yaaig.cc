@@ -45,7 +45,28 @@ string SamplingSearchYaaig::sample_file_header() const {
     return header;
 }
 
+vector<int> SamplingSearchYaaig::binary_to_values(string bin) {
+    vector<int> values = {};
+    // assert(bin.size() == relevant_facts.size());
+    if (bin.size() != relevant_facts.size()) exit(10);
+    for (unsigned i = 0; i < bin.size(); i++) {
+        if (bin[i] == '1')
+            values.push_back(relevant_facts[i].value);
+        else if ((values.size() == (unsigned)relevant_facts[i].var) &&
+                (i == bin.size()-1 || relevant_facts[i].var != relevant_facts[i+1].var))
+            values.push_back(relevant_facts[i].value+1);
+        else
+            continue;
+        //assert(values.size()-1 == (unsigned)relevant_facts[i].var)
+        if (values.size()-1 != (unsigned)relevant_facts[i].var) exit(10);
+    }
+    return values;
+}
+
 void SamplingSearchYaaig::do_minimization(vector<shared_ptr<PartialAssignment>>& states) {
+    if (use_evaluator)
+        return;
+
     // Mapping where each state will have a pair, where the first element is the
     // smallest h-value found for the state and the second is a list of pointers
     // to all h-values vars of all identical states.
@@ -71,8 +92,10 @@ void SamplingSearchYaaig::do_minimization(vector<shared_ptr<PartialAssignment>>&
 }
 
 void SamplingSearchYaaig::do_minimization(vector<pair<int,pair<vector<int>,string>>>& states) {
-    unordered_map<string,pair<int,vector<int*>>> pairs;
+    if (use_evaluator)
+        return;
 
+    unordered_map<string,pair<int,vector<int*>>> pairs;
     for (pair<int,pair<vector<int>,string>>& s: states) {
         if (pairs.count(s.second.second) == 0) {
             pairs[s.second.second] = make_pair(s.first, vector<int*>{&s.first});
@@ -289,6 +312,8 @@ void SamplingSearchYaaig::create_trie_statespace() {
 void SamplingSearchYaaig::approximate_value_iteration() {
     if (avi_k <= 0 || avi_its <= 0)
         return;
+    if (use_evaluator)
+        return;
     if (mse_hstar_file != "none")
         create_trie_statespace();
 
@@ -420,8 +445,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             );
         } else if (state_representation == "valid") {
             bool is_valid = false;
-            State s;
-
+            
             if (trie_statespace.empty()) create_trie_statespace();
             if (task_properties::is_goal_assignment(task_proxy, *partialAssignment)) h = 0;
             int best_h = INT_MAX;
@@ -450,7 +474,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             for (int i = 0; i < 10000 && !is_valid; i++) { // MAX_TRIES = 10000
                 pair<bool,State> p = partialAssignment->get_full_state(true, *rng);
                 if (p.first) {
-                    s = p.second;
+                    State s = p.second;
                     vector<int> v = s.get_values();
                     EvaluationContext eval_context(registry.insert_state(move(v)));
                     EvaluationResult eval_results = evaluator->compute_result(eval_context);
@@ -461,9 +485,9 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 }
             }
             if (is_valid) {
-                values_set.push_back(
+/*                values_set.push_back(
                     make_pair(h, make_pair(s.get_values(), s.to_binary()))
-                );
+                );*/
             } else {
                 utils::g_log << "Sample " << partialAssignment->to_binary(true)
                     << " not found in state space or PDB + mutex!" << endl;
@@ -495,7 +519,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     }
 
     // blind is the default, sampling keeps the regression value
-    if (evaluator->get_description() != "blind")
+    if (use_evaluator)
         replace_h_with_evaluator(values_set);
 
     if (state_representation == "complete" || state_representation == "complete_no_mutex" || state_representation == "partial" || state_representation == "valid")
@@ -574,6 +598,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       mse_hstar_file(opts.get<string>("mse_hstar_file")),
       mse_result_file(opts.get<string>("mse_result_file")),
       evaluator(opts.get<shared_ptr<Evaluator>>("evaluator")),
+      use_evaluator(evaluator->get_description() != "evaluator = blind"),
       relevant_facts(task_properties::get_strips_fact_pairs(task.get())),
       registry(task_proxy),
       header(construct_header()),
