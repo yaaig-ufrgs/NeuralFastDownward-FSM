@@ -347,7 +347,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     unordered_map<string,AviNode> avi_mapping;
     for (shared_ptr<PartialAssignment>& s : sampling_technique::modified_tasks) {
         string s_key = s->values_to_string();
-        //string s_key = s->to_binary();
+        //string s_key = s->to_binary(true);
         if (avi_mapping[s_key].samples.size() == 0) {
             vector<OperatorID> applicable_operators;
             succ_generator->generate_applicable_ops(*s, applicable_operators, true);
@@ -357,7 +357,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                 if (!t.violates_mutexes()) {
                     for (shared_ptr<PartialAssignment>& t_: trie.find_all_compatible(t.get_values(), avi_rule)) {
                         string t_key = t_->values_to_string();
-                        //string t_key = t_->to_binary();
+                        //string t_key = t_->to_binary(true);
                         pair<string,int> pair = make_pair(t_key, op_proxy.get_cost());
                         if (find(avi_mapping[s_key].successors.begin(), avi_mapping[s_key].successors.end(), pair)
                                 == avi_mapping[s_key].successors.end()) {
