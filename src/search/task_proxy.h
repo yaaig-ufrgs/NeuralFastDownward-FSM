@@ -618,6 +618,7 @@ public:
             bool check_mutexes, utils::RandomNumberGenerator &rng) const;
     
     std::string to_binary(bool use_undefined = false) const;
+    std::string values_to_string() const;
 };
 
 
