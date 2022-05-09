@@ -324,17 +324,9 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     // Trie
     auto t_avi = std::chrono::high_resolution_clock::now();
     auto t = t_avi;
-    unordered_map<string,int> min_pairs_pre;
     trie::trie<shared_ptr<PartialAssignment>> trie;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
-        string bin = partialAssignment->to_binary(true);
-        int h = partialAssignment->estimated_heuristic;
-        // Maintain a mapping to keep the smallest h-value
-        // in the trie in case there are duplicate samples
-        if (min_pairs_pre.count(bin) == 0 || h < min_pairs_pre[bin]) {
-            trie.insert(partialAssignment->get_values(), partialAssignment);
-            min_pairs_pre[bin] = h;
-        }
+        trie.insert(partialAssignment->get_values(), partialAssignment);
     }
     utils::g_log << "[AVI] Time creating trie: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
