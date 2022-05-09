@@ -167,7 +167,7 @@ class TrainWorkflow:
         """
         with torch.no_grad():
             for item in self.train_dataloader:
-                X = item[0] if self.device == "cpu" else item[0].to(self.device)
+                X = item[0].to(self.device)
                 for p in self.model(X):
                     p_list = p.tolist()
                     if type(p_list) is float:
@@ -205,7 +205,7 @@ class TrainWorkflow:
         while t < self.max_epochs and not self.early_stopped and not train_timer.check_timeout():
             cur_train_loss = self.train_loop(t, fold_idx)
             # Check if born dead (or died during training)
-            if not (t % 10) and not born_dead:
+            if not born_dead:
                 if self.dead():
                     if self.restart_no_conv:
                         _log.warning(
