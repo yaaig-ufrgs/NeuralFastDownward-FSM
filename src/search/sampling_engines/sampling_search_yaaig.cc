@@ -414,7 +414,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
 }
 
 vector<string> SamplingSearchYaaig::extract_samples() {
-    utils::g_log << endl;
+    utils::g_log << "Extracting samples... " << endl;
 
     if (sort_h) {
         sort(
