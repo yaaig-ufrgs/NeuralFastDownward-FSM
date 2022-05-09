@@ -424,8 +424,11 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         }
 
         utils::g_log << "Starting random walk search (" << subtechnique << ") from " << leaves.size() << " leaves" << endl;
-        if (max_samples != INT32_MAX)
+        if (max_samples != numeric_limits<int>::max())
             utils::g_log << "Looking for " << (max_samples - samples.size()) << " more samples..." << endl;
+        else
+            utils::g_log << "Looking for more samples until mem/time budget runs out." << endl;
+            
         int lid = 0;
         vector<bool> leaves_used(leaves.size(), false);
         while ((samples.size() < (unsigned)max_samples) && !stopped) {

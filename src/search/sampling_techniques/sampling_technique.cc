@@ -155,12 +155,12 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
     */
 
     if (max_samples == -1)
-        max_samples = INT32_MAX; // ~2 billion samples
+        max_samples = numeric_limits<int>::max(); // ~2 billion samples
 
     if (mem_limit_mb != -1)
         mem_limit = mem_limit_mb * 1024; // KB
     else
-        mem_limit = INT32_MAX;
+        mem_limit = numeric_limits<int>::max();
 
     if (max_time == -1.0)
         max_time = numeric_limits<double>::max();
@@ -219,7 +219,7 @@ bool SamplingTechnique::stop_sampling(bool is_bfs, float bfs_pct) const {
                 utils::get_curr_memory_in_kb() >= mem_reserved_bfs);
     }
     if (stop) {
-        cout << "[STOP] Time/memory limit breached. Stopping " << (is_bfs ? "BFS" : "") << " sampling..." << endl
+        cout << "[STOP] Time/memory limit breached. Stopping " << (is_bfs ? "BFS" : "") << "sampling..." << endl
              << "[STOP] Current time:   " << sampling_timer->get_elapsed_time() << "/" << max_time << "s" << endl
              << "[STOP] Current memory: " << utils::get_curr_memory_in_kb() << "/" << mem_limit << endl;
     }
@@ -282,7 +282,7 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
             }
 
             tasks.push_back(task);
-            if (max_samples != INT32_MAX && tasks.size() >= (unsigned)max_samples) {
+            if (max_samples != numeric_limits<int>::max() && tasks.size() >= (unsigned)max_samples) {
                 max_samples_reached = true;
                 break;
             }
