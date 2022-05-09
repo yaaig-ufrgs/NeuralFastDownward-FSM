@@ -248,7 +248,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
         for (PartialAssignment& s : vk) {
             vector<PartialAssignment> succ_s;
             int idx_op = 0, rng_seed = (*rng)() * (INT32_MAX - 1);
-            while (true) {
+            while (!stopped) {
                 OperatorID applied_op = OperatorID::no_operator;
                 PartialAssignment s_ = dfss->sample_state_length(
                     s, rng_seed, idx_op, applied_op, is_valid_state
@@ -285,6 +285,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
                     hash_table.insert(s_);
                 }
             }
+            if (stopped)
+                break;
             stopped = stop_sampling(true, bfs_percentage);
         }
         vk = vk1;
@@ -415,13 +417,15 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
         utils::HashSet<PartialAssignment> bfs_core; // or dfs_core
         bool avoid_bfs_core = true;
-        if (avoid_bfs_core)
+        if (avoid_bfs_core) {
             for (shared_ptr<PartialAssignment> &s : samples) {
                 bfs_core.insert(*s);
             }
+        }
 
-        utils::g_log << "Starting random walk search (" << subtechnique << ") from " << leaves.size() << " leaves" << endl
-             << "Looking for " << (max_samples - samples.size()) << " more samples..." << endl;
+        utils::g_log << "Starting random walk search (" << subtechnique << ") from " << leaves.size() << " leaves" << endl;
+        if (max_samples != INT32_MAX)
+            utils::g_log << "Looking for " << (max_samples - samples.size()) << " more samples..." << endl;
         int lid = 0;
         vector<bool> leaves_used(leaves.size(), false);
         while ((samples.size() < (unsigned)max_samples) && !stopped) {
