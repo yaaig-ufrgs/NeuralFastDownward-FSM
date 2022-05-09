@@ -46,7 +46,7 @@ protected:
     StateRegistry registry;
     const std::string header;
     std::shared_ptr<utils::RandomNumberGenerator> rng;
-    trie::trie<int> trie_statespace; // with h*
+    trie::trie<std::pair<int,std::string>> trie_statespace; // with h*
 
     virtual std::vector<std::string> extract_samples() override;
     virtual std::string construct_header() const;

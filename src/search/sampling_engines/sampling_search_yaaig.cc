@@ -242,8 +242,8 @@ double SamplingSearchYaaig::mse(vector<shared_ptr<PartialAssignment>>& samples, 
         vector<int> key;
         for (char& b : pa->to_binary(true))
             key.push_back(b == '*' ? -1 : (int)b - '0');
-        for (int& hs: trie_statespace.find_all_compatible(key, "v_vu"))
-            best_h = min(best_h, hs);
+        for (pair<int,string> p: trie_statespace.find_all_compatible(key, "v_vu"))
+            best_h = min(best_h, p.first);
         // assert(best_h != INT_MAX);
         if (best_h != INT_MAX) {
             int err = best_h - pa->estimated_heuristic;
@@ -297,9 +297,12 @@ void SamplingSearchYaaig::create_trie_statespace() {
                 continue;
             int h = stoi(h_sample.substr(0, h_sample.find(';')));
             vector<int> key;
-            for (char& b : h_sample.substr(h_sample.find(';') + 1, h_sample.size()))
+            string bin = "";
+            for (char &b : h_sample.substr(h_sample.find(';') + 1, h_sample.size())) {
                 key.push_back((int)b - '0');
-            trie_statespace.insert(key, h);
+                bin += b;
+            }
+            trie_statespace.insert(key, make_pair(h, bin));
         }
         f.close();
         utils::g_log << "Time creating trie_statespace: " << (std::chrono::duration<double, std::milli>(
@@ -438,60 +441,54 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         if (state_representation == "complete" || state_representation == "complete_no_mutex" || state_representation == "values_complete" || state_representation == "facts_complete") {
             State s = partialAssignment->get_full_state(
                 state_representation != "complete_no_mutex", *rng).second;
-            if (task_properties::is_goal_state(task_proxy, s)) h = 0;
+            if (task_properties::is_goal_state(task_proxy, s))
+                h = 0;
             s.unpack();
             values_set.push_back(
                 make_pair(h, make_pair(s.get_values(), s.to_binary()))
             );
         } else if (state_representation == "valid") {
+            State s = partialAssignment->get_full_state(true, *rng).second;
             bool is_valid = false;
-            
+
+            // Looking for valid state in forward state space
             if (trie_statespace.empty()) create_trie_statespace();
-            if (task_properties::is_goal_assignment(task_proxy, *partialAssignment)) h = 0;
-            int best_h = INT_MAX;
             vector<int> key;
             for (char &b : partialAssignment->to_binary(true)) {
                 key.push_back(b == '*' ? -1 : (int)b - '0');
             }
-            for (int &hs : trie_statespace.find_all_compatible(key, "v_vu")) {
-                cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-                   << endl;
-                best_h = min(best_h, hs);
-            }
-            if (best_h != INT_MAX) {
-                cout << "### BEST_H " << best_h << endl;
+            vector<pair<int,string>> compatibles = trie_statespace.find_all_compatible(key, "v_vu"); 
+            if (!compatibles.empty()) {
+                vector<int> values = binary_to_values(compatibles[(*rng)()*compatibles.size()].second);
+                s = State(*task, move(values));
                 is_valid = true;
-            } else {
-                // check PDB
             }
-            /*
-            if (is_valid) {
-              values_set.push_back(
-                  make_pair(best_h, make_pair(s.get_values(), s.to_binary())));
-            }
-            */
 
+            // Looking for valid state in PDB+Mutex
             for (int i = 0; i < 10000 && !is_valid; i++) { // MAX_TRIES = 10000
                 pair<bool,State> p = partialAssignment->get_full_state(true, *rng);
                 if (p.first) {
-                    State s = p.second;
+                    s = p.second;
                     vector<int> v = s.get_values();
                     EvaluationContext eval_context(registry.insert_state(move(v)));
                     EvaluationResult eval_results = evaluator->compute_result(eval_context);
                     if (eval_results.is_uninitialized() || eval_results.is_infinite())
                         continue;
-                    s.unpack();
                     is_valid = true;
                 }
             }
+
             if (is_valid) {
-/*                values_set.push_back(
+                if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
+                    h = 0;
+                s.unpack();
+                values_set.push_back(
                     make_pair(h, make_pair(s.get_values(), s.to_binary()))
-                );*/
+                );
             } else {
                 utils::g_log << "Sample " << partialAssignment->to_binary(true)
                     << " not found in state space or PDB + mutex!" << endl;
-                exit(10);
+                continue;
             }
         } else if (state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial" || state_representation == "facts_partial") {
             if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
@@ -501,7 +498,8 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             );
         } else if (state_representation == "assign_undefined") {
             for (State &s : assign_undefined_state(partialAssignment, 5 * assignments_by_undefined_state)) {
-                if (task_properties::is_goal_state(task_proxy, s)) h = 0;
+                if (task_properties::is_goal_state(task_proxy, s))
+                    h = 0;
                 s.unpack();
                 values_set.push_back(
                     make_pair(h, make_pair(s.get_values(), s.to_binary()))
@@ -553,13 +551,13 @@ void SamplingSearchYaaig::compute_sampling_statistics(
             vector<int> key;
             for (char& b : s.second.second)
                 key.push_back((int)b - '0');
-            vector<int> hs = trie_statespace.find_all_compatible(key, "v_v");
-            if (hs.size() == 0) {
+            vector<pair<int, string>> compatibles = trie_statespace.find_all_compatible(key, "v_v");
+            if (compatibles.size() == 0) {
                 not_in_statespace++;
             } else {
-                // assert(hs.size() == 1);
-                if (!(hs.size() == 1)) exit(10);
-                int hstar = hs[0];
+                // assert(compatibles.size() == 1);
+                if (!(compatibles.size() == 1)) exit(10);
+                int hstar = compatibles[0].first;
                 if (h == hstar)
                     with_hstar++;
                 else if (h < hstar)
