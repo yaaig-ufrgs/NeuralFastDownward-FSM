@@ -324,12 +324,12 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     // Trie
     auto t_avi = std::chrono::high_resolution_clock::now();
     auto t = t_avi;
-
-    // for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
-    //     trie_avi->insert(partialAssignment->get_values(), partialAssignment);
-    // }
-    // utils::g_log << "[AVI] Time creating trie: " << (std::chrono::duration<double, std::milli>(
-    //    std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
+    trie::trie<shared_ptr<PartialAssignment>> trie;
+    for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
+        trie.insert(partialAssignment->get_values(), partialAssignment);
+    }
+    utils::g_log << "[AVI] Time creating trie: " << (std::chrono::duration<double, std::milli>(
+        std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 
     // Mapping
     t = std::chrono::high_resolution_clock::now();
@@ -339,6 +339,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     unordered_map<string,AviNode> avi_mapping;
     for (shared_ptr<PartialAssignment>& s : sampling_technique::modified_tasks) {
         string s_key = s->values_to_string();
+        //string s_key = s->to_binary(true);
         if (avi_mapping[s_key].samples.size() == 0) {
             vector<OperatorID> applicable_operators;
             succ_generator->generate_applicable_ops(*s, applicable_operators, true);
@@ -346,8 +347,9 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                 OperatorProxy op_proxy = operators[op_id];
                 PartialAssignment t = s->get_partial_successor(op_proxy);
                 if (!t.violates_mutexes()) {
-                    for (shared_ptr<PartialAssignment>& t_: trie_avi->find_all_compatible(t.get_values(), avi_rule)) {
+                    for (shared_ptr<PartialAssignment>& t_: trie.find_all_compatible(t.get_values(), avi_rule)) {
                         string t_key = t_->values_to_string();
+                        //string t_key = t_->to_binary(true);
                         pair<string,int> pair = make_pair(t_key, op_proxy.get_cost());
                         if (find(avi_mapping[s_key].successors.begin(), avi_mapping[s_key].successors.end(), pair)
                                 == avi_mapping[s_key].successors.end()) {
@@ -367,7 +369,6 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             for (shared_ptr<PartialAssignment>& s : p.second.samples)
                 s->estimated_heuristic = p.second.best_h;
     }
-    delete trie_avi;
     utils::g_log << "[AVI] Time creating AVI mapping: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 
@@ -605,9 +606,6 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
     if (!(avi_k == 0 || avi_k == 1)) exit(10);
     // assert(avi_its > 0);
     if (!(avi_its >= 0)) exit(10);
-
-    if (avi_k > 0)
-        trie_avi = new trie::trie<shared_ptr<PartialAssignment>>();
 }
 
 static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parser) {

@@ -2,7 +2,6 @@
 #include <algorithm>
 
 #include "technique_gbackward_yaaig.h"
-#include "../sampling_engines/sampling_engine.h"
 
 #include "../evaluation_result.h"
 #include "../heuristic.h"
@@ -388,24 +387,20 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
 
     if (technique == "rw") {
-        samples = sample_with_random_walk(
-            pa, min(samples_per_search, num_missing_samples(samples.size())), is_valid_state, func_bias, task_proxy);
-        insert_in_trie(samples);
+        samples = sample_with_random_walk(pa, samples_per_search, is_valid_state, func_bias, task_proxy);
 
     } else if (technique == "bfs_rw" && subtechnique == "percentage") {
         float bfs_percentage = 0.1; // TODO: argument
         samples = sample_with_percentage_limited_bfs(bfs_percentage, pa, is_valid_state, leaves, task_proxy);
-        insert_in_trie(samples);
 
     } else if (technique == "dfs" || technique == "bfs") {
         do {
             vector<shared_ptr<PartialAssignment>> samples_ = sample_with_bfs_or_dfs(
-                technique.substr(0, 3), pa, num_missing_samples(samples.size()), is_valid_state, task_proxy
+                technique.substr(0, 3), pa, max_samples-samples.size(), is_valid_state, task_proxy
             );
             samples.insert(samples.end(), samples_.begin(), samples_.end());
             hash_table.clear();
-            insert_in_trie(samples_);
-        } while (num_missing_samples(samples.size()) > 0 && !stopped);
+        } while ((samples.size() < (unsigned)max_samples) && !stopped);
 
     } else if (technique == "dfs_rw" || technique == "bfs_rw") {
         utils::g_log << technique << " (" << subtechnique << ") not implemented!" << endl;
@@ -423,16 +418,20 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         utils::HashSet<PartialAssignment> bfs_core; // or dfs_core
         bool avoid_bfs_core = true;
         if (avoid_bfs_core) {
-            for (shared_ptr<PartialAssignment> &s : samples)
+            for (shared_ptr<PartialAssignment> &s : samples) {
                 bfs_core.insert(*s);
+            }
         }
 
         utils::g_log << "Starting random walk search (" << subtechnique << ") from " << leaves.size() << " leaves" << endl;
-        if (max_samples != INT32_MAX)
-            utils::g_log << "Looking for " << num_missing_samples(samples.size()) << " more samples..." << endl;
+        if (max_samples != numeric_limits<int>::max())
+            utils::g_log << "Looking for " << (max_samples - samples.size()) << " more samples..." << endl;
+        else
+            utils::g_log << "Looking for more samples until mem/time budget runs out." << endl;
+            
         int lid = 0;
         vector<bool> leaves_used(leaves.size(), false);
-        while (num_missing_samples(samples.size()) && !stopped) {
+        while ((samples.size() < (unsigned)max_samples) && !stopped) {
             do {
                 lid = (subtechnique == "round_robin") ? // round_robin or random_leaf (random_leaf if percentage)
                       (lid + 1) % leaves.size() : (int)((*rng)() * (INT32_MAX - 1)) % leaves.size();
@@ -443,7 +442,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
             vector<shared_ptr<PartialAssignment>> samples_ = sample_with_random_walk(
                 leaves[lid],
-                min(samples_per_search, num_missing_samples(samples.size())),
+                min(samples_per_search, (int)(max_samples-samples.size())),
                 is_valid_state,
                 func_bias,
                 task_proxy,
@@ -452,20 +451,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 bfs_core
             );
             samples.insert(samples.end(), samples_.begin(), samples_.end());
-            insert_in_trie(samples_);
         }
     }
     return samples;
-}
-
-int TechniqueGBackwardYaaig::num_missing_samples(int samples_curr_rollout) {
-    return max_samples - modified_tasks.size() - samples_curr_rollout;
-}
-
-void TechniqueGBackwardYaaig::insert_in_trie(vector<shared_ptr<PartialAssignment>>& samples) {
-    if (sampling_engine::trie_avi != nullptr)
-        for (shared_ptr<PartialAssignment>& s : samples)
-            sampling_engine::trie_avi->insert(s->get_values(), s);
 }
 
 /* PARSING TECHNIQUE_GBACKWARD_YAAIG*/

@@ -88,9 +88,6 @@ private:
         vector<PartialAssignment> &leaves,
         const TaskProxy &task_proxy
     );
-
-    int num_missing_samples(int samples_curr_rollout);
-    void insert_in_trie(vector<shared_ptr<PartialAssignment>>& samples);
 };
 }
 #endif

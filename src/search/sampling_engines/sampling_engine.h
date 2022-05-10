@@ -7,7 +7,6 @@
 #include "../utils/hash.h"
 
 #include "sample_cache.h"
-#include "../trie/trie.h"
 
 #include <functional>
 #include <memory>
@@ -22,8 +21,6 @@ namespace utils {
 }
 
 namespace sampling_engine {
-extern trie::trie<std::shared_ptr<PartialAssignment>>* trie_avi;
-
 /* Use this magic word if you want to ensure that the file is correctly encoded
  * e.g. after compressing it. Add it into your sample_file_header*/
 extern const std::string SAMPLE_FILE_MAGIC_WORD;
