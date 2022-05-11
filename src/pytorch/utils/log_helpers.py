@@ -71,6 +71,7 @@ def logging_train_config(
         "bias": args.bias,
         "bias_output": args.bias_output,
         "normalize_output": args.normalize_output,
+        "check_dead_once": args.check_dead_once,
         "seed_increment_when_born_dead": args.seed_increment_when_born_dead,
         "weights_method": args.weights_method,
         "seed": args.seed if args.seed != -1 else "random",

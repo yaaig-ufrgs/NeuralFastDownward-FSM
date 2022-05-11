@@ -26,6 +26,7 @@ class TrainWorkflow:
         dirname: str,
         optimizer: optim.Optimizer,
         scatter_plot: bool,
+        check_dead_once: bool,
         loss_fn: nn = nn.MSELoss(),
         is_weighted_loss_fn: bool = False,
         restart_no_conv: bool = True,
@@ -50,6 +51,7 @@ class TrainWorkflow:
         self.patience = patience
         self.early_stopped = False
         self.restart_no_conv = restart_no_conv
+        self.check_dead_once = check_dead_once
         self.train_y_pred_values = []  # [state, y, pred]
         self.val_y_pred_values = [] # [state, y, pred]
 
@@ -201,11 +203,12 @@ class TrainWorkflow:
         best_loss, best_epoch = None, None
         cur_train_loss, cur_val_loss = None, None
         born_dead = False
+        check_once = False
         t = 0
         while t < self.max_epochs and not self.early_stopped and not train_timer.check_timeout():
             cur_train_loss = self.train_loop(t, fold_idx)
             # Check if born dead (or died during training)
-            if not (t % 10) and not born_dead:
+            if not (t % 10) and not born_dead and not check_once:
                 if self.dead():
                     if self.restart_no_conv:
                         _log.warning(
@@ -217,6 +220,8 @@ class TrainWorkflow:
                             "All predictions are 0 (born dead), but restart is disabled."
                         )
                         born_dead = True
+                if self.check_dead_once:
+                    check_once = True
 
             epoch_log = f"Epoch {t} | avg_train_loss={cur_train_loss:>7f}"
 

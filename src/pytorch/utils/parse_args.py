@@ -296,6 +296,13 @@ def get_train_args():
         help="Restarts the network if it won't converge. (default: %(default)s)",
     )
     parser.add_argument(
+        "-cdead",
+        "--check-dead-once",
+        type=str2bool,
+        default=default_args.CHECK_DEAD_ONCE,
+        help="Only check if network is dead once, at the start of the first epoch. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-sibd",
         "--seed-increment-when-born-dead",
         type=int,
@@ -905,6 +912,13 @@ def get_exp_args():
         type=str2bool,
         default=default_args.RESTART_NO_CONV,
         help="Restarts the network if it won't converge. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-trn-cdead",
+        "--train-check-dead-once",
+        type=str2bool,
+        default=default_args.CHECK_DEAD_ONCE,
+        help="Only check if network is dead once, at the start of the first epoch. (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-sibd",
