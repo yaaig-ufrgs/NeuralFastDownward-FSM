@@ -62,7 +62,7 @@ class KFoldTrainingData:
             unique_samples,
             unique_states,
         )
-        _log.debug(f"Mem usage after loading data: {get_memory_usage_mb()} MB")
+        _log.info(f"Mem usage after loading data: {get_memory_usage_mb()} MB")
 
         self.normalize = normalize
         if self.normalize:
@@ -198,12 +198,9 @@ class KFoldTrainingData:
                         if len(self.weights) > 0:
                             w_train.append(self.weights[j])
 
-            del self.states[:]
-            del self.states
-            del self.heuristics[:]
-            del self.heuristics
-            del self.weights[:]
-            del self.weights
+            self.states = None
+            self.heuristics = None
+            self.weights = None
 
             """
             # If necessary, change the ordering of the data.
@@ -246,13 +243,9 @@ class KFoldTrainingData:
             _log.info(f"Created train dataloader.")
             _log.debug(f"Mem usage: {get_memory_usage_mb()} MB")
 
-            # DO NOT DELETE IF USING training_data_mem.py
-            del x_train[:]
-            del x_train
-            del y_train[:]
-            del y_train
-            del w_train[:]
-            del w_train
+            x_train = None
+            y_train = None
+            w_train = None
 
             val_dataloader = (
                 DataLoader(
@@ -272,13 +265,9 @@ class KFoldTrainingData:
             _log.info(f"Created validation dataloader.")
             _log.debug(f"Mem usage: {get_memory_usage_mb()} MB")
 
-            # DO NOT DELETE IF USING training_data_mem.py
-            del x_val[:]
-            del x_val
-            del y_val[:]
-            del y_val
-            del w_val[:]
-            del w_val
+            x_val = None
+            y_val = None
+            w_val = None
 
             test_dataloader = (
                 DataLoader(
@@ -298,16 +287,12 @@ class KFoldTrainingData:
             _log.info(f"Created test dataloader.")
             _log.debug(f"Mem usage: {get_memory_usage_mb()} MB")
 
-            # DO NOT DELETE IF USING training_data_mem.py
-            del x_test[:]
-            del x_test
-            del y_test[:]
-            del y_test
-            del w_test[:]
-            del w_test
+            x_test = None
+            y_test = None
+            w_test = None
 
             kfolds.append((train_dataloader, val_dataloader, test_dataloader))
-            _log.debug(
+            _log.info(
                 f"Mem usage after creating fold(s): {get_memory_usage_mb()} MB"
             )
 

@@ -12,9 +12,9 @@ _log = logging.getLogger(__name__)
 class InstanceDataset(Dataset):
     def __init__(
         self,
-        states: list,
-        heuristics: list,
-        weights: list,
+        states: np.array,
+        heuristics: np.array,
+        weights: np.array,
         domain_max_value: int,
         output_layer: str,
     ):
@@ -25,21 +25,20 @@ class InstanceDataset(Dataset):
         # We don't need extra memory usage.
         if len(weights) > 0:
             self.weights = torch.tensor(
-                np.array(weights), dtype=torch.float32
+                weights, dtype=torch.float32
             ).unsqueeze(1)
         else:
             self.weights = []
 
-        del weights[:]
-        del weights
+        weights = None
 
-        self.states = torch.tensor(np.array([np.fromiter(s, dtype=np.int8) for s in states]), dtype=torch.float32)
-        del states[:]
-        del states
+        #self.states = torch.tensor(np.array([np.fromiter(s, dtype=np.int8) for s in states]), dtype=torch.float32)
+        self.states = torch.tensor(states, dtype=torch.float32)
+        states = None
 
         if output_layer == "regression":
             self.hvalues = torch.tensor(
-                np.array(heuristics), dtype=torch.float32
+                heuristics, dtype=torch.float32
             ).unsqueeze(1)
 
         elif output_layer == "prefix":
@@ -56,8 +55,7 @@ class InstanceDataset(Dataset):
         else:
             raise RuntimeError(f"Invalid output layer: {output_layer}")
 
-        del heuristics[:]
-        del heuristics
+        heuristics = None
 
     def __getitem__(self, idx: int) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         if len(self.weights) > 0:
@@ -130,7 +128,8 @@ def load_training_state_value_pairs(
                         continue
                     uniques_x.append(state)
 
-                states.append(state)
+                st = np.fromiter(state, dtype=np.int8)
+                states.append(st)
                 heuristics.append(h_int)
 
                 # Gets the domain max h value.
@@ -138,12 +137,14 @@ def load_training_state_value_pairs(
                     max_h = h_int
                     domain_max_value = max_h
 
+    """
     # Clamps the heuristic value.
     if clamping != default_args.CLAMPING:
         for i in range(len(state_value_pairs)):
             curr_h = state_value_pairs[i][1]
             if (curr_h >= max_h - clamping) and (curr_h != max_h):
                 state_value_pairs[i][1] = max_h
+    """
 
     # Appends weights (counts) to state_value_pairs:
     if loss_function == "mse_weighted":
@@ -158,7 +159,7 @@ def load_training_state_value_pairs(
             else:  # No weighting, use default (1).
                 weights.append(1)
 
-    return states, heuristics, weights, domain_max_value
+    return np.array(states), np.array(heuristics), np.array(weights), domain_max_value
 
 
 def generate_optimal_state_value_pairs(domain, problems):

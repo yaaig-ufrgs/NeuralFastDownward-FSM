@@ -249,6 +249,7 @@ class TrainWorkflow:
             _log.info(f"Training time reached. Best epoch: {best_epoch}/{t}")
         if t == self.max_epochs:
             _log.info(f"Max epoch reached. Best epoch: {best_epoch}/{t}")
+        _log.info(f"Mem usage END: {get_memory_usage_mb()} MB")
 
         if not self.save_best:
             self.best_epoch_model = self.model
