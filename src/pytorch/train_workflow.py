@@ -185,6 +185,7 @@ class TrainWorkflow:
         Saves a traced model to be used by the C++ backend.
         """
         if model == "resnet":
+            #example_input = self.train_dataloader.dataset[0][0] If using training_data_mem.py
             example_input = self.train_dataloader.dataset[:10][0]
         elif model == "simple":
             example_input = self.train_dataloader.dataset[0][0]

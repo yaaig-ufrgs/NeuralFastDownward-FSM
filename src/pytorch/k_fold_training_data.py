@@ -246,6 +246,7 @@ class KFoldTrainingData:
             _log.info(f"Created train dataloader.")
             _log.debug(f"Mem usage: {get_memory_usage_mb()} MB")
 
+            # DO NOT DELETE IF USING training_data_mem.py
             del x_train[:]
             del x_train
             del y_train[:]
@@ -271,6 +272,7 @@ class KFoldTrainingData:
             _log.info(f"Created validation dataloader.")
             _log.debug(f"Mem usage: {get_memory_usage_mb()} MB")
 
+            # DO NOT DELETE IF USING training_data_mem.py
             del x_val[:]
             del x_val
             del y_val[:]
@@ -296,6 +298,7 @@ class KFoldTrainingData:
             _log.info(f"Created test dataloader.")
             _log.debug(f"Mem usage: {get_memory_usage_mb()} MB")
 
+            # DO NOT DELETE IF USING training_data_mem.py
             del x_test[:]
             del x_test
             del y_test[:]
