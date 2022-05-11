@@ -62,6 +62,7 @@ class KFoldTrainingData:
             unique_samples,
             unique_states,
         )
+        _log.info(f"Number of samples: {len(self.states)}")
         _log.info(f"Mem usage after loading data: {get_memory_usage_mb()} MB")
 
         self.normalize = normalize

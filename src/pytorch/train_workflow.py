@@ -65,11 +65,11 @@ class TrainWorkflow:
             # Compute prediction and loss.
             if len(item) == 3:
                 X, y, w = item[0].to(self.device), item[1].to(self.device), item[2].to(self.device)
-                pred = self.model(X)
+                pred = self.model(X.float())
                 loss = self.loss_fn(pred, y, w) if self.is_weighted_loss_fn else self.loss_fn(pred, y)
             else:
                 X, y = item[0].to(self.device), item[1].to(self.device)
-                pred = self.model(X)
+                pred = self.model(X.float())
                 loss = self.loss_fn(pred, y)
 
             train_loss += loss.item()
@@ -106,11 +106,11 @@ class TrainWorkflow:
             for item in self.val_dataloader:
                 if len(item) == 3:
                     X, y, w = item[0].to(self.device), item[1].to(self.device), item[2].to(self.device)
-                    pred = self.model(X)
+                    pred = self.model(X.float())
                     val_loss += self.loss_fn(pred, y, w).item() if self.is_weighted_loss_fn else self.loss_fn(pred, y).item()
                 else:
                     X, y = item[0].to(self.device), item[1].to(self.device)
-                    pred = self.model(X)
+                    pred = self.model(X.float())
                     val_loss += self.loss_fn(pred, y).item()
 
                 if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
@@ -134,11 +134,11 @@ class TrainWorkflow:
             for item in self.test_dataloader:
                 if len(item) == 3:
                     X, y, w = item[0].to(self.device), item[1].to(self.device), item[2].to(self.device)
-                    pred = self.model(X)
+                    pred = self.model(X.float())
                     test_loss += self.loss_fn(pred, y, w).item() if self.is_weighted_loss_fn else self.loss_fn(pred, y).item()
                 else:
                     X, y = item[0].to(self.device), item[1].to(self.device)
-                    pred = self.model(X)
+                    pred = self.model(X.float())
                     test_loss += self.loss_fn(pred, y).item()
 
         return test_loss / num_batches
@@ -152,7 +152,7 @@ class TrainWorkflow:
         with torch.no_grad():
             for item in self.val_dataloader:
                 X, y = item[0].to(self.device), item[1].to(self.device)
-                pred = self.model(X)
+                pred = self.model(X.float())
                 val_loss += self.loss_fn(
                     torch.tensor(
                         [pred_ for i, pred_ in enumerate(pred) if y[i] != contrasting_h]
@@ -168,7 +168,7 @@ class TrainWorkflow:
         with torch.no_grad():
             for item in self.train_dataloader:
                 X = item[0] if self.device == "cpu" else item[0].to(self.device)
-                for p in self.model(X):
+                for p in self.model(X.float()):
                     p_list = p.tolist()
                     if type(p_list) is float:
                         if p_list != 0.0:
@@ -185,10 +185,9 @@ class TrainWorkflow:
         Saves a traced model to be used by the C++ backend.
         """
         if model == "resnet":
-            #example_input = self.train_dataloader.dataset[0][0] If using training_data_mem.py
-            example_input = self.train_dataloader.dataset[:10][0]
+            example_input = self.train_dataloader.dataset[:10][0].float()
         elif model == "simple":
-            example_input = self.train_dataloader.dataset[0][0]
+            example_input = self.train_dataloader.dataset[0][0].float()
 
         # To make testing possible (and fair), the model has to be saved while in the CPU,
         # even if training was performed in GPU.
@@ -269,14 +268,14 @@ class TrainWorkflow:
                 for item in self.val_dataloader:
                     X, y = item[0].to(self.device), item[1].to(self.device)
                     self.val_y_pred_values = self.fill_y_pred(
-                        X, y, self.model(X), self.val_y_pred_values
+                        X, y, self.model(X.float()), self.val_y_pred_values
                     )
             else:
                 self.val_y_pred_values = None
             for item in self.train_dataloader:
                 X, y = item[0].to(self.device), item[1].to(self.device)
                 self.train_y_pred_values = self.fill_y_pred(
-                    X, y, self.model(X), self.train_y_pred_values
+                    X, y, self.model(X.float()), self.train_y_pred_values
                 )
 
             _log.info(f"Saving post-training scatter plot.")

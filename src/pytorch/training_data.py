@@ -29,11 +29,9 @@ class InstanceDataset(Dataset):
             ).unsqueeze(1)
         else:
             self.weights = []
-
         weights = None
 
-        #self.states = torch.tensor(np.array([np.fromiter(s, dtype=np.int8) for s in states]), dtype=torch.float32)
-        self.states = torch.tensor(states, dtype=torch.float32)
+        self.states = torch.tensor(states, dtype=torch.int8)
         states = None
 
         if output_layer == "regression":
