@@ -33,8 +33,9 @@ public:
         } else {
             if (!line_has_started) {
                 line_has_started = true;
-                std::cout << "[t=" << g_timer << ", "
-                          << get_peak_memory_in_kb() << " KB] ";
+                std::cout << "[t=" << g_timer << ", peak="
+                          << get_peak_memory_in_kb() << " KB, "
+                          << "curr=" << get_curr_memory_in_kb() << " KB] ";
             }
 
             std::cout << elem;
