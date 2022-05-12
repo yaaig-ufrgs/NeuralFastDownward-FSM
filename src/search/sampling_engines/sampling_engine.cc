@@ -126,6 +126,10 @@ void SamplingEngine::print_statistics() const {
     }
 }
 
+string SamplingEngine::get_sampling_technique_name() {
+    return sampling_techniques[0]->get_name();
+}
+
 void SamplingEngine::save_plan_if_necessary() {
     sample_cache_manager.finalize();
 }

@@ -62,10 +62,13 @@ int main(int argc, const char **argv) {
     engine->print_statistics();
     utils::g_log << "Search time: " << search_timer << endl;
     utils::g_log << "Total time: " << utils::g_timer << endl;
-
     ExitCode exitcode = engine->found_solution()
         ? ExitCode::SUCCESS
         : ExitCode::SEARCH_UNSOLVED_INCOMPLETE;
+
+    if (engine->get_sampling_technique_name() == "gbackward_yaaig")
+        exitcode = ExitCode::SUCCESS; // need this so TSP will work...
+
     utils::report_exit_code_reentrant(exitcode);
     return static_cast<int>(exitcode);
 }

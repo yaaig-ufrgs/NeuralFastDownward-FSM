@@ -68,6 +68,7 @@ protected:
 public:
     SearchEngine(const options::Options &opts);
     virtual ~SearchEngine();
+    virtual std::string get_sampling_technique_name() {return "";};
     virtual void print_statistics() const = 0;
     virtual void print_timed_statistics() const;
     virtual void save_plan_if_necessary();

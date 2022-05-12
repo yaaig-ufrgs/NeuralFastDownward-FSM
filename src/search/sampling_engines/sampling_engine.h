@@ -57,6 +57,7 @@ public:
     virtual void save_plan_if_necessary() override;
 
     static void add_sampling_options(options::OptionParser &parser);
+    virtual std::string get_sampling_technique_name() override;
 };
 }
 #endif
