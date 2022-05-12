@@ -130,6 +130,7 @@ def yaaig_ferber(args, meth):
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
                            f'--build release {instance} '
+                           f'{"--translate-options --unit-cost --search-options " if args.sample_unit_cost == "true" and args.evaluator == "pdb(hstar_pattern([]))" else ""}'
                            f'--search \"sampling_search_yaaig({search_algo}, '
                            f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, max_samples={args.max_samples}, '
                            f'bound_multiplier={args.bound_multiplier}, 'f'technique={args.technique}, subtechnique={args.subtechnique}, '
