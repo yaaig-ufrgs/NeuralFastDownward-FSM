@@ -39,6 +39,11 @@ def eval_main(args: Namespace):
         return
 
     dirname = "/".join(args.trained_model.split("/")[:2])
+    d_split = dirname.split('/')[-1].split('_')
+    ss, ns = d_split[-1].split('.')
+    ss, ns = ss[2:], ns[2:]
+    domain, instance =  d_split[2], d_split[3]
+    prefix = [domain, instance, ss, ns]
 
     if args.follow_training:
         original_train_args = get_train_args_json(dirname)
@@ -68,8 +73,10 @@ def eval_main(args: Namespace):
     eval_results_path = dirname + "/" + eval_results_name
 
     f_results = open(eval_results_path, "a")
-    f_results.write("sample,num_samples,misses,max_rounded_abs_error,mean_rounded_abs_error,min_rmse_loss,min_rmse_loss_no_goal,mean_rmse_loss,max_rmse_loss,time\n")
-    #f_results.write("sample,num_samples,misses,min_rmse_loss,min_rmse_loss_no_goal,mean_rmse_loss,max_rmse_loss,time\n")
+    if len(prefix) == 0:
+        f_results.write("sample,num_samples,misses,max_rounded_abs_error,mean_rounded_abs_error,min_rmse_loss,min_rmse_loss_no_goal,mean_rmse_loss,max_rmse_loss,time\n")
+    else:
+        f_results.write("domain,instance,sample_seed,network_seed,sample,num_samples,misses,mean_rmse_loss,max_rmse_loss\n")
 
     model = torch.jit.load(args.trained_model)
     model.eval()
@@ -91,18 +98,18 @@ def eval_main(args: Namespace):
         ).get_fold(0)
 
         if train_data != None:
-            eval_workflow(model, sample, dirname, train_data, "train", f_results, args.log_states, args.save_preds, args.save_plots)
+            eval_workflow(model, sample, dirname, train_data, "train", f_results, args.log_states, args.save_preds, args.save_plots, prefix)
         if val_data != None:
-            eval_workflow(model, sample, dirname, val_data, "val", f_results, args.log_states, args.save_preds, args.save_plots)
+            eval_workflow(model, sample, dirname, val_data, "val", f_results, args.log_states, args.save_preds, args.save_plots, prefix)
         if test_data != None:
-            eval_workflow(model, sample, dirname, test_data, "test", f_results, args.log_states, args.save_preds, args.save_plots)
+            eval_workflow(model, sample, dirname, test_data, "test", f_results, args.log_states, args.save_preds, args.save_plots, prefix)
 
     _log.info(f"Total elapsed time for evaluation: {eval_timer_total.current_time()}")
 
     f_results.close()
 
 
-def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data_type: str, f_results, log_states: bool, save_preds: bool, save_plots: bool):
+def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data_type: str, f_results, log_states: bool, save_preds: bool, save_plots: bool, prefix: list = []):
     """
     Complete model evaluation workflow for a given dataset.
     """
@@ -138,7 +145,7 @@ def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data
 
     if save_preds:
         y_pred_loss_file = f"{dirname}/{data_name}_{data_type}.csv"
-        save_y_pred_loss_csv(y_pred_loss, y_pred_loss_file)
+        save_y_pred_loss_csv(y_pred_loss, y_pred_loss_file, prefix=prefix)
         _log.info(f"Saved {data_type} dataset (state,y,pred,loss) CSV file to {y_pred_loss_file}")
 
     if save_plots:
@@ -151,10 +158,9 @@ def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data
         #f_results.write(
         #    f"{data_type},,,,,,,,,\n"
         #)
-        f_results.write(
-            f"{data_name},{num_samples},{misses},{max_abs_error},{mean_abs_error},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{round(curr_time,4)}\n"
-            #f"{data_name},{num_samples},{misses},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{round(curr_time,4)}\n"
-        )
+        to_write = f"{data_name},{num_samples},{misses},{max_abs_error},{mean_abs_error},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{round(curr_time,4)}\n" if len(prefix) == 0 else f"{prefix[0]},{prefix[1]},{prefix[2]},{prefix[3]},{data_name},{num_samples},{misses},{mean_loss},{max_loss}\n"
+
+        f_results.write(to_write)
         _log.info(f"Saved results to a CSV file.")
 
 
@@ -176,6 +182,7 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
     # difference between the absolute error and RMSE here are minimum, the former directly reflects the output
     # of the network during search.
 
+    state_count = 1
     with torch.no_grad():
         for item in dataloader:
             X, y = item[0], item[1]
@@ -211,8 +218,9 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
                     f"| y: {float(y[0])} | pred: {float(pred[0])} | rmse_loss: {loss} | abs_error_round: {abs_error}"
                 )
 
-            eval_y_pred.append([x_str, float(y[0]), round(float(pred[0]), 4), abs_error, round(loss, 4)])
+            eval_y_pred.append([x_str, state_count, float(y[0]), round(float(pred[0]), 4), abs_error, round(loss, 4)])
             #eval_y_pred.append([x_str, float(y[0]), round(float(pred[0]), 4), round(loss, 4)])
+            state_count += 1
 
     mean_loss = eval_loss / len(dataloader)
     mean_abs_error = eval_abs_error / len(dataloader)
