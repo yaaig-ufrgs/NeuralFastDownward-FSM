@@ -97,22 +97,22 @@ def train_main(args: Namespace):
         _log.info(f"Restarts needed: {num_retries}")
     
     if best_fold['fold'] != -1:
-        try:
-            h_pred_files = glob.glob(f"{dirname}/heuristic_pred*.csv")
-            if len(h_pred_files) > 1:
-                remove_csv_except_best(dirname, best_fold["fold"])
-                os.rename(
-                    f"{dirname}/heuristic_pred_{best_fold['fold']}.csv",
-                    f"{dirname}/heuristic_pred.csv",
-                )
-            else:
-                os.rename(
-                    f"{dirname}/heuristic_pred_0.csv",
-                    f"{dirname}/heuristic_pred.csv",
-                )
-        except:
-            _log.error(f"Failed to save heuristic_pred.csv.")
-
+        if args.save_heuristic_pred:
+            try:
+                h_pred_files = glob.glob(f"{dirname}/heuristic_pred*.csv")
+                if len(h_pred_files) > 1:
+                    remove_csv_except_best(dirname, best_fold["fold"])
+                    os.rename(
+                        f"{dirname}/heuristic_pred_{best_fold['fold']}.csv",
+                        f"{dirname}/heuristic_pred.csv",
+                    )
+                else:
+                    os.rename(
+                        f"{dirname}/heuristic_pred_0.csv",
+                        f"{dirname}/heuristic_pred.csv",
+                    )
+            except:
+                _log.error(f"Failed to save heuristic_pred.csv.")
         try:
             if args.training_size != 1.0:
                 _log.info(
@@ -244,11 +244,13 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                 num_retries += 1
                 add_train_arg(dirname, "updated_seed", args.seed)
             else:
-                heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
+                if args.save_heuristic_pred:
+                    heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
 
                 if fold_val_loss != None:
                     if fold_val_loss < best_fold["val_loss"]:
-                        save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
+                        if args.save_heuristic_pred:
+                            save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
                         _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
                         best_fold["fold"] = fold_idx
                         best_fold["val_loss"] = fold_val_loss
@@ -257,7 +259,8 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                             f"Val loss at fold {fold_idx} = {fold_val_loss} (best = {best_fold['val_loss']})"
                         )
                 else:  # Only using training data
-                    save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
+                    if args.save_heuristic_pred:
+                        save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
                     best_fold["fold"] = fold_idx
                     best_fold["train_loss"] = train_wf.cur_train_loss
 
