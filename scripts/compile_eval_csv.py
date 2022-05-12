@@ -13,22 +13,39 @@ import json
 from sys import argv
 from glob import glob
 
+num_samples_dict = {
+    "transport": 637632,
+    "visitall": 125483,
+    "blocks": 65990,
+    "grid": 452353,
+    "npuzzle": 181440,
+    "rovers": 565824,
+    "scanalyzer": 46080,
+}
+
 l = []
 l_avg = []
 
 for result in argv[1:]:
+    # COMMENT THIS FOR FUTURE RUNS
+    if "unit" in result:
+        continue
     train_args = {}
-    with open(f'{result}/train_args.json') as json_file:
+    with open(f"{result}/train_args.json") as json_file:
         train_args = json.load(json_file)
-    sample_used = train_args['samples']
+    sample_used = train_args["samples"]
     used_avi = False
     used_min = False
-    percentage = "1%" 
+    percentage = 0.01
+    num_samples = -1
+    num_samples_statespace = -1
     experiment = "NA"
     sampling_algorithm = "NA"
     bound = "NA"
     if "bfsrw" in sample_used:
         sampling_algorithm = "bfs_rw"
+    if "_rw" in sample_used or "baseline" in result or "tech-rw" in sample_used:
+        sampling_algorithm = "rw"
     if "_avi" in sample_used:
         used_avi = True
     if "min-both" in sample_used:
@@ -39,6 +56,8 @@ for result in argv[1:]:
         bound = "propositions"
     if "bnd-propseff" in sample_used:
         bound = "propositions-eff"
+    if "baseline" in result:
+        bound = "baseline"
     if not used_avi:
         experiment = "no_avi"
     if not used_min:
@@ -58,59 +77,70 @@ for result in argv[1:]:
     if "best-pct" in sample_used:
         experiment = "best_pct"
     if "1pct" in sample_used:
-        percentage = "1%"
+        percentage = 0.01
     if "5pct" in sample_used:
-        percentage = "5%"
+        percentage = 0.05
     if "25pct" in sample_used:
-        percentage = "25%"
+        percentage = 0.25
     if "50pct" in sample_used:
-        percentage = "50%"
+        percentage = 0.50
     if "100pct" in sample_used:
-        percentage = "100%"
+        percentage = 1.0
 
-    statespace_file = glob(f"{result}/statespace*")[0]
-    with open(statespace_file) as f:
+    statespace_file = glob(f"{result}/statespace*")
+    if len(statespace_file) == 0:
+        continue
+    with open(statespace_file[0]) as f:
         reader = csv.DictReader(f)
         for row in reader:
             curr = []
-            curr.append(row['domain'])
-            curr.append(row['instance'])
+            curr.append(row["domain"])
+            num_samples_statespace = num_samples_dict[row["domain"]]
+            num_samples = round(int(num_samples_dict[row["domain"]]) * percentage)
+            #curr.append(row["instance"])
             curr.append(sampling_algorithm)
             curr.append(experiment)
             curr.append(bound)
-            curr.append(percentage)
-            curr.append(row['sample_seed'])
-            curr.append(row['network_seed'])
-            curr.append(row['state'])
-            curr.append(row['y'])
-            curr.append(row['pred'])
-            curr.append(row['rmse'])
+            curr.append(row["sample_seed"])
+            curr.append(row["network_seed"])
+            curr.append(str(num_samples))
+            curr.append(str(num_samples_statespace))
+            curr.append(row["state"])
+            curr.append(row["y"])
+            curr.append(row["pred"])
+            curr.append(row["rmse"])
             l.append(curr)
 
-    eval_results_file = glob(f"{result}/eval_results.csv")[0]
-    with open(eval_results_file) as f:
+    eval_results_file = glob(f"{result}/eval_results.csv")
+    if len(eval_results_file) == 0:
+        continue
+    with open(eval_results_file[0]) as f:
         reader = csv.DictReader(f)
         for row in reader:
             curr = []
-            curr.append(row['domain'])
-            curr.append(row['instance'])
+            curr.append(row["domain"])
+            #curr.append(row["instance"])
             curr.append(sampling_algorithm)
             curr.append(experiment)
             curr.append(bound)
-            curr.append(percentage)
-            curr.append(row['num_samples'])
-            curr.append(row['sample_seed'])
-            curr.append(row['network_seed'])
-            curr.append(row['misses'])
-            curr.append(row['mean_rmse_loss'])
-            curr.append(row['max_rmse_loss'])
+            curr.append(row["sample_seed"])
+            curr.append(row["network_seed"])
+            curr.append(str(round(int(row["num_samples"]) * percentage)))
+            curr.append(row["num_samples"])
+            curr.append(row["misses"])
+            curr.append(row["mean_rmse_loss"])
+            curr.append(row["max_rmse_loss"])
             l_avg.append(curr)
 
-print(f"domain,instance,sampling_algorithm,preprocessing_method,bound,sample_percentage,sample_seed,network_seed,state,hstar,hnn,rmse")
+print(
+    f"domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,num_samples,num_samples_statespace,state,hstar,hnn,rmse"
+)
 for e in l:
     print(f"{','.join(e)}")
 
 print("###")
-print(f"domain,instance,sampling_algorithm,preprocessing_method,bound,sample_percentage,num_samples_statespace,sample_seed,network_seed,misses,mean_rmse_loss,max_rmse_loss")
+print(
+    f"domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,num_samples,num_samples_statespace,misses,mean_rmse_loss,max_rmse_loss"
+)
 for e in l_avg:
     print(f"{','.join(e)}")
