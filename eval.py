@@ -38,7 +38,7 @@ def eval_main(args: Namespace):
         _log.error("No data given.")
         return
 
-    dirname = "/".join(args.trained_model.split("/")[:2])
+    dirname = "/".join(args.trained_model.split("/")[:-2])
     d_split = dirname.split('/')[-1].split('_')
     ss, ns = d_split[-1].split('.')
     ss, ns = ss[2:], ns[2:]
