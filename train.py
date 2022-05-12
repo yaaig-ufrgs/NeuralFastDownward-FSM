@@ -374,7 +374,7 @@ def make_extra_plots(args: Namespace, dirname: str, best_fold: dict):
             except:
                 _log.error(f"Failed making box plot.")
 
-    if args.save_heuristic_pred and os.path.exists(heuristic_pred_file):
+    if not args.save_heuristic_pred and os.path.exists(heuristic_pred_file):
         os.remove(heuristic_pred_file)
 
 
