@@ -44,20 +44,22 @@ for result in argv[1:]:
     bound = "NA"
     if "bfsrw" in sample_used:
         sampling_algorithm = "bfs_rw"
-    if "_rw" in sample_used or "baseline" in result or "tech-rw" in sample_used:
+    if "_rw" in sample_used or "baseline" in result or "tech-rw" in sample_used or "-rw-" in result:
         sampling_algorithm = "rw"
     if "_avi" in sample_used:
         used_avi = True
-    if "min-both" in sample_used:
+    if "_min-both" in sample_used:
         used_min = True
+    if "_min-none" in sample_used:
+        used_min = False
     if "bnd-def" in sample_used:
         bound = "default"
-    if "bnd-props" in sample_used:
+    if "bnd-props" in sample_used or "propositions" in result:
         bound = "propositions"
-    if "bnd-propseff" in sample_used:
+    if "bnd-propseff" in sample_used or "propositions-eff":
         bound = "propositions-eff"
     if "baseline" in result:
-        bound = "baseline"
+        bound = "default"
     if not used_avi:
         experiment = "no_avi"
     if not used_min:
@@ -70,7 +72,9 @@ for result in argv[1:]:
         experiment = "hstar_value"
     if "bounds" in result:
         experiment = "bounds"
-    if used_avi and used_avi and bound == "propositions-eff":
+    if "baseline" in result:
+        experiment = "baseline"
+    if used_avi and used_min and bound == "propositions-eff":
         experiment = "best"
     if "random-sample-pct" in result:
         experiment = "random_sample"
