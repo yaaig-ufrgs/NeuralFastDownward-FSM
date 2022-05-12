@@ -40,6 +40,8 @@ count = -1
 up = 0
 wait_else = 1
 up_else = 0
+os.system(f"tsp -K")
+os.system(f"tsp -S {THREADS}")
 for domain in d:
     for instance in d[domain]:
         curr = d[domain][instance]
@@ -73,8 +75,7 @@ for domain in d:
                 os.system(sample_cmd)
                 print()
                 print(train_test_cmd)
-                #time.sleep(2)
                 os.system(train_test_cmd)
-                print("----------------")
+                print("----------------------------------------")
                 count += 2
                 up += 1
