@@ -79,6 +79,7 @@ def eval_main(args: Namespace):
     for sample in args.samples:
         train_data, val_data, test_data = KFoldTrainingData(
             sample,
+            device=torch.device("cpu"),
             batch_size=1,
             shuffle=args.shuffle,
             seed=args.seed,
@@ -174,8 +175,10 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
     # of the network during search.
 
     with torch.no_grad():
-        for X, y, _ in dataloader:
-            pred = model(X)
+        for item in dataloader:
+            X, y = item[0], item[1]
+            # w = item[2]
+            pred = model(X.float())
             loss = loss_fn(pred, y).item()
 
             rounded_y = int(torch.round(y[0]))
