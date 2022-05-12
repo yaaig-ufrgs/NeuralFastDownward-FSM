@@ -131,9 +131,11 @@ def save_y_pred_loss_csv(data: list, csv_filename: str):
     Saves the {state: (value, predicted_value, rounded_abs_error, loss)} set to a CSV file.
     """
     with open(csv_filename, "w") as f:
-        f.write("state,y,pred,rounded_abs_error,rmse\n")
+        #f.write("state,y,pred,rounded_abs_error,rmse\n")
+        f.write("state,y,pred,rmse\n")
         for d in data:
-            f.write("%s,%s,%s,%s,%s\n" % (d[0], d[1], d[2], d[3], d[4]))
+            #f.write("%s,%s,%s,%s,%s\n" % (d[0], d[1], d[2], d[3], d[4]))
+            f.write("%s,%s,%s,%s\n" % (d[0], d[1], d[2], d[4]))
 
 
 def remove_csv_except_best(directory: str, fold_idx: int):

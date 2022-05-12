@@ -69,6 +69,7 @@ def eval_main(args: Namespace):
 
     f_results = open(eval_results_path, "a")
     f_results.write("sample,num_samples,misses,max_rounded_abs_error,mean_rounded_abs_error,min_rmse_loss,min_rmse_loss_no_goal,mean_rmse_loss,max_rmse_loss,time\n")
+    #f_results.write("sample,num_samples,misses,min_rmse_loss,min_rmse_loss_no_goal,mean_rmse_loss,max_rmse_loss,time\n")
 
     model = torch.jit.load(args.trained_model)
     model.eval()
@@ -147,11 +148,12 @@ def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data
         _log.info(f"Saved {data_name} plots for {data_type} dataset to {plots_dir}")
 
     if f_results != None:
+        #f_results.write(
+        #    f"{data_type},,,,,,,,,\n"
+        #)
         f_results.write(
-            f"{data_type},,,,,,,,,\n"
-        )
-        f_results.write(
-            f"{data_name},{num_samples},{misses},{max_abs_error},{mean_abs_error},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{curr_time}\n"
+            f"{data_name},{num_samples},{misses},{max_abs_error},{mean_abs_error},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{round(curr_time,4)}\n"
+            #f"{data_name},{num_samples},{misses},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{round(curr_time,4)}\n"
         )
         _log.info(f"Saved results to a CSV file.")
 
@@ -209,7 +211,8 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
                     f"| y: {float(y[0])} | pred: {float(pred[0])} | rmse_loss: {loss} | abs_error_round: {abs_error}"
                 )
 
-            eval_y_pred.append([x_str, float(y[0]), float(pred[0]), abs_error, loss])
+            eval_y_pred.append([x_str, float(y[0]), round(float(pred[0]), 4), abs_error, round(loss, 4)])
+            #eval_y_pred.append([x_str, float(y[0]), round(float(pred[0]), 4), round(loss, 4)])
 
     mean_loss = eval_loss / len(dataloader)
     mean_abs_error = eval_abs_error / len(dataloader)
@@ -218,12 +221,12 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
         eval_y_pred,
         len(dataloader),
         misses,
-        max_abs_error,
-        mean_abs_error,
-        min_loss,
-        min_loss_no_goal,
-        mean_loss,
-        max_loss,
+        round(max_abs_error, 4),
+        round(mean_abs_error, 4),
+        round(min_loss, 4),
+        round(min_loss_no_goal, 4),
+        round(mean_loss, 4),
+        round(max_loss, 4),
     )
 
 
