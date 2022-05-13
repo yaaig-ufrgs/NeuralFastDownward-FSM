@@ -18,10 +18,9 @@ NET_SEEDS = 1
 SAMPLE_SEEDS = 1
 THREADS = 10
 
-d = {'blocks': {}, 'npuzzle': {}, 'visitall': {}, 'grid': {}, 'rovers': {},
-    'depot': {}, 'npuzzle': {}, 'pipesworld-notankage': {}, 'scanalyzer-opt11-strips': {},
-    'storage': {}, 'transport-opt14-strips': {}, 'visitall-opt14-strips': {}
-    }
+d = {'blocks': {}, 'npuzzle': {}, 'grid': {}, 'rovers': {},
+    'depot': {}, 'pipesworld-notankage': {}, 'scanalyzer-opt11-strips': {},
+    'storage': {}, 'transport-opt14-strips': {}, 'visitall-opt14-strips': {}}
 
 with open(argv[1], 'r') as f:
     reader = csv.DictReader(f)
