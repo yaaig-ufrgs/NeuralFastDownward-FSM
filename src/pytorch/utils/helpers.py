@@ -58,7 +58,7 @@ def get_memory_usage_mb(peak: bool = False):
     Peak memory if `peak` is true, otherwise current memory
     """
 
-    field = 'VmPeak:' if peak else 'VmRSS:'
+    field = 'VmPeak:' if peak else 'VmSize:'
     with open('/proc/self/status') as f:
         memusage = f.read().split(field)[1].split('\n')[0][:-3]
 
