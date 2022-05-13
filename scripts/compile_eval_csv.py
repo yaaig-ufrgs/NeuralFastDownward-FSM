@@ -56,7 +56,7 @@ for result in argv[1:]:
         bound = "default"
     if "bnd-props" in sample_used or "propositions" in result:
         bound = "propositions"
-    if "bnd-propseff" in sample_used or "propositions-eff":
+    if "bnd-propseff" in sample_used or "propositions-eff" in result:
         bound = "propositions-eff"
     if "baseline" in result:
         bound = "default"
