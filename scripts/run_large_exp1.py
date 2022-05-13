@@ -63,13 +63,13 @@ for domain in d:
         max_epochs = 5
         maxs = []
         mem_limit = 2048
-        max_vars = int(60000000 / tasks_info[domain][instance_name]["variables"])
+        max_vars = (int(60000000 / tasks_info[domain][instance_name]["variables"]), "variables")
         maxs.append(max_vars)
-        max_atoms = int(800000000 / tasks_info[domain][instance_name]["fact_pairs"])
+        max_atoms = (int(800000000 / tasks_info[domain][instance_name]["fact_pairs"]), "atoms")
         maxs.append(max_atoms)
-        max_bytes_per_state = int(12000000 / tasks_info[domain][instance_name]["bytes_per_state"])
+        max_bytes_per_state = (int(12000000 / tasks_info[domain][instance_name]["bytes_per_state"]), "bytes_per_state")
         maxs.append(max_bytes_per_state)
-        max_normal = 400 # max_samples = -1 e mem_limit_mb = 400
+        max_normal = (400, "normal") # max_samples = -1 e mem_limit_mb = 400
         maxs.append(max_normal)
         for max_samples in maxs:
             if up < THREADS:
@@ -83,16 +83,18 @@ for domain in d:
                 wait_else += 2
                 up_else += 1
 
+            max_s = max_samples[0]
+            extra_name = max_samples[1]
+            if extra_name == "normal":
+                max_s = -1
+                mem_limit = 400
+
             sample_out_dir = f"samples/{domain}/{difficulty}/samples_{domain}_{instance_name}_bfsrw"
             if not os.path.exists(sample_out_dir):
                 os.makedirs(sample_out_dir)
 
-            if max_samples == max_normal:
-                max_samples = -1
-                mem_limit = 400
-
-            sample_cmd = f"{tsp_sample} ./fast-downward.py --sas-file {sample_out_dir}/yaaig_{domain}_{instance_name}_tech-bfsrw_subtech-percentage_dups-ir_min-both_repr-fs_bnd-propseff_ss{ss}-output.sas --plan-file {sample_out_dir}/yaaig_{domain}_{instance_name}_tech-bfsrw_subtech-percentage_dups-ir_min-both_repr-fs_bnd-propseff_ss{ss} --build release {instance} --search 'sampling_search_yaaig(eager_greedy([ff(transform=sampling_transform())], transform=sampling_transform()), techniques=[gbackward_yaaig(searches=1, samples_per_search=-1, max_samples={max_samples}, bound_multiplier=1.0, technique=bfs_rw, subtechnique=percentage, bound=propositions_per_mean_effects, depth_k=99999, random_seed={ss}, restart_h_when_goal_state=true, allow_duplicates=interrollout, unit_cost=false, max_time=600.0, mem_limit_mb={mem_limit})], state_representation=complete, random_seed={ss}, minimization=both, avi_k=0, avi_its=9999, avi_epsilon=-1, avi_unit_cost=false, avi_rule=vu_u, sort_h=false, mse_hstar_file=, mse_result_file={sample_out_dir}/yaaig_{domain}_{instance_name}_tech-bfsrw_subtech-percentage_avi-1_dups-ir_min-both_repr-fs_bnd-propseff_ss{ss}_rmse, assignments_by_undefined_state=10, contrasting_samples=0, evaluator=blind())'"
-            train_args = f"{sample_out_dir}/yaaig_{domain}_{instance_name}_tech-bfsrw_subtech-percentage_dups-ir_min-both_repr-fs_bnd-propseff_ss{ss} -mdl resnet -diff False -pte False -pat 100 -hl 2 -b 512 -e {max_epochs} -a relu -o regression -sb True -lo False -f 1 -clp 0 -lr 0.0001 -w 0 -no False -sibd 100 -hpred False -trd -1 -dnw 0 -d 0 -bi True -biout True -of results/{domain}/{difficulty}/results_{domain}_{instance_name}_bfsrw -rst True -s {ns} -sp False -spn -1 -rmg False -cfst False -sfst False -itc 0 -cut False -gpu False -tsize 0.9 -spt 1.0 -us False -ust False -cdead True -lf mse -wm kaiming_uniform -hu 250 -t 1800"
+            sample_cmd = f"{tsp_sample} ./fast-downward.py --sas-file {sample_out_dir}/yaaig_{domain}_{instance_name}_{extra_name}_{max_s}_tech-bfsrw_subtech-percentage_dups-ir_min-both_repr-fs_bnd-propseff_ss{ss}-output.sas --plan-file {sample_out_dir}/yaaig_{domain}_{instance_name}_tech-bfsrw_subtech-percentage_dups-ir_min-both_repr-fs_bnd-propseff_ss{ss} --build release {instance} --search 'sampling_search_yaaig(eager_greedy([ff(transform=sampling_transform())], transform=sampling_transform()), techniques=[gbackward_yaaig(searches=1, samples_per_search=-1, max_samples={max_s}, bound_multiplier=1.0, technique=bfs_rw, subtechnique=percentage, bound=propositions_per_mean_effects, depth_k=99999, random_seed={ss}, restart_h_when_goal_state=true, allow_duplicates=interrollout, unit_cost=false, max_time=600.0, mem_limit_mb={mem_limit})], state_representation=complete, random_seed={ss}, minimization=both, avi_k=0, avi_its=9999, avi_epsilon=-1, avi_unit_cost=false, avi_rule=vu_u, sort_h=false, mse_hstar_file=, mse_result_file={sample_out_dir}/yaaig_{domain}_{instance_name}_tech-bfsrw_subtech-percentage_avi-1_dups-ir_min-both_repr-fs_bnd-propseff_ss{ss}_rmse, assignments_by_undefined_state=10, contrasting_samples=0, evaluator=blind())'"
+            train_args = f"{sample_out_dir}/yaaig_{domain}_{instance_name}_{extra_name}_{max_s}_tech-bfsrw_subtech-percentage_dups-ir_min-both_repr-fs_bnd-propseff_ss{ss} -mdl resnet -diff False -pte False -pat 100 -hl 2 -b 512 -e {max_epochs} -a relu -o regression -sb True -lo False -f 1 -clp 0 -lr 0.0001 -w 0 -no False -sibd 100 -hpred False -trd -1 -dnw 0 -d 0 -bi True -biout True -of results/{domain}/{difficulty}/results_{domain}_{instance_name}_bfsrw -rst True -s {ns} -sp False -spn -1 -rmg False -cfst False -sfst False -itc 0 -cut False -gpu False -tsize 0.9 -spt 1.0 -us False -ust False -cdead True -lf mse -wm kaiming_uniform -hu 250 -t 1800"
             train_cmd = f"{tsp_train} ./train.py {train_args}"
             print(sample_cmd)
             os.system(sample_cmd)
@@ -102,3 +104,5 @@ for domain in d:
             print("----------------------------------------")
             count += 2
             up += 1
+            if up == 4:
+                exit()
