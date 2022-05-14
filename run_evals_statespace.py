@@ -39,7 +39,7 @@ for i in range(1, len(argv)):
 for model in models:
     model_name = model.split('/')[-3]
     domain_name = model_name.split('_')[2]
-    if "unit" in domain_name:
+    if "unit" in model:
         domain_name += "-unitcost"
     if "visitall-opt14-strips" in domain_name:
         domain_name = "visitall"
