@@ -97,6 +97,7 @@ bool  sample_next_state_with_random_walk(
         }
         if (!found_successor) {
             current_state = move(previous_state);
+            applied_op = OperatorID::no_operator;
             return false;
         }
 

@@ -37,7 +37,7 @@ static int compute_heuristic(
 }
 
 bool is_number(const string& s) {
-    return !s.empty() && find_if(s.begin(), 
+    return !s.empty() && find_if(s.begin(),
         s.end(), [](unsigned char c) { return !isdigit(c); }) == s.end();
 }
 
@@ -156,7 +156,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
     // Each element of the stack is (state, operator index used to achieve the state)
     stack<PartialAssignment> stack;
     queue<PartialAssignment> queue;
-    
+
     if (technique == "dfs")
         stack.push(pa);
     else
@@ -285,7 +285,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
                     hash_table.insert(s_);
                 }
             }
-            if (stopped)
+            if (stopped || samples.size() == bfs_samples)
                 break;
             stopped = stop_sampling(true, bfs_percentage);
         }
@@ -343,7 +343,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     //   Atom on(b, a);Atom on(c, b);Atom on(d, c);(handempty)
     if (allow_duplicates_interrollout)
         hash_table.clear();
-    
+
     PartialAssignment pa = regression_task_proxy->get_goal_assignment();
     pa.estimated_heuristic = 0;
     vector<shared_ptr<PartialAssignment>> samples;
@@ -428,7 +428,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             utils::g_log << "Looking for " << (max_samples - samples.size()) << " more samples..." << endl;
         else
             utils::g_log << "Looking for more samples until mem/time budget runs out." << endl;
-            
+
         int lid = 0;
         vector<bool> leaves_used(leaves.size(), false);
         while ((samples.size() < (unsigned)max_samples) && !stopped) {
