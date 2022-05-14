@@ -27,7 +27,9 @@ statespaces_dict = {'blocks': "../NeuralFastDownward-results/resnets/experiments
                     'grid': "../NeuralFastDownward-results/resnets/experiments/grid/samples/statespace/statespace_grid_grid_hstar",
                     'rovers': "../NeuralFastDownward-results/resnets/experiments/rovers/samples/statespace/statespace_rovers_rovers_hstar",
                     'transport': "../NeuralFastDownward-results/resnets/experiments/transport/samples/statespace/statespace_transport_transport_hstar",
+                    'transport-unitcost': "../NeuralFastDownward-results/resnets/experiments/transport/samples/statespace/statespace_transport_transport_hstar_unitcost",
                     'scanalyzer': "../NeuralFastDownward-results/resnets/experiments/scanalyzer/samples/statespace/statespace_scanalyzer_scanalyzer_hstar"
+                    'scanalyzer-unitcost': "../NeuralFastDownward-results/resnets/experiments/scanalyzer/samples/statespace/statespace_scanalyzer_scanalyzer_hstar_unitcost"
                     }
 
 models = []
@@ -37,6 +39,8 @@ for i in range(1, len(argv)):
 for model in models:
     model_name = model.split('/')[-3]
     domain_name = model_name.split('_')[2]
+    if "unit" in domain_name:
+        domain_name += "-unitcost"
     statespace = statespaces_dict[domain_name]
     if up < THREADS:
         tsp_eval = f"tsp taskset -c {up}"
