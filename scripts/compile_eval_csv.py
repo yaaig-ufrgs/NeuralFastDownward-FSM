@@ -27,10 +27,10 @@ num_samples_dict = {
 
 f_all = open('statespace_hnn_all.csv', 'w')
 writer_all = csv.writer(f_all)
-writer_all.writerow("domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,pecentage,num_samples,num_samples_statespace,state,hstar,hnn,rmse")
+writer_all.writerow("domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,pecentage,num_samples,num_samples_statespace,state,hstar,hnn,rmse".split(','))
 f_avg = open('statespace_hnn_avg.csv', 'w')
 writer_avg = csv.writer(f_avg)
-writer_avg.writerow("domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,percentage,num_samples,num_samples_statespace,misses,mean_rmse_loss,max_rmse_loss")
+writer_avg.writerow("domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,percentage,num_samples,num_samples_statespace,misses,mean_rmse_loss,max_rmse_loss".split(','))
 
 for result in argv[1:]:
     train_args = {}
@@ -67,22 +67,22 @@ for result in argv[1:]:
         experiment = "no_avi"
     if not used_min:
         experiment = "no_min"
-    if "mutex" in result:
-        experiment = "no_mutex"
-    if "valid-states" in result:
-        experiment = "valid_states"
-    if "hstar-value" in result:
-        experiment = "hstar_value"
     if "bounds" in result:
         experiment = "bounds"
     if "baseline" in result and not used_avi and not used_min:
         experiment = "no_min_no_avi"
-    if used_avi and used_min and bound == "propositions-eff":
+    if used_avi and used_min and bound == "propositions-eff" and sampling_algorithm == "bfs_rw":
         experiment = "best"
+    if "-nomutex" in result:
+        experiment = "no_mutex"
+    if "-vs" in result:
+        experiment = "valid_states"
     if "random-sample-pct" in result:
         experiment = "random_sample"
-    if "best-pct" in sample_used:
+    if "best-pct" in result:
         experiment = "best_pct"
+    if "hstar-pct" in result:
+        experiment = "hstar_value"
     if "1pct" in sample_used:
         percentage = 0.01
     if "5pct" in sample_used:
@@ -94,6 +94,7 @@ for result in argv[1:]:
     if "100pct" in sample_used:
         percentage = 1.0
 
+    """
     statespace_file = glob(f"{result}/statespace*")
     if len(statespace_file) == 0:
         continue
@@ -119,8 +120,9 @@ for result in argv[1:]:
             curr.append(row["y"])
             curr.append(row["pred"])
             curr.append(row["rmse"])
-            print(f"{','.join(curr)}")
-            writer_all.writerows(curr)
+            #print(f"{','.join(curr)}")
+            writer_all.writerow(curr)
+    """
 
     eval_results_file = glob(f"{result}/eval_results.csv")
     if len(eval_results_file) == 0:
@@ -144,8 +146,8 @@ for result in argv[1:]:
             curr.append(row["misses"])
             curr.append(row["mean_rmse_loss"])
             curr.append(row["max_rmse_loss"])
-            print(f"{','.join(curr)}")
-            writer_avg.writerows(curr)
+            #print(f"{','.join(curr)}")
+            writer_avg.writerow(curr)
 
 f_all.close()
 f_avg.close()
