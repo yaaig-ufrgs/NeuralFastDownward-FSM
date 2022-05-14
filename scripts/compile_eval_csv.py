@@ -21,15 +21,18 @@ num_samples_dict = {
     "npuzzle": 181440,
     "rovers": 565824,
     "scanalyzer": 46080,
+    "scanalyzer_unitcost": 46080,
+    "transport_unitcost": 637632,
 }
 
-l = []
-l_avg = []
+f_all = open('statespace_hnn_all.csv', 'w')
+writer_all = csv.writer(f_all)
+writer_all.writerow("domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,pecentage,num_samples,num_samples_statespace,state,hstar,hnn,rmse")
+f_avg = open('statespace_hnn_avg.csv', 'w')
+writer_avg = csv.writer(f_avg)
+writer_avg.writerow("domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,percentage,num_samples,num_samples_statespace,misses,mean_rmse_loss,max_rmse_loss")
 
 for result in argv[1:]:
-    # COMMENT THIS FOR FUTURE RUNS
-    if "unit" in result:
-        continue
     train_args = {}
     with open(f"{result}/train_args.json") as json_file:
         train_args = json.load(json_file)
@@ -72,8 +75,8 @@ for result in argv[1:]:
         experiment = "hstar_value"
     if "bounds" in result:
         experiment = "bounds"
-    if "baseline" in result:
-        experiment = "baseline"
+    if "baseline" in result and not used_avi and not used_min:
+        experiment = "no_min_no_avi"
     if used_avi and used_min and bound == "propositions-eff":
         experiment = "best"
     if "random-sample-pct" in result:
@@ -98,6 +101,8 @@ for result in argv[1:]:
         reader = csv.DictReader(f)
         for row in reader:
             curr = []
+            if "unit" in result:
+                row["domain"] += "_unitcost"
             curr.append(row["domain"])
             num_samples_statespace = num_samples_dict[row["domain"]]
             num_samples = round(int(num_samples_dict[row["domain"]]) * percentage)
@@ -107,13 +112,15 @@ for result in argv[1:]:
             curr.append(bound)
             curr.append(row["sample_seed"])
             curr.append(row["network_seed"])
+            curr.append(str(percentage))
             curr.append(str(num_samples))
             curr.append(str(num_samples_statespace))
             curr.append(row["state"])
             curr.append(row["y"])
             curr.append(row["pred"])
             curr.append(row["rmse"])
-            l.append(curr)
+            print(f"{','.join(curr)}")
+            writer_all.writerows(curr)
 
     eval_results_file = glob(f"{result}/eval_results.csv")
     if len(eval_results_file) == 0:
@@ -122,6 +129,8 @@ for result in argv[1:]:
         reader = csv.DictReader(f)
         for row in reader:
             curr = []
+            if "unit" in result:
+                row["domain"] += "_unitcost"
             curr.append(row["domain"])
             #curr.append(row["instance"])
             curr.append(sampling_algorithm)
@@ -129,22 +138,14 @@ for result in argv[1:]:
             curr.append(bound)
             curr.append(row["sample_seed"])
             curr.append(row["network_seed"])
+            curr.append(str(percentage))
             curr.append(str(round(int(row["num_samples"]) * percentage)))
             curr.append(row["num_samples"])
             curr.append(row["misses"])
             curr.append(row["mean_rmse_loss"])
             curr.append(row["max_rmse_loss"])
-            l_avg.append(curr)
+            print(f"{','.join(curr)}")
+            writer_avg.writerows(curr)
 
-print(
-    f"domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,num_samples,num_samples_statespace,state,hstar,hnn,rmse"
-)
-for e in l:
-    print(f"{','.join(e)}")
-
-print("###")
-print(
-    f"domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,num_samples,num_samples_statespace,misses,mean_rmse_loss,max_rmse_loss"
-)
-for e in l_avg:
-    print(f"{','.join(e)}")
+f_all.close()
+f_avg.close()
