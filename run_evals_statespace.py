@@ -12,7 +12,7 @@ import time
 from sys import argv
 from glob import glob
 
-THREADS = 10
+THREADS = 5
 
 count = -1
 up = 0
@@ -28,7 +28,7 @@ statespaces_dict = {'blocks': "../NeuralFastDownward-results/resnets/experiments
                     'rovers': "../NeuralFastDownward-results/resnets/experiments/rovers/samples/statespace/statespace_rovers_rovers_hstar",
                     'transport': "../NeuralFastDownward-results/resnets/experiments/transport/samples/statespace/statespace_transport_transport_hstar",
                     'transport-unitcost': "../NeuralFastDownward-results/resnets/experiments/transport/samples/statespace/statespace_transport_transport_hstar_unitcost",
-                    'scanalyzer': "../NeuralFastDownward-results/resnets/experiments/scanalyzer/samples/statespace/statespace_scanalyzer_scanalyzer_hstar"
+                    'scanalyzer': "../NeuralFastDownward-results/resnets/experiments/scanalyzer/samples/statespace/statespace_scanalyzer_scanalyzer_hstar",
                     'scanalyzer-unitcost': "../NeuralFastDownward-results/resnets/experiments/scanalyzer/samples/statespace/statespace_scanalyzer_scanalyzer_hstar_unitcost"
                     }
 
@@ -41,6 +41,8 @@ for model in models:
     domain_name = model_name.split('_')[2]
     if "unit" in domain_name:
         domain_name += "-unitcost"
+    if "visitall-opt14-strips" in domain_name:
+        domain_name = "visitall"
     statespace = statespaces_dict[domain_name]
     if up < THREADS:
         tsp_eval = f"tsp taskset -c {up}"
