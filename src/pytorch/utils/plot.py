@@ -83,8 +83,8 @@ def save_y_pred_scatter_eval(data: list, directory: str, data_type: str):
     #plot_filename = f"eval_best_{data_type}_{plot_title}_{suffix}"
     plot_filename = f"eval_best_{data_type}_{plot_title}"
 
-    real = [round(d[1]) for d in data]
-    pred = [round(d[2]) for d in data]
+    real = [round(d[2]) for d in data]
+    pred = [round(d[3]) for d in data]
 
     fig, ax = plt.subplots()
     ax.scatter(real, pred, s=2, alpha=0.35, c="red", zorder=10)
@@ -125,7 +125,7 @@ def save_pred_error_bar_eval(data: list, directory: str, data_type: str):
     #plot_filename = f"eval_error_{data_type}_{plot_title}_{suffix}"
     plot_filename = f"eval_error_{data_type}_{plot_title}"
 
-    rounded_errors = [round(d[3]) for d in data]
+    rounded_errors = [round(d[4]) for d in data]
 
     d_error_count = {}
 
