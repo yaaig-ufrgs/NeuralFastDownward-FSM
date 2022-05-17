@@ -238,7 +238,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
     // assert(bfs_percentage >= 0.0 && bfs_percentage <= 1.0);
     if (!(bfs_percentage >= 0.0 && bfs_percentage <= 1.0)) exit(10);
     OperatorsProxy ops = task_proxy.get_operators();
-    float bfs_samples = bfs_percentage * max_samples;
+    unsigned bfs_samples = (int)(bfs_percentage * max_samples);
     vector<PartialAssignment> vk = {initial_state}, vk1 = {}; // vector_k, vector_k+1
     vector<shared_ptr<PartialAssignment>> samples = {make_shared<PartialAssignment>(initial_state)};
     leaves.push_back(initial_state);
