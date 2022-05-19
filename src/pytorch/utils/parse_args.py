@@ -1223,7 +1223,7 @@ def get_sample_args():
     )
     parser.add_argument(
         "method",
-        choices=["ferber", "yaaig", "rsl"],
+        choices=["ferber", "yaaig"],
         default=default_args.SAMPLE_METHOD,
         help="Sampling base method to use. (default: %(default)s)",
     )
@@ -1451,34 +1451,6 @@ def get_sample_args():
         type=str2bool,
         default=default_args.SAMPLE_UNIT_COST,
         help="Increments h by unit cost instead of operator cost. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-rsl-states",
-        "--rsl-num-states",
-        type=int,
-        default=default_args.SAMPLE_RSL_NUM_TRAIN_STATES,
-        help="Number of samples. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-rsl-demos",
-        "--rsl-num-demos",
-        type=int,
-        default=default_args.SAMPLE_RSL_NUM_DEMOS,
-        help="Number of demos. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-rsl-len-demo",
-        "--rsl-max-len-demo",
-        type=int,
-        default=default_args.SAMPLE_RSL_MAX_LEN_DEMO,
-        help="Max len of each demo. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-rsl-inv",
-        "--rsl-check-invars",
-        type=str2bool,
-        default=default_args.SAMPLE_RSL_STATE_INVARS,
-        help="Check for state invariants. (default: %(default)s)",
     )
     parser.add_argument(
         "-threads",

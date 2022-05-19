@@ -164,31 +164,6 @@ def yaaig_ferber(args, meth):
                 os.remove(sf)
 
 
-def rsl(args):
-    global COUNT
-    global ID_COUNT
-    instances = [args.instance] if args.instance.endswith(".pddl") else glob(f"{args.instance}/*.pddl")
-
-    start = args.seed
-    end = args.seed+1 if args.mult_seed <= 1 else args.mult_seed+1
-    print(start, end)
-    for instance in instances:
-        instance_split = instance.split('/')
-        instance_name = instance_split[-1][:-5]
-        if instance_name != "domain" and instance_name != "source":
-            for i in range(start, end):
-                cmd = (f'./RSL/sampling.py --out_dir {args.output_dir} '
-                       f'--instance {instance} --num_train_states {args.rsl_num_states} '
-                       f'--num_demos {args.rsl_num_demos} --max_len_demo {args.rsl_max_len_demo} --seed {i} '
-                       f'--random_sample_percentage {args.contrasting} --regression_method {args.technique} '
-                       f'--check_state_invars {args.rsl_check_invars}')
-                if args.threads > 1:
-                    run_multi_thread(cmd, args.threads)
-                else:
-                    os.system(cmd)
-                    print(cmd)
-
-
 def sample(args):
     os.system(f"tsp -K")
     os.system(f"tsp -S {args.threads}")
@@ -202,9 +177,6 @@ def sample(args):
 
     if args.method == "yaaig" or args.method == "ferber":
         yaaig_ferber(args, meth=args.method)
-    elif args.method == "rsl":
-        args.technique = "countBoth" if args.technique == SAMPLE_TECHNIQUE else args.technique
-        rsl(args)
     else:
         print("Invalid configuration.")
         exit(1)

@@ -21,10 +21,10 @@ def RAI(fan_in, fan_out):
     return W, b
 
 
-class Block(nn.Module):
+class ResBlock(nn.Module):
     def __init__(self, hidden_size):
-        super(Block, self).__init__()
-        self.block = nn.Sequential(
+        super(ResBlock, self).__init__()
+        self.resblock = nn.Sequential(
             nn.Linear(hidden_size, hidden_size),
             nn.ReLU(),
             nn.Linear(hidden_size, hidden_size),
@@ -32,11 +32,9 @@ class Block(nn.Module):
 
     def forward(self, x):
         identity = x
-        out = self.block(x)
-
+        out = self.resblock(x)
         out += identity
         out = nn.functional.relu(out)
-
         return out
 
 
@@ -61,7 +59,7 @@ class HNN(nn.Module):
         self.input_units = input_units
         self.hidden_units = hidden_units
         self.output_units = output_units
-        self.hidden_layers = hidden_layers
+        self.hidden_layers = hidden_layers+1
         self.dropout_rate = dropout_rate
         self.output_layer = output_layer
         self.linear_output = linear_output
@@ -76,7 +74,7 @@ class HNN(nn.Module):
         self.hid = self.set_hidden_layers(hu)
 
         if model == "resnet":
-            self.resblock = Block(hidden_units[0])
+            self.resblock = ResBlock(hidden_units[0])
 
         # If `use_bias` is set to False, `bias_output` is set to False regardless
         # of the value in `use_bias_output`.

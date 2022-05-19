@@ -46,10 +46,8 @@ usage: fast_sample.py [-h] [-stp STATESPACE]
                       [-o OUTPUT_DIR] [-sym SYMM_STATESPACE]
                       [-min {none,partial,complete,both}] [-sorth SORT_H]
                       [-avi AVI_K] [-avits AVI_ITS] [-avieps AVI_EPS] [-kd K_DEPTH]
-                      [-rsl-states RSL_NUM_STATES] [-rsl-demos RSL_NUM_DEMOS]
-                      [-rsl-len-demo RSL_MAX_LEN_DEMO] [-rsl-inv RSL_CHECK_INVARS]
                       [-threads THREADS]
-                      instance {ferber,yaaig,rsl}
+                      instance {ferber,yaaig}
 ```
 
 The example below takes all the instances in the `blocks` directory and saves the
