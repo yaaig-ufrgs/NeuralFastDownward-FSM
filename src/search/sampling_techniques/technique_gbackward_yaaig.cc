@@ -69,11 +69,11 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           bias_reload_counter(0) {
     if (technique == "bfs_rw") {
         // assert(subtechnique == "round_robin" || subtechnique == "random_leaf" || subtechnique == "percentage");
-        if (!(subtechnique == "round_robin" || subtechnique == "random_leaf" || subtechnique == "percentage")) exit(10);
+        if (!(subtechnique == "round_robin" || subtechnique == "random_leaf" || subtechnique == "percentage")) { utils::g_log << "Error: technique_gbackward_yaaig.cc:72" << endl; exit(0); }
     }
     if (technique == "dfs_rw") {
         // assert(subtechnique == "round_robin" || subtechnique == "random_leaf");
-        if (!(subtechnique == "round_robin" || subtechnique == "random_leaf")) exit(10);
+        if (!(subtechnique == "round_robin" || subtechnique == "random_leaf")) { utils::g_log << "Error: technique_gbackward_yaaig.cc:76" << endl; exit(0); }
     }
 }
 
@@ -117,7 +117,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
         if (!(
             (pa_ == pa && applied_op == OperatorID::no_operator) ||
             (pa_ != pa && applied_op != OperatorID::no_operator)
-        )) exit(10);
+        )) { utils::g_log << "Error: technique_gbackward_yaaig.cc:120" << endl; exit(0); }
         if (pa_ == pa) // there is no applicable operator
             break;
 
@@ -139,7 +139,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
         stopped = stop_sampling();
     }
     // assert(samples.size() <= steps);
-    if (!(samples.size() <= steps)) exit(10);
+    if (!(samples.size() <= steps)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:142" << endl; exit(0); }
     return samples;
 }
 
@@ -194,10 +194,10 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
             if (!(
                 (idx_op == -1 && applied_op == OperatorID::no_operator) ||
                 (idx_op != -1 && applied_op != OperatorID::no_operator)
-            )) exit(10);
+            )) { utils::g_log << "Error: technique_gbackward_yaaig.cc:197" << endl; exit(0); }
             if (idx_op == -1) {
                 // assert(pa == pa_);
-                if (!(pa == pa_)) exit(10);
+                if (!(pa == pa_)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:200" << endl; exit(0); }
                 break;
             }
             if (pa_ == pa)
@@ -224,7 +224,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
         }
     }
     // assert(samples.size() <= steps);
-    if (!(samples.size() <= steps)) exit(10);
+    if (!(samples.size() <= steps)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:227" << endl; exit(0); }
     return samples;
 }
 
@@ -236,7 +236,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
     const TaskProxy &task_proxy
 ) {
     // assert(bfs_percentage >= 0.0 && bfs_percentage <= 1.0);
-    if (!(bfs_percentage >= 0.0 && bfs_percentage <= 1.0)) exit(10);
+    if (!(bfs_percentage >= 0.0 && bfs_percentage <= 1.0)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:239" << endl; exit(0); }
     OperatorsProxy ops = task_proxy.get_operators();
     unsigned bfs_samples = (int)(bfs_percentage * max_samples);
     vector<PartialAssignment> vk = {initial_state}, vk1 = {}; // vector_k, vector_k+1
@@ -260,7 +260,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
                 if (!(
                     (idx_op == -1 && applied_op == OperatorID::no_operator) ||
                     (idx_op != -1 && applied_op != OperatorID::no_operator)
-                )) exit(10);
+                )) { utils::g_log << "Error: technique_gbackward_yaaig.cc:263" << endl; exit(0); }
                 if (idx_op == -1)
                     break;
                 if (find(succ_s.begin(), succ_s.end(), s_) == succ_s.end()
@@ -377,7 +377,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         }
     }
     // assert(bound_n > 0);
-    if (!(bound_n > 0)) exit(10);
+    if (!(bound_n > 0)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:380" << endl; exit(0); }
     bound_value = bound_n;
 
     if (technique == "rw" || technique == "bfs_rw" || technique == "dfs_rw")
@@ -404,7 +404,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
     } else if (technique == "dfs_rw" || technique == "bfs_rw") {
         utils::g_log << technique << " (" << subtechnique << ") not implemented!" << endl;
-        exit(1);
+        exit(0);
     }
 
     // pos-dfs/bfs random walk step

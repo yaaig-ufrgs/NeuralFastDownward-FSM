@@ -5,7 +5,7 @@ Simple auxiliary functions.
 import logging
 import glob
 import os
-from random import Random, sample
+from random import Random, sample, random, randint
 from json import dump, load
 from datetime import datetime, timezone
 from subprocess import check_output
@@ -290,3 +290,45 @@ def get_samples_folder_from_train_folder(train_folder: str) -> [str]:
 def get_train_args_json(train_folder: str) -> dict:
     with open(train_folder + "/train_args.json") as json_file:
         return load(json_file)
+
+
+def create_fake_samples(domain: str, problem: str, n_samples: int) -> str:
+    try:
+        with open("reference/large_tasks.csv", "r") as f:
+            pddl = None
+            for line in [x.strip() for x in f.readlines()[1:]]:
+                if line.startswith(f"{domain},{problem}"):
+                    pddl = line.split(",")[3]
+            if not pddl:
+                return None
+
+        search_command = "sampling_search_yaaig(eager_greedy([ff(transform=sampling_transform())], transform=sampling_transform()), "\
+            "techniques=[gbackward_yaaig(searches=1, samples_per_search=-1, max_samples=1000, bound_multiplier=1.0, technique=rw, "\
+            "subtechnique=percentage, bound=default, depth_k=99999, random_seed=0, restart_h_when_goal_state=true, "\
+            "allow_duplicates=interrollout, unit_cost=false, max_time=1200.0, mem_limit_mb=2048)], state_representation=complete, "\
+            "random_seed=0, minimization=none, avi_k=0, avi_its=0, avi_epsilon=-1, avi_unit_cost=false, avi_rule=vu_u, sort_h=false, "\
+            "mse_hstar_file=, mse_result_file={sample_file}, assignments_by_undefined_state=10, contrasting_samples=0, evaluator=blind())"
+
+        unique_id = str(random())[2:]
+        samples_file = f"fake_{domain}_{problem}_{n_samples}_s{unique_id}"
+        cl = [
+            "./fast-downward.py",
+            "--sas-file", f"{unique_id}-output.sas",
+            "--plan-file", f"{unique_id}_sas_plan",
+            "--build", "release",
+            pddl,
+            "--search", search_command.format(sample_file=samples_file)
+        ]
+        output = check_output(cl).decode("utf-8")
+        if "Total samples: " not in output:
+            return None
+
+        with open(samples_file) as f:
+            samples = [x.strip() for x in f.readlines()]
+        with open(samples_file, "w") as f:
+            for i in range(int(n_samples)):
+                f.write(samples[randint(0, len(samples)-1)]+"\n")
+        return samples_file
+    except Exception as e:
+        print(e)
+        return None

@@ -49,7 +49,7 @@ string SamplingSearchYaaig::sample_file_header() const {
 vector<int> SamplingSearchYaaig::binary_to_values(string bin) {
     vector<int> values = {};
     // assert(bin.size() == relevant_facts.size());
-    if (bin.size() != relevant_facts.size()) exit(10);
+    if (bin.size() != relevant_facts.size()) { utils::g_log << "Error: sampling_search_yaaig.cc:52" << endl; exit(0); }
     for (unsigned i = 0; i < bin.size(); i++) {
         if (bin[i] == '1')
             values.push_back(relevant_facts[i].value);
@@ -59,7 +59,7 @@ vector<int> SamplingSearchYaaig::binary_to_values(string bin) {
         else
             continue;
         //assert(values.size()-1 == (unsigned)relevant_facts[i].var)
-        if (values.size()-1 != (unsigned)relevant_facts[i].var) exit(10);
+        if (values.size()-1 != (unsigned)relevant_facts[i].var) { utils::g_log << "Error: sampling_search_yaaig.cc:62" << endl; exit(0); }
     }
     return values;
 }
@@ -139,7 +139,7 @@ void SamplingSearchYaaig::create_contrasting_samples(
     if (percentage == 0)
         return;
     // assert(percentage > 0 && percentage <= 100);
-    if (!(percentage > 0 && percentage <= 100)) exit(10);
+    if (!(percentage > 0 && percentage <= 100)) { utils::g_log << "Error: sampling_search_yaaig.cc:142" << endl; exit(0); }
 
     const size_t n_atoms = sampling_technique::modified_tasks[0]->get_values().size();
     PartialAssignment pa(
@@ -228,7 +228,7 @@ vector<string> SamplingSearchYaaig::values_to_samples(
                     oss << (p.second.first[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
                 }
             } else {
-                exit(10); // not implemented
+                { utils::g_log << "Error: sampling_search_yaaig.cc:231" << endl; exit(0); } // not implemented
             }
         }
         samples.push_back(oss.str());
@@ -528,7 +528,7 @@ void SamplingSearchYaaig::replace_h_with_evaluator(
         EvaluationContext eval_context(registry.insert_state(move(v)));
         EvaluationResult eval_results = evaluator->compute_result(eval_context);
         // assert(!eval_results.is_uninitialized());
-        if (eval_results.is_uninitialized()) exit(10);
+        if (eval_results.is_uninitialized()) { utils::g_log << "Error: sampling_search_yaaig.cc:531" << endl; exit(0); }
         p.first = eval_results.is_infinite() ? bound_value*2 : eval_results.get_evaluator_value();
     }
 }
@@ -551,7 +551,7 @@ void SamplingSearchYaaig::compute_sampling_statistics(
                 not_in_statespace++;
             } else {
                 // assert(compatibles.size() == 1);
-                if (!(compatibles.size() == 1)) exit(10);
+                if (!(compatibles.size() == 1)) { utils::g_log << "Error: sampling_search_yaaig.cc:554" << endl; exit(0); }
                 int hstar = compatibles[0].first;
                 if (h == hstar)
                     with_hstar++;
@@ -561,7 +561,7 @@ void SamplingSearchYaaig::compute_sampling_statistics(
         }
         if (evaluator->get_description() == "evaluator = pdb(hstar_pattern(list))") {
             // assert((unsigned)(with_hstar + not_in_statespace) == samples.size());
-            if (!((unsigned)(with_hstar + not_in_statespace) == samples.size())) exit(10);
+            if (!((unsigned)(with_hstar + not_in_statespace) == samples.size())) { utils::g_log << "Error: sampling_search_yaaig.cc:564" << endl; exit(0); }
         }
 
         utils::g_log << "[STATS] Samples: " << samples.size() << "\n";
@@ -599,13 +599,13 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       header(construct_header()),
       rng(utils::parse_rng_from_options(opts)) {
     // assert(contrasting_samples >= 0 && contrasting_samples <= 100);
-    if (!(contrasting_samples >= 0 && contrasting_samples <= 100)) exit(10);
+    if (!(contrasting_samples >= 0 && contrasting_samples <= 100)) { utils::g_log << "Error: sampling_search_yaaig.cc:602" << endl; exit(0); }
     // assert(assignments_by_undefined_state > 0);
-    if (!(assignments_by_undefined_state > 0)) exit(10);
+    if (!(assignments_by_undefined_state > 0)) { utils::g_log << "Error: sampling_search_yaaig.cc:604" << endl; exit(0); }
     // assert(avi_k == 0 || avi_k == 1);
-    if (!(avi_k == 0 || avi_k == 1)) exit(10);
+    if (!(avi_k == 0 || avi_k == 1)) { utils::g_log << "Error: sampling_search_yaaig.cc:606" << endl; exit(0); }
     // assert(avi_its > 0);
-    if (!(avi_its >= 0)) exit(10);
+    if (!(avi_its >= 0)) { utils::g_log << "Error: sampling_search_yaaig.cc:608" << endl; exit(0); }
 }
 
 static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parser) {

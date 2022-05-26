@@ -24,6 +24,7 @@ from src.pytorch.utils.helpers import (
     add_train_arg,
     get_problem_by_sample_filename,
     get_memory_usage_mb,
+    create_fake_samples,
 )
 from src.pytorch.utils.file_helpers import (
     create_train_directory,
@@ -52,6 +53,13 @@ def train_main(args: Namespace):
     """
     if args.num_threads != -1:
         torch.set_num_threads(args.num_threads)
+
+    if args.samples.startswith("fake_"):
+        _, samples_domain, samples_problem, samples_num = args.samples.split("_")
+        args.samples = create_fake_samples(samples_domain, samples_problem, int(samples_num))
+        if not args.samples:
+            _log.error("Fake samples failed.")
+            exit(0)
 
     set_seeds(args)
 
@@ -114,7 +122,7 @@ def train_main(args: Namespace):
             except:
                 _log.error(f"Failed to save heuristic_pred.csv.")
         try:
-            if args.training_size != 1.0:
+            if args.training_size != 1.0 and args.num_folds > 1:
                 _log.info(
                     f"Saving traced_{best_fold['fold']}.pt as best "
                     f"model (by val loss = {best_fold['val_loss']})"
@@ -130,6 +138,9 @@ def train_main(args: Namespace):
         _log.info("Training complete!")
     else:
         _log.error("Training incomplete! No trained networks.")
+
+    if args.samples.startswith("fake_"):
+        os.remove(args.samples)
 
     # OTHER PLOTS
     make_extra_plots(args, dirname, best_fold)
