@@ -60,7 +60,8 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
           is_valid_walk(opts.get<bool>("is_valid_walk")),
           restart_h_when_goal_state(opts.get<bool>("restart_h_when_goal_state")),
-          mutex(opts.get<bool>("mutex")),
+          state_filtering(opts.get<string>("state_filtering")),
+          bfs_percentage(opts.get<int>("bfs_percentage") / 100.0),
           bias_evaluator_tree(opts.get_parse_tree("bias", options::ParseTree())),
           bias_probabilistic(opts.get<bool>("bias_probabilistic")),
           bias_adapt(opts.get<double>("bias_adapt")),
@@ -74,6 +75,8 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
         // assert(subtechnique == "round_robin" || subtechnique == "random_leaf");
         if (!(subtechnique == "round_robin" || subtechnique == "random_leaf")) { utils::g_log << "Error: technique_gbackward_yaaig.cc:76" << endl; exit(0); }
     }
+    // assert(bfs_percentage >= 0 && bfs_percentage <= 100);
+    if (!(bfs_percentage >= 0 && bfs_percentage <= 100)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:79" << endl; exit(0); }
 }
 
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_random_walk(
@@ -329,10 +332,15 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     };
 
     auto is_valid_state = [&](PartialAssignment &partial_assignment) {
-        if (!mutex)
+        if (state_filtering == "none") {
             return true;
-        return !(is_valid_walk) || regression_task_proxy->convert_to_full_state(
-                partial_assignment, true, *rng).first;
+        } else if (state_filtering == "mutex") {
+            return !(is_valid_walk) || regression_task_proxy->convert_to_full_state(
+                    partial_assignment, true, *rng).first;
+        } else if (state_filtering == "statespace") {
+
+        }
+        return false;
     };
 
     if (bias != nullptr) {
@@ -391,7 +399,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         samples = sample_with_random_walk(pa, samples_per_search, is_valid_state, func_bias, task_proxy);
 
     } else if (technique == "bfs_rw" && subtechnique == "percentage") {
-        float bfs_percentage = 0.1; // TODO: argument
         samples = sample_with_percentage_limited_bfs(bfs_percentage, pa, is_valid_state, leaves, task_proxy);
 
     } else if (technique == "dfs" || technique == "bfs") {
@@ -517,10 +524,15 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "Restart h value when goal state is sampled (only random walk)",
             "true"
     );
-    parser.add_option<bool>(
-            "mutex",
-            "Apply mutex to filter applicable operators.",
-            "true"
+    parser.add_option<string>(
+            "state_filtering",
+            "Filtering of applicable operators (none, mutex, statespace)",
+            "mutex"
+    );
+    parser.add_option<int>(
+            "bfs_percentage",
+            "Percentage of samples per BFS when technique=bfs_rw",
+            "10"
     );
     parser.add_option<shared_ptr<Heuristic>>(
             "bias",

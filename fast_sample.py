@@ -135,8 +135,8 @@ def yaaig_ferber(args, meth):
                            f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, max_samples={args.max_samples}, '
                            f'bound_multiplier={args.bound_multiplier}, 'f'technique={args.technique}, subtechnique={args.subtechnique}, '
                            f'bound={args.bound}, depth_k={args.k_depth}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state}, '
-                           f'mutex={args.mutex}, allow_duplicates={args.allow_dups}, unit_cost={args.sample_unit_cost}, '
-                           f'max_time={args.max_time}, mem_limit_mb={args.mem_limit})], '
+                           f'state_filtering={args.state_filtering}, bfs_percentage={args.bfs_percentage}, allow_duplicates={args.allow_dups}, '
+                           f'unit_cost={args.sample_unit_cost}, max_time={args.max_time}, mem_limit_mb={args.mem_limit})], '
                            f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, '
                            f'avi_k={args.avi_k}, avi_its={args.avi_its}, avi_epsilon={args.avi_eps}, avi_unit_cost={args.sample_unit_cost}, '
                            f'avi_rule={args.avi_rule}, sort_h={args.sort_h}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
@@ -168,7 +168,7 @@ def sample(args):
     os.system(f"tsp -K")
     os.system(f"tsp -S {args.threads}")
     args.restart_h_when_goal_state = bool2str(args.restart_h_when_goal_state)
-    args.mutex = bool2str(args.mutex)
+    args.state_filtering = bool2str(args.state_filtering)
     args.sample_unit_cost = bool2str(args.sample_unit_cost)
     args.sort_h = bool2str(args.sort_h)
     args.ferber_technique = "iforward" if args.ferber_technique == "forward" else "gbackward"

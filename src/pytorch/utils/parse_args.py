@@ -1390,11 +1390,18 @@ def get_sample_args():
         help="Restart h value when goal state is sampled (only random walk). (default: %(default)s)",
     )
     parser.add_argument(
-        "-mtx",
-        "--mutex",
-        type=str2bool,
-        default=default_args.SAMPLE_MUTEX,
-        help="Apply mutex to filter applicable operators. (default: %(default)s)",
+        "-sf",
+        "--state-filtering",
+        type=str,
+        default=default_args.SAMPLE_STATE_FILTERING,
+        help="Filtering of applicable operators (none, mutex, statespace). (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-bfsp",
+        "--bfs-percentage",
+        type=int,
+        default=default_args.SAMPLE_BFS_PERCENTAGE,
+        help="Percentage of samples per BFS when technique=bfs_rw. (default: %(default)s)",
     )
     parser.add_argument(
         "-o",
