@@ -10,6 +10,7 @@ namespace utils {
 class RandomNumberGenerator {
     // Mersenne Twister random number generator.
     std::mt19937 rng;
+    std::default_random_engine dre;
     int seed_value;
 
 public:
@@ -73,7 +74,7 @@ public:
 
     template<typename T>
     void shuffle(std::vector<T> &vec) {
-        std::shuffle(vec.begin(), vec.end(), rng);
+        std::shuffle(vec.begin(), vec.end(), dre);
     }
 
     std::vector<int> choose_n_of_N(int n, int N);

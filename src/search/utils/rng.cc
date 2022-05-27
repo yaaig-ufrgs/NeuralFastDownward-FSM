@@ -34,6 +34,7 @@ RandomNumberGenerator::~RandomNumberGenerator() { }
 void RandomNumberGenerator::seed(int seed_) {
     seed_value = seed_;
     rng.seed(seed_value);
+    dre.seed(seed_value);
 }
 
 vector<int> RandomNumberGenerator::choose_n_of_N(int n, int N) {
