@@ -304,7 +304,7 @@ def create_fake_samples(domain: str, problem: str, n_samples: int) -> str:
 
         search_command = "sampling_search_yaaig(eager_greedy([ff(transform=sampling_transform())], transform=sampling_transform()), "\
             "techniques=[gbackward_yaaig(searches=1, samples_per_search=-1, max_samples=1000, bound_multiplier=1.0, technique=rw, "\
-            "subtechnique=percentage, bound=default, depth_k=99999, random_seed=0, restart_h_when_goal_state=true, "\
+            "subtechnique=percentage, bound=default, depth_k=99999, random_seed=0, restart_h_when_goal_state=true, mutex=true, "\
             "allow_duplicates=interrollout, unit_cost=false, max_time=1200.0, mem_limit_mb=2048)], state_representation=complete, "\
             "random_seed=0, minimization=none, avi_k=0, avi_its=0, avi_epsilon=-1, avi_unit_cost=false, avi_rule=vu_u, sort_h=false, "\
             "mse_hstar_file=, mse_result_file={sample_file}, assignments_by_undefined_state=10, contrasting_samples=0, evaluator=blind())"

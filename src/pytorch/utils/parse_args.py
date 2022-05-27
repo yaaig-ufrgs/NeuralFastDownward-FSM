@@ -1390,6 +1390,13 @@ def get_sample_args():
         help="Restart h value when goal state is sampled (only random walk). (default: %(default)s)",
     )
     parser.add_argument(
+        "-mtx",
+        "--mutex",
+        type=str2bool,
+        default=default_args.SAMPLE_MUTEX,
+        help="Apply mutex to filter applicable operators. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-o",
         "--output-dir",
         type=Path,

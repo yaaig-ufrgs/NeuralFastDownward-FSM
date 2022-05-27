@@ -60,6 +60,7 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           deprioritize_undoing_steps(opts.get<bool>("deprioritize_undoing_steps")),
           is_valid_walk(opts.get<bool>("is_valid_walk")),
           restart_h_when_goal_state(opts.get<bool>("restart_h_when_goal_state")),
+          mutex(opts.get<bool>("mutex")),
           bias_evaluator_tree(opts.get_parse_tree("bias", options::ParseTree())),
           bias_probabilistic(opts.get<bool>("bias_probabilistic")),
           bias_adapt(opts.get<double>("bias_adapt")),
@@ -328,6 +329,8 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     };
 
     auto is_valid_state = [&](PartialAssignment &partial_assignment) {
+        if (!mutex)
+            return true;
         return !(is_valid_walk) || regression_task_proxy->convert_to_full_state(
                 partial_assignment, true, *rng).first;
     };
@@ -512,6 +515,11 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
     parser.add_option<bool>(
             "restart_h_when_goal_state",
             "Restart h value when goal state is sampled (only random walk)",
+            "true"
+    );
+    parser.add_option<bool>(
+            "mutex",
+            "Apply mutex to filter applicable operators.",
             "true"
     );
     parser.add_option<shared_ptr<Heuristic>>(
