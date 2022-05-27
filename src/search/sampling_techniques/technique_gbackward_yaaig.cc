@@ -450,7 +450,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
             vector<shared_ptr<PartialAssignment>> samples_ = sample_with_random_walk(
                 leaves[lid],
-                min(samples_per_search, (int)(max_samples-samples.size())),
+                min(samples_per_search - leaves[lid].estimated_heuristic, (int)(max_samples-samples.size())),
                 is_valid_state,
                 func_bias,
                 task_proxy,
