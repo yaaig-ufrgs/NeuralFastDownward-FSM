@@ -14,8 +14,6 @@
 
 #include "../task_utils/task_properties.h"
 
-#define RW_MAX_ATTEMPTS 100
-
 using namespace std;
 
 namespace sampling_technique {
@@ -95,14 +93,14 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
     }
     utils::HashSet<PartialAssignment> local_hash_table;
     utils::HashSet<PartialAssignment> *ht_pointer = global_hash_table ? &hash_table : &local_hash_table;
-    // Attempts to find a new state when performing each step
-    int attempts = 0;
+    bool renegerate_applicable_ops = true;
     while ((samples.size() < steps) && !stopped) {
         OperatorID applied_op = OperatorID::no_operator;
         PartialAssignment pa_ = rrws->sample_state_length(
             pa,
             1,
             applied_op,
+            renegerate_applicable_ops,
             deprioritize_undoing_steps,
             is_valid_state,
             bias,
@@ -132,9 +130,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
             ht_pointer->insert(pa_);
             samples.push_back(make_shared<PartialAssignment>(pa_));
             pa = pa_;
-            attempts = 0;
-        } else if (++attempts >= RW_MAX_ATTEMPTS) {
-            break;
+            renegerate_applicable_ops = true;
+        } else {
+            renegerate_applicable_ops = false;
         }
         stopped = stop_sampling();
     }

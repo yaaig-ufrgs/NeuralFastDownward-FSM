@@ -26,13 +26,17 @@ bool  sample_next_state_with_random_walk(
         bool probabilistic_bias,
         double adapt_bias,
         OperatorID &applied_op,
+        bool renegerate_applicable_ops,
         const function<bool (S &)> *is_dead_end = nullptr,
         const function<bool (S &)> *is_valid_state = nullptr) {
 
     pre_previous_state = move(previous_state);
     previous_state = move(current_state);
-    vector<OperatorID> applicable_operators;
-    generator.generate_applicable_ops(previous_state, applicable_operators);
+    static vector<OperatorID> applicable_operators;
+    if (renegerate_applicable_ops) {
+        applicable_operators.clear();
+        generator.generate_applicable_ops(previous_state, applicable_operators);
+    }
     // If there are no applicable operators, do not walk further.
     if (applicable_operators.empty()) {
         current_state = move(previous_state);
@@ -139,6 +143,7 @@ S sample_with_random_walk(
         bool probabilistic_bias,
         double adapt_bias,
         OperatorID &applied_op,
+        bool renegerate_applicable_ops,
         const function<bool (S &)> *is_dead_end = nullptr,
         const function<bool (S &)> *is_valid_state = nullptr) {
     // Sample one state with a random walk of length length.
@@ -163,6 +168,7 @@ S sample_with_random_walk(
                 probabilistic_bias,
                 adapt_bias,
                 applied_op,
+                renegerate_applicable_ops,
                 is_dead_end,
                 is_valid_state)) {
             if (is_dead_end != nullptr && (*is_dead_end)(current_state)) {
@@ -198,6 +204,7 @@ static State sample_state_with_random_forward_walk(
     };
 
     OperatorID applied_op = OperatorID::no_operator; // dummy
+    bool renegerate_applicable_ops = true; // relevant var only for sample_partial_assignment_with_random_backward_walk
     return sample_with_random_walk(
             initial_state,
             length,
@@ -209,6 +216,7 @@ static State sample_state_with_random_forward_walk(
             probabilistic_bias,
             adapt_bias,
             applied_op,
+            renegerate_applicable_ops,
             &is_dead_end);
 }
 
@@ -263,6 +271,7 @@ static PartialAssignment sample_partial_assignment_with_random_backward_walk(
     bool probabilistic_bias,
     double adapt_bias,
     OperatorID &applied_op,
+    bool renegerate_applicable_ops,
     const PartialDeadEndDetector &is_dead_end) {
 
     const function<PartialAssignment (const PartialAssignment &, const OperatorID &)>
@@ -284,6 +293,7 @@ static PartialAssignment sample_partial_assignment_with_random_backward_walk(
             probabilistic_bias,
             adapt_bias,
             applied_op,
+            renegerate_applicable_ops,
             &is_dead_end,
             &is_valid_state
             );
@@ -301,6 +311,7 @@ static PartialAssignment sample_partial_assignments_with_random_backward_walks(
     const PartialAssignmentBias *bias,
     bool probabilistic_bias,
     OperatorID &applied_op,
+    bool renegerate_applicable_ops,
     const PartialDeadEndDetector &is_dead_end) {
     int n;
     if (init_h == 0) {
@@ -332,7 +343,7 @@ static PartialAssignment sample_partial_assignments_with_random_backward_walks(
     return sample_partial_assignment_with_random_backward_walk(
         regression_task_proxy, goals, predecessor_generator,
         length, rng, deprioritize_undoing_steps, is_valid_state, bias,
-        probabilistic_bias, -1, applied_op, is_dead_end);
+        probabilistic_bias, -1, applied_op, renegerate_applicable_ops, is_dead_end);
 }
 
 
@@ -394,6 +405,7 @@ RandomRegressionWalkSampler::~RandomRegressionWalkSampler() {
 PartialAssignment RandomRegressionWalkSampler::sample_state(
     int init_h,
     OperatorID &applied_op,
+    bool renegerate_applicable_ops,
     bool deprioritize_undoing_steps,
     const ValidStateDetector  &is_valid_state,
     const PartialAssignmentBias *bias,
@@ -410,6 +422,7 @@ PartialAssignment RandomRegressionWalkSampler::sample_state(
         is_valid_state,
         bias, probabilistic_bias,
         applied_op,
+        renegerate_applicable_ops,
         is_dead_end);
 }
 
@@ -417,6 +430,7 @@ PartialAssignment RandomRegressionWalkSampler::sample_state_length(
     const PartialAssignment &goals,
     int length,
     OperatorID &applied_op,
+    bool renegerate_applicable_ops,
     bool deprioritize_undoing_steps,
     const ValidStateDetector &is_valid_state,
     const PartialAssignmentBias *bias,
@@ -433,6 +447,7 @@ PartialAssignment RandomRegressionWalkSampler::sample_state_length(
         is_valid_state,
         bias, probabilistic_bias, adapt_bias,
         applied_op,
+        renegerate_applicable_ops,
         is_dead_end);
 }
 

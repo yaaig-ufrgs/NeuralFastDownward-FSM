@@ -128,6 +128,7 @@ public:
     PartialAssignment sample_state(
         int init_h,
         OperatorID &applied_op,
+        bool renegerate_applicable_ops,
         bool deprioritize_undoing_steps = false,
         const ValidStateDetector &is_valid_state = [](const PartialAssignment &) {return true;},
         const PartialAssignmentBias *bias = nullptr,
@@ -137,6 +138,7 @@ public:
     PartialAssignment sample_state_length(
         const PartialAssignment &goals, int length,
         OperatorID &applied_op,
+        bool renegerate_applicable_ops,
         bool deprioritize_undoing_steps = false,
         const ValidStateDetector &is_valid_state = [](const PartialAssignment &) {return true;},
         const PartialAssignmentBias *bias = nullptr,

@@ -93,6 +93,7 @@ std::shared_ptr<AbstractTask> TechniqueGBackwardNone::create_next(
                         regression_task_proxy->get_goal_assignment(),
                         steps->next(),
                         applied_op,
+                        true,
                         deprioritize_undoing_steps,
                         is_valid_state,
                         func_bias,
