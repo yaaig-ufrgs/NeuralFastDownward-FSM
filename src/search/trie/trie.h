@@ -33,6 +33,7 @@ private:
 
     tnode<T> *root;
     int size;
+    bool is_empty;
 };
 
 template <typename T>
@@ -40,6 +41,7 @@ trie<T>::trie(): size(0) {
     T flag = T();
     root = new tnode<T>(flag, nullptr, -1);
     size = 0;
+    is_empty = true;
 }
 
 template <typename T>
@@ -61,6 +63,7 @@ void trie<T>::insert(std::vector<int> key, T val) {
     if (!node->isEnd()) {
         this->size += 1;
     }
+    this->is_empty = false;
     node->update(val);
     node->markEnd(key);
 }
@@ -88,7 +91,8 @@ bool trie<T>::exist(std::vector<int> key) {
 
 template <typename T>
 bool trie<T>::empty() {
-    return this->size == 0;
+    // return this->size == 0;
+    return this->is_empty;
 }
 
 template <typename T>
