@@ -89,6 +89,13 @@ def yaaig_ferber(args, meth):
         test_tasks += glob(f"{args.test_tasks_dir}/../*.pddl")
         args.bound = max(get_hstar_tasks("scripts", test_tasks))
         assert(args.bound > 0)
+    elif args.bound == "state_space_diameter":
+        assert args.statespace
+        max_h = 0
+        with open(args.statespace, "r") as ss_file:
+            for h, _ in [l.split(";") for l in ss_file.readlines() if not l.startswith("#")]:
+                max_h = max(max_h, int(h))
+        args.bound = max_h
 
     state_repr = get_full_state_repr_name(args.state_representation)
     instances = [args.instance] if args.instance.endswith(".pddl") else glob(f"{args.instance}/*.pddl")
