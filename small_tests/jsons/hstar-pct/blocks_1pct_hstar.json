@@ -49,7 +49,7 @@
         "scatter-plot": "no",
         "output-layer": "regression",
         "sample-percentage": 1.0,
-        "max-epochs": 22816
+        "max-epochs": 27200
     },
     "test": {
         "max-expansions": 65992,

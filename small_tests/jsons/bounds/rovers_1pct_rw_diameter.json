@@ -46,7 +46,7 @@
         "use-gpu": "no",
         "output-layer": "regression",
         "sample-percentage": 1.0,
-        "max-epochs": 3701
+        "max-epochs": 4520
     },
     "test": {
         "max-expansions": 565825,
