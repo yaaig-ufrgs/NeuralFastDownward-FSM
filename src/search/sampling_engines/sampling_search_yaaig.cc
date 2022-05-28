@@ -287,8 +287,9 @@ void SamplingSearchYaaig::create_trie_statespace() {
         // utils::g_log << "Could not create trie_statespace: missing state space file." << endl;
         return;
     }
-    if (!trie_statespace.empty()) // was already created in a previous call
+    if (!trie_statespace.empty()) { // was already created in a previous call
         return;
+    }
     auto t_start_avi = std::chrono::high_resolution_clock::now();
     string h_sample;
     ifstream f(mse_hstar_file);
@@ -536,6 +537,8 @@ void SamplingSearchYaaig::replace_h_with_evaluator(
 void SamplingSearchYaaig::compute_sampling_statistics(
     vector<pair<int,pair<vector<int>,string>>> samples
 ) {
+    if (mse_hstar_file == "none")
+        return;
     create_trie_statespace();
     utils::g_log << "Generating statistics on samples...\n";
     if (!trie_statespace.empty()) {
@@ -570,7 +573,7 @@ void SamplingSearchYaaig::compute_sampling_statistics(
         utils::g_log << "[STATS] Samples not in state space: " << not_in_statespace << "\n";
         utils::g_log << "[STATS] Average h value: " << ((float)sum_h / samples.size()) << "\n";
     } else {
-        // utils::g_log << "[STATS] trie_statespace was not created." << endl;
+        utils::g_log << "[STATS] trie_statespace was not created." << endl;
     }
 }
 
@@ -606,6 +609,9 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
     if (!(avi_k == 0 || avi_k == 1)) { utils::g_log << "Error: sampling_search_yaaig.cc:606" << endl; exit(0); }
     // assert(avi_its > 0);
     if (!(avi_its >= 0)) { utils::g_log << "Error: sampling_search_yaaig.cc:608" << endl; exit(0); }
+
+    if (mse_hstar_file != "none")
+        create_trie_statespace();
 }
 
 static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parser) {

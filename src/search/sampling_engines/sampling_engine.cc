@@ -17,6 +17,8 @@
 using namespace std;
 
 namespace sampling_engine {
+trie::trie<std::pair<int,std::string>> trie_statespace = trie::trie<std::pair<int,std::string>>();
+
 const string SAMPLE_FILE_MAGIC_WORD = "# MAGIC FIRST LINE";
 /* Global variable for sampling algorithms to store arbitrary paths (plans [
    operator ids] and trajectories [state ids]).

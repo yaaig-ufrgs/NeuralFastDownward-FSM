@@ -14,6 +14,8 @@
 
 #include "../task_utils/task_properties.h"
 
+#include "../sampling_engines/sampling_engine.h"
+
 using namespace std;
 
 namespace sampling_technique {
@@ -331,6 +333,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         }
     };
 
+    // assert(state_filtering != "statespace" || !sampling_engine::trie_statespace.empty());
+    if (!(state_filtering != "statespace" || !sampling_engine::trie_statespace.empty())) { utils::g_log << "Error: technique_gbackward_yaaig.cc:337" << endl; exit(0); }
+
     auto is_valid_state = [&](PartialAssignment &partial_assignment) {
         if (state_filtering == "none") {
             return true;
@@ -338,7 +343,10 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             return !(is_valid_walk) || regression_task_proxy->convert_to_full_state(
                     partial_assignment, true, *rng).first;
         } else if (state_filtering == "statespace") {
-
+            vector<int> key;
+            for (char& b : partial_assignment.to_binary(true))
+                key.push_back(b == '*' ? -1 : (int)b - '0');
+            return sampling_engine::trie_statespace.find_all_compatible(key, "v_vu").size() > 0;
         }
         return false;
     };

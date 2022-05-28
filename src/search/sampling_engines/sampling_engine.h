@@ -8,6 +8,8 @@
 
 #include "sample_cache.h"
 
+#include "../trie/trie.h"
+
 #include <functional>
 #include <memory>
 #include <ostream>
@@ -21,6 +23,8 @@ namespace utils {
 }
 
 namespace sampling_engine {
+extern trie::trie<std::pair<int,std::string>> trie_statespace;
+
 /* Use this magic word if you want to ensure that the file is correctly encoded
  * e.g. after compressing it. Add it into your sample_file_header*/
 extern const std::string SAMPLE_FILE_MAGIC_WORD;

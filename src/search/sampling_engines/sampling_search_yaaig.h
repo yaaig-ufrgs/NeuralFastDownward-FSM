@@ -10,8 +10,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "../trie/trie.h"
-
 /* SamplingSearchYaaig
  * ----------------------
  * Similar to SamplingSearchFerber, but heuristics are not
@@ -46,7 +44,6 @@ protected:
     StateRegistry registry;
     const std::string header;
     std::shared_ptr<utils::RandomNumberGenerator> rng;
-    trie::trie<std::pair<int,std::string>> trie_statespace; // with h*
 
     virtual std::vector<std::string> extract_samples() override;
     virtual std::string construct_header() const;
