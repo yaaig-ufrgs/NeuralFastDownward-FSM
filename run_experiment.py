@@ -9,17 +9,13 @@ $ ./run_experiment.py samples -exp-eval true -evl-mdl results/*/models/traced_0.
 
 """
 
-import sys
 import os
-from math import ceil
 from glob import glob
 from src.pytorch.utils.parse_args import get_exp_args
 import src.pytorch.utils.default_args as default_args
 
 
-COUNTER = 0
-THREAD_ID = -1
-
+PID = 0
 
 def filter_samples(samples: [str], seed: int) -> [str]:
     filtered_samples = []
@@ -32,23 +28,13 @@ def filter_samples(samples: [str], seed: int) -> [str]:
     return filtered_samples
 
 
-def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
-    global COUNTER
-    global THREAD_ID
-    threads = args.exp_threads
+def run_train_test(args, sample_seed: int, net_seed: int):
+    global PID
     sample_files = glob(f"{args.samples}/*")
     sample_files = filter_samples(sample_files, sample_seed)
-    files_len = len(sample_files) * runs
-    max_per_thread = ceil(files_len / threads)
 
     for sample in sample_files:
         sample_name = sample.split("/")[-1]
-        sample_name_split = sample_name.split("_")
-        sample_type = sample_name_split[0]
-        domain = sample_name_split[1]
-        instance = sample_name_split[2]
-        technique = sample_name_split[3]
-        sample_size = sample_name_split[4]
         trained_model_dir = f"{args.train_output_folder}/nfd_train.{sample_name}.ns{net_seed}" if not args.exp_only_test else f"{args.test_model_dir}/nfd_train.{sample_name}.ns{net_seed}"
 
         train_args = (
@@ -91,25 +77,23 @@ def run_train_test(args, sample_seed: int, net_seed: int, runs: int):
         if args.test_max_expansions != default_args.MAX_EXPANSIONS:
             test_args += f" -e {args.test_max_expansions}"
 
-        if COUNTER % max_per_thread == 0:
-            THREAD_ID += 1
-            cmd = f"tsp taskset -c {THREAD_ID} ./train-and-test.sh '{train_args}' '{test_args}'"
-            if args.exp_only_train:
-                cmd = f"tsp taskset -c {THREAD_ID} ./train.py {train_args}"
-            elif args.exp_only_test:
-                cmd = f"tsp taskset -c {THREAD_ID} ./test.py {test_args}"
-            os.system(cmd)
-            #print(cmd + "\n")
-        else:
-            cmd = f"tsp -D {COUNTER-1} taskset -c {THREAD_ID} ./train-and-test.sh '{train_args}' '{test_args}'"
-            if args.exp_only_train:
-                cmd = f"tsp -D {COUNTER-1} taskset -c {THREAD_ID} ./train.py {train_args}"
-            if args.exp_only_test:
-                cmd = f"tsp -D {COUNTER-1} taskset -c {THREAD_ID} ./test.py {test_args}"
-            os.system(cmd)
-            #print(cmd + "\n")
+        pcore = PID % args.exp_threads
+        pdep = PID - args.exp_threads
 
-        COUNTER += 1
+        if args.exp_only_train:
+            cmd = f"./train.py {train_args}"
+        elif args.exp_only_test:
+            cmd = f"./test.py {test_args}"
+        else:
+            cmd = f"./train-and-test.sh '{train_args}' '{test_args}'"
+        cmd = f"tsp taskset -c {pcore} {cmd}"
+        if pdep >= 0:
+            cmd = cmd.replace("tsp", f"tsp -D {pdep}")
+
+        os.system(cmd)
+        # print(cmd + "\n")
+
+        PID += 1
 
 
 def only_eval(args):
@@ -195,24 +179,19 @@ def experiment(args):
             run_train_test(args, max_sample_seed, max_net_seed, runs=1)
 
         elif args.exp_type == "all":
-            #total_runs = args.exp_sample_seed * args.exp_net_seed
-            total_runs = ((max_sample_seed-min_sample_seed) + 1) * ((max_net_seed-min_net_seed) + 1)
             for i in range(min_sample_seed, max_sample_seed + 1):
                 for j in range(min_net_seed, max_net_seed + 1):
-                    run_train_test(args, i, j, runs=total_runs)
+                    run_train_test(args, i, j)
 
         elif args.exp_type == "combined":
             max_seed = max(max_net_seed, max_sample_seed)
-            total_runs = (max_seed * 3) - 2
-            run_train_test(
-                args, 1, 1, runs=total_runs
-            )
+            run_train_test(args, 1, 1)
             for i in range(2, max_seed + 1):
-                run_train_test(args, i, 1, runs=total_runs)
+                run_train_test(args, i, 1)
             for i in range(2, max_seed + 1):
-                run_train_test(args, 1, i, runs=total_runs)
+                run_train_test(args, 1, i)
             for i in range(2, max_seed + 1):
-                run_train_test(args, i, i, runs=total_runs)
+                run_train_test(args, i, i)
 
         else:
             print("ERROR: Invalid experiment configuration.")
