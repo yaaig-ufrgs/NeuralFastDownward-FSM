@@ -59,7 +59,7 @@ class HNN(nn.Module):
         self.input_units = input_units
         self.hidden_units = hidden_units
         self.output_units = output_units
-        self.hidden_layers = hidden_layers+1
+        self.hidden_layers = hidden_layers
         self.dropout_rate = dropout_rate
         self.output_layer = output_layer
         self.linear_output = linear_output
