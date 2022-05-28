@@ -444,7 +444,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 make_pair(h, make_pair(s.get_values(), s.to_binary()))
             );
         } else if (state_representation == "valid") {
-            State s = partialAssignment->get_full_state(true, *rng).second;
+            State s = partialAssignment->get_full_state(true, *rng).second; // placeholder
             bool is_valid = false;
 
             // Looking for valid state in forward state space
@@ -461,18 +461,18 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             }
 
             // Looking for valid state in PDB+Mutex
-            for (int i = 0; i < 10000 && !is_valid; i++) { // MAX_TRIES = 10000
-                pair<bool,State> p = partialAssignment->get_full_state(true, *rng);
-                if (p.first) {
-                    s = p.second;
-                    vector<int> v = s.get_values();
-                    EvaluationContext eval_context(registry.insert_state(move(v)));
-                    EvaluationResult eval_results = evaluator->compute_result(eval_context);
-                    if (eval_results.is_uninitialized() || eval_results.is_infinite())
-                        continue;
-                    is_valid = true;
-                }
-            }
+            // for (int i = 0; i < 10000 && !is_valid; i++) { // MAX_TRIES = 10000
+            //     pair<bool,State> p = partialAssignment->get_full_state(true, *rng);
+            //     if (p.first) {
+            //         s = p.second;
+            //         vector<int> v = s.get_values();
+            //         EvaluationContext eval_context(registry.insert_state(move(v)));
+            //         EvaluationResult eval_results = evaluator->compute_result(eval_context);
+            //         if (eval_results.is_uninitialized() || eval_results.is_infinite())
+            //             continue;
+            //         is_valid = true;
+            //     }
+            // }
 
             if (is_valid) {
                 if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
@@ -483,8 +483,10 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 );
             } else {
                 utils::g_log << "Sample " << partialAssignment->to_binary(true)
-                    << " not found in state space or PDB + mutex!" << endl;
-                continue;
+                    << " not found in state space!" << endl;
+                exit(0);
+                //     << " not found in state space or PDB + mutex!" << endl;
+                // continue;
             }
         } else if (state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial" || state_representation == "facts_partial") {
             if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
