@@ -116,7 +116,6 @@ def yaaig_ferber(args, meth):
                 if args.avi_k > 0:
                     avik = f"_avi-{args.avi_k}"
                     # avik = f"_avi-{args.avi_k}"
-                    # avi_iterations = "max" if args.avi_its >= 9999 else args.avi_its
                     # avits = f"_it-{avi_iterations}"
                 if args.allow_dups != "none":
                     dups = "_dups-" + ("ir" if args.allow_dups == "interrollout" else args.allow_dups)
@@ -138,7 +137,7 @@ def yaaig_ferber(args, meth):
                            f'state_filtering={args.state_filtering}, bfs_percentage={args.bfs_percentage}, allow_duplicates={args.allow_dups}, '
                            f'unit_cost={args.sample_unit_cost}, max_time={args.max_time}, mem_limit_mb={args.mem_limit})], '
                            f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, '
-                           f'avi_k={args.avi_k}, avi_its={args.avi_its}, avi_epsilon={args.avi_eps}, avi_unit_cost={args.sample_unit_cost}, '
+                           f'avi_k={args.avi_k}, avi_epsilon={args.avi_eps}, avi_unit_cost={args.sample_unit_cost}, '
                            f'avi_rule={args.avi_rule}, sort_h={args.sort_h}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
                            f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting}, evaluator={args.evaluator})\"')
                 elif meth == "ferber":

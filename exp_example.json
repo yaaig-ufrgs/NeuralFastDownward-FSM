@@ -16,6 +16,7 @@
         "method": "yaaig",
         "technique": "bfs_rw",
         "subtechnique": "percentage",
+        "bfs-percentage": "10",
         "search-algorithm": "astar",
         "search-heuristic": "lmcut",
         "state-representation": "fs",
@@ -26,14 +27,13 @@
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",
         "minimization": "both",
-        "statespace": "../NeuralFastDownward-results/resnets/experiments/blocks/samples/statespace/statespace_blocks_probBLOCKS-7-0_hstar",
+        "statespace": "tasks/experiments/statespaces/statespace_blocks_probBLOCKS-7-0_hstar",
         "avi-k": 1,
-        "avi-its": 9999,
         "k-depth": 0,
         "bound-multiplier": 1.0,
         "bound": "propositions_per_mean_effects",
         "test-tasks-dir": "tasks/experiments/blocks/probBLOCKS-7-0",
-        "avi-state-representation": "ps"
+        "state-filtering": "mutex"
     },
     "train": {
         "model": "resnet",

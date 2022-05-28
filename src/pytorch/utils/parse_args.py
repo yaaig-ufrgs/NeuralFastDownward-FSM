@@ -1432,13 +1432,6 @@ def get_sample_args():
         help="Approximate Value Iteration (AVI) lookahead. If 0, no AVI is performed. (default: %(default)s)",
     )
     parser.add_argument(
-        "-avits",
-        "--avi-its",
-        type=int,
-        default=default_args.SAMPLE_AVI_ITS,
-        help="Number of AVI iterations. (default: %(default)s)",
-    )
-    parser.add_argument(
         "-avieps",
         "--avi-eps",
         type=int,

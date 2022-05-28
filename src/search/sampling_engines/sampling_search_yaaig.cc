@@ -315,7 +315,7 @@ void SamplingSearchYaaig::create_trie_statespace() {
 }
 
 void SamplingSearchYaaig::approximate_value_iteration() {
-    if (avi_k <= 0 || avi_its <= 0)
+    if (avi_k <= 0)
         return;
     if (use_evaluator)
         return;
@@ -422,7 +422,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         );
     }
 
-    if (avi_k > 0 && avi_its > 0) {
+    if (avi_k > 0) {
         approximate_value_iteration();
     } else if (minimization == "partial" || minimization == "both") {
         do_minimization(sampling_technique::modified_tasks);
@@ -588,7 +588,6 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
       contrasting_samples(opts.get<int>("contrasting_samples")),
       avi_k(opts.get<int>("avi_k")),
-      avi_its(opts.get<int>("avi_its")),
       avi_rule(opts.get<string>("avi_rule")),
       avi_epsilon(stod(opts.get<string>("avi_epsilon"))),
       avi_unit_cost(opts.get<bool>("avi_unit_cost")),
@@ -609,8 +608,6 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
     if (!(assignments_by_undefined_state > 0)) { utils::g_log << "Error: sampling_search_yaaig.cc:604" << endl; exit(0); }
     // assert(avi_k == 0 || avi_k == 1);
     if (!(avi_k == 0 || avi_k == 1)) { utils::g_log << "Error: sampling_search_yaaig.cc:606" << endl; exit(0); }
-    // assert(avi_its > 0);
-    if (!(avi_its >= 0)) { utils::g_log << "Error: sampling_search_yaaig.cc:608" << endl; exit(0); }
 
     if (mse_hstar_file != "none")
         create_trie_statespace();
@@ -652,10 +649,6 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "avi_k",
             "Correct h-values using AVI via K-step forward repeatedly",
             "0");
-    parser.add_option<int>(
-            "avi_its",
-            "Number of AVI repeats.",
-            "1");
     parser.add_option<string>(
             "avi_rule",
             "Rule applied when checking subset states.",
