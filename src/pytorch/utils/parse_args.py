@@ -14,7 +14,7 @@ def get_train_args():
     parser.add_argument(
         "-mdl",
         "--model",
-        choices=["hnn", "resnet"],
+        choices=["hnn", "resnet", "resnet_rtdl"],
         default=default_args.MODEL,
         help="Network model to use. (default: %(default)s)",
     )
@@ -681,7 +681,7 @@ def get_exp_args():
     parser.add_argument(
         "-trn-mdl",
         "--train-model",
-        choices=["hnn", "resnet"],
+        choices=["hnn", "resnet", "resnet_rtdl"],
         default=default_args.MODEL,
         help="Network model to use. (default: %(default)s)",
     )

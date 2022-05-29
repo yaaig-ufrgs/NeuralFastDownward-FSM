@@ -4,51 +4,19 @@ import torch.nn as nn
 import random
 from math import sqrt
 import numpy as np
+import typing as ty
 
-
-def RAI(fan_in, fan_out):
-    """
-    Randomized asymmetric initializer.
-    It draws samples using RAI where fan_in is the number of input units in the weight
-    tensor and fan_out is the number of output units in the weight tensor.
-    """
-    V = np.random.randn(fan_out, fan_in + 1) * 0.6007 / fan_in ** 0.5
-    for j in range(fan_out):
-        k = np.random.randint(0, high=fan_in + 1)
-        V[j, k] = np.random.beta(2, 1)
-    W = torch.nn.parameter.Parameter(torch.tensor(V[:, :-1], dtype=torch.float32))
-    b = torch.nn.parameter.Parameter(torch.tensor(V[:, -1], dtype=torch.float32))
-    return W, b
-
-
-class ResBlock(nn.Module):
-    def __init__(self, hidden_size):
-        super(ResBlock, self).__init__()
-        self.resblock = nn.Sequential(
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size),
-        )
-
-    def forward(self, x):
-        identity = x
-        out = self.resblock(x)
-        out += identity
-        out = nn.functional.relu(out)
-        return out
-
-
-# H(euristic) Neural Network
-class HNN(nn.Module):
+class ResNetRTDL(nn.Module):
     def __init__(
         self,
         input_units: int,
-        hidden_units: [int],
+        hidden_units: int,
         output_units: int,
-        hidden_layers: int,
+        num_layers: int,
         activation: str,
         output_layer: str,
-        dropout_rate: float,
+        hidden_dropout: float,
+        residual_dropout: float,
         linear_output: bool,
         use_bias: bool,
         use_bias_output: bool,
@@ -59,30 +27,29 @@ class HNN(nn.Module):
         self.input_units = input_units
         self.hidden_units = hidden_units
         self.output_units = output_units
-        self.hidden_layers = hidden_layers
-        self.dropout_rate = dropout_rate
+        self.num_layers = num_layers
+        self.hidden_dropout = hidden_dropout
+        self.residual_dropout = residual_dropout
         self.output_layer = output_layer
         self.linear_output = linear_output
         self.use_bias = use_bias
         self.use_bias_output = use_bias_output
         self.model = model
 
-        if model == "resnet":
-            self.flatten = nn.Flatten()
-
-        hu = self.set_hidden_units()
-        self.hid = self.set_hidden_layers(hu)
-
-        if model == "resnet":
-            self.resblock = ResBlock(hidden_units[0])
-
-        # If `use_bias` is set to False, `bias_output` is set to False regardless
-        # of the value in `use_bias_output`.
+        self.first_layer = nn.Linear(input_units, hidden_units)
+        self.layers = nn.ModuleList(
+            [
+                nn.ModuleDict(
+                    {
+                        'linear0': nn.Linear(hidden_units, hidden_units),
+                        'linear1': nn.Linear(hidden_units, hidden_units),
+                    }
+                )
+                for _ in range(num_layers)
+            ]
+        )
         bias_output = False if self.use_bias == False else use_bias_output
-        self.opt = nn.Linear(hu[-1], output_units, bias=bias_output)
-
-        if self.dropout_rate > 0:
-            self.dropout = nn.Dropout(self.dropout_rate, inplace=False)
+        self.head = nn.Linear(hidden_units, output_units, bias=bias_output)
 
         self.activation = self.set_activation(activation)
         self.output_activation = self.set_output_activation(activation)
@@ -95,27 +62,6 @@ class HNN(nn.Module):
         # https://github.com/pytorch/pytorch/issues/57109
         if weights_method != "default":
             self.initialize_weights(weights_method)
-
-    def set_hidden_units(self) -> list:
-        hu = [self.input_units]
-
-        if len(self.hidden_units) == 0:  # Layers with scalable number of units.
-            unit_diff = self.input_units - self.output_units
-            step = int(unit_diff / (self.hidden_layers + 1))
-            for i in range(self.hidden_layers):
-                hu.append(self.input_units - (i + 1) * step)
-        elif len(self.hidden_units) == 1:  # All layers with the same number of units.
-            hu += self.hidden_units * self.hidden_layers
-        else:
-            hu += self.hidden_units
-
-        return hu
-
-    def set_hidden_layers(self, hu: list) -> nn.ModuleList():
-        hid = nn.ModuleList()
-        for i in range(self.hidden_layers):
-            hid.append(nn.Linear(hu[i], hu[i + 1], bias=self.use_bias))
-        return hid
 
     def set_activation(self, activation: str) -> nn.functional:
         if activation == "sigmoid":
@@ -134,10 +80,6 @@ class HNN(nn.Module):
                 if activation != "leakyrelu"
                 else nn.functional.leaky_relu
             )
-        elif self.output_layer == "prefix":
-            return torch.sigmoid
-        elif self.output_layer == "one-hot":
-            return nn.functional.softmax
         else:
             raise NotImplementedError(
                 f"{self.output_layer} not implemented for output layer!"
@@ -195,23 +137,21 @@ class HNN(nn.Module):
             torch.nn.init.zeros_(m.bias)
 
     def forward(self, x):
-        if self.model == "resnet":
-            if len(x.size()) > 1:
-                x = self.flatten(x)
-            for h in self.hid:
-                x = self.activation(h(x))
-                if self.dropout_rate > 0:
-                    x = self.dropout(x)
-            x = self.resblock(x)
-            out = self.opt(x)
-            return self.output_activation(out)
+        x = self.first_layer(x)
 
-        else:
-            for h in self.hid:
-                x = self.activation(h(x))
-                if self.dropout_rate > 0:
-                    x = self.dropout(x)
+        for layer in self.layers:
+            layer = ty.cast(ty.Dict[str, nn.Module], layer)
+            z = x
+            z = layer['linear0'](z)
+            z = self.activation(z)
+            if self.hidden_dropout > 0:
+                z = nn.functional.dropout(z, self.hidden_dropout, True) # training = True?
+            z = layer['linear1'](z)
+            if self.residual_dropout > 0:
+                z = nn.functional.dropout(z, self.residual_dropout, True)
+            x = x + z
 
-            if self.linear_output:
-                return self.opt(x)
-            return self.output_activation(self.opt(x))
+        x = self.head(x)
+        #x = x.squeeze(-1)
+        return x
+

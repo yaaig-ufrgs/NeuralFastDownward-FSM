@@ -186,9 +186,9 @@ class TrainWorkflow:
         """
         Saves a traced model to be used by the C++ backend.
         """
-        if model == "resnet":
+        if model == "resnet" or model == "resnet_rtdl":
             example_input = self.train_dataloader.dataset[:10][0].float()
-        elif model == "simple":
+        elif model == "simple" or model == "hnn":
             example_input = self.train_dataloader.dataset[0][0].float()
 
         # To make testing possible (and fair), the model has to be saved while in the CPU,
