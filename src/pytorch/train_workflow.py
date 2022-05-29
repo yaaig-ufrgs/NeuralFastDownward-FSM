@@ -314,7 +314,7 @@ class TrainWorkflow:
             else:  # Regression
                 y_pred_values.append([
                     x_str,
-                    torch.round(y[i][0]),
-                    torch.round(pred[i][0]),
+                    round(y[i][0].item()),
+                    round(pred[i][0].item()),
                 ])
         return y_pred_values

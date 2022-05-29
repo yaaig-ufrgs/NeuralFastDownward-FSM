@@ -116,7 +116,7 @@ def remove_temporary_files(directory: str):
 
 def save_y_pred_csv(data: list, csv_filename: str):
     """
-    Saves the [state, value, predicted_value] set to a CSV file.
+    Saves the [state, value, predicted_value, diff] set to a CSV file.
     """
     with open(csv_filename, "w") as f:
         f.write("state,y,pred,diff\n")

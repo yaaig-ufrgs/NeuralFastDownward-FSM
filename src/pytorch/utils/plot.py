@@ -17,7 +17,7 @@ def get_plot_title(directory: str) -> str:
     """
     Return plot title from directory name.
     """
-    dir_split = directory.split("/")[1].split("_")
+    dir_split = directory.split("/")[-2].split("_")
     plot_title = "_".join(dir_split[2:])
     return plot_title
 
@@ -36,6 +36,7 @@ def save_y_pred_scatter(data: list, t: int, fold_idx: int, directory: str, prefi
         makedirs(directory)
 
     plot_title = get_plot_title(directory)
+    print(plot_title)
     plot_filename = f"{prefix}{plot_title}_epoch_{str(t)}_{fold_idx}"
 
     real = [d[1] for d in data]
