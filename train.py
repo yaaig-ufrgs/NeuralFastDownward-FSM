@@ -112,13 +112,21 @@ def train_main(args: Namespace):
                 if len(h_pred_files) > 1:
                     remove_csv_except_best(dirname, best_fold["fold"])
                     os.rename(
-                        f"{dirname}/heuristic_pred_{best_fold['fold']}.csv",
-                        f"{dirname}/heuristic_pred.csv",
+                        f"{dirname}/heuristic_pred_train_{best_fold['fold']}.csv",
+                        f"{dirname}/heuristic_pred_train.csv",
+                    )
+                    os.rename(
+                        f"{dirname}/heuristic_pred_val_{best_fold['fold']}.csv",
+                        f"{dirname}/heuristic_pred_val.csv",
                     )
                 else:
                     os.rename(
-                        f"{dirname}/heuristic_pred_0.csv",
-                        f"{dirname}/heuristic_pred.csv",
+                        f"{dirname}/heuristic_pred_train_0.csv",
+                        f"{dirname}/heuristic_pred_train.csv",
+                    )
+                    os.rename(
+                        f"{dirname}/heuristic_pred_val_0.csv",
+                        f"{dirname}/heuristic_pred_val.csv",
                     )
             except:
                 _log.error(f"Failed to save heuristic_pred.csv.")
@@ -258,12 +266,14 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                 add_train_arg(dirname, "updated_seed", args.seed)
             else:
                 if args.save_heuristic_pred:
-                    heuristic_pred_file = f"{dirname}/heuristic_pred_{fold_idx}.csv"
+                    heuristic_pred_file_train = f"{dirname}/heuristic_pred_train_{fold_idx}.csv"
+                    heuristic_pred_file_val = f"{dirname}/heuristic_pred_val_{fold_idx}.csv"
 
                 if fold_val_loss != None:
                     if fold_val_loss < best_fold["val_loss"]:
                         if args.save_heuristic_pred:
-                            save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file)
+                            save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file_train)
+                            save_y_pred_csv(train_wf.val_y_pred_values, heuristic_pred_file_val)
                         _log.info(f"New best val loss at fold {fold_idx} = {fold_val_loss}")
                         best_fold["fold"] = fold_idx
                         best_fold["val_loss"] = fold_val_loss
