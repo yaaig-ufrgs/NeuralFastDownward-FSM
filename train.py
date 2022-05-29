@@ -25,6 +25,7 @@ from src.pytorch.utils.helpers import (
     get_problem_by_sample_filename,
     get_memory_usage_mb,
     create_fake_samples,
+    count_parameters,
 )
 from src.pytorch.utils.file_helpers import (
     create_train_directory,
@@ -220,7 +221,8 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
             ).to(device)
 
             if fold_idx == 0:
-                _log.info(model)
+                _log.info(f"\n{model}")
+                count_parameters(model)
 
             train_wf = TrainWorkflow(
                 model=model,

@@ -10,6 +10,7 @@ from json import dump, load
 from datetime import datetime, timezone
 from subprocess import check_output
 from argparse import Namespace
+from prettytable import PrettyTable
 
 import src.pytorch.utils.default_args as default_args
 from src.pytorch.utils.file_helpers import (
@@ -18,6 +19,21 @@ from src.pytorch.utils.file_helpers import (
 
 _log = logging.getLogger(__name__)
 
+def count_parameters(model):
+    """
+    Get trainable parameters of a network model.
+    https://stackoverflow.com/questions/49201236/check-the-total-number-of-parameters-in-a-pytorch-model
+    """
+    table = PrettyTable(["Modules", "Parameters"])
+    total_params = 0
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad: continue
+        params = parameter.numel()
+        table.add_row([name, params])
+        total_params+=params
+    _log.info(f"\n{table}")
+    _log.info(f"Total Trainable Params: {total_params}")
+    return total_params   
 
 def to_prefix(n: int, max_value: int) -> [int]:
     """
