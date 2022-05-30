@@ -17,6 +17,7 @@ from random import randint
 
 from src.pytorch.k_fold_training_data import KFoldTrainingData
 from src.pytorch.model import HNN
+from src.pytorch.model_rtdl import ResNetRTDL
 from src.pytorch.train_workflow import TrainWorkflow
 from src.pytorch.log import setup_full_logging
 from src.pytorch.utils.helpers import (
@@ -214,19 +215,37 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
 
             train_dataloader, val_dataloader, test_dataloader = kfold.get_fold(fold_idx)
 
-            model = HNN(
-                input_units=train_dataloader.dataset.x_shape()[1],
-                hidden_units=args.hidden_units,
-                output_units=train_dataloader.dataset.y_shape()[1],
-                hidden_layers=args.hidden_layers,
-                activation=args.activation,
-                output_layer=args.output_layer,
-                dropout_rate=args.dropout_rate,
-                linear_output=args.linear_output,
-                use_bias=args.bias,
-                use_bias_output=args.bias_output,
-                weights_method=args.weights_method,
-            ).to(device)
+            if args.model == "resnet_rtdl":
+                model = ResNetRTDL(
+                    input_units=train_dataloader.dataset.x_shape()[1],
+                    hidden_units=args.hidden_units,
+                    output_units=train_dataloader.dataset.y_shape()[1],
+                    num_layers=args.hidden_layers,
+                    activation=args.activation,
+                    output_layer=args.output_layer,
+                    hidden_dropout=args.dropout_rate,
+                    residual_dropout=args.dropout_rate,
+                    linear_output=args.linear_output,
+                    use_bias=args.bias,
+                    use_bias_output=args.bias_output,
+                    weights_method=args.weights_method,
+                    model=args.model,
+                ).to(device)
+            else:
+                model = HNN(
+                    input_units=train_dataloader.dataset.x_shape()[1],
+                    hidden_units=args.hidden_units,
+                    output_units=train_dataloader.dataset.y_shape()[1],
+                    hidden_layers=args.hidden_layers,
+                    activation=args.activation,
+                    output_layer=args.output_layer,
+                    dropout_rate=args.dropout_rate,
+                    linear_output=args.linear_output,
+                    use_bias=args.bias,
+                    use_bias_output=args.bias_output,
+                    weights_method=args.weights_method,
+                    model=args.model,
+                ).to(device)
 
             if fold_idx == 0:
                 _log.info(f"\n{model}")

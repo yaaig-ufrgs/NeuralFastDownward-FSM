@@ -23,7 +23,7 @@ class ResNetRTDL(nn.Module):
         weights_method: str,
         model: str,
     ):
-        super(HNN, self).__init__()
+        super(ResNetRTDL, self).__init__()
         self.input_units = input_units
         self.hidden_units = hidden_units
         self.output_units = output_units
