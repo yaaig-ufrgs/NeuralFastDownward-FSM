@@ -218,7 +218,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
             if args.model == "resnet_rtdl":
                 model = ResNetRTDL(
                     input_units=train_dataloader.dataset.x_shape()[1],
-                    hidden_units=args.hidden_units,
+                    hidden_units=args.hidden_units[0],
                     output_units=train_dataloader.dataset.y_shape()[1],
                     num_layers=args.hidden_layers,
                     activation=args.activation,
