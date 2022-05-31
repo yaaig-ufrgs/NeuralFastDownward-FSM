@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "samples": "small_tests/samples/transportunit-100pct-bfsrw-propeff-unitcost-hstar",
+        "samples": "small_tests/samples/transportunit-100pct-bfsrw-propeff-hstar",
         "exp-type": "all",
         "exp-net-seed": "0..4",
         "exp-sample-seed": "0..4",
@@ -33,7 +33,7 @@
     "train": {
         "model": "resnet",
         "training-size": 0.9,
-        "output-folder": "small_tests/results/transportunit-100pct-bfsrw-propeff-unitcost-hstar",
+        "output-folder": "small_tests/results/transportunit-100pct-bfsrw-propeff-hstar",
         "restart-no-conv": "yes",
         "hidden-layers": 2,
         "hidden-units": 250,
