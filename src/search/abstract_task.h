@@ -110,8 +110,6 @@ public:
     std::string get_sas() const;
 
     virtual bool is_undefined(const FactPair &fact) const = 0;
-
-    int estimated_heuristic = -1;
 };
 
 #endif
