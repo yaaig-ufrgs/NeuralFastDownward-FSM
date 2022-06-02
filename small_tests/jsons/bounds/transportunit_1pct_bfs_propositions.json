@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "samples": "small_tests/samples/transportunit-1pct-bfsrw-prop",
+        "samples": "small_tests/samples/transportunit-1pct-bfs-prop",
         "exp-type": "all",
         "exp-net-seed": "0..4",
         "exp-sample-seed": "0..4",
@@ -14,8 +14,7 @@
     "sampling": {
         "instance": "tasks/experiments/transport",
         "method": "yaaig",
-        "technique": "bfs_rw",
-        "subtechnique": "percentage",
+        "technique": "bfs",
         "state-representation": "fs",
         "max-samples": 6376,
         "seed": "0..4",
@@ -32,7 +31,7 @@
     "train": {
         "model": "resnet",
         "training-size": 0.9,
-        "output-folder": "small_tests/results/transportunit-1pct-bfsrw-prop",
+        "output-folder": "small_tests/results/transportunit-1pct-bfs-prop",
         "restart-no-conv": "yes",
         "hidden-layers": 2,
         "hidden-units": 250,

@@ -1,0 +1,56 @@
+{
+    "experiment": {
+        "samples": "small_tests/samples/npuzzle-1pct-dfs-diameter",
+        "exp-type": "all",
+        "exp-net-seed": "0..4",
+        "exp-sample-seed": "0..4",
+        "exp-threads": 11,
+        "exp-only-sampling": "no",
+        "exp-only-train": "no",
+        "exp-only-test": "no",
+        "exp-only-eval": "no",
+        "trained-model": ""
+    },
+    "sampling": {
+        "instance": "tasks/experiments/npuzzle",
+        "method": "yaaig",
+        "technique": "dfs",
+        "state-representation": "fs",
+        "max-samples": 1814,
+        "seed": "0..4",
+        "allow-dups": "interrollout",
+        "restart-h-when-goal-state": "yes",
+        "minimization": "both",
+        "avi-k": 1,
+        "statespace": "tasks/experiments/statespaces/statespace_npuzzle_prob-n3-1_hstar",
+        "bound": "state_space_diameter",
+        "state-filtering": "mutex",
+        "bfs-percentage": 10
+    },
+    "train": {
+        "model": "resnet",
+        "training-size": 0.9,
+        "output-folder": "small_tests/results/npuzzle-1pct-dfs-diameter",
+        "restart-no-conv": "yes",
+        "hidden-layers": 2,
+        "hidden-units": 250,
+        "batch-size": 64,
+        "patience": 100,
+        "activation": "relu",
+        "loss-function": "mse",
+        "weights-method": "kaiming_uniform",
+        "shuffle": "yes",
+        "bias": "yes",
+        "learning-rate": 0.0001,
+        "normalize-output": "no",
+        "use-gpu": "no",
+        "scatter-plot": "no",
+        "output-layer": "regression",
+        "sample-percentage": 1.0,
+        "max-epochs": 11408
+    },
+    "test": {
+        "max-expansions": 181442,
+        "search-algorithm": "eager_greedy"
+    }
+}

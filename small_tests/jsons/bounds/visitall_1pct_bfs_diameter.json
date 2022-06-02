@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "samples": "small_tests/samples/visitall-1pct-bfsrw-diameter",
+        "samples": "small_tests/samples/visitall-1pct-bfs-diameter",
         "exp-type": "all",
         "exp-net-seed": "0..4",
         "exp-sample-seed": "0..4",
@@ -14,8 +14,7 @@
     "sampling": {
         "instance": "tasks/experiments/visitall",
         "method": "yaaig",
-        "technique": "bfs_rw",
-        "subtechnique": "percentage",
+        "technique": "bfs",
         "state-representation": "fs",
         "max-samples": 1255,
         "seed": "0..4",
@@ -31,7 +30,7 @@
     "train": {
         "model": "resnet",
         "training-size": 0.9,
-        "output-folder": "small_tests/results/visitall-1pct-bfsrw-diameter",
+        "output-folder": "small_tests/results/visitall-1pct-bfs-diameter",
         "restart-no-conv": "yes",
         "hidden-layers": 2,
         "hidden-units": 250,
