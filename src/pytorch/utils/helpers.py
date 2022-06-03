@@ -150,6 +150,8 @@ def get_problem_by_sample_filename(sample_filename: str, train_folder: str = Non
             data = load(f)
             assert domain == data["domain"]
             assert problem == data["problem"]
+    if domain.endswith("unit"):
+        domain = domain[:-len("unit")]
     return domain, problem
 
 

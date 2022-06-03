@@ -13,9 +13,16 @@ import os
 from glob import glob
 from src.pytorch.utils.parse_args import get_exp_args
 import src.pytorch.utils.default_args as default_args
-
+from sys import argv
 
 PID = 0
+
+def has_flag_prefix(prefix: str) -> bool:
+    for arg in argv[1:]:
+        if arg.startswith(prefix):
+            return True
+    return False
+
 
 def filter_samples(samples: [str], seed: int) -> [str]:
     filtered_samples = []
@@ -34,6 +41,9 @@ def run_train_test(args, sample_seed: int, net_seed: int):
     sample_files = filter_samples(sample_files, sample_seed)
 
     for sample in sample_files:
+        args.exp_only_train |= not has_flag_prefix("-tst-") and not has_flag_prefix("--test-")
+        args.exp_only_test |= not has_flag_prefix("-trn-") and not has_flag_prefix("--train-")
+
         sample_name = sample.split("/")[-1]
         trained_model_dir = f"{args.train_output_folder}/nfd_train.{sample_name}.ns{net_seed}" if not args.exp_only_test else f"{args.test_model_dir}/nfd_train.{sample_name}.ns{net_seed}"
 
@@ -91,7 +101,7 @@ def run_train_test(args, sample_seed: int, net_seed: int):
             cmd = cmd.replace("tsp", f"tsp -D {pdep}")
 
         os.system(cmd)
-        # print(cmd + "\n")
+        print("run_experiment.py:", cmd, end="\n\n")
 
         PID += 1
 

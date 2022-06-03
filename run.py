@@ -108,38 +108,38 @@ def main(exp_paths: [str]):
             test = full_exp["test"] if "test" in full_exp else None
             evalu = full_exp["eval"] if "eval" in full_exp else None
             sampling = full_exp["sampling"] if "sampling" in full_exp else None
-            if sampling is not None:
+            if sampling:
                 sampling["threads"] = exp["exp-threads"]
                 sampling["output-dir"] = exp["samples"]
-            if train is not None and test is not None:
+            if train and test:
                 test["model-dir"] = train["output-folder"]
                 if "save-git-diff" in train:
                     test["save-git-diff"] = train["save-git-diff"]
 
             only_sampling = str2bool(exp["exp-only-sampling"])
             only_train = str2bool(exp["exp-only-train"])
-            only_test = str2bool(exp["exp-only-test"])
+            only_test = True #str2bool(exp["exp-only-test"])
             only_eval = str2bool(exp["exp-only-eval"])
 
-            mod_sample = "default" if "modify-sample" not in exp else exp["modify-sample"]
-            if mod_sample != "default":
-                if type(exp['exp-sample-seed']) == str and ".." in exp['exp-sample-seed']:
-                    min_seed, max_seed = [int(n) for n in exp['exp-sample-seed'].split('..')]
+            if sampling and not any([only_train, only_test, only_eval]):
+                mod_sample = "default" if "modify-sample" not in exp else exp["modify-sample"]
+                if mod_sample == "default":
+                    args = "./fast_sample.py"
+                    args += build_args(sampling, "--")
+                    print("run.py [sampling]:", args, end="\n\n")
+                    os.system(args)
+
+                    time.sleep(2)
+                    wait(10, exp_path)
+
+                    remove_leftover_files(exp["samples"])
                 else:
-                    min_seed = int(exp['exp-sample-seed'])
-                    max_seed = min_seed
-                do_sample_mod(mod_sample, exp["samples"], sampling["statespace"], min_seed, max_seed)
-
-            if sampling and not any([only_train, only_test, only_eval]) and mod_sample == "default":
-                args = "./fast_sample.py"
-                args += build_args(sampling, "--")
-                print(args, end="\n\n")
-                os.system(args)
-
-                time.sleep(2)
-                wait(10, exp_path)
-
-                remove_leftover_files(exp["samples"])
+                    if type(exp['exp-sample-seed']) == str and ".." in exp['exp-sample-seed']:
+                        min_seed, max_seed = [int(n) for n in exp['exp-sample-seed'].split('..')]
+                    else:
+                        min_seed = int(exp['exp-sample-seed'])
+                        max_seed = min_seed
+                    do_sample_mod(mod_sample, exp["samples"], sampling["statespace"], min_seed, max_seed)
 
             if not only_sampling:
                 args = "./run_experiment.py"
@@ -151,7 +151,7 @@ def main(exp_paths: [str]):
                         args += build_args(train, "--train-")
                     if test and not only_train:
                         args += build_args(test, "--test-")
-                print(args, end="\n\n")
+                print("run.py [train/test]:", args, end="\n\n")
                 os.system(args)
 
                 time.sleep(2)
