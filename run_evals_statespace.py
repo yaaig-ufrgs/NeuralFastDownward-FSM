@@ -21,15 +21,15 @@ up_else = 0
 os.system(f"tsp -K")
 os.system(f"tsp -S {THREADS}")
 
-statespaces_dict = {'blocks': "../NeuralFastDownward-results/resnets/experiments/blocks/samples/statespace/statespace_blocks_probBLOCKS-7-0_hstar",
-                    'npuzzle': "../NeuralFastDownward-results/resnets/experiments/npuzzle/samples/statespace/statespace_npuzzle_prob-n3-1_hstar",
-                    'visitall': "../NeuralFastDownward-results/resnets/experiments/visitall-opt14-strips/samples/statespace/statespace_visitall-opt14-strips_p-1-4_hstar",
-                    'grid': "../NeuralFastDownward-results/resnets/experiments/grid/samples/statespace/statespace_grid_grid_hstar",
-                    'rovers': "../NeuralFastDownward-results/resnets/experiments/rovers/samples/statespace/statespace_rovers_rovers_hstar",
-                    'transport': "../NeuralFastDownward-results/resnets/experiments/transport/samples/statespace/statespace_transport_transport_hstar",
-                    'transport-unitcost': "../NeuralFastDownward-results/resnets/experiments/transport/samples/statespace/statespace_transport_transport_hstar_unitcost",
-                    'scanalyzer': "../NeuralFastDownward-results/resnets/experiments/scanalyzer/samples/statespace/statespace_scanalyzer_scanalyzer_hstar",
-                    'scanalyzer-unitcost': "../NeuralFastDownward-results/resnets/experiments/scanalyzer/samples/statespace/statespace_scanalyzer_scanalyzer_hstar_unitcost"
+statespaces_dict = {'blocks': "tasks/experiments/statespaces/statespace_blocks_probBLOCKS-7-0_hstar",
+                    'npuzzle': "tasks/experiments/statespaces/statespace_npuzzle_prob-n3-1_hstar",
+                    'visitall': "tasks/experiments/statespaces/statespace_visitall-opt14-strips_p-1-4_hstar",
+                    'grid': "tasks/experiments/statespaces/statespace_grid_grid_hstar",
+                    'rovers': "tasks/experiments/statespaces/statespace_rovers_rovers_hstar",
+                    'transport': "tasks/experiments/statespaces/statespace_transport_transport_hstar",
+                    'transportunit': "tasks/experiments/statespaces/statespace_transportunit_transport_hstar",
+                    'scanalyzer': "tasks/experiments/statespaces/statespace_scanalyzer_scanalyzer_hstar",
+                    'scanalyzerunit': "tasks/experiments/statespaces/statespace_scanalyzerunit_scanalyzer_hstar"
                     }
 
 models = []
@@ -40,7 +40,7 @@ for model in models:
     model_name = model.split('/')[-3]
     domain_name = model_name.split('_')[2]
     if "unit" in model:
-        domain_name += "-unitcost"
+        domain_name += "unit"
     if "visitall-opt14-strips" in domain_name:
         domain_name = "visitall"
     statespace = statespaces_dict[domain_name]
