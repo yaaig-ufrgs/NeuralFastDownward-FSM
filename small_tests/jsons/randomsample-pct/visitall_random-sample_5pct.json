@@ -13,7 +13,7 @@
         "modify-sample": "random-sample"
     },
     "sampling": {
-        "statespace": "tasks/experiments/statespaces/statespace_visitall-opt14-strips_p-1-4_hstar",
+        "statespace": "tasks/experiments/statespaces/statespace_visitall_p-1-4_hstar",
         "seed": "0..4",
         "max-samples": 6274
     },
