@@ -118,7 +118,7 @@ def main(exp_paths: [str]):
 
             only_sampling = str2bool(exp["exp-only-sampling"])
             only_train = str2bool(exp["exp-only-train"])
-            only_test = True #str2bool(exp["exp-only-test"])
+            only_test = str2bool(exp["exp-only-test"])
             only_eval = str2bool(exp["exp-only-eval"])
 
             if sampling and not any([only_train, only_test, only_eval]):
