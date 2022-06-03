@@ -145,13 +145,13 @@ def add_train_arg(dirname: str, key, value):
 
 def get_problem_by_sample_filename(sample_filename: str, train_folder: str = None) -> (str, str):
     domain, problem = sample_filename.split("/")[-1].split("_")[1:3]
+    if domain.endswith("unit"):
+        domain = domain[:-len("unit")]
     if train_folder:
         with open(f"{train_folder}/train_args.json") as f:
             data = load(f)
             assert domain == data["domain"]
             assert problem == data["problem"]
-    if domain.endswith("unit"):
-        domain = domain[:-len("unit")]
     return domain, problem
 
 
