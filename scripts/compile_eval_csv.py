@@ -33,6 +33,7 @@ writer_avg = csv.writer(f_avg)
 writer_avg.writerow("domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,percentage,num_samples,num_samples_statespace,misses,mean_rmse_loss,max_rmse_loss".split(','))
 
 for result in argv[1:]:
+    print(result)
     train_args = {}
     with open(f"{result}/train_args.json") as json_file:
         train_args = json.load(json_file)
@@ -45,6 +46,10 @@ for result in argv[1:]:
     experiment = "NA"
     sampling_algorithm = "NA"
     bound = "NA"
+    if "bfs" in sample_used:
+        sampling_algorithm = "bfs"
+    if "dfs" in sample_used:
+        sampling_algorithm = "dfs"
     if "bfsrw" in sample_used:
         sampling_algorithm = "bfs_rw"
     if "_rw" in sample_used or "baseline" in result or "tech-rw" in sample_used or "-rw-" in result:
@@ -63,6 +68,8 @@ for result in argv[1:]:
         bound = "propositions-eff"
     if "baseline" in result:
         bound = "default"
+    if "diameter" in result:
+        bound = "diameter"
     if not used_avi:
         experiment = "no_avi"
     if not used_min:
@@ -94,7 +101,6 @@ for result in argv[1:]:
     if "100pct" in sample_used:
         percentage = 1.0
 
-    """
     statespace_file = glob(f"{result}/statespace*")
     if len(statespace_file) == 0:
         continue
@@ -122,7 +128,6 @@ for result in argv[1:]:
             curr.append(row["rmse"])
             #print(f"{','.join(curr)}")
             writer_all.writerow(curr)
-    """
 
     eval_results_file = glob(f"{result}/eval_results.csv")
     if len(eval_results_file) == 0:
