@@ -5,7 +5,7 @@
         "exp-net-seed": "0..4",
         "exp-sample-seed": "0..4",
         "exp-threads": 11,
-        "exp-only-sampling": "yes",
+        "exp-only-sampling": "no",
         "exp-only-train": "no",
         "exp-only-test": "no",
         "exp-only-eval": "no",
@@ -15,7 +15,8 @@
     "sampling": {
         "statespace": "tasks/experiments/statespaces/statespace_transportunit_transport_hstar",
         "seed": "0..4",
-        "max-samples": 159408
+        "max-samples": 159408,
+        "sample-unit-cost": "yes"
     },
     "train": {
         "model": "resnet",
@@ -41,6 +42,7 @@
     },
     "test": {
         "max-expansions": 637633,
-        "search-algorithm": "eager_greedy"
+        "search-algorithm": "eager_greedy",
+        "unit-cost": "yes"
     }
 }
