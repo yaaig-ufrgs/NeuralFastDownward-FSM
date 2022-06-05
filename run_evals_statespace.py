@@ -23,7 +23,7 @@ os.system(f"tsp -S {THREADS}")
 
 statespaces_dict = {'blocks': "tasks/experiments/statespaces/statespace_blocks_probBLOCKS-7-0_hstar",
                     'npuzzle': "tasks/experiments/statespaces/statespace_npuzzle_prob-n3-1_hstar",
-                    'visitall': "tasks/experiments/statespaces/statespace_visitall-opt14-strips_p-1-4_hstar",
+                    'visitall': "tasks/experiments/statespaces/statespace_visitall_p-1-4_hstar",
                     'grid': "tasks/experiments/statespaces/statespace_grid_grid_hstar",
                     'rovers': "tasks/experiments/statespaces/statespace_rovers_rovers_hstar",
                     'transport': "tasks/experiments/statespaces/statespace_transport_transport_hstar",
