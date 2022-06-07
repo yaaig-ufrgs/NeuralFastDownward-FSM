@@ -133,7 +133,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
                 pa_.states_to_goal = 0;
             } else {
                 pa_.estimated_heuristic = pa.estimated_heuristic + (unit_cost ? 1 : ops[applied_op].get_cost());
-                pa_.states_to_goal++;
+                pa_.states_to_goal = pa.states_to_goal + 1;
             }
 
             ht_pointer->insert(pa_);
@@ -217,7 +217,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
                     pa_.states_to_goal = 0;
                 } else {
                     pa_.estimated_heuristic = pa.estimated_heuristic + (unit_cost ? 1 : ops[applied_op].get_cost());
-                    pa_.states_to_goal++;
+                    pa_.states_to_goal = pa.states_to_goal + 1;
                 }
 
                 if (pa_.states_to_goal <= depth_k) {
@@ -281,7 +281,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
                         s_.states_to_goal = 0;
                     } else {
                         s_.estimated_heuristic = s.estimated_heuristic + (unit_cost ? 1 : ops[applied_op].get_cost());
-                        s_.states_to_goal++;
+                        s_.states_to_goal = s.states_to_goal + 1;
                     }
 
                     succ_s.push_back(s_);
@@ -410,7 +410,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         samples_per_search = ceil(bound_multiplier * bound_n);
     else if (technique == "dfs" || technique == "bfs")
         depth_k = ceil(bound_multiplier * bound_n);
-
 
     if (technique == "rw") {
         samples = sample_with_random_walk(pa, samples_per_search, is_valid_state, func_bias, task_proxy);
