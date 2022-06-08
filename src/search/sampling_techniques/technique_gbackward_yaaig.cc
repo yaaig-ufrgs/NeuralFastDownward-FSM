@@ -406,10 +406,13 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     if (!(bound_n > 0)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:380" << endl; exit(0); }
     bound_value = bound_n;
 
-    if (technique == "rw" || technique == "bfs_rw" || technique == "dfs_rw")
+    if (technique == "rw" || technique == "bfs_rw" || technique == "dfs_rw") {
         samples_per_search = ceil(bound_multiplier * bound_n);
-    else if (technique == "dfs" || technique == "bfs")
+        utils::g_log << "Depth limit: " << samples_per_search << endl;
+    } else if (technique == "dfs" || technique == "bfs") {
         depth_k = ceil(bound_multiplier * bound_n);
+        utils::g_log << "Depth limit: " << depth_k << endl;
+    }
 
     if (technique == "rw") {
         samples = sample_with_random_walk(pa, samples_per_search, is_valid_state, func_bias, task_proxy);
