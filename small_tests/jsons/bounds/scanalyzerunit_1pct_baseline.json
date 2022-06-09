@@ -25,7 +25,7 @@
         "avi-k": 0,
         "sample-unit-cost": "yes",
         "state-filtering": "mutex",
-        "bound": "default"
+        "bound": 200
     },
     "train": {
         "model": "resnet",

@@ -24,7 +24,7 @@
         "minimization": "both",
         "statespace": "tasks/experiments/statespaces/statespace_rovers_rovers_hstar",
         "avi-k": 1,
-        "bound": "default",
+        "bound": 200,
         "state-filtering": "mutex",
         "bfs-percentage": 10
     },

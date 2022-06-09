@@ -24,7 +24,7 @@
         "avi-k": 0,
         "statespace": "tasks/experiments/statespaces/statespace_npuzzle_prob-n3-1_hstar",
         "state-filtering": "mutex",
-        "bound": "default"
+        "bound": 200
     },
     "train": {
         "model": "resnet",

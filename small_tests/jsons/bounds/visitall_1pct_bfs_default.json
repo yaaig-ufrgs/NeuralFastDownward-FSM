@@ -23,7 +23,7 @@
         "minimization": "both",
         "avi-k": 1,
         "statespace": "tasks/experiments/statespaces/statespace_visitall_p-1-4_hstar",
-        "bound": "default",
+        "bound": 200,
         "state-filtering": "mutex",
         "bfs-percentage": 10
     },

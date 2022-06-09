@@ -24,7 +24,7 @@
         "statespace": "tasks/experiments/statespaces/statespace_rovers_rovers_hstar",
         "avi-k": 0,
         "state-filtering": "mutex",
-        "bound": "default"
+        "bound": 200
     },
     "train": {
         "model": "resnet",

@@ -23,7 +23,7 @@
         "minimization": "both",
         "avi-k": 1,
         "statespace": "tasks/experiments/statespaces/statespace_npuzzle_prob-n3-1_hstar",
-        "bound": "default",
+        "bound": 200,
         "state-filtering": "mutex"
     },
     "train": {
