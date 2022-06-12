@@ -60,7 +60,7 @@ for result in argv[1:]:
         used_min = True
     if "_min-none" in sample_used:
         used_min = False
-    if "bnd-def" in sample_used:
+    if "bnd-def" in sample_used or "bnd-200" in sample_used:
         bound = "default"
     if "bnd-props" in sample_used or "propositions" in result:
         bound = "propositions"
