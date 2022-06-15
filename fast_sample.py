@@ -90,12 +90,20 @@ def yaaig_ferber(args, meth):
         args.bound = max(get_hstar_tasks("scripts", test_tasks))
         assert(args.bound > 0)
     elif args.bound == "state_space_diameter":
+        # expected state-space filename: statespace_transportunit_transport_hstar
         assert args.statespace
+        statespace_unit = args.statespace.split("_")
+        statespace_unit[-3] += "unit"
+        statespace_unit = "_".join(statespace_unit)
+        statespace_bound_file = args.statespace if not os.path.exists(statespace_unit) else statespace_unit
+        assert statespace_bound_file
         max_h = 0
-        with open(args.statespace, "r") as ss_file:
+        with open(statespace_bound_file, "r") as ss_file:
             for h, _ in [l.split(";") for l in ss_file.readlines() if not l.startswith("#")]:
                 max_h = max(max_h, int(h))
         args.bound = max_h
+        print(statespace_bound_file, args.bound)
+        exit(2)
 
     state_repr = get_full_state_repr_name(args.state_representation)
     instances = [args.instance] if args.instance.endswith(".pddl") else glob(f"{args.instance}/*.pddl")
