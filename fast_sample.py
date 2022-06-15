@@ -102,8 +102,6 @@ def yaaig_ferber(args, meth):
             for h, _ in [l.split(";") for l in ss_file.readlines() if not l.startswith("#")]:
                 max_h = max(max_h, int(h))
         args.bound = max_h
-        print(statespace_bound_file, args.bound)
-        exit(2)
 
     state_repr = get_full_state_repr_name(args.state_representation)
     instances = [args.instance] if args.instance.endswith(".pddl") else glob(f"{args.instance}/*.pddl")
