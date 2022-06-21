@@ -142,7 +142,7 @@ def save_pred_error_bar_eval(data: list, directory: str, data_type: str):
     #ax.set_xlim(low_x-5, high_x+5)
     ax.set_ylim(low_y, high_y+5)
 
-    ax.set_xlabel("abs(y-pred) error")
+    ax.set_xlabel("y-pred")
     ax.set_ylabel("count")
     hl = round(len(plot_title) / 2)
     #ax.set_title(data_type + "_" + + plot_title[:hl] + "\n" + plot_title[hl:], fontsize=9)

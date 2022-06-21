@@ -14,6 +14,7 @@ import torch.nn as nn
 from random import randint
 from argparse import Namespace
 from glob import glob
+from sklearn.metrics import mean_squared_error
 from torch.utils.data import DataLoader
 from src.pytorch.log import setup_full_logging
 from src.pytorch.k_fold_training_data import KFoldTrainingData
@@ -74,7 +75,7 @@ def eval_main(args: Namespace):
 
     f_results = open(eval_results_path, "a")
     if len(prefix) == 0:
-        f_results.write("sample,num_samples,misses,max_rounded_abs_error,mean_rounded_abs_error,min_rmse_loss,min_rmse_loss_no_goal,mean_rmse_loss,max_rmse_loss,time\n")
+        f_results.write("sample,num_samples,misses,min_rmse_loss,min_rmse_loss_no_goal,mean_rmse_loss,max_rmse_loss,time\n")
     else:
         f_results.write("domain,instance,sample_seed,network_seed,sample,num_samples,misses,mean_rmse_loss,max_rmse_loss\n")
 
@@ -122,8 +123,6 @@ def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data
         y_pred_loss,
         num_samples,
         misses,
-        max_abs_error,
-        mean_abs_error,
         min_loss,
         min_loss_no_goal,
         mean_loss,
@@ -135,8 +134,6 @@ def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data
     _log.info(f"Results for {data_type} dataset:")
     _log.info(f"| num_samples: {num_samples}")
     _log.info(f"| rounded_misses: {misses}")
-    _log.info(f"| max_rounded_abs_error: {max_abs_error}")
-    _log.info(f"| mean_rounded_abs_error: {mean_abs_error}")
     _log.info(f"| min_rmse_loss: {min_loss}")
     _log.info(f"| min_rmse_loss_no_goal: {min_loss_no_goal}")
     _log.info(f"| mean_rmse_loss: {mean_loss}")
@@ -158,7 +155,7 @@ def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data
         #f_results.write(
         #    f"{data_type},,,,,,,,,\n"
         #)
-        to_write = f"{data_name},{num_samples},{misses},{max_abs_error},{mean_abs_error},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{round(curr_time,4)}\n" if len(prefix) == 0 else f"{prefix[0]},{prefix[1]},{prefix[2]},{prefix[3]},{data_name},{num_samples},{misses},{mean_loss},{max_loss}\n"
+        to_write = f"{data_name},{num_samples},{misses},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{round(curr_time,4)}\n" if len(prefix) == 0 else f"{prefix[0]},{prefix[1]},{prefix[2]},{prefix[3]},{data_name},{num_samples},{misses},{mean_loss},{max_loss}\n"
 
         f_results.write(to_write)
         _log.info(f"Saved results to a CSV file.")
@@ -171,16 +168,7 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
     min_loss = float("inf")
     min_loss_no_goal = float("inf")
     eval_y_pred = []  # [[state, y, pred, abs_error, loss], ...]
-    eval_abs_error = 0
-    max_abs_error = 0
     misses = 0
-
-    # Observation: RMSE and "abssolute error" here are virtually the same, except the RMSE is comparing y
-    # directly with the floating-point output (prediction) of the trained model, while the "abs error"
-    # is comparing y with the rounded (integer) prediction of the trained model.
-    # This distinction is made because during search, the output of the network is rounded; therefore, while the
-    # difference between the absolute error and RMSE here are minimum, the former directly reflects the output
-    # of the network during search.
 
     state_count = 1
     with torch.no_grad():
@@ -188,18 +176,13 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
             X, y = item[0], item[1]
             # w = item[2]
             pred = model(X.float())
-            loss = loss_fn(pred, y).item()
+            # We round the values here because we do not actually use floating-point heuristics during search.
+            loss = loss_fn(torch.round(pred), torch.round(y)).item()
 
             rounded_y = int(torch.round(y[0]))
             rounded_pred = int(torch.round(pred[0]))
             if rounded_y != rounded_pred:
                 misses += 1
-
-            abs_error = abs(rounded_y - rounded_pred)
-            if abs_error > max_abs_error:
-                max_abs_error = abs_error
-            eval_abs_error += abs_error
-
             if loss > max_loss:
                 max_loss = loss
             if loss < min_loss:
@@ -215,22 +198,18 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
             if log_states:
                 _log.info(f"| state: {x_str}")
                 _log.info(
-                    f"| y: {float(y[0])} | pred: {float(pred[0])} | rmse_loss: {loss} | abs_error_round: {abs_error}"
+                    f"| y: {float(y[0])} | pred: {float(pred[0])} | rmse_loss: {loss}"
                 )
 
-            eval_y_pred.append([x_str, state_count, float(y[0]), round(float(pred[0]), 4), abs_error, round(loss, 4)])
-            #eval_y_pred.append([x_str, float(y[0]), round(float(pred[0]), 4), round(loss, 4)])
+            eval_y_pred.append([x_str, state_count, float(y[0]), round(float(pred[0]), 4), round(loss, 4)])
             state_count += 1
 
     mean_loss = eval_loss / len(dataloader)
-    mean_abs_error = eval_abs_error / len(dataloader)
 
     return (
         eval_y_pred,
         len(dataloader),
         misses,
-        round(max_abs_error, 4),
-        round(mean_abs_error, 4),
         round(min_loss, 4),
         round(min_loss_no_goal, 4),
         round(mean_loss, 4),
