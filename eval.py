@@ -75,9 +75,9 @@ def eval_main(args: Namespace):
 
     f_results = open(eval_results_path, "a")
     if len(prefix) == 0:
-        f_results.write("sample,num_samples,misses,min_rmse_loss,min_rmse_loss_no_goal,mean_rmse_loss,max_rmse_loss,time\n")
+        f_results.write("sample,num_samples,misses,min_loss,min_loss_no_goal,mean_loss,max_loss,rmse,time\n")
     else:
-        f_results.write("domain,instance,sample_seed,network_seed,sample,num_samples,misses,mean_rmse_loss,max_rmse_loss\n")
+        f_results.write("domain,instance,sample_seed,network_seed,sample,num_samples,misses,mean_loss,max_loss,rmse\n")
 
     model = torch.jit.load(args.trained_model)
     model.eval()
@@ -127,17 +127,19 @@ def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data
         min_loss_no_goal,
         mean_loss,
         max_loss,
+        rmse,
     ) = eval_model(model, dataloader, log_states)
 
     curr_time = eval_timer.current_time()
 
-    _log.info(f"Results for {data_type} dataset:")
+    _log.info(f"Results for {data_type} dataset with RMSE loss:")
     _log.info(f"| num_samples: {num_samples}")
     _log.info(f"| rounded_misses: {misses}")
-    _log.info(f"| min_rmse_loss: {min_loss}")
-    _log.info(f"| min_rmse_loss_no_goal: {min_loss_no_goal}")
-    _log.info(f"| mean_rmse_loss: {mean_loss}")
-    _log.info(f"| max_rmse_loss: {max_loss}")
+    _log.info(f"| min_loss: {min_loss}")
+    _log.info(f"| min_loss_no_goal: {min_loss_no_goal}")
+    _log.info(f"| mean_loss: {mean_loss}")
+    _log.info(f"| max_loss: {max_loss}")
+    _log.info(f"| rmse: {rmse}")
     _log.info(f"| elapsed time: {curr_time}")
 
     if save_preds:
@@ -155,7 +157,7 @@ def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data
         #f_results.write(
         #    f"{data_type},,,,,,,,,\n"
         #)
-        to_write = f"{data_name},{num_samples},{misses},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{round(curr_time,4)}\n" if len(prefix) == 0 else f"{prefix[0]},{prefix[1]},{prefix[2]},{prefix[3]},{data_name},{num_samples},{misses},{mean_loss},{max_loss}\n"
+        to_write = f"{data_name},{num_samples},{misses},{min_loss},{min_loss_no_goal},{mean_loss},{max_loss},{rmse},{round(curr_time,4)}\n" if len(prefix) == 0 else f"{prefix[0]},{prefix[1]},{prefix[2]},{prefix[3]},{data_name},{num_samples},{misses},{mean_loss},{max_loss},{rmse}\n"
 
         f_results.write(to_write)
         _log.info(f"Saved results to a CSV file.")
@@ -168,6 +170,8 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
     min_loss = float("inf")
     min_loss_no_goal = float("inf")
     eval_y_pred = []  # [[state, y, pred, abs_error, loss], ...]
+    y_true = []
+    y_pred = []
     misses = 0
 
     state_count = 1
@@ -181,6 +185,8 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
 
             rounded_y = int(torch.round(y[0]))
             rounded_pred = int(torch.round(pred[0]))
+            y_true.append(rounded_y)
+            y_pred.append(rounded_pred)
             if rounded_y != rounded_pred:
                 misses += 1
             if loss > max_loss:
@@ -198,13 +204,14 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
             if log_states:
                 _log.info(f"| state: {x_str}")
                 _log.info(
-                    f"| y: {float(y[0])} | pred: {float(pred[0])} | rmse_loss: {loss}"
+                    f"| y: {float(y[0])} | pred: {float(pred[0])} | error: {loss}"
                 )
 
             eval_y_pred.append([x_str, state_count, float(y[0]), round(float(pred[0]), 4), round(loss, 4)])
             state_count += 1
 
     mean_loss = eval_loss / len(dataloader)
+    rmse = mean_squared_error(y_true, y_pred, squared=False)
 
     return (
         eval_y_pred,
@@ -214,6 +221,7 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
         round(min_loss_no_goal, 4),
         round(mean_loss, 4),
         round(max_loss, 4),
+        round(rmse, 4),
     )
 
 

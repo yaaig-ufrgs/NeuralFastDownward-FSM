@@ -131,16 +131,14 @@ def save_y_pred_loss_csv(data: list, csv_filename: str, prefix: list = [], suffi
     Saves the {state: (value, predicted_value, rounded_abs_error, loss)} set to a CSV file.
     """
     with open(csv_filename, "w") as f:
-        #f.write("state,y,pred,rounded_abs_error,rmse\n")
         if len(prefix) == 0:
-            f.write("state,y,pred,rmse\n")
+            f.write("state,y,pred,error\n")
             for d in data:
-                #f.write("%s,%s,%s,%s,%s\n" % (d[0], d[1], d[2], d[3], d[4]))
-                f.write("%s,%s,%s,%s\n" % (d[0], d[2], d[3], d[5]))
+                f.write("%s,%s,%s,%s\n" % (d[0], d[2], d[3], d[4]))
         else:
-            f.write("domain,instance,sample_seed,network_seed,state,y,pred,rmse\n")
+            f.write("domain,instance,sample_seed,network_seed,state,y,pred,error\n")
             for d in data:
-                f.write("%s,%s,%s,%s,%s,%s,%s,%s\n" % (prefix[0], prefix[1], prefix[2], prefix[3], d[1], round(d[2]), round(d[3]), d[5]))
+                f.write("%s,%s,%s,%s,%s,%s,%s,%s\n" % (prefix[0], prefix[1], prefix[2], prefix[3], d[1], round(d[2]), round(d[3]), d[4]))
 
 
 def remove_csv_except_best(directory: str, fold_idx: int):
