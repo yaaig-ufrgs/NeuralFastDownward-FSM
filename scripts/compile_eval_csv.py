@@ -12,6 +12,7 @@ import time
 import json
 from sys import argv
 from glob import glob
+from statistics import mean, pstdev
 
 num_samples_dict = {
     "transport": 637632,
@@ -25,12 +26,16 @@ num_samples_dict = {
     "transport_unitcost": 637632,
 }
 
+all_csv = glob(f"{argv[1]}/*/*/eval_results.csv")
 f_all = open('statespace_hnn_all.csv', 'w')
 writer_all = csv.writer(f_all)
-writer_all.writerow("domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,pecentage,num_samples,num_samples_statespace,state,hstar,hnn,rmse".split(','))
+writer_all.writerow("domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,pecentage,num_samples,num_samples_statespace,state,hstar,hnn,error".split(','))
+
 f_avg = open('statespace_hnn_avg.csv', 'w')
 writer_avg = csv.writer(f_avg)
-writer_avg.writerow("domain,sampling_algorithm,preprocessing_method,bound,sample_seed,network_seed,percentage,num_samples,num_samples_statespace,misses,mean_rmse_loss,max_rmse_loss".split(','))
+writer_avg.writerow("domain,sampling_algorithm,preprocessing_method,bound,percentage,num_samples,num_samples_statespace,mean_misses,mean_loss,pstdev_loss,max_loss,mean_rmse,pstdev_rmse".split(','))
+
+d = {}
 
 for result in argv[1:]:
     print(result)
@@ -63,9 +68,9 @@ for result in argv[1:]:
     if "bnd-def" in sample_used or "bnd-200" in sample_used:
         bound = "default"
     if "bnd-props" in sample_used or "propositions" in result:
-        bound = "propositions"
+        bound = "prop"
     if "bnd-propseff" in sample_used or "propositions-eff" in result:
-        bound = "propositions-eff"
+        bound = "propeff"
     if "baseline" in result:
         bound = "default"
     if "diameter" in result:
@@ -103,7 +108,8 @@ for result in argv[1:]:
 
     statespace_file = glob(f"{result}/statespace*")
     if len(statespace_file) == 0:
-        continue
+        print("ERROR")
+        exit(1)
     with open(statespace_file[0]) as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -125,13 +131,14 @@ for result in argv[1:]:
             curr.append(row["state"])
             curr.append(row["y"])
             curr.append(row["pred"])
-            curr.append(row["rmse"])
+            curr.append(row["error"])
             #print(f"{','.join(curr)}")
             writer_all.writerow(curr)
 
     eval_results_file = glob(f"{result}/eval_results.csv")
     if len(eval_results_file) == 0:
-        continue
+        print("ERROR")
+        exit(1)
     with open(eval_results_file[0]) as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -149,10 +156,44 @@ for result in argv[1:]:
             curr.append(str(round(int(row["num_samples"]) * percentage)))
             curr.append(row["num_samples"])
             curr.append(row["misses"])
-            curr.append(row["mean_rmse_loss"])
-            curr.append(row["max_rmse_loss"])
+            curr.append(row["mean_loss"])
+            curr.append(row["max_loss"])
+            key = f"{row['domain']}_{sampling_algorithm}_{experiment}_{bound}_{str(round(int(row['num_samples']) * percentage))}"
+            if key not in d:
+                d[key] = {'domain': None, 'sampling_algorithm': None, 'experiment': None, 'bound': None, 'percentage': None, 'num_samples': None, 'num_samples_pct': None, 'misses': [], 'mean_loss': [], 'max_loss': [], 'mean_rmse': []}
+            d[key]['domain'] = row["domain"]
+            d[key]['sampling_algorithm'] = sampling_algorithm
+            d[key]['experiment'] = experiment
+            d[key]['bound'] = bound
+            d[key]['percentage'] = str(percentage)
+            d[key]['num_samples'] = row["num_samples"]
+            d[key]['num_samples_pct'] = str(round(int(row["num_samples"]) * percentage))
+            d[key]['misses'].append(float(row["misses"]))
+            d[key]['mean_loss'].append(float(row["mean_loss"]))
+            d[key]['max_loss'].append(float(row["max_loss"]))
+            d[key]['mean_rmse'].append(float(row["rmse"]))
             #print(f"{','.join(curr)}")
-            writer_avg.writerow(curr)
+            #writer_avg.writerow(curr)
 
-f_all.close()
+print(d)
+print(len(d))
+
+#"domain,sampling_algorithm,preprocessing_method,bound,percentage,num_samples,num_samples_statespace,mean_misses,mean_loss,pstdev_loss,max_loss,mean_rmse,pstdev_rmse".split(','))
+for key in d:
+    curr = []
+    curr.append(d[key]['domain'])
+    curr.append(d[key]['sampling_algorithm'])
+    curr.append(d[key]['experiment'])
+    curr.append(d[key]['bound'] )
+    curr.append(d[key]['percentage'])
+    curr.append(d[key]['num_samples_pct'])
+    curr.append(d[key]['num_samples'])
+    curr.append(round(mean(d[key]['misses']),2))
+    curr.append(round(mean(d[key]['mean_loss']),2))
+    curr.append(round(pstdev(d[key]['mean_loss']),2))
+    curr.append(round(mean(d[key]['max_loss']),2))
+    curr.append(round(mean(d[key]['mean_rmse']),2))
+    curr.append(round(pstdev(d[key]['mean_rmse']),2))
+    writer_avg.writerow(curr)
+
 f_avg.close()
