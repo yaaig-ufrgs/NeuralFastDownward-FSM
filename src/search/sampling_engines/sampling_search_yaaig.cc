@@ -347,7 +347,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             for (OperatorID& op_id : applicable_operators) {
                 OperatorProxy op_proxy = operators[op_id];
                 PartialAssignment t = s->get_partial_successor(op_proxy);
-                if (!t.violates_mutexes()) {
+                if (state_representation == "complete_no_mutex" || !t.violates_mutexes()) {
                     for (shared_ptr<PartialAssignment>& t_: trie.find_all_compatible(t.get_values(), avi_rule)) {
                         string t_key = t_->values_to_string();
                         //string t_key = t_->to_binary(true);
