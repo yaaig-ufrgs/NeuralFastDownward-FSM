@@ -98,5 +98,6 @@
     (on car-out-5 seg-out-5)
   ))
   
+ (:metric minimize (total-cost))
 )
 

@@ -354,5 +354,6 @@
   (at package-5 city-2-loc-7)
  ))
  
+ (:metric minimize (total-cost))
 )
 
