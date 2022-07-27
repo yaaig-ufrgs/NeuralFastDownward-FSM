@@ -1377,9 +1377,9 @@ def get_sample_args():
     )
     parser.add_argument(
         "-c",
-        "--contrasting",
+        "--contrasting-percentage",
         type=int,
-        default=default_args.SAMPLE_CONTRASTING,
+        default=default_args.SAMPLE_CONTRASTING_PERCENTAGE,
         help="Percentage of contrasting samples. (default: %(default)s)",
     )
     parser.add_argument(

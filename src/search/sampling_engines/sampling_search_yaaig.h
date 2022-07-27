@@ -29,7 +29,6 @@ protected:
     const std::string state_representation;
     const std::string minimization;
     const int assignments_by_undefined_state;
-    const int contrasting_samples;
     const int avi_k;
     const std::string avi_rule;
     const double avi_epsilon;

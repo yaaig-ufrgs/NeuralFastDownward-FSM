@@ -134,12 +134,10 @@ vector<State> SamplingSearchYaaig::assign_undefined_state(shared_ptr<PartialAssi
 
 void SamplingSearchYaaig::create_contrasting_samples(
     vector<pair<int,pair<vector<int>,string>>>& values_set,
-    int percentage
+    int num_samples
 ) {
-    if (percentage == 0)
+    if (num_samples == 0)
         return;
-    // assert(percentage > 0 && percentage <= 100);
-    if (!(percentage > 0 && percentage <= 100)) { utils::g_log << "Error: sampling_search_yaaig.cc:142" << endl; exit(0); }
 
     const size_t n_atoms = sampling_technique::modified_tasks[0]->get_values().size();
     PartialAssignment pa(
@@ -147,47 +145,33 @@ void SamplingSearchYaaig::create_contrasting_samples(
         vector<int>(n_atoms, PartialAssignment::UNASSIGNED)
     );
 
-    // Biggest h found in the search
-    int max_h = 0;
-    for (pair<int,pair<vector<int>,string>>& p : values_set)
-        if (p.first > max_h)
-            max_h = p.first;
-    max_h++; // contrasting h = max_h + 1
-
-    int samples_to_be_created;
-    if (percentage == 100) {
-        // TODO: if 100%, the samples generation step is useless
-        samples_to_be_created = values_set.size();
-        values_set.clear();
-    } else {
-        samples_to_be_created =
-            (sampling_technique::modified_tasks.size()*percentage) / (100.0 - percentage);
-    }
-
     unordered_map<string,int> state_value;
-    if (minimization != "none") {
+    if (minimization != "complete" && minimization != "both") {
+        // if full state minimization is enabled this will be done implicitly later
         for (pair<int,pair<vector<int>,string>>& p : values_set) {
             if (state_value.count(p.second.second) == 0)
                 state_value[p.second.second] = p.first;
         }
     }
 
-    while (samples_to_be_created > 0) {
+    int max_h = 0; // biggest h found in the search
+    for (pair<int,pair<vector<int>,string>>& p : values_set)
+        max_h = max(max_h, p.first);
+
+    while (num_samples > 0) {
         pair<bool,State> fs = pa.get_full_state(true, *rng);
         if (!fs.first)
             continue;
         State s = fs.second;
         s.unpack();
-
-        int h = max_h;
-        if (minimization != "none") {
+        int h = max_h + 1;
+        if (minimization != "complete" && minimization != "both") {
             string bin = s.to_binary();
             if (state_value.count(bin) != 0)
                 h = state_value[bin];
         }
-        
         values_set.push_back(make_pair(h, make_pair(s.get_values(), s.to_binary())));
-        samples_to_be_created--;
+        num_samples--;
     }
 }
 
@@ -506,8 +490,8 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         }
     }
 
-    if (contrasting_samples > 0)
-        create_contrasting_samples(values_set, contrasting_samples);
+    if (sampling_technique::contrasting_samples > 0)
+        create_contrasting_samples(values_set, sampling_technique::contrasting_samples);
 
     if ((minimization == "complete" || minimization == "both")
             && !(state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char")) {
@@ -586,7 +570,6 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       state_representation(opts.get<string>("state_representation")),
       minimization(opts.get<string>("minimization")),
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
-      contrasting_samples(opts.get<int>("contrasting_samples")),
       avi_k(opts.get<int>("avi_k")),
       avi_rule(opts.get<string>("avi_rule")),
       avi_epsilon(stod(opts.get<string>("avi_epsilon"))),
@@ -602,8 +585,6 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       registry(task_proxy),
       header(construct_header()),
       rng(utils::parse_rng_from_options(opts)) {
-    // assert(contrasting_samples >= 0 && contrasting_samples <= 100);
-    if (!(contrasting_samples >= 0 && contrasting_samples <= 100)) { utils::g_log << "Error: sampling_search_yaaig.cc:602" << endl; exit(0); }
     // assert(assignments_by_undefined_state > 0);
     if (!(assignments_by_undefined_state > 0)) { utils::g_log << "Error: sampling_search_yaaig.cc:604" << endl; exit(0); }
     // assert(avi_k == 0 || avi_k == 1);
@@ -641,10 +622,6 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "assignments_by_undefined_state",
             "Number of states generated from each undefined state (only with assign_undefined).",
             "10");
-    parser.add_option<int>(
-            "contrasting_samples",
-            "Generate new random samples with h = L+1. (Percentage of those obtained with the search).",
-            "0");
     parser.add_option<int>(
             "avi_k",
             "Correct h-values using AVI via K-step forward repeatedly",

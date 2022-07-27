@@ -145,14 +145,14 @@ def yaaig_ferber(args, meth):
                            f'{"--translate-options --unit-cost --search-options " if args.sample_unit_cost == "true" and args.evaluator == "pdb(hstar_pattern([]))" else ""}'
                            f'--search \"sampling_search_yaaig({search_algo}, '
                            f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, max_samples={args.max_samples}, '
-                           f'bound_multiplier={args.bound_multiplier}, 'f'technique={args.technique}, subtechnique={args.subtechnique}, '
+                           f'contrasting_percentage={args.contrasting_percentage}, bound_multiplier={args.bound_multiplier}, 'f'technique={args.technique}, subtechnique={args.subtechnique}, '
                            f'bound={args.bound}, depth_k={args.k_depth}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state}, '
                            f'state_filtering={args.state_filtering}, bfs_percentage={args.bfs_percentage}, allow_duplicates={args.allow_dups}, '
                            f'unit_cost={args.sample_unit_cost}, max_time={args.max_time}, mem_limit_mb={args.mem_limit})], '
                            f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, '
                            f'avi_k={args.avi_k}, avi_epsilon={args.avi_eps}, avi_unit_cost={args.sample_unit_cost}, '
                            f'avi_rule={args.avi_rule}, sort_h={args.sort_h}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
-                           f'assignments_by_undefined_state={args.us_assignments}, contrasting_samples={args.contrasting}, evaluator={args.evaluator})\"')
+                           f'assignments_by_undefined_state={args.us_assignments}, evaluator={args.evaluator})\"')
                 elif meth == "ferber":
                     out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.ferber_technique}_{args.ferber_select_state.replace("_", "-")}_{args.ferber_num_tasks}_{args.ferber_min_walk_len}_{args.ferber_max_walk_len}_ss{i}'
                     cmd = (f'./fast-downward.py '

@@ -36,6 +36,8 @@ namespace sampling_technique {
 extern std::shared_ptr<AbstractTask> modified_task;
 extern std::vector<std::shared_ptr<PartialAssignment>> modified_tasks;
 
+extern int contrasting_samples;
+
 class SamplingTechnique {
 private:
     static int next_id;
@@ -48,6 +50,7 @@ protected:
     const int searches;
     int samples_per_search;
     int max_samples;
+    int contrasting_percentage;
     const double bound_multiplier;
     double max_time;
     const int mem_limit_mb;
