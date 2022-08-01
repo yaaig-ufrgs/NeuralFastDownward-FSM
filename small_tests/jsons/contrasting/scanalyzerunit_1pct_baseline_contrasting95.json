@@ -1,0 +1,58 @@
+{
+    "experiment": {
+        "samples": "small_tests/samples/scanalyzerunit-1pct-baseline-default-contrasting95",
+        "exp-type": "all",
+        "exp-net-seed": "0..4",
+        "exp-sample-seed": "0..4",
+        "exp-threads": 11,
+        "exp-only-sampling": "no",
+        "exp-only-train": "no",
+        "exp-only-test": "no",
+        "exp-only-eval": "no",
+        "trained-model": ""
+    },
+    "sampling": {
+        "instance": "tasks/experiments/scanalyzer",
+        "method": "yaaig",
+        "technique": "rw",
+        "state-representation": "fs",
+        "max-samples": 461,
+        "seed": "0..4",
+        "allow-dups": "interrollout",
+        "restart-h-when-goal-state": "no",
+        "minimization": "none",
+        "statespace": "tasks/experiments/statespaces/statespace_scanalyzerunit_scanalyzer_hstar",
+        "avi-k": 0,
+        "sample-unit-cost": "yes",
+        "state-filtering": "mutex",
+        "bound": 200,
+        "contrasting-percentage": 95
+    },
+    "train": {
+        "model": "resnet",
+        "training-size": 0.9,
+        "output-folder": "small_tests/results/scanalyzerunit-1pct-baseline-default-contrasting95",
+        "scatter-plot": "no",
+        "restart-no-conv": "yes",
+        "hidden-layers": 2,
+        "hidden-units": 250,
+        "batch-size": 64,
+        "patience": 100,
+        "activation": "relu",
+        "loss-function": "mse",
+        "weights-method": "kaiming_uniform",
+        "shuffle": "yes",
+        "bias": "yes",
+        "learning-rate": 0.0001,
+        "normalize-output": "no",
+        "use-gpu": "no",
+        "output-layer": "regression",
+        "sample-percentage": 1.0,
+        "max-epochs": 43293
+    },
+    "test": {
+        "max-expansions": 46081,
+        "unit-cost": "yes",
+        "search-algorithm": "eager_greedy"
+    }
+}
