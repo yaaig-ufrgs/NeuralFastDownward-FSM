@@ -1,0 +1,57 @@
+{
+    "experiment": {
+        "samples": "small_tests/samples/rovers-1pct-dfs-diameter-hstar",
+        "exp-type": "all",
+        "exp-net-seed": "0..4",
+        "exp-sample-seed": "0..4",
+        "exp-threads": 11,
+        "exp-only-sampling": "no",
+        "exp-only-train": "no",
+        "exp-only-test": "no",
+        "exp-only-eval": "no",
+        "trained-model": ""
+    },
+    "sampling": {
+        "instance": "tasks/experiments/rovers",
+        "method": "yaaig",
+        "technique": "dfs",
+        "state-representation": "fs",
+        "max-samples": 5658,
+        "seed": "0..4",
+        "allow-dups": "interrollout",
+        "restart-h-when-goal-state": "yes",
+        "minimization": "both",
+        "statespace": "tasks/experiments/statespaces/statespace_rovers_rovers_hstar",
+        "avi-k": 1,
+        "bound": "state_space_diameter",
+        "state-filtering": "mutex",
+        "bfs-percentage": 10,
+        "evaluator": "pdb(hstar_pattern([]))"
+    },
+    "train": {
+        "model": "resnet",
+        "training-size": 0.9,
+        "output-folder": "small_tests/results/rovers-1pct-dfs-diameter-hstar",
+        "restart-no-conv": "yes",
+        "hidden-layers": 2,
+        "hidden-units": 250,
+        "batch-size": 64,
+        "patience": 100,
+        "activation": "relu",
+        "loss-function": "mse",
+        "weights-method": "kaiming_uniform",
+        "shuffle": "yes",
+        "bias": "yes",
+        "learning-rate": 0.0001,
+        "normalize-output": "no",
+        "use-gpu": "no",
+        "scatter-plot": "no",
+        "output-layer": "regression",
+        "sample-percentage": 1.0,
+        "max-epochs": 4520
+    },
+    "test": {
+        "max-expansions": 565825,
+        "search-algorithm": "eager_greedy"
+    }
+}

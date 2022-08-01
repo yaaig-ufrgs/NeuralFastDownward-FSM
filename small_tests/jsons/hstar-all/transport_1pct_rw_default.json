@@ -1,0 +1,56 @@
+{
+    "experiment": {
+        "samples": "small_tests/samples/transport-1pct-rw-default-hstar",
+        "exp-type": "all",
+        "exp-net-seed": "0..4",
+        "exp-sample-seed": "0..4",
+        "exp-threads": 11,
+        "exp-only-sampling": "no",
+        "exp-only-train": "no",
+        "exp-only-test": "no",
+        "exp-only-eval": "no",
+        "trained-model": ""
+    },
+    "sampling": {
+        "instance": "tasks/experiments/transport",
+        "method": "yaaig",
+        "technique": "rw",
+        "state-representation": "fs",
+        "max-samples": 6376,
+        "seed": "0..4",
+        "allow-dups": "interrollout",
+        "restart-h-when-goal-state": "yes",
+        "minimization": "both",
+        "statespace": "tasks/experiments/statespaces/statespace_transport_transport_hstar",
+        "avi-k": 1,
+        "bound": 200,
+        "state-filtering": "mutex",
+        "evaluator": "pdb(hstar_pattern([]))"
+    },
+    "train": {
+        "model": "resnet",
+        "training-size": 0.9,
+        "output-folder": "small_tests/results/transport-1pct-rw-default-hstar",
+        "scatter-plot": "no",
+        "restart-no-conv": "yes",
+        "hidden-layers": 2,
+        "hidden-units": 250,
+        "batch-size": 64,
+        "patience": 100,
+        "activation": "relu",
+        "loss-function": "mse",
+        "weights-method": "kaiming_uniform",
+        "shuffle": "yes",
+        "bias": "yes",
+        "learning-rate": 0.0001,
+        "normalize-output": "no",
+        "use-gpu": "no",
+        "output-layer": "regression",
+        "sample-percentage": 1.0,
+        "max-epochs": 3652
+    },
+    "test": {
+        "max-expansions": 637633,
+        "search-algorithm": "eager_greedy"
+    }
+}
