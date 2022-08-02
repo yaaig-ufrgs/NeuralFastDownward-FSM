@@ -157,14 +157,16 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
     }
     */
 
+    // assert(max_samples > 0);
+    if (!(max_samples > 0)) { utils::g_log << "Error: sampling_technique.cc:164" << endl; exit(0); }
+
     // assert(contrasting_percentage >= 0 && contrasting_percentage < 100);
-    if (!(contrasting_percentage >= 0 && contrasting_percentage < 100)) { utils::g_log << "Error: sampling_technique.cc:159" << endl; exit(0); }
-    // TODO: 100% is not implemented: special case because we need at least one normal sample to get the number of variables to generate the contrasting samples
+    if (!(contrasting_percentage >= 0 && contrasting_percentage <= 100)) { utils::g_log << "Error: sampling_technique.cc:159" << endl; exit(0); }
 
-    if (contrasting_percentage > 0) {
-        // assert(max_samples > 0);
-        if (!(max_samples > 0)) { utils::g_log << "Error: sampling_technique.cc:164" << endl; exit(0); }
-
+    if (contrasting_percentage == 100) {
+        sampling_technique::contrasting_samples = max_samples;
+        max_samples = 1;
+    } else if (contrasting_percentage > 0) {
         sampling_technique::contrasting_samples = max_samples - int(max_samples * contrasting_percentage*0.01);
         max_samples -= sampling_technique::contrasting_samples;
     }

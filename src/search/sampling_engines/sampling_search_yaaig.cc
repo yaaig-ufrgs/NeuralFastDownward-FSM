@@ -145,6 +145,11 @@ void SamplingSearchYaaig::create_contrasting_samples(
         vector<int>(n_atoms, PartialAssignment::UNASSIGNED)
     );
 
+    // Hack: if 100% contrasting then we sample 1 state to know the structure of the state.
+    // At this point it is no longer important.
+    if (sampling_technique::modified_tasks.size() == 1)
+        values_set.clear();
+
     unordered_map<string,int> state_value;
     if (minimization != "complete" && minimization != "both") {
         // if full state minimization is enabled this will be done implicitly later
