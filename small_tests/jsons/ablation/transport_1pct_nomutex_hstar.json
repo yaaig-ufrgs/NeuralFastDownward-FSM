@@ -16,7 +16,7 @@
         "method": "yaaig",
         "technique": "bfs_rw",
         "subtechnique": "percentage",
-        "state-representation": "fs-nomutex-hstar",
+        "state-representation": "fs-nomutex",
         "max-samples": 6376,
         "seed": "0..4",
         "allow-dups": "interrollout",
