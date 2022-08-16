@@ -1,5 +1,4 @@
-#ifndef TRIE_TRIE_H
-#define TRIE_TRIE_H
+#pragma once
 
 /**
  * Source: https://github.com/akshitgrover/trie
@@ -35,11 +34,11 @@ namespace trie {
     bool exists(KeyType);
     bool empty();
     void find_all_compatible(KeyType key, SearchRule rule, std::vector<T>& values) const;
-    
+
     bool has_superset(KeyType key) const {
       return has_superset(key, 0, root);
     }
-    
+
   private:
     void find_samesets (const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) const;
     void find_supersets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) const;
@@ -49,12 +48,11 @@ namespace trie {
     void adjust_key(KeyType& key) const;
 
     tnode<T> *root;
-    int size;
     bool is_empty;
   };
 
   template <typename T>
-  trie<T>::trie(): size(0), is_empty(true) {
+  trie<T>::trie(): is_empty(true) {
     root = new tnode<T>(T());
   }
 
@@ -90,8 +88,7 @@ namespace trie {
 
   template <typename T>
   bool trie<T>::empty() {
-    // return this->size == 0;
-    return this->is_empty;
+    return is_empty;
   }
 
   // Our use case has -1, so its increments to get the values in the range (0..MAX_CHILDREN-1)
@@ -156,7 +153,7 @@ namespace trie {
 
     if (has_superset(key, pos+1, n->getChild(key[pos])))
       return true;
-    
+
     if (key[pos] != 0)
       return has_superset(key, pos+1, n->getChild(0));
 
@@ -180,5 +177,3 @@ namespace trie {
 	find_subsets(key, pos + 1, cnode, values);
   }
 } // namespace trie
-
-#endif
