@@ -181,6 +181,8 @@ def solve_instance_with_fd_nh(
         opt_network += ")"
 
         opt_heuristic = f"nh({opt_network})"
+    elif heuristic == "hstar":
+        opt_heuristic = "pdb(hstar_pattern([]))"
     else:
         opt_heuristic = f"{heuristic}()"
 

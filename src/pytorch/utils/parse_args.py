@@ -431,7 +431,7 @@ def get_test_args():
     parser.add_argument(
         "-heu",
         "--heuristic",
-        choices=["nn", "add", "blind", "ff", "goalcount", "hmax", "lmcut"],
+        choices=["nn", "add", "blind", "ff", "goalcount", "hmax", "lmcut", "hstar"],
         default=default_args.HEURISTIC,
         help="Heuristic to be used in the search. (default: %(default)s)",
     )
