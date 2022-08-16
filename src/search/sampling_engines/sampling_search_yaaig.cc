@@ -232,7 +232,9 @@ double SamplingSearchYaaig::mse(vector<shared_ptr<PartialAssignment>>& samples, 
         vector<int> key;
         for (char& b : pa->to_binary(true))
             key.push_back(b == '*' ? -1 : (int)b - '0');
-        for (pair<int,string> p: trie_statespace.find_all_compatible(key, "v_vu"))
+	std::vector<std::pair<int,std::string>> compatible_states;
+	trie_statespace.find_all_compatible(key, UpdateRule::v_vu, compatible_states);
+        for (pair<int,string> p : compatible_states)
             best_h = min(best_h, p.first);
         // assert(best_h != INT_MAX);
         if (best_h != INT_MAX) {
@@ -337,7 +339,9 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                 OperatorProxy op_proxy = operators[op_id];
                 PartialAssignment t = s->get_partial_successor(op_proxy);
                 if (state_representation == "complete_no_mutex" || !t.violates_mutexes()) {
-                    for (shared_ptr<PartialAssignment>& t_: trie.find_all_compatible(t.get_values(), avi_rule)) {
+		    std::vector<shared_ptr<PartialAssignment>> compatible_states;
+		    trie.find_all_compatible(t.get_values(), avi_rule, compatible_states);
+                    for (shared_ptr<PartialAssignment>& t_: compatible_states) {
                         string t_key = t_->values_to_string();
                         //string t_key = t_->to_binary(true);
                         pair<string,int> pair = make_pair(t_key, op_proxy.get_cost());
@@ -442,7 +446,8 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             for (char &b : partialAssignment->to_binary(true)) {
                 key.push_back(b == '*' ? -1 : (int)b - '0');
             }
-            vector<pair<int,string>> compatibles = trie_statespace.find_all_compatible(key, "v_vu"); 
+            vector<pair<int,string>> compatibles;
+	    trie_statespace.find_all_compatible(key, UpdateRule::v_vu, compatibles); 
             if (!compatibles.empty()) {
                 vector<int> values = binary_to_values(compatibles[(*rng)()*compatibles.size()].second);
                 s = State(*task, move(values));
@@ -540,7 +545,8 @@ void SamplingSearchYaaig::compute_sampling_statistics(
             vector<int> key;
             for (char& b : s.second.second)
                 key.push_back((int)b - '0');
-            vector<pair<int, string>> compatibles = trie_statespace.find_all_compatible(key, "v_v");
+	    vector<pair<int, string>> compatibles;
+	    trie_statespace.find_all_compatible(key, UpdateRule::v_v, compatibles);
             if (compatibles.size() == 0) {
                 not_in_statespace++;
             } else {
@@ -576,7 +582,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       minimization(opts.get<string>("minimization")),
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
       avi_k(opts.get<int>("avi_k")),
-      avi_rule(opts.get<string>("avi_rule")),
+      avi_rule(getRule(opts.get<string>("avi_rule"))),
       avi_epsilon(stod(opts.get<string>("avi_epsilon"))),
       avi_unit_cost(opts.get<bool>("avi_unit_cost")),
       sort_h(opts.get<bool>("sort_h")),

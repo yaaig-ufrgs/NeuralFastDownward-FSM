@@ -43,16 +43,17 @@ void tnode<T>::addChild(tnode* child, int key) {
 
 template <typename T>
 std::vector<int> tnode<T>::getKey() {
-    exit(1516);
+  exit(1516);// WTF?
     return {};
     // return this->key;
 }
 
 template <typename T>
 tnode<T>* tnode<T>::getChild(int key) {
-    if (this->children.count(key) == 0)
-        return nullptr;
-    return this->children[key];
+  const auto child = children.find(key);
+  if (child==children.end())
+    return nullptr;
+  return child->second;
 }
 
 template <typename T>
@@ -79,13 +80,13 @@ bool tnode<T>::isEnd() {
 
 template <typename T>
 tnode<T>* tnode<T>::getParent() {
-    exit(1516);
+  exit(1516); // WTF?
     return nullptr;
     // return this->parent;
 }
 
 template <typename T> int tnode<T>::getParentIndex() {
-    exit(1516);
+  exit(1516); // WTF?
     return -1;
     // return this->p_index;
 }

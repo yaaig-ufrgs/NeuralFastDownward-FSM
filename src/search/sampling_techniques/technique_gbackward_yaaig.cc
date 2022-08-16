@@ -213,7 +213,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
             if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
                 // if it is goal state then set h to 0
                 if (restart_h_when_goal_state && task_properties::is_goal_assignment(task_proxy, pa_)) {
-                    pa_.estimated_heuristic = 0;
+		     pa_.estimated_heuristic = 0;
                     pa_.states_to_goal = 0;
                 } else {
                     pa_.estimated_heuristic = pa.estimated_heuristic + (unit_cost ? 1 : ops[applied_op].get_cost());
@@ -355,7 +355,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             vector<int> key;
             for (char& b : partial_assignment.to_binary(true))
                 key.push_back(b == '*' ? -1 : (int)b - '0');
-            return sampling_engine::trie_statespace.find_all_compatible(key, "v_vu").size() > 0;
+	    vector<pair<int,string>> compatible_states;
+	    sampling_engine::trie_statespace.find_all_compatible(key, UpdateRule::v_vu, compatible_states);
+            return compatible_states.size() > 0; // bloody inefficient
         }
         return false;
     };
@@ -534,7 +536,7 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
     );
     parser.add_option<bool>(
             "is_valid_walk",
-            "enforces states during random walk are avalid states w.r.t. "
+            "enforces states during random walk are valid states w.r.t. "
             "the KNOWN mutexes",
             "true"
     );
