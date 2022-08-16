@@ -349,8 +349,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         if (state_filtering == "none") {
             return true;
         } else if (state_filtering == "mutex") {
-            return !(is_valid_walk) || regression_task_proxy->convert_to_full_state(
-                    partial_assignment, true, *rng).first;
+            return !(is_valid_walk) || regression_task_proxy->convert_to_full_state(partial_assignment, true, *rng).first;
         } else if (state_filtering == "statespace") {
             vector<int> key;
             for (char& b : partial_assignment.to_binary(true))

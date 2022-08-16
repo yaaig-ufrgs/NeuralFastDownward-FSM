@@ -40,12 +40,13 @@ namespace trie {
     reverse_iterator rbegin();
     reverse_iterator rend();
     iterator find(KeyType);
-    void find_all_compatible(KeyType key, SearchRule rule, std::vector<T>& values);
+    void find_all_compatible(KeyType key, SearchRule rule, std::vector<T>& values) const;
+    void has_superset(KeyType key) const;
 
   private:
-    void find_samesets (const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values);
-    void find_supersets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values);
-    void find_subsets  (const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values);
+    void find_samesets (const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) const;
+    void find_supersets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) const;
+    void find_subsets  (const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) const;
 
     void adjust_key(KeyType& key);
 
@@ -55,51 +56,41 @@ namespace trie {
   };
 
   template <typename T>
-  trie<T>::trie(): size(0) {
+  trie<T>::trie(): size(0), is_empty(true) {
     T flag = T();
     root = new tnode<T>(flag, nullptr, -1);
-    size = 0;
-    is_empty = true;
   }
 
   template <typename T>
   void trie<T>::insert(KeyType key, T val) {
-    tnode<T>* node = this->root;
+    tnode<T>* node = root;
     adjust_key(key);
     for (int v : key) {
-      if (node->getChild(v) != nullptr) {
-	node = node->getChild(v);
-      } else {
+      if (node->getChild(v) == nullptr) {
 	T flag = T();
 	tnode<T>* _node = new tnode<T>(flag, node, v);
 	node->addChild(_node, v);
-	node = node->getChild(v);
       }
+      node = node->getChild(v);
     }
     if (!node->isEnd()) {
-      this->size += 1;
+      size += 1;
     }
-    this->is_empty = false;
+    is_empty = false;
     node->update(val);
   }
 
   template <typename T>
   bool trie<T>::exist(KeyType key) {
-    bool res = true;
-    tnode<T>* node = this->root;
+    tnode<T>* node = root;
     adjust_key(key);
     for (int v : key) {
-      if (node->getChild(v) == nullptr) {
-	res = false;
-	break;
-      } else {
-	node = node->getChild(v);
-      }
+      auto child = node->getChild(v);
+      if (child == nullptr)
+	return false;
+      node = child;
     }
-    if (!node->isEnd()) {
-      res = false;
-    }
-    return res;
+    return true;
   }
 
   template <typename T>
@@ -121,9 +112,8 @@ namespace trie {
   typename trie<T>::iterator trie<T>::end() {
     T flag;
     tnode<T>* r = nullptr;
-    if (!this->empty()) {
+    if (!this->empty())
       r = rbrecur(this->root);
-    }
     tnode<T>* t = new tnode<T>(flag, r, 1516);
     return *(new trie_iterator<T>(t));
   }
@@ -182,7 +172,7 @@ namespace trie {
       assert(v >= 0 && v < MAX_CHILDREN);
     }
   }
-  
+
   template <typename T>
   void trie<T>::find_all_compatible(KeyType key, SearchRule rule, std::vector<T>& values) {
     adjust_key(key);
@@ -200,10 +190,10 @@ namespace trie {
   }
 
   template <typename T>
-  void trie<T>::find_samesets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) {
+  void trie<T>::find_samesets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) const {
     if (n==nullptr)
       return;
-  
+
     if (pos==key.size()) {
       values.push_back(n->get());
       return;
@@ -212,30 +202,47 @@ namespace trie {
   }
 
   template <typename T>
-  void trie<T>::find_supersets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) {
+  void trie<T>::find_supersets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) const {
     if (n==nullptr)
       return;
-  
+
     if (pos==key.size()) {
       values.push_back(n->get());
       return;
     }
-    
+
     find_supersets(key, pos + 1, n->getChild(key[pos]), values);
     if (key[pos] != 0)
       find_supersets(key, pos + 1, n->getChild(0), values);
   }
 
   template <typename T>
-  void trie<T>::find_subsets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) {
+  void trie<T>::has_superset(KeyType key) const {
     if (n==nullptr)
       return;
-  
+
+    if (pos==key.size())
+      return true;
+
+    if (find_supersets(key, pos + 1, n->getChild(key[pos]), values))
+      return true;
+    
+    if (key[pos] != 0)
+      return find_supersets(key, pos + 1, n->getChild(0), values);
+
+    return false;
+  }
+
+  template <typename T>
+  void trie<T>::find_subsets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) const {
+    if (n==nullptr)
+      return;
+
     if (pos==key.size()) {
       values.push_back(n->get());
       return;
     }
-    
+
     find_subsets(key, pos + 1, n->getChild(key[pos]), values);
 
     if (key[pos] == 0)
