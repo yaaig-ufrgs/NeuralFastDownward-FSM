@@ -17,7 +17,7 @@
         "technique": "bfs_rw",
         "subtechnique": "percentage",
         "state-representation": "fs",
-        "max-samples": 31371,
+        "max-samples": 19983,
         "seed": "0..4",
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

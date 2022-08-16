@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "samples": "small_tests/samples/visitall-1pct-randomsample",
+        "samples": "small_tests/samples/visitall-50pct-randomsample",
         "exp-type": "all",
         "exp-net-seed": "0..4",
         "exp-sample-seed": "0..4",
@@ -15,12 +15,12 @@
     "sampling": {
         "statespace": "tasks/experiments/statespaces/statespace_visitall_p-1-4_hstar",
         "seed": "0..4",
-        "max-samples": 1255
+        "max-samples": 799
     },
     "train": {
         "model": "resnet",
         "training-size": 0.9,
-        "output-folder": "small_tests/results/visitall-1pct-randomsample",
+        "output-folder": "small_tests/results/visitall-50pct-randomsample",
         "restart-no-conv": "yes",
         "hidden-layers": 2,
         "hidden-units": 250,
@@ -37,7 +37,7 @@
         "scatter-plot": "no",
         "output-layer": "regression",
         "sample-percentage": 1.0,
-        "max-epochs": 18349
+        "max-epochs": 446
     },
     "test": {
         "max-expansions": 125484,

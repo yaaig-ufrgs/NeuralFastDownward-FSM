@@ -16,7 +16,7 @@
         "method": "yaaig",
         "technique": "bfs",
         "state-representation": "fs",
-        "max-samples": 1255,
+        "max-samples": 799,
         "seed": "0..4",
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",
