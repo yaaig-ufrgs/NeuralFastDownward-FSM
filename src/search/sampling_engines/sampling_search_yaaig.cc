@@ -330,6 +330,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     const OperatorsProxy operators = task_proxy.get_operators();
     unordered_map<string,AviNode> avi_mapping;
     for (shared_ptr<PartialAssignment>& s : sampling_technique::modified_tasks) {
+      utils::g_log << "." << std::flush;
         string s_key = s->values_to_string();
         //string s_key = s->to_binary(true);
         if (avi_mapping[s_key].samples.size() == 0) {

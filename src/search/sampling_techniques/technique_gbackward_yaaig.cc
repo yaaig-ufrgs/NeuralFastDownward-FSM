@@ -354,9 +354,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             vector<int> key;
             for (char& b : partial_assignment.to_binary(true))
                 key.push_back(b == '*' ? -1 : (int)b - '0');
-	    vector<pair<int,string>> compatible_states;
-	    sampling_engine::trie_statespace.find_all_compatible(key, SearchRule::supersets, compatible_states);
-            return compatible_states.size() > 0; // bloody inefficient
+	    return sampling_engine::trie_statespace.has_superset(key);
         }
         return false;
     };
