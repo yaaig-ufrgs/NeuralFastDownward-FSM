@@ -77,7 +77,6 @@ namespace trie {
     }
     this->is_empty = false;
     node->update(val);
-    node->markEnd(key);
   }
 
   template <typename T>
@@ -207,8 +206,10 @@ namespace trie {
       // v -> v
       // u -> v || u
       if (key[pos] == 0) // if (key[pos] == u)
-	for (int i = 1; i < MAX_CHILDREN-1; i++)
-	  find_all_compatible_rec(key, pos + 1, n->getChild(i), rule, values);
+	for(auto& [i,cnode] : n->children)
+	  find_all_compatible_rec(key, pos + 1, cnode, rule, values);
+	// for (int i = 1; i < MAX_CHILDREN-1; i++)
+	//   find_all_compatible_rec(key, pos + 1, n->getChild(i), rule, values);
     }
   }
 } // namespace trie
