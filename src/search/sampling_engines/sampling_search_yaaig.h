@@ -30,7 +30,7 @@ protected:
     const std::string minimization;
     const int assignments_by_undefined_state;
     const int avi_k;
-    const UpdateRule avi_rule;
+    const SearchRule avi_rule;
     const double avi_epsilon;
     const bool avi_unit_cost;
     const bool sort_h;

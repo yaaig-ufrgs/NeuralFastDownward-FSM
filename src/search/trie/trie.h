@@ -11,37 +11,43 @@
 #include "trie_node.h"
 #include "trie_iterator.h"
 
-enum UpdateRule { vu_u, v_vu, v_v };
-UpdateRule getRule(std::string rule) {
+enum SearchRule { supersets, subsets, samesets };
+SearchRule getRule(std::string rule) {
   if (rule=="vu_u")
-    return UpdateRule::vu_u;
+    return SearchRule::supersets;
   else if (rule=="v_vu")
-    return UpdateRule::v_vu;
+    return SearchRule::subsets;
   else if (rule=="v_v")
-    return UpdateRule::v_v;
+    return SearchRule::samesets;
   assert(false);
-  return UpdateRule::v_v;
+  return SearchRule::samesets;
 }
 
 namespace trie {
-  template <typename T> class trie {
+  template <typename T>
+  class trie {
   public:
     using iterator = trie_iterator<T>;
     using reverse_iterator = std::reverse_iterator<iterator>;
+    using KeyType = std::vector<int>;
 
     trie();
-    void insert(std::vector<int>, T);
-    bool exist(std::vector<int>);
+    void insert(KeyType, T);
+    bool exist(KeyType);
     bool empty();
     iterator begin();
     iterator end();
     reverse_iterator rbegin();
     reverse_iterator rend();
-    iterator find(std::vector<int>);
-    void find_all_compatible(std::vector<int> key, UpdateRule rule, std::vector<T>& values);
+    iterator find(KeyType);
+    void find_all_compatible(KeyType key, SearchRule rule, std::vector<T>& values);
 
   private:
-    void find_all_compatible_rec(const std::vector<int>& key, unsigned pos, tnode<T>* n, UpdateRule rule, std::vector<T>& values);
+    void find_samesets (const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values);
+    void find_supersets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values);
+    void find_subsets  (const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values);
+
+    void adjust_key(KeyType& key);
 
     tnode<T> *root;
     int size;
@@ -57,12 +63,10 @@ namespace trie {
   }
 
   template <typename T>
-  void trie<T>::insert(std::vector<int> key, T val) {
+  void trie<T>::insert(KeyType key, T val) {
     tnode<T>* node = this->root;
-    for (int& v : key) {
-      // Our use case has -1, so its increments to get the values in the range (0..MAX_CHILDREN-1)
-      v += 1; assert(v >= 0 && v < MAX_CHILDREN);
-
+    adjust_key(key);
+    for (int v : key) {
       if (node->getChild(v) != nullptr) {
 	node = node->getChild(v);
       } else {
@@ -80,13 +84,11 @@ namespace trie {
   }
 
   template <typename T>
-  bool trie<T>::exist(std::vector<int> key) {
+  bool trie<T>::exist(KeyType key) {
     bool res = true;
     tnode<T>* node = this->root;
-    for (int& v : key) {
-      // Our use case has -1, so its increments to get the values in the range (0..MAX_CHILDREN-1)
-      v += 1; assert(v >= 0 && v < MAX_CHILDREN);
-
+    adjust_key(key);
+    for (int v : key) {
       if (node->getChild(v) == nullptr) {
 	res = false;
 	break;
@@ -156,16 +158,13 @@ namespace trie {
   }
 
   template <typename T>
-  typename trie<T>::iterator trie<T>::find(std::vector<int> key) {
+  typename trie<T>::iterator trie<T>::find(KeyType key) {
     tnode<T>* n = this->root;
-    for (int& v : key) {
-      // Our use case has -1, so its increments to get the values in the range (0..MAX_CHILDREN-1)
-      v += 1; assert(v >= 0 && v < MAX_CHILDREN);
-
+    adjust_key(key);
+    for (int v : key) {
       n = n->getChild(v);
-      if (n == nullptr) {
+      if (n == nullptr)
 	return this->end();
-      }
     }
     if (!n->isEnd()) {
       return this->end();
@@ -174,18 +173,46 @@ namespace trie {
     return it;
   }
 
-  template <typename T>
-  void trie<T>::find_all_compatible(std::vector<int> key, UpdateRule rule, std::vector<T>& values) {
-    // Our use case has -1, so its increments to get the values in the range (0..MAX_CHILDREN-1)
+
+  // Our use case has -1, so its increments to get the values in the range (0..MAX_CHILDREN-1)
+  template<typename T>
+  void trie<T>::adjust_key(KeyType& key) {
     for (int& v : key) {
       v++;
       assert(v >= 0 && v < MAX_CHILDREN);
     }
-    find_all_compatible_rec(key, 0, this->root, rule, values);
+  }
+  
+  template <typename T>
+  void trie<T>::find_all_compatible(KeyType key, SearchRule rule, std::vector<T>& values) {
+    adjust_key(key);
+    switch(rule) {
+    case SearchRule::samesets:
+      find_samesets(key, 0, this->root, values);
+      break;
+    case SearchRule::supersets:
+      find_supersets(key, 0, this->root, values);
+      break;
+    case SearchRule::subsets:
+      find_subsets(key, 0, this->root, values);
+      break;
+    }
   }
 
   template <typename T>
-  void trie<T>::find_all_compatible_rec(const std::vector<int>& key, unsigned pos, tnode<T>* n, UpdateRule rule, std::vector<T>& values) {
+  void trie<T>::find_samesets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) {
+    if (n==nullptr)
+      return;
+  
+    if (pos==key.size()) {
+      values.push_back(n->get());
+      return;
+    }
+    find_samesets(key, pos + 1, n->getChild(key[pos]), values);
+  }
+
+  template <typename T>
+  void trie<T>::find_supersets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) {
     if (n==nullptr)
       return;
   
@@ -194,23 +221,28 @@ namespace trie {
       return;
     }
     
-    find_all_compatible_rec(key, pos + 1, n->getChild(key[pos]), rule, values);
+    find_supersets(key, pos + 1, n->getChild(key[pos]), values);
+    if (key[pos] != 0)
+      find_supersets(key, pos + 1, n->getChild(0), values);
+  }
 
-    // let 0 = undefined, v = any other value
-    if (rule == UpdateRule::vu_u) {
-      // v -> v || u
-      // u -> u
-      if (key[pos] != 0) // if (key[pos] == v)
-	find_all_compatible_rec(key, pos + 1, n->getChild(0), rule, values);
-    } else if (rule == UpdateRule::v_vu) {
-      // v -> v
-      // u -> v || u
-      if (key[pos] == 0) // if (key[pos] == u)
-	for(auto& [i,cnode] : n->children)
-	  find_all_compatible_rec(key, pos + 1, cnode, rule, values);
-	// for (int i = 1; i < MAX_CHILDREN-1; i++)
-	//   find_all_compatible_rec(key, pos + 1, n->getChild(i), rule, values);
+  template <typename T>
+  void trie<T>::find_subsets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) {
+    if (n==nullptr)
+      return;
+  
+    if (pos==key.size()) {
+      values.push_back(n->get());
+      return;
     }
+    
+    find_subsets(key, pos + 1, n->getChild(key[pos]), values);
+
+    if (key[pos] == 0)
+      for(auto& [i,cnode] : n->children)
+	find_subsets(key, pos + 1, cnode, values);
+    // for (int i = 1; i < MAX_CHILDREN-1; i++)
+    //   find_subsets(key, pos + 1, n->getChild(i), values);
   }
 } // namespace trie
 

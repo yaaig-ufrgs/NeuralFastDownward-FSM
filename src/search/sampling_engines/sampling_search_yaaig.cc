@@ -233,7 +233,7 @@ double SamplingSearchYaaig::mse(vector<shared_ptr<PartialAssignment>>& samples, 
         for (char& b : pa->to_binary(true))
             key.push_back(b == '*' ? -1 : (int)b - '0');
 	std::vector<std::pair<int,std::string>> compatible_states;
-	trie_statespace.find_all_compatible(key, UpdateRule::v_vu, compatible_states);
+	trie_statespace.find_all_compatible(key, SearchRule::supersets, compatible_states);
         for (pair<int,string> p : compatible_states)
             best_h = min(best_h, p.first);
         // assert(best_h != INT_MAX);
@@ -447,7 +447,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 key.push_back(b == '*' ? -1 : (int)b - '0');
             }
             vector<pair<int,string>> compatibles;
-	    trie_statespace.find_all_compatible(key, UpdateRule::v_vu, compatibles); 
+	    trie_statespace.find_all_compatible(key, SearchRule::supersets, compatibles); 
             if (!compatibles.empty()) {
                 vector<int> values = binary_to_values(compatibles[(*rng)()*compatibles.size()].second);
                 s = State(*task, move(values));
@@ -546,7 +546,7 @@ void SamplingSearchYaaig::compute_sampling_statistics(
             for (char& b : s.second.second)
                 key.push_back((int)b - '0');
 	    vector<pair<int, string>> compatibles;
-	    trie_statespace.find_all_compatible(key, UpdateRule::v_v, compatibles);
+	    trie_statespace.find_all_compatible(key, SearchRule::samesets, compatibles);
             if (compatibles.size() == 0) {
                 not_in_statespace++;
             } else {
