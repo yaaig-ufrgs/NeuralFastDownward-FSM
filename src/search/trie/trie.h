@@ -6,40 +6,34 @@
  */
 
 #include <vector>
-#include <assert.h>
+#include <cassert>
 
 #include "trie_node.h"
-#include "trie_iterator.h"
 
 enum SearchRule { supersets, subsets, samesets };
 SearchRule getRule(std::string rule) {
-  if (rule=="vu_u")
+  if (rule=="vu_u" || rule=="supersets")
     return SearchRule::supersets;
-  else if (rule=="v_vu")
+  else if (rule=="v_vu" || rule=="subsets")
     return SearchRule::subsets;
-  else if (rule=="v_v")
+  else if (rule=="v_v" || rule=="samesets")
     return SearchRule::samesets;
   assert(false);
   return SearchRule::samesets;
 }
 
 namespace trie {
+  int MAX_CHILDREN = 128;
+
   template <typename T>
   class trie {
   public:
-    using iterator = trie_iterator<T>;
-    using reverse_iterator = std::reverse_iterator<iterator>;
     using KeyType = std::vector<int>;
 
     trie();
     void insert(KeyType, T);
-    bool exist(KeyType);
+    bool exists(KeyType);
     bool empty();
-    iterator begin();
-    iterator end();
-    reverse_iterator rbegin();
-    reverse_iterator rend();
-    iterator find(KeyType);
     void find_all_compatible(KeyType key, SearchRule rule, std::vector<T>& values) const;
     
     bool has_superset(KeyType key) const {
@@ -61,8 +55,7 @@ namespace trie {
 
   template <typename T>
   trie<T>::trie(): size(0), is_empty(true) {
-    T flag = T();
-    root = new tnode<T>(flag, nullptr, -1);
+    root = new tnode<T>(T());
   }
 
   template <typename T>
@@ -70,22 +63,20 @@ namespace trie {
     tnode<T>* node = root;
     adjust_key(key);
     for (int v : key) {
-      if (node->getChild(v) == nullptr) {
+      auto child = node->getChild(v);
+      if (child == nullptr) {
 	T flag = T();
-	tnode<T>* _node = new tnode<T>(flag, node, v);
+	tnode<T>* _node = new tnode<T>(flag);
 	node->addChild(_node, v);
       }
       node = node->getChild(v);
-    }
-    if (!node->isEnd()) {
-      size += 1;
     }
     is_empty = false;
     node->update(val);
   }
 
   template <typename T>
-  bool trie<T>::exist(KeyType key) {
+  bool trie<T>::exists(KeyType key) {
     tnode<T>* node = root;
     adjust_key(key);
     for (int v : key) {
@@ -102,71 +93,6 @@ namespace trie {
     // return this->size == 0;
     return this->is_empty;
   }
-
-  template <typename T>
-  typename trie<T>::iterator trie<T>::begin() {
-    trie_iterator<T> it = *(new trie_iterator<T>(this->root));
-    return ++it;
-  }
-
-  template <typename T>
-  tnode<T>* rbrecur(tnode<T>* n, int offset = MAX_CHILDREN-1, tnode<T>* r = nullptr);
-
-  template <typename T>
-  typename trie<T>::iterator trie<T>::end() {
-    T flag;
-    tnode<T>* r = nullptr;
-    if (!this->empty())
-      r = rbrecur(this->root);
-    tnode<T>* t = new tnode<T>(flag, r, 1516);
-    return *(new trie_iterator<T>(t));
-  }
-
-  template <typename T>
-  tnode<T>* rbrecur(tnode<T>* n, int offset, tnode<T>* r) {
-    tnode<T>* it = nullptr;
-    for (int i = offset; i > -1; i--) {
-      it = n->getChild(i);
-      if (it == nullptr) {
-	if (i == 0) {
-	  return r;
-	}
-	continue;
-      }
-      if (it->isEnd()) {
-	r = it;
-      }
-      return rbrecur(it, MAX_CHILDREN-1, r);
-    }
-    return nullptr;
-  }
-
-  template <typename T>
-  typename trie<T>::reverse_iterator trie<T>::rbegin() {
-    return *(new trie<T>::reverse_iterator(trie<T>::end()));
-  }
-
-  template <typename T>
-  typename trie<T>::reverse_iterator trie<T>::rend() {
-    return *(new trie<T>::reverse_iterator(trie<T>::begin()));
-  }
-
-  template <typename T>
-  typename trie<T>::iterator trie<T>::find(KeyType key) {
-    tnode<T>* n = this->root;
-    adjust_key(key);
-    for (int v : key) {
-      n = n->getChild(v);
-      if (n == nullptr)
-	return this->end();
-    }
-    if (!n->isEnd()) {
-      return this->end();
-    }
-    trie_iterator<T> it = *(new trie_iterator<T>(n));
-    return it;
-  }
-
 
   // Our use case has -1, so its increments to get the values in the range (0..MAX_CHILDREN-1)
   template<typename T>
@@ -252,8 +178,6 @@ namespace trie {
     if (key[pos] == 0)
       for(auto& [i,cnode] : n->children)
 	find_subsets(key, pos + 1, cnode, values);
-    // for (int i = 1; i < MAX_CHILDREN-1; i++)
-    //   find_subsets(key, pos + 1, n->getChild(i), values);
   }
 } // namespace trie
 

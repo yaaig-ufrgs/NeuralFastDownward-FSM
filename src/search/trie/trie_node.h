@@ -8,27 +8,19 @@ namespace trie {
 template <typename T>
 class tnode {
 public:
-    explicit tnode(T v, tnode<T>* p, int ascii, bool eow = false);
+  explicit tnode(T v) : mapped_value(v) {};
     void addChild(tnode* child, int key);
     tnode<T>* getChild(int key);
-    T& get();
+    T& get() { return mapped_value; };
     void update(T val);
-    bool isEnd() {  return true; }
-    tnode<T>* getParent();
-    int getParentIndex();
     std::unordered_map<int,tnode<T>*> children;
 private:
     T mapped_value;
 };
 
 template <typename T>
-tnode<T>::tnode(T val, tnode<T>* /*p*/, int /*ascii*/, bool /*eow*/) {
-    this->mapped_value = val;
-}
-
-template <typename T>
 void tnode<T>::addChild(tnode* child, int key) {
-    this->children[key] = child;
+    children[key] = child;
 }
 
 template <typename T>
@@ -40,13 +32,8 @@ tnode<T>* tnode<T>::getChild(int key) {
 }
 
 template <typename T>
-T& tnode<T>::get() {
-    return this->mapped_value;
-}
-
-template <typename T>
 void tnode<T>::update(T val) {
-    this->mapped_value = val;
+    mapped_value = val;
 }
 
 } // namespace trie
