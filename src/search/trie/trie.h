@@ -39,11 +39,16 @@ namespace trie {
       return has_superset(key, 0, root);
     }
 
+    bool has_subset(KeyType key) const {
+      return has_subset(key, 0, root);
+    }
+
   private:
     void find_samesets (const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) const;
     void find_supersets(const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) const;
     void find_subsets  (const KeyType& key, unsigned pos, tnode<T>* n, std::vector<T>& values) const;
     bool has_superset  (const KeyType& key, unsigned pos, tnode<T>* n) const;
+    bool has_subset    (const KeyType& key, unsigned pos, tnode<T>* n) const;
 
     void adjust_key(KeyType& key) const;
 
@@ -175,5 +180,23 @@ namespace trie {
     if (key[pos] == 0)
       for(auto& [i,cnode] : n->children)
 	find_subsets(key, pos + 1, cnode, values);
+  }
+
+  template <typename T>
+  bool trie<T>::has_subset(const KeyType& key, unsigned pos, tnode<T>* n) const {
+    if (n==nullptr)
+      return false;
+
+    if (pos==key.size())
+      return true;
+
+    if (has_subset(key, pos+1, n->getChild(key[pos])))
+      return true;
+
+    if (key[pos] == 0)
+      for(auto& [i,cnode] : n->children)
+	 return has_subset(key, pos + 1, cnode);
+
+    return false;
   }
 } // namespace trie

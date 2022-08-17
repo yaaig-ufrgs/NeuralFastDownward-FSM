@@ -232,8 +232,8 @@ double SamplingSearchYaaig::mse(vector<shared_ptr<PartialAssignment>>& samples, 
         vector<int> key;
         for (char& b : pa->to_binary(true))
             key.push_back(b == '*' ? -1 : (int)b - '0');
-	std::vector<std::pair<int,std::string>> compatible_states;
-	trie_statespace.find_all_compatible(key, SearchRule::supersets, compatible_states);
+        std::vector<std::pair<int,std::string>> compatible_states;
+        trie_statespace.find_all_compatible(key, SearchRule::subsets, compatible_states);
         for (pair<int,string> p : compatible_states)
             best_h = min(best_h, p.first);
         // assert(best_h != INT_MAX);
@@ -448,7 +448,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 key.push_back(b == '*' ? -1 : (int)b - '0');
             }
             vector<pair<int,string>> compatibles;
-	    trie_statespace.find_all_compatible(key, SearchRule::supersets, compatibles); 
+            trie_statespace.find_all_compatible(key, SearchRule::subsets, compatibles);
             if (!compatibles.empty()) {
                 vector<int> values = binary_to_values(compatibles[(*rng)()*compatibles.size()].second);
                 s = State(*task, move(values));
