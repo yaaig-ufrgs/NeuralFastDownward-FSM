@@ -177,8 +177,9 @@ void SamplingSearchYaaig::create_contrasting_samples(
             h = values_set[idx].first;
         } else if (sampling_technique::contrasting_estimates == "default" && max_h != 0) {
               h = max_h + 1;
-        } else { // number
-              h = stoi(sampling_technique::contrasting_estimates);
+        } else { // number range
+              int range = stoi(sampling_technique::contrasting_estimates);
+              h = ((*rng)() * (range))+1; // +1 so we don't get fake goals
         }
         if (h == -1) { utils::g_log << "Error: sampling_search_yaaig.cc:183" << endl; exit(0); }
         if (minimization != "complete" && minimization != "both") {
