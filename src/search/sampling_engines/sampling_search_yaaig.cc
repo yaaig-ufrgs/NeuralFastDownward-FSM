@@ -160,8 +160,10 @@ void SamplingSearchYaaig::create_contrasting_samples(
     }
 
     int max_h = 0; // biggest h found in the search
-    for (pair<int,pair<vector<int>,string>>& p : values_set)
-        max_h = max(max_h, p.first);
+    if (sampling_technique::contrasting_estimates == "default") {
+        for (pair<int, pair<vector<int>, string>> &p : values_set)
+            max_h = max(max_h, p.first);
+    } 
 
     while (num_samples > 0) {
         pair<bool,State> fs = pa.get_full_state(true, *rng);
@@ -169,7 +171,16 @@ void SamplingSearchYaaig::create_contrasting_samples(
             continue;
         State s = fs.second;
         s.unpack();
-        int h = max_h + 1;
+        int h = -1;
+        if (sampling_technique::contrasting_estimates == "random") {
+            int idx = (*rng)() * values_set.size();
+            h = values_set[idx].first;
+        } else if (sampling_technique::contrasting_estimates == "default" && max_h != 0) {
+              h = max_h + 1;
+        } else { // number
+              h = stoi(sampling_technique::contrasting_estimates);
+        }
+        if (h == -1) { utils::g_log << "Error: sampling_search_yaaig.cc:183" << endl; exit(0); }
         if (minimization != "complete" && minimization != "both") {
             string bin = s.to_binary();
             if (state_value.count(bin) != 0)

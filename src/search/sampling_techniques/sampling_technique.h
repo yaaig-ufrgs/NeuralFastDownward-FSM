@@ -37,6 +37,7 @@ extern std::shared_ptr<AbstractTask> modified_task;
 extern std::vector<std::shared_ptr<PartialAssignment>> modified_tasks;
 
 extern int contrasting_samples;
+extern std::string contrasting_estimates;
 
 class SamplingTechnique {
 private:
@@ -51,6 +52,7 @@ protected:
     int samples_per_search;
     int max_samples;
     int contrasting_percentage;
+    std::string contrasting_estimates;
     const double bound_multiplier;
     double max_time;
     const int mem_limit_mb;

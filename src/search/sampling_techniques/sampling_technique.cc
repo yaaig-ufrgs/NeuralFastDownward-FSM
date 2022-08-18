@@ -24,6 +24,7 @@ std::shared_ptr<AbstractTask> modified_task = nullptr;
 std::vector<std::shared_ptr<PartialAssignment>> modified_tasks = std::vector<std::shared_ptr<PartialAssignment>>();
 
 int contrasting_samples = 0;
+string contrasting_estimates = "default";
 
 static shared_ptr<AbstractTask> _parse_sampling_transform(
         options::OptionParser &parser) {
@@ -118,6 +119,7 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
           samples_per_search(opts.get<int>("samples_per_search")),
           max_samples(opts.get<int>("max_samples")),
           contrasting_percentage(opts.get<int>("contrasting_percentage")),
+          contrasting_estimates(opts.get<string>("contrasting_estimates")),
           bound_multiplier(opts.get<double>("bound_multiplier")),
           max_time(opts.get<double>("max_time")),
           mem_limit_mb(opts.get<int>("mem_limit_mb")),
@@ -170,6 +172,8 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
         sampling_technique::contrasting_samples = max_samples - int(max_samples * contrasting_percentage*0.01);
         max_samples -= sampling_technique::contrasting_samples;
     }
+
+    sampling_technique::contrasting_estimates = contrasting_estimates;
 
     if (max_samples == -1)
         max_samples = numeric_limits<int>::max(); // ~2 billion samples
@@ -461,6 +465,11 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
             "Percentage [0,100) of randomly generated samples (h = L+1).",
             "0"
     );
+    parser.add_option<string>(
+            "contrasting_estimates",
+            "Estimate values for random samples:"
+            "default, random, number"
+            "default");
     parser.add_option<double>(
             "bound_multiplier",
             "Multiplies the bound of each rollout by the given value.",

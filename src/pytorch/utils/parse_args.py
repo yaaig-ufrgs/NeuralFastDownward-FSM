@@ -1383,6 +1383,13 @@ def get_sample_args():
         help="Percentage of contrasting samples. (default: %(default)s)",
     )
     parser.add_argument(
+        "-ce",
+        "--contrasting-estimates",
+        type=str,
+        default=default_args.SAMPLE_CONTRASTING_ESTIMATES,
+        help="Estimates of the contrasting samples. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-rhg",
         "--restart-h-when-goal-state",
         type=str2bool,
