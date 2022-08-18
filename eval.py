@@ -164,7 +164,8 @@ def eval_workflow(model, sample: str, dirname: str, dataloader: DataLoader, data
 
 
 def eval_model(model, dataloader: DataLoader, log_states: bool):
-    loss_fn = RMSELoss()
+    #loss_fn = RMSELoss()
+    loss_fn = nn.L1Loss()
     eval_loss = 0
     max_loss = float("-inf")
     min_loss = float("inf")
@@ -173,6 +174,7 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
     y_true = []
     y_pred = []
     misses = 0
+    eval_diff = 0
 
     state_count = 1
     with torch.no_grad():
@@ -187,6 +189,7 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
             rounded_pred = int(torch.round(pred[0]))
             y_true.append(rounded_y)
             y_pred.append(rounded_pred)
+
             if rounded_y != rounded_pred:
                 misses += 1
             if loss > max_loss:
