@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "samples": "small_tests/samples/scanalyzer-1pct-bfsrw-propeff-nomin",
+        "samples": "small_tests/samples/visitall-1pct-bfsrw-propeff-contrasting80-hstar",
         "exp-type": "all",
         "exp-net-seed": "0..4",
         "exp-sample-seed": "0..4",
@@ -12,26 +12,28 @@
         "trained-model": ""
     },
     "sampling": {
-        "instance": "tasks/experiments/scanalyzer",
+        "instance": "tasks/experiments/visitall",
         "method": "yaaig",
         "technique": "bfs_rw",
         "subtechnique": "percentage",
         "state-representation": "fs",
-        "max-samples": 461,
+        "max-samples": 799,
         "seed": "0..4",
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",
-        "minimization": "none",
-        "statespace": "tasks/experiments/statespaces/statespace_scanalyzer_scanalyzer_hstar",
+        "minimization": "both",
         "avi-k": 1,
+        "statespace": "tasks/experiments/statespaces/statespace_visitall_p-1-4_hstar",
         "bound": "propositions_per_mean_effects",
         "state-filtering": "mutex",
-        "bfs-percentage": 10
+        "bfs-percentage": 10,
+        "contrasting-percentage": 80,
+        "evaluator": "pdb(hstar_pattern([]))"
     },
     "train": {
         "model": "resnet",
         "training-size": 0.9,
-        "output-folder": "small_tests/results/scanalyzer-1pct-bfsrw-propeff-nomin",
+        "output-folder": "small_tests/results/visitall-1pct-bfsrw-propeff-contrasting80-hstar",
         "restart-no-conv": "yes",
         "hidden-layers": 2,
         "hidden-units": 250,
@@ -48,10 +50,10 @@
         "scatter-plot": "no",
         "output-layer": "regression",
         "sample-percentage": 1.0,
-        "max-epochs": 41000
+        "max-epochs": 18349
     },
     "test": {
-        "max-expansions": 46081,
+        "max-expansions": 125484,
         "search-algorithm": "eager_greedy"
     }
 }
