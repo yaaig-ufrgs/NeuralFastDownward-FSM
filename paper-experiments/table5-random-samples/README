@@ -1,0 +1,8 @@
+contrasting0  = 100% normal samples
+contrasting10 = 10% normal samples, 90% random samples
+contrasting20 = 20% normal samples, 80% random samples
+contrasting30 = ...
+....
+contrasting100 = 100% random samples
+
+(this will change)

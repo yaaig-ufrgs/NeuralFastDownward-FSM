@@ -1,6 +1,19 @@
-To perform each experiment, run the following in the root directory:
+Unless states otherwise, to perform each experiment, run the following in the root directory:
+
 $ ./run.py tableX/*.json
 
-"propeff" -> #F/E
-"prop"    -> #F
-"200"     -> #D
+The generated samples and results will be saved in ../small_tests/samples and ../small_tests/results 
+-- according to the "samples" and "output-folder" keys in each JSON.
+
+
+Convention
+----------
+"propeff" or "propostions per mean effects"  -> #F/E
+"prop" or "propositions"                     -> #F
+"200" or "default"                           -> #D
+
+
+TODO
+----
+Insert relevant scripts in each directory.
+Complete READMEs.
