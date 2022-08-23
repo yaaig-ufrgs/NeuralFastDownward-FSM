@@ -1,0 +1,6 @@
+To perform each experiment, run the following in the root directory:
+$ ./run.py tableX/*.json
+
+"propeff" -> #F/E
+"prop"    -> #F
+"200"     -> #D
