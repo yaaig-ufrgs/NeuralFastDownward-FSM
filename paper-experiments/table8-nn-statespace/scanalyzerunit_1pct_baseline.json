@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "samples": "small_tests/samples/scanalyzerunit-1pct-baseline-default",
+        "samples": "paper-experiments/table8-nn-statespace/samples/scanalyzerunit-1pct-baseline-default",
         "exp-type": "all",
         "exp-net-seed": "0..4",
         "exp-sample-seed": "0..4",
@@ -30,7 +30,7 @@
     "train": {
         "model": "resnet",
         "training-size": 0.9,
-        "output-folder": "small_tests/results/scanalyzerunit-1pct-baseline-default",
+        "output-folder": "paper-experiments/table8-nn-statespace/results/scanalyzerunit-1pct-baseline-default",
         "scatter-plot": "no",
         "restart-no-conv": "yes",
         "hidden-layers": 2,

@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "samples": "small_tests/samples/visitall-1pct-bfsrw-propeff-noavinomin",
+        "samples": "paper-experiments/table4-rollout-limit/samples/visitall-1pct-bfsrw-propeff-noavinomin",
         "exp-type": "all",
         "exp-net-seed": "0..4",
         "exp-sample-seed": "0..4",
@@ -31,7 +31,7 @@
     "train": {
         "model": "resnet",
         "training-size": 0.9,
-        "output-folder": "small_tests/results/visitall-1pct-bfsrw-propeff-noavinomin",
+        "output-folder": "paper-experiments/table4-rollout-limit/results/visitall-1pct-bfsrw-propeff-noavinomin",
         "restart-no-conv": "yes",
         "hidden-layers": 2,
         "hidden-units": 250,
