@@ -43,6 +43,8 @@ Convention
 ----
 TODO
 ----
-table7-diff-estimates -- fill directories
-table8-nn-statespace -- run_eval_statespace.py and script to run h^ff and h^gc over the state space.
-Insert relevant scripts and extra info in each directory.
+* Fix `make_csv.py`
+* `table7-diff-estimates` -- fill directories
+* `table8-nn-statespace`  -- run_eval_statespace.py and script to run h^ff and h^gc over the state space.
+* Insert relevant scripts and extra info in each directory.
+
