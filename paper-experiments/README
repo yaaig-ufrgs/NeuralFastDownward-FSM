@@ -1,11 +1,35 @@
-Unless states otherwise, to perform each experiment, run the following in the root directory:
+-------------------
+RUNNING EXPERIMENTS
+-------------------
+
+Unless stated otherwise, to perform each experiment, run the following in the root directory:
 
 $ ./run.py tableX/*.json
 
 The generated samples and results will be saved in ../small_tests/samples and ../small_tests/results 
 -- according to the "samples" and "output-folder" keys in each JSON.
 
+Specific instructions to compile results are found within each tableX directory.
 
+
+---------------
+MODIFYING JSONS
+---------------
+
+To easily change multiple JSONs at once in case you want to try different parameters, you can use the 
+`modify_json.py` script. Example usage:
+
+$ ./modify_json.py experiment exp-threads 5 tableX/*.json
+
+-----------------
+COMPILING RESULTS
+-----------------
+
+To create a CSV with the data of an experiment, you can run:
+
+$ ./make_csv.py tableX/*/nfd_train*/ > tableX.csv
+
+----------
 Convention
 ----------
 "propeff" or "propostions per mean effects"  -> #F/E
@@ -13,6 +37,7 @@ Convention
 "200" or "default"                           -> #D
 
 
+----
 TODO
 ----
 Insert relevant scripts in each directory.
