@@ -1148,6 +1148,13 @@ def get_exp_args():
         help="Path to already trained models to be evaluated on.",
     )
     parser.add_argument(
+        "-evl-smp",
+        "--eval-sample",
+        type=str,
+        default=default_args.EXP_EVAL_SAMPLE,
+        help="Sample used to evaluate the network over.",
+    )
+    parser.add_argument(
         "-evl-s",
         "--eval-seed",
         type=int,

@@ -40,6 +40,7 @@ def run_train_test(args, sample_seed: int, net_seed: int):
     sample_files = glob(f"{args.samples}/*")
     sample_files = filter_samples(sample_files, sample_seed)
 
+    do_eval = has_flag_prefix("--eval-")
     for sample in sample_files:
         args.exp_only_train |= not has_flag_prefix("-tst-") and not has_flag_prefix("--test-")
         args.exp_only_test |= not has_flag_prefix("-trn-") and not has_flag_prefix("--train-")
@@ -82,6 +83,16 @@ def run_train_test(args, sample_seed: int, net_seed: int):
             f"{trained_model_dir}"
         )
 
+        eval_args = (
+            f"{trained_model_dir}/models/traced_0.pt {args.eval_sample} "
+            f"-ls {args.eval_log_states} -sp {args.eval_save_preds} "
+            f"-s {args.eval_seed} -shs {args.eval_shuffle_seed} "
+            f"-sh {args.eval_shuffle} -tsize {args.eval_training_size} "
+            f"-us {args.eval_unique_samples} -ls {args.eval_log_states} "
+            f"-plt {args.eval_save_plots} -ft {args.eval_follow_training}"
+        )
+
+
         if args.problem_pddls != []:
             test_args += f" {args.problem_pddls}"
         if args.test_max_expansions != default_args.MAX_EXPANSIONS:
@@ -90,7 +101,9 @@ def run_train_test(args, sample_seed: int, net_seed: int):
         pcore = PID % args.exp_threads
         pdep = PID - args.exp_threads
 
-        if args.exp_only_train:
+        if args.exp_only_train and do_eval:
+            cmd = f"./train-and-eval.sh '{train_args}' '{eval_args}'"
+        elif args.exp_only_train:
             cmd = f"./train.py {train_args}"
         elif args.exp_only_test:
             cmd = f"./test.py {test_args}"
@@ -181,7 +194,7 @@ def experiment(args):
     os.system(f"tsp -K")
     os.system(f"tsp -S {args.exp_threads}")
 
-    if args.exp_only_eval:
+    if args.exp_only_eval and not args.exp_only_train:
         # Evaluate on all networks passed through argument.
         only_eval(args)
     else:
