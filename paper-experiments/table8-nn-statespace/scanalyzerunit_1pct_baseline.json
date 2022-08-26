@@ -49,9 +49,9 @@
         "sample-percentage": 1.0,
         "max-epochs": 43293
     },
-    "test": {
-        "max-expansions": 46081,
-        "unit-cost": "yes",
-        "search-algorithm": "eager_greedy"
+    "eval": {
+        "sample": "tasks/experiments/statespaces/statespace_scanalyzerunit_scanalyzer_hstar",
+        "save-preds": "yes",
+        "save-plots": "yes"
     }
 }

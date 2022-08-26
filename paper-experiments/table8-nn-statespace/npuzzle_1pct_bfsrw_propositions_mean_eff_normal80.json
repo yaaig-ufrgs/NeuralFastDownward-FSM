@@ -51,8 +51,9 @@
         "sample-percentage": 1.0,
         "max-epochs": 11408
     },
-    "test": {
-        "max-expansions": 181442,
-        "search-algorithm": "eager_greedy"
+    "eval": {
+        "sample": "tasks/experiments/statespaces/statespace_npuzzle_prob-n3-1_hstar",
+        "save-preds": "yes",
+        "save-plots": "yes"
     }
 }

@@ -52,9 +52,9 @@
         "sample-percentage": 1.0,
         "max-epochs": 4239
     },
-    "test": {
-        "max-expansions": 637633,
-        "unit-cost": "yes",
-        "search-algorithm": "eager_greedy"
+    "eval": {
+        "sample": "tasks/experiments/statespaces/statespace_transportunit_transport_hstar",
+        "save-preds": "yes",
+        "save-plots": "yes"
     }
 }
