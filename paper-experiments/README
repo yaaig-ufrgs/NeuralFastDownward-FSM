@@ -10,6 +10,9 @@ The generated samples and results will be saved in tableX/samples and tableX/res
 
 Specifics are found within each tableX directory.
 
+* Table3:
+- After generating the samples, run ./get_mean_h table3-algorithms-hmean/samples
+
 
 ---------------
 MODIFYING JSONS
