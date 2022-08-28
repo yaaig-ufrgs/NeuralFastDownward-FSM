@@ -54,7 +54,7 @@ NAMING CONVENTIONS
 ----
 TODO
 ----
-* Fix `make_csv.py`
-* `table7-diff-estimates`       -- logic-based heuristics
-* `table8-nn-statespace`        -- logic-based heuristics
-* `table9-expanded-heuristics`  -- logic-based heuristics
+- Fix `make_csv.py`.
+- Table 7: Add diff script that uses both the FSSP and the BSSP.
+- Table 8: Write script to evaluate the logic-based scripts to run the heuristics over the state spaces.
+- Table 9: Using `run_heuristic_experiments.py`, write a specific hassle-free script to run the heuristics over the PDDLs.
