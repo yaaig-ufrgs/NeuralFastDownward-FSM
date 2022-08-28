@@ -10,8 +10,14 @@ The generated samples and results will be saved in tableX/samples and tableX/res
 
 Specifics are found within each tableX directory.
 
-* Table3:
-- After generating the samples, run ./get_mean_h table3-algorithms-hmean/samples
+* Table 3:
+- After generating the samples, run: 
+$ ./get_mean_h.py table3-algorithms-hmean/samples
+
+* Table 8:
+- After performing the evaluations with `run.py`, run: 
+$ ./compile_eval_csv.py table8-nn-statespace/results/*/*
+A CSV with the compiled average results will be generated as `statespace_hnn_avg.csv`.
 
 
 ---------------
@@ -32,7 +38,7 @@ To create a CSV with the data of an experiment, you can run:
 
 $ ./make_csv.py tableX/results/*/nfd_train*/ > tableX/tableX.csv
 
-You can use Python's Pandas library or R to manipulate the data in a CSV.
+You can use Python's Pandas library or R to manipulate the data.
 
 
 ----------
@@ -48,6 +54,5 @@ TODO
 ----
 * Fix `make_csv.py`
 * `table7-diff-estimates` -- fill directories
-* `table8-nn-statespace`  -- run_eval_statespace.py and script to run h^ff and h^gc over the state space.
-* Insert relevant scripts and extra info in each directory.
-
+* `table8-nn-statespace`  -- script to run h^ff and h^gc over the state space.
+* `table9-expanded-heuristics`  -- script to run h^ff, h^gc and h*.
