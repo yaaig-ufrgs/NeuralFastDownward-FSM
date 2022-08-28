@@ -5,7 +5,7 @@
         "exp-net-seed": "0..4",
         "exp-sample-seed": "0..4",
         "exp-threads": 11,
-        "exp-only-sampling": "no",
+        "exp-only-sampling": "yes",
         "exp-only-train": "no",
         "exp-only-test": "no",
         "exp-only-eval": "no",
