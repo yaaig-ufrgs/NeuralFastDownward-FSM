@@ -41,18 +41,20 @@ $ ./make_csv.py tableX/results/*/nfd_train*/ > tableX/tableX.csv
 You can use Python's Pandas library or R to manipulate the data.
 
 
-----------
-Convention
-----------
-"propeff" or "propostions per mean effects"  -> #F/E
-"prop" or "propositions"                     -> #F
-"200" or "default"                           -> #D
+------------------
+NAMING CONVENTIONS
+------------------
+"propeff" or "propostions per mean effects"  -> LF/eff
+"prop" or "propositions"                     -> LF
+"200" or "default"                           -> D
+"min" or "hmin"                              -> SAI
+"avi" or "hvfc"                              -> SUI
 
 
 ----
 TODO
 ----
 * Fix `make_csv.py`
-* `table7-diff-estimates` -- fill directories
-* `table8-nn-statespace`  -- script to run h^ff and h^gc over the state space.
-* `table9-expanded-heuristics`  -- script to run h^ff, h^gc and h*.
+* `table7-diff-estimates`       -- logic-based heuristics
+* `table8-nn-statespace`        -- logic-based heuristics
+* `table9-expanded-heuristics`  -- logic-based heuristics

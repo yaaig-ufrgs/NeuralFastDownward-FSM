@@ -25,11 +25,11 @@ domains_d = {'blocks': "../../NeuralFastDownward/tasks/experiments/statespaces/s
 #domains = ['blocks', 'grid', 'npuzzle', 'rovers', 'scanalyzer', 'scanalyzerunit', 'transport', 'transportunit', 'visitall']
 domains = ['blocks', 'grid', 'npuzzle', 'rovers', 'scanalyzerunit', 'transportunit', 'visitall']
 
-h_ss = []
-h_bfs = []
-h_dfs = []
-h_rw = []
-h_bfsrw = []
+#h_ss = []
+#h_bfs = []
+#h_dfs = []
+#h_rw = []
+#h_bfsrw = []
 
 print("domain,sample,n_seeds,mean_h")
 for domain in domains:
@@ -41,7 +41,7 @@ for domain in domains:
     df_statespace = pd.read_csv(domains_d[domain], header=None, sep=';', comment='#', usecols=[0,1], names=['h', 'state'])
     max_df_statespace = max(df_statespace['h'])
     mean_h_fssp = df_statespace['h'].mean()
-    h_ss.append(mean_h_fssp)
+    #h_ss.append(mean_h_fssp)
     print(f"{domain},statespace,NA,{round(mean_h_fssp,2)}")
 
     h_algo = []
@@ -63,14 +63,14 @@ for domain in domains:
 
         mean_h = df_curr['h'].mean()
 
-        if "-bfs-" in sample:
-            h_bfs.append(mean_h)
-        if "-dfs-" in sample:
-            h_dfs.append(mean_h)
-        if "-rw-" in sample:
-            h_rw.append(mean_h)
-        if "-bfsrw-" in sample:
-            h_bfsrw.append(mean_h)
+        #if "-bfs-" in sample:
+        #    h_bfs.append(mean_h)
+        #if "-dfs-" in sample:
+        #    h_dfs.append(mean_h)
+        #if "-rw-" in sample:
+        #    h_rw.append(mean_h)
+        #if "-bfsrw-" in sample:
+        #    h_bfsrw.append(mean_h)
 
         h_algo.append(mean_h)
         print(f"{domain},{sample.split('/')[-1]},{len(csv_files)},{round(mean_h,2)}")
