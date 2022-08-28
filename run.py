@@ -19,16 +19,6 @@ from glob import glob
 from natsort import natsorted
 from scripts.create_random_sample import random_sample_statespace
 
-domains_d = {'blocks': "tasks/experiments/statespaces/statespace_blocks_probBLOCKS-7-0_hstar",
-             'grid': "tasks/experiments/statespaces/statespace_grid_grid_hstar",
-             'npuzzle': "tasks/experiments/statespaces/statespace_npuzzle_prob-n3-1_hstar",
-             'rovers': "tasks/experiments/statespaces/statespace_rovers_rovers_hstar",
-             'scanalyzer': "tasks/experiments/statespaces/statespace_scanalyzer_scanalyzer_hstar",
-             'scanalyzerunit': "tasks/experiments/statespaces/statespace_scanalyzerunit_scanalyzer_hstar",
-             'transport': "tasks/experiments/statespaces/statespace_transport_transport_hstar",
-             'transportunit': "tasks/experiments/statespaces/statespace_transportunit_transport_hstar",
-             'visitall': "tasks/experiments/statespaces/statespace_visitall_p-1-4_hstar",
-             }
 
 def build_args(d: dict, prefix: str) -> str:
     args = ""

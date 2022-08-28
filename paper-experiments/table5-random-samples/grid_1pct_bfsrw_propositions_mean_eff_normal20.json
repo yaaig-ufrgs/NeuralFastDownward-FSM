@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "samples": "paper-experiments/table5-random-samples/samples/grid-1pct-bfsrw-propeff-contrasting20",
+        "samples": "paper-experiments/table5-random-samples/samples/grid-1pct-bfsrw-propeff-normal20",
         "exp-type": "all",
         "exp-net-seed": "0..4",
         "exp-sample-seed": "0..4",
@@ -32,7 +32,7 @@
     "train": {
         "model": "resnet",
         "training-size": 0.9,
-        "output-folder": "paper-experiments/table5-random-samples/results/grid-1pct-bfsrw-propeff-contrasting20",
+        "output-folder": "paper-experiments/table5-random-samples/results/grid-1pct-bfsrw-propeff-normal20",
         "restart-no-conv": "yes",
         "hidden-layers": 2,
         "hidden-units": 250,
