@@ -14,7 +14,7 @@ _DEST_FOLDER = "results"
 algorithm = argv[1]
 assert algorithm in ["astar", "eager_greedy"], "invalid search algorithm"
 heuristic = argv[2]
-assert heuristic in ["add", "blind", "ff", "goalcount", "hmax", "lmcut"], "invalid heuristic"
+assert heuristic in ["add", "blind", "ff", "goalcount", "hmax", "lmcut", "hstar"], "invalid heuristic"
 
 for pddl in argv[3:]:
 	domain, problem = pddl.replace(".pddl", "").rsplit("/", 2)[1:]
