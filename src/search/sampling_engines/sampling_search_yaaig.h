@@ -27,6 +27,7 @@ protected:
     const bool store_plan_cost;
     const bool store_state;
     const std::string state_representation;
+    const std::string random_sample_state_representation;
     const std::string minimization;
     const int assignments_by_undefined_state;
     const int avi_k;

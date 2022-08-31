@@ -166,11 +166,21 @@ void SamplingSearchYaaig::create_contrasting_samples(
     } 
 
     while (num_samples > 0) {
-        pair<bool,State> fs = pa.get_full_state(true, *rng);
-        if (!fs.first)
-            continue;
-        State s = fs.second;
-        s.unpack();
+        string bin = "";
+        vector<int> values;
+        if (random_sample_state_representation == "complete" ||
+            random_sample_state_representation == "complete_no_mutex") {
+            pair<bool, State> fs = pa.get_full_state(random_sample_state_representation != "complete_no_mutex", *rng);
+            if (!fs.first)
+                continue;
+            State s = fs.second;
+            s.unpack();
+            bin = s.to_binary();
+            values = s.get_values();
+        } else {
+            bin = pa.to_binary(random_sample_state_representation == "undefined_char");
+            values = pa.get_values();
+        }
         int h = -1;
         if (sampling_technique::contrasting_estimates == "random") {
             int idx = (*rng)() * values_set.size();
@@ -183,11 +193,10 @@ void SamplingSearchYaaig::create_contrasting_samples(
         }
         if (h == -1) { utils::g_log << "Error: sampling_search_yaaig.cc:183" << endl; exit(0); }
         if (minimization != "complete" && minimization != "both") {
-            string bin = s.to_binary();
             if (state_value.count(bin) != 0)
                 h = state_value[bin];
         }
-        values_set.push_back(make_pair(h, make_pair(s.get_values(), s.to_binary())));
+        values_set.push_back(make_pair(h, make_pair(values, bin)));
         num_samples--;
     }
 }
@@ -592,6 +601,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       store_plan_cost(opts.get<bool>("store_plan_cost")),
       store_state(opts.get<bool>("store_state")),
       state_representation(opts.get<string>("state_representation")),
+      random_sample_state_representation(opts.get<string>("random_sample_state_representation")),
       minimization(opts.get<string>("minimization")),
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
       avi_k(opts.get<int>("avi_k")),
@@ -637,6 +647,10 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
     parser.add_option<string>(
             "state_representation",
             "State facts representation format (complete, complete_no_mutex, partial, valid, undefined, assign_undefined, undefined_char, values_partial, values_complete, facts_partial, or facts_complete).",
+            "complete");
+    parser.add_option<string>(
+            "random_sample_state_representation",
+            "Random samples' state facts representation format (complete, complete_no_mutex, partial, undefined.",
             "complete");
     parser.add_option<string>(
             "minimization",

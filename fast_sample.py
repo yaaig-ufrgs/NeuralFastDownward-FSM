@@ -104,6 +104,7 @@ def yaaig_ferber(args, meth):
         args.bound = max_h
 
     state_repr = get_full_state_repr_name(args.state_representation)
+    random_state_repr = get_full_state_repr_name(args.random_sample_state_representation)
     instances = [args.instance] if args.instance.endswith(".pddl") else glob(f"{args.instance}/*.pddl")
 
     if ".." in args.seed:
@@ -149,7 +150,7 @@ def yaaig_ferber(args, meth):
                            f'bound={args.bound}, depth_k={args.k_depth}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state}, '
                            f'state_filtering={args.state_filtering}, bfs_percentage={args.bfs_percentage}, allow_duplicates={args.allow_dups}, '
                            f'unit_cost={args.sample_unit_cost}, max_time={args.max_time}, mem_limit_mb={args.mem_limit})], '
-                           f'state_representation={state_repr}, random_seed={i}, minimization={args.minimization}, '
+                           f'state_representation={state_repr}, random_sample_state_representation={random_state_repr}, random_seed={i}, minimization={args.minimization}, '
                            f'avi_k={args.avi_k}, avi_epsilon={args.avi_eps}, avi_unit_cost={args.sample_unit_cost}, '
                            f'avi_rule={args.avi_rule}, sort_h={args.sort_h}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
                            f'assignments_by_undefined_state={args.us_assignments}, evaluator={args.evaluator})\"')

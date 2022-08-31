@@ -1319,6 +1319,13 @@ def get_sample_args():
         help="Output state representation. (default: %(default)s)",
     )
     parser.add_argument(
+        "-rst",
+        "--random-sample-state-representation",
+        choices=["fs", "fs-nomutex", "ps", "us"],  # full state, full state no mutex, partial state, undefined
+        default=default_args.SAMPLE_RANDOM_SAMPLE_STATE_REPRESENTATION,
+        help="Random sample state representation. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-uss",
         "--us-assignments",
         type=int,
