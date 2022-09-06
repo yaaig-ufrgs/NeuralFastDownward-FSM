@@ -370,7 +370,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                         if (find(avi_mapping[s_key].successors.begin(), avi_mapping[s_key].successors.end(), pair)
                                 == avi_mapping[s_key].successors.end()) {
                             avi_mapping[s_key].successors.push_back(pair);
-                            avi_mapping[t_key].predecessors.push_back(make_pair(s_key, op_proxy.get_cost()));
+                            //avi_mapping[t_key].predecessors.push_back(make_pair(s_key, op_proxy.get_cost()));
                         }
                     }
                 }
