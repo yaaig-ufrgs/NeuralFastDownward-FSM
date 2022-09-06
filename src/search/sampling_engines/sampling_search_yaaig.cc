@@ -361,8 +361,8 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                 OperatorProxy op_proxy = operators[op_id];
                 PartialAssignment t = s->get_partial_successor(op_proxy);
                 if (state_representation == "complete_no_mutex" || !t.violates_mutexes()) {
-		    std::vector<shared_ptr<PartialAssignment>> compatible_states;
-		    trie.find_all_compatible(t.get_values(), avi_rule, compatible_states);
+                    std::vector<shared_ptr<PartialAssignment>> compatible_states;
+                    trie.find_all_compatible(t.get_values(), avi_rule, compatible_states);
                     for (shared_ptr<PartialAssignment>& t_: compatible_states) {
                         string t_key = t_->values_to_string();
                         //string t_key = t_->to_binary(true);
@@ -393,29 +393,31 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     t = std::chrono::high_resolution_clock::now();
     int updates = 0, updates_between_rmse = sampling_technique::modified_tasks.size() * 0.25;
     log_mse(updates);
-    set<AviNode*> queue;
+
+    priority_queue<AviNode*, vector<AviNode*>, AviNodePtrCompare> queue;
     for (pair<string,AviNode> p: avi_mapping)
-        queue.insert(&avi_mapping[p.first]);
+        queue.push(&avi_mapping[p.first]);
     while (!queue.empty()) {
-        set<AviNode*>::iterator it = queue.begin();
+        AviNode* item = queue.top();
+        queue.pop();
         bool relaxed = false;
-        for (pair<string,int> s_ : (*it)->successors) { // pair<binary,op_cost>
+        for (pair<string,int> s_ : item->successors) { // pair<binary,op_cost>
             int candidate_heuristic = avi_mapping[s_.first].best_h + (avi_unit_cost ? 1 : s_.second);
-            if (candidate_heuristic < (*it)->best_h) {
-                (*it)->best_h = candidate_heuristic;
+            if (candidate_heuristic < item->best_h) {
+                item->best_h = candidate_heuristic;
                 relaxed = true;
-                for (shared_ptr<PartialAssignment>& s : (*it)->samples)
+                for (shared_ptr<PartialAssignment>& s : item->samples)
                     s->estimated_heuristic = candidate_heuristic;
             }
         }
         if (relaxed) {
-            for (pair<string,int> s_ : (*it)->predecessors)
-                queue.insert(&avi_mapping[s_.first]);
+            for (pair<string,int> s_ : item->successors)
+                queue.push(&avi_mapping[s_.first]);
             if (++updates % updates_between_rmse == 0)
                 log_mse(updates);
         }
-        queue.erase(it);
     }
+
     log_mse(updates);
     utils::g_log << "[AVI] Time updating h-values: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;

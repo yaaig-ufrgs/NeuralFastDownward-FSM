@@ -81,10 +81,13 @@ public:
     std::vector<std::pair<std::string,int>> predecessors;
     std::vector<std::pair<std::string,int>> successors;
     int best_h = INT_MAX;
+};
 
-    bool operator()(AviNode& a, AviNode& b) {
-        return a.best_h < b.best_h;
-    }
+class AviNodePtrCompare {
+public:
+    bool operator()(AviNode* const first, AviNode* const second) {
+        return first->best_h > second->best_h;
+    };
 };
 }
 #endif
