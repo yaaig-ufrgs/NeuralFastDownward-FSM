@@ -5,7 +5,6 @@
 
 #include <vector>
 #include <random>
-#include <bitset>
 #include <limits.h>
 
 #include <unordered_map>

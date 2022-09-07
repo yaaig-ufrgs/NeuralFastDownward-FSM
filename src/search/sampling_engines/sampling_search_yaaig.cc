@@ -344,6 +344,23 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     utils::g_log << "[AVI] Time creating trie: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 
+    // Check for hash conflicts.
+    unordered_set<size_t> hashset;
+    unordered_set<string> sampleset;
+    for (shared_ptr<PartialAssignment> &s : sampling_technique::modified_tasks) {
+        size_t h_key = hash<string>{}(s->values_to_string());
+        if (sampleset.count(s->values_to_string()) == 0) {
+          sampleset.insert(s->values_to_string());
+          if (hashset.count(h_key) == 1) {
+              utils::g_log << "Hash key " << h_key << " conflict!" << endl;
+              exit(0);
+          } else
+            hashset.insert(h_key);
+        }
+    }
+    hashset.clear();
+    sampleset.clear();
+
     // Mapping
     t = std::chrono::high_resolution_clock::now();
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
