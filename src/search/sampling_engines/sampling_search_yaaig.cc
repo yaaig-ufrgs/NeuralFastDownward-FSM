@@ -349,10 +349,13 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
     const OperatorsProxy operators = task_proxy.get_operators();
-    unordered_map<string,AviNode> avi_mapping;
+    //unordered_map<string,AviNode> avi_mapping;
+    unordered_map<size_t,AviNode> avi_mapping;
     for (shared_ptr<PartialAssignment>& s : sampling_technique::modified_tasks) {
-      utils::g_log << "." << std::flush;
-        string s_key = s->values_to_string();
+        //utils::g_log << "." << std::flush;
+        //string s_key = s->values_to_string();
+        size_t s_key = hash<string>{}(s->values_to_string());
+        //int s_key = idx;
         //string s_key = s->to_binary(true);
         if (avi_mapping[s_key].samples.size() == 0) {
             vector<OperatorID> applicable_operators;
@@ -364,9 +367,11 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                     std::vector<shared_ptr<PartialAssignment>> compatible_states;
                     trie.find_all_compatible(t.get_values(), avi_rule, compatible_states);
                     for (shared_ptr<PartialAssignment>& t_: compatible_states) {
-                        string t_key = t_->values_to_string();
+                        //string t_key = t_->values_to_string();
+                        size_t t_key = hash<string>{}(t_->values_to_string());
                         //string t_key = t_->to_binary(true);
-                        pair<string,int> pair = make_pair(t_key, op_proxy.get_cost());
+                        //pair<string,int> pair = make_pair(t_key, op_proxy.get_cost());
+                        pair<size_t,int> pair = make_pair(t_key, op_proxy.get_cost());
                         if (find(avi_mapping[s_key].successors.begin(), avi_mapping[s_key].successors.end(), pair)
                                 == avi_mapping[s_key].successors.end()) {
                             avi_mapping[s_key].successors.push_back(pair);
@@ -381,9 +386,11 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             avi_mapping[s_key].best_h = s->estimated_heuristic;
     }
     if (minimization == "partial" || minimization == "both") {
-        for (pair<string,AviNode> p: avi_mapping)
-            for (shared_ptr<PartialAssignment>& s : p.second.samples)
+        //for (pair<string, AviNode> p : avi_mapping) {
+        for (pair<size_t, AviNode> p : avi_mapping) {
+            for (shared_ptr<PartialAssignment> &s : p.second.samples)
                 s->estimated_heuristic = p.second.best_h;
+        }
     }
     utils::g_log << "[AVI] Time creating AVI mapping: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
@@ -395,13 +402,15 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     log_mse(updates);
 
     priority_queue<AviNode*, vector<AviNode*>, AviNodePtrCompare> queue;
-    for (pair<string,AviNode> p: avi_mapping)
+    //for (pair<string,AviNode> p: avi_mapping)
+    for (pair<size_t,AviNode> p: avi_mapping)
         queue.push(&avi_mapping[p.first]);
     while (!queue.empty()) {
         AviNode* item = queue.top();
         queue.pop();
         bool relaxed = false;
-        for (pair<string,int> s_ : item->successors) { // pair<binary,op_cost>
+        //for (pair<string,int> s_ : item->successors) { // pair<binary,op_cost>
+        for (pair<size_t,int> s_ : item->successors) { // pair<binary,op_cost>
             int candidate_heuristic = avi_mapping[s_.first].best_h + (avi_unit_cost ? 1 : s_.second);
             if (candidate_heuristic < item->best_h) {
                 item->best_h = candidate_heuristic;
@@ -411,7 +420,8 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             }
         }
         if (relaxed) {
-            for (pair<string,int> s_ : item->predecessors)
+            //for (pair<string,int> s_ : item->predecessors)
+            for (pair<size_t,int> s_ : item->predecessors)
                 queue.push(&avi_mapping[s_.first]);
             if (++updates % updates_between_rmse == 0)
                 log_mse(updates);

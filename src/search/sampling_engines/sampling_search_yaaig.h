@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <random>
+#include <bitset>
 #include <limits.h>
 
 #include <unordered_map>
@@ -78,8 +79,10 @@ private:
 class AviNode {
 public:
     std::vector<std::shared_ptr<PartialAssignment>> samples;
-    std::vector<std::pair<std::string,int>> predecessors;
-    std::vector<std::pair<std::string,int>> successors;
+    //std::vector<std::pair<std::string,int>> predecessors;
+    std::vector<std::pair<size_t,int>> predecessors;
+    //std::vector<std::pair<std::string,int>> successors;
+    std::vector<std::pair<size_t,int>> successors;
     int best_h = INT_MAX;
 };
 

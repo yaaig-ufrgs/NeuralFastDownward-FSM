@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-
 class AxiomsProxy;
 class ConditionsProxy;
 class EffectProxy;
