@@ -414,12 +414,12 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         any_relaxed = false;
         for (pair<size_t,AviNode> s: avi_mapping) {
             relaxed = false;
-            for (pair<size_t,int> s_ : avi_mapping[s.first].successors) { // pair<state,op_cost>
+            for (pair<size_t,int> s_ : s.second.successors) { // pair<state,op_cost>
                 int candidate_heuristic = avi_mapping[s_.first].best_h + (avi_unit_cost ? 1 : s_.second);
                 if (candidate_heuristic < avi_mapping[s.first].best_h) {
                     avi_mapping[s.first].best_h = candidate_heuristic;
                     relaxed = true;
-                    for (shared_ptr<PartialAssignment>& s : avi_mapping[s.first].samples)
+                    for (shared_ptr<PartialAssignment>& s : s.second.samples)
                         s->estimated_heuristic = candidate_heuristic;
                 }
             }
