@@ -163,7 +163,7 @@ void SamplingSearchYaaig::create_contrasting_samples(
     if (sampling_technique::contrasting_estimates == "default") {
         for (pair<int, pair<vector<int>, string>> &p : values_set)
             max_h = max(max_h, p.first);
-    } 
+    }
 
     while (num_samples > 0) {
         string bin = "";
@@ -366,14 +366,10 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
     const OperatorsProxy operators = task_proxy.get_operators();
-    //unordered_map<string,AviNode> avi_mapping;
     unordered_map<size_t,AviNode> avi_mapping;
     for (shared_ptr<PartialAssignment>& s : sampling_technique::modified_tasks) {
-        //utils::g_log << "." << std::flush;
-        //string s_key = s->values_to_string();
+        //size_t s_key = hash<string>{}(s->to_binary(true));
         size_t s_key = hash<string>{}(s->values_to_string());
-        //int s_key = idx;
-        //string s_key = s->to_binary(true);
         if (avi_mapping[s_key].samples.size() == 0) {
             vector<OperatorID> applicable_operators;
             succ_generator->generate_applicable_ops(*s, applicable_operators, true);
@@ -384,15 +380,12 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                     std::vector<shared_ptr<PartialAssignment>> compatible_states;
                     trie.find_all_compatible(t.get_values(), avi_rule, compatible_states);
                     for (shared_ptr<PartialAssignment>& t_: compatible_states) {
-                        //string t_key = t_->values_to_string();
+                        //size_t t_key = hash<string>{}(t_->to_binary(true));
                         size_t t_key = hash<string>{}(t_->values_to_string());
-                        //string t_key = t_->to_binary(true);
-                        //pair<string,int> pair = make_pair(t_key, op_proxy.get_cost());
                         pair<size_t,int> pair = make_pair(t_key, op_proxy.get_cost());
                         if (find(avi_mapping[s_key].successors.begin(), avi_mapping[s_key].successors.end(), pair)
                                 == avi_mapping[s_key].successors.end()) {
                             avi_mapping[s_key].successors.push_back(pair);
-                            avi_mapping[t_key].predecessors.push_back(make_pair(s_key, op_proxy.get_cost()));
                         }
                     }
                 }
@@ -403,7 +396,6 @@ void SamplingSearchYaaig::approximate_value_iteration() {
             avi_mapping[s_key].best_h = s->estimated_heuristic;
     }
     if (minimization == "partial" || minimization == "both") {
-        //for (pair<string, AviNode> p : avi_mapping) {
         for (pair<size_t, AviNode> p : avi_mapping) {
             for (shared_ptr<PartialAssignment> &s : p.second.samples)
                 s->estimated_heuristic = p.second.best_h;
@@ -417,35 +409,29 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     t = std::chrono::high_resolution_clock::now();
     int updates = 0, updates_between_rmse = sampling_technique::modified_tasks.size() * 0.25;
     log_mse(updates);
-
-    priority_queue<AviNode*, vector<AviNode*>, AviNodePtrCompare> queue;
-    //for (pair<string,AviNode> p: avi_mapping)
-    for (pair<size_t,AviNode> p: avi_mapping)
-        queue.push(&avi_mapping[p.first]);
-    while (!queue.empty()) {
-        AviNode* item = queue.top();
-        queue.pop();
-        bool relaxed = false;
-        //for (pair<string,int> s_ : item->successors) { // pair<binary,op_cost>
-        for (pair<size_t,int> s_ : item->successors) { // pair<binary,op_cost>
-            int candidate_heuristic = avi_mapping[s_.first].best_h + (avi_unit_cost ? 1 : s_.second);
-            if (candidate_heuristic < item->best_h) {
-                item->best_h = candidate_heuristic;
-                relaxed = true;
-                for (shared_ptr<PartialAssignment>& s : item->samples)
-                    s->estimated_heuristic = candidate_heuristic;
+    bool relaxed, any_relaxed;
+    do {
+        any_relaxed = false;
+        for (pair<size_t,AviNode> s: avi_mapping) {
+            relaxed = false;
+            for (pair<size_t,int> s_ : avi_mapping[s.first].successors) { // pair<state,op_cost>
+                int candidate_heuristic = avi_mapping[s_.first].best_h + (avi_unit_cost ? 1 : s_.second);
+                if (candidate_heuristic < avi_mapping[s.first].best_h) {
+                    avi_mapping[s.first].best_h = candidate_heuristic;
+                    relaxed = true;
+                    for (shared_ptr<PartialAssignment>& s : avi_mapping[s.first].samples)
+                        s->estimated_heuristic = candidate_heuristic;
+                }
+            }
+            if (relaxed) {
+                any_relaxed = true;
+                if (++updates % updates_between_rmse == 0)
+                    log_mse(updates);
             }
         }
-        if (relaxed) {
-            //for (pair<string,int> s_ : item->predecessors)
-            for (pair<size_t,int> s_ : item->predecessors)
-                queue.push(&avi_mapping[s_.first]);
-            if (++updates % updates_between_rmse == 0)
-                log_mse(updates);
-        }
-    }
-
+    } while (any_relaxed);
     log_mse(updates);
+
     utils::g_log << "[AVI] Time updating h-values: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 
