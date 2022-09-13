@@ -20,6 +20,7 @@ list of contributors, history, etc.), see [here](https://github.com/PatrickFerbe
     pip install -r requirements.txt
     ./build.py release
     ```
+   3.1. If torch 1.9.0 is not found, install Python <= 3.9.10.
 
 ### Messing with the neural network code
 See
