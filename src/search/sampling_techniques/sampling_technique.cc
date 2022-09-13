@@ -169,7 +169,7 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
         sampling_technique::random_samples = max_samples;
         max_samples = 1;
     } else if (random_percentage > 0) {
-        sampling_technique::random_samples = max_samples - int(max_samples * random_percentage*0.01);
+        sampling_technique::random_samples = int(max_samples * random_percentage*0.01);
         max_samples -= sampling_technique::random_samples;
     }
 
