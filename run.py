@@ -19,7 +19,6 @@ from glob import glob
 from natsort import natsorted
 from scripts.create_random_sample import random_sample_statespace
 
-
 def build_args(d: dict, prefix: str) -> str:
     args = ""
     for k, v in d.items():

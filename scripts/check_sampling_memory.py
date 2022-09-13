@@ -23,7 +23,7 @@ search_command = "sampling_search_yaaig(eager_greedy([ff(transform=sampling_tran
     "subtechnique=percentage, bound=propositions_per_mean_effects, depth_k=99999, random_seed=0, restart_h_when_goal_state=true, "\
     "allow_duplicates=interrollout, unit_cost=false, max_time=600, mem_limit_mb=2048)], state_representation=complete, random_seed=0, "\
     "minimization=both, avi_k=1, avi_its=9999, avi_epsilon=-1, avi_unit_cost=false, avi_rule=vu_u, sort_h=false, mse_hstar_file=, "\
-    "mse_result_file=rmse, assignments_by_undefined_state=10, contrasting_samples=0, evaluator=blind())"
+    "mse_result_file=rmse, assignments_by_undefined_state=10, random_samples=0, evaluator=blind())"
 
 def get_mem(line, output):
     try:

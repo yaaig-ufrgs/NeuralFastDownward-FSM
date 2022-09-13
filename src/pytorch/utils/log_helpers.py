@@ -63,7 +63,7 @@ def logging_train_config(
         "shuffle_seed": args.shuffle_seed,
         "remove_goals": args.remove_goals,
         "standard_first": args.standard_first,
-        "contrast_first": args.contrast_first,
+        "random_first": args.random_first,
         "intercalate_samples": args.intercalate_samples,
         "cut_non_intercalated_samples": args.cut_non_intercalated_samples,
         "dataloader_num_workers": args.data_num_workers,

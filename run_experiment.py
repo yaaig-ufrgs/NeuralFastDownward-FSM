@@ -60,7 +60,7 @@ def run_train_test(args, sample_seed: int, net_seed: int):
             f"-d {args.train_dropout_rate} -bi {args.train_bias} -biout {args.train_bias_output} "
             f"-of {args.train_output_folder} -rst {args.train_restart_no_conv} "
             f"-s {net_seed} -shs {args.train_shuffle_seed} -sp {args.train_scatter_plot} -spn {args.train_plot_n_epochs} "
-            f"-rmg {args.train_remove_goals} -cfst {args.train_contrast_first} "
+            f"-rmg {args.train_remove_goals} -rfst {args.train_random_first} "
             f"-sfst {args.train_standard_first} -itc {args.train_intercalate_samples} "
             f"-cut {args.train_cut_non_intercalated_samples} -gpu {args.train_use_gpu} "
             f"-tsize {args.train_training_size} -spt {args.train_sample_percentage} "

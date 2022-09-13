@@ -132,7 +132,7 @@ vector<State> SamplingSearchYaaig::assign_undefined_state(shared_ptr<PartialAssi
     return states;
 }
 
-void SamplingSearchYaaig::create_contrasting_samples(
+void SamplingSearchYaaig::create_random_samples(
     vector<pair<int,pair<vector<int>,string>>>& values_set,
     int num_samples
 ) {
@@ -145,7 +145,7 @@ void SamplingSearchYaaig::create_contrasting_samples(
         vector<int>(n_atoms, PartialAssignment::UNASSIGNED)
     );
 
-    // Hack: if 100% contrasting then we sample 1 state to know the structure of the state.
+    // Hack: if 100% random then we sample 1 state to know the structure of the state.
     // At this point it is no longer important.
     if (sampling_technique::modified_tasks.size() == 1)
         values_set.clear();
@@ -160,7 +160,7 @@ void SamplingSearchYaaig::create_contrasting_samples(
     }
 
     int max_h = 0; // biggest h found in the search
-    if (sampling_technique::contrasting_estimates == "default") {
+    if (sampling_technique::random_estimates == "default") {
         for (pair<int, pair<vector<int>, string>> &p : values_set)
             max_h = max(max_h, p.first);
     }
@@ -182,13 +182,13 @@ void SamplingSearchYaaig::create_contrasting_samples(
             values = pa.get_values();
         }
         int h = -1;
-        if (sampling_technique::contrasting_estimates == "random") {
+        if (sampling_technique::random_estimates == "random") {
             int idx = (*rng)() * values_set.size();
             h = values_set[idx].first;
-        } else if (sampling_technique::contrasting_estimates == "default" && max_h != 0) {
+        } else if (sampling_technique::random_estimates == "default" && max_h != 0) {
               h = max_h + 1;
         } else { // number range
-              int range = stoi(sampling_technique::contrasting_estimates);
+              int range = stoi(sampling_technique::random_estimates);
               h = ((*rng)() * (range))+1; // +1 so we don't get fake goals
         }
         if (h == -1) { utils::g_log << "Error: sampling_search_yaaig.cc:183" << endl; exit(0); }
@@ -537,8 +537,8 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         }
     }
 
-    if (sampling_technique::contrasting_samples > 0)
-        create_contrasting_samples(values_set, sampling_technique::contrasting_samples);
+    if (sampling_technique::random_samples > 0)
+        create_random_samples(values_set, sampling_technique::random_samples);
 
     if ((minimization == "complete" || minimization == "both")
             && !(state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char")) {

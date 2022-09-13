@@ -146,7 +146,7 @@ def yaaig_ferber(args, meth):
                            f'{"--translate-options --unit-cost --search-options " if args.sample_unit_cost == "true" and args.evaluator == "pdb(hstar_pattern([]))" else ""}'
                            f'--search \"sampling_search_yaaig({search_algo}, '
                            f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, max_samples={args.max_samples}, '
-                           f'contrasting_percentage={args.contrasting_percentage}, contrasting_estimates={args.contrasting_estimates}, bound_multiplier={args.bound_multiplier}, 'f'technique={args.technique}, subtechnique={args.subtechnique}, '
+                           f'random_percentage={args.random_percentage}, random_estimates={args.random_estimates}, bound_multiplier={args.bound_multiplier}, 'f'technique={args.technique}, subtechnique={args.subtechnique}, '
                            f'bound={args.bound}, depth_k={args.k_depth}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state}, '
                            f'state_filtering={args.state_filtering}, bfs_percentage={args.bfs_percentage}, allow_duplicates={args.allow_dups}, '
                            f'unit_cost={args.sample_unit_cost}, max_time={args.max_time}, mem_limit_mb={args.mem_limit})], '

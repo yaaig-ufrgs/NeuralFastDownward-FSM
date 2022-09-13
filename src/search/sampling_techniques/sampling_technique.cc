@@ -23,8 +23,8 @@ namespace sampling_technique {
 std::shared_ptr<AbstractTask> modified_task = nullptr;
 std::vector<std::shared_ptr<PartialAssignment>> modified_tasks = std::vector<std::shared_ptr<PartialAssignment>>();
 
-int contrasting_samples = 0;
-string contrasting_estimates = "default";
+int random_samples = 0;
+string random_estimates = "default";
 
 static shared_ptr<AbstractTask> _parse_sampling_transform(
         options::OptionParser &parser) {
@@ -118,8 +118,8 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
           searches(opts.get<int>("searches")),
           samples_per_search(opts.get<int>("samples_per_search")),
           max_samples(opts.get<int>("max_samples")),
-          contrasting_percentage(opts.get<int>("contrasting_percentage")),
-          contrasting_estimates(opts.get<string>("contrasting_estimates")),
+          random_percentage(opts.get<int>("random_percentage")),
+          random_estimates(opts.get<string>("random_estimates")),
           bound_multiplier(opts.get<double>("bound_multiplier")),
           max_time(opts.get<double>("max_time")),
           mem_limit_mb(opts.get<int>("mem_limit_mb")),
@@ -162,18 +162,18 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
     // assert(max_samples > 0);
     if (!(max_samples > 0)) { utils::g_log << "Error: sampling_technique.cc:164" << endl; exit(0); }
 
-    // assert(contrasting_percentage >= 0 && contrasting_percentage < 100);
-    if (!(contrasting_percentage >= 0 && contrasting_percentage <= 100)) { utils::g_log << "Error: sampling_technique.cc:159" << endl; exit(0); }
+    // assert(random_percentage >= 0 && random_percentage < 100);
+    if (!(random_percentage >= 0 && random_percentage <= 100)) { utils::g_log << "Error: sampling_technique.cc:159" << endl; exit(0); }
 
-    if (contrasting_percentage == 100) {
-        sampling_technique::contrasting_samples = max_samples;
+    if (random_percentage == 100) {
+        sampling_technique::random_samples = max_samples;
         max_samples = 1;
-    } else if (contrasting_percentage > 0) {
-        sampling_technique::contrasting_samples = max_samples - int(max_samples * contrasting_percentage*0.01);
-        max_samples -= sampling_technique::contrasting_samples;
+    } else if (random_percentage > 0) {
+        sampling_technique::random_samples = max_samples - int(max_samples * random_percentage*0.01);
+        max_samples -= sampling_technique::random_samples;
     }
 
-    sampling_technique::contrasting_estimates = contrasting_estimates;
+    sampling_technique::random_estimates = random_estimates;
 
     if (max_samples == -1)
         max_samples = numeric_limits<int>::max(); // ~2 billion samples
@@ -461,12 +461,12 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
             "-1"
     );
     parser.add_option<int>(
-            "contrasting_percentage",
+            "random_percentage",
             "Percentage [0,100) of randomly generated samples (h = L+1).",
             "0"
     );
     parser.add_option<string>(
-            "contrasting_estimates",
+            "random_estimates",
             "Estimate values for random samples:"
             "default, random, number"
             "default");

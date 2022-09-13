@@ -66,7 +66,7 @@ def train_main(args: Namespace):
     set_seeds(args)
 
     # If forcibly changing the order that the samples are presented, disable shuffling.
-    if args.standard_first or args.contrast_first or args.intercalate_samples != 0:
+    if args.standard_first or args.random_first or args.intercalate_samples != 0:
         args.shuffle = False
 
     args.domain, args.problem = get_problem_by_sample_filename(args.samples)
@@ -191,7 +191,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
             clamping=args.clamping,
             remove_goals=args.remove_goals,
             standard_first=args.standard_first,
-            contrast_first=args.contrast_first,
+            random_first=args.random_first,
             intercalate_samples=args.intercalate_samples,
             cut_non_intercalated_samples=args.cut_non_intercalated_samples,
             sample_percentage=args.sample_percentage,
@@ -339,7 +339,7 @@ def post_training_evaluation(trained_model: str, args: Namespace, dirname: str) 
         clamping=args.clamping,
         remove_goals=args.remove_goals,
         standard_first=args.standard_first,
-        contrast_first=args.contrast_first,
+        random_first=args.random_first,
         intercalate_samples=args.intercalate_samples,
         cut_non_intercalated_samples=args.cut_non_intercalated_samples,
         sample_percentage=args.sample_percentage,

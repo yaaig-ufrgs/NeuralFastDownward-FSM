@@ -145,9 +145,9 @@ class TrainWorkflow:
 
         return test_loss / num_batches
 
-    def val_loop_no_contrasting(self, contrasting_h: int = 501) -> float:
+    def val_loop_no_random(self, random_h: int = 501) -> float:
         """
-        Evaluation loop without contrasting.
+        Evaluation loop without random.
         """
         num_batches = len(self.val_dataloader)
         val_loss = 0
@@ -157,9 +157,9 @@ class TrainWorkflow:
                 pred = self.model(X.float())
                 val_loss += self.loss_fn(
                     torch.tensor(
-                        [pred_ for i, pred_ in enumerate(pred) if y[i] != contrasting_h]
+                        [pred_ for i, pred_ in enumerate(pred) if y[i] != random_h]
                     ),
-                    torch.tensor([y_ for y_ in y if y_ != contrasting_h]),
+                    torch.tensor([y_ for y_ in y if y_ != random_h]),
                 ).item()
         return val_loss / num_batches
 
