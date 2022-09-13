@@ -43,7 +43,7 @@
         "shuffle": "yes",
         "bias": "yes",
         "learning-rate": 0.0001,
-        "normalize-output": "no",
+        "randomize-output": "no",
         "use-gpu": "no",
         "scatter-plot": "no",
         "output-layer": "regression",
