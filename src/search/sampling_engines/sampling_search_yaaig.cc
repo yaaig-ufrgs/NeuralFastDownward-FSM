@@ -368,7 +368,6 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     const OperatorsProxy operators = task_proxy.get_operators();
     unordered_map<size_t,AviNode> avi_mapping;
     for (shared_ptr<PartialAssignment>& s : sampling_technique::modified_tasks) {
-        //size_t s_key = hash<string>{}(s->to_binary(true));
         size_t s_key = hash<string>{}(s->values_to_string());
         if (avi_mapping[s_key].samples.size() == 0) {
             vector<OperatorID> applicable_operators;
@@ -380,7 +379,6 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                     std::vector<shared_ptr<PartialAssignment>> compatible_states;
                     trie.find_all_compatible(t.get_values(), avi_rule, compatible_states);
                     for (shared_ptr<PartialAssignment>& t_: compatible_states) {
-                        //size_t t_key = hash<string>{}(t_->to_binary(true));
                         size_t t_key = hash<string>{}(t_->values_to_string());
                         pair<size_t,int> pair = make_pair(t_key, op_proxy.get_cost());
                         if (find(avi_mapping[s_key].successors.begin(), avi_mapping[s_key].successors.end(), pair)
@@ -415,7 +413,7 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         for (pair<size_t,AviNode> s: avi_mapping) {
             relaxed = false;
             for (pair<size_t,int> s_ : s.second.successors) { // pair<state,op_cost>
-                int candidate_heuristic = avi_mapping[s_.first].best_h + (avi_unit_cost ? 1 : s_.second);
+                int candidate_heuristic = avi_mapping[s_.first].best_h + (unit_cost ? 1 : s_.second);
                 if (candidate_heuristic < avi_mapping[s.first].best_h) {
                     avi_mapping[s.first].best_h = candidate_heuristic;
                     relaxed = true;
@@ -622,7 +620,6 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       avi_k(opts.get<int>("avi_k")),
       avi_rule(getRule(opts.get<string>("avi_rule"))),
       avi_epsilon(stod(opts.get<string>("avi_epsilon"))),
-      avi_unit_cost(opts.get<bool>("avi_unit_cost")),
       sort_h(opts.get<bool>("sort_h")),
       mse_hstar_file(opts.get<string>("mse_hstar_file")),
       mse_result_file(opts.get<string>("mse_result_file")),
@@ -687,10 +684,6 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "avi_epsilon",
             "RMSE no-improvement threshold for AVI early stop.",
             "-1");
-    parser.add_option<bool>(
-            "avi_unit_cost",
-            "Increments h by unit cost instead of operator cost.",
-            "false");
     parser.add_option<bool>(
             "sort_h",
             "Sort samples by increasing h-values.",

@@ -221,7 +221,10 @@ string PartialAssignment::values_to_string() const {
     if (values.size() <= 0) { utils::g_log << "Error: task_proxy.cc:221" << endl; exit(0); }
     string vstring = "";
     for (unsigned i = 0; i < values.size(); i++) {
-        if (values[i] >= 255) { utils::g_log << "Error: task_proxy.cc:224" << endl; exit(0); }
+        if (values[i] >= 255) {
+            // utils::g_log << "PartialAssignment::values_to_string() OVERFLOW. Returning PartialAssignment::to_binary(use_undefined=true)" << endl;
+            return this->to_binary(true);
+        }
         vstring += (char)(values[i]-127);
     }
     return vstring;

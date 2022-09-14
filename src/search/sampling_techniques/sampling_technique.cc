@@ -118,6 +118,7 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
           searches(opts.get<int>("searches")),
           samples_per_search(opts.get<int>("samples_per_search")),
           max_samples(opts.get<int>("max_samples")),
+          unit_cost(opts.get<bool>("unit_cost")),
           contrasting_percentage(opts.get<int>("contrasting_percentage")),
           contrasting_estimates(opts.get<string>("contrasting_estimates")),
           bound_multiplier(opts.get<double>("bound_multiplier")),
@@ -159,8 +160,10 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
     }
     */
 
-    // assert(max_samples > 0);
-    if (!(max_samples > 0)) { utils::g_log << "Error: sampling_technique.cc:164" << endl; exit(0); }
+    if (max_samples == -1)
+        max_samples = numeric_limits<int>::max();
+    if (searches == -1)
+        searches = numeric_limits<int>::max();
 
     // assert(contrasting_percentage >= 0 && contrasting_percentage < 100);
     if (!(contrasting_percentage >= 0 && contrasting_percentage <= 100)) { utils::g_log << "Error: sampling_technique.cc:159" << endl; exit(0); }
@@ -174,9 +177,6 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
     }
 
     sampling_technique::contrasting_estimates = contrasting_estimates;
-
-    if (max_samples == -1)
-        max_samples = numeric_limits<int>::max(); // ~2 billion samples
 
     if (mem_limit_mb != -1)
         mem_limit = mem_limit_mb * 1024; // KB
@@ -200,6 +200,7 @@ SamplingTechnique::SamplingTechnique(
             searches(searches),
             samples_per_search(-1),
             max_samples(-1),
+            unit_cost(false),
             bound_multiplier(1.0),
             max_time(-1.0),
             mem_limit_mb(-1),
@@ -283,9 +284,9 @@ shared_ptr<AbstractTask> SamplingTechnique::next(
 vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         const shared_ptr<AbstractTask> &seed_task) {
     vector<shared_ptr<PartialAssignment>> tasks;
-    bool max_samples_reached = false;
+    bool limit_reached = false;
     utils::HashSet<PartialAssignment> hash_table;
-    while ((!empty() || !max_samples_reached) && !stopped) {
+    for (unsigned i = 0; i < searches && (!empty() || !limit_reached); ++i) {
         update_alternative_task_mutexes(seed_task);
         vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
         for (shared_ptr<PartialAssignment>& task : next_tasks) {
@@ -304,7 +305,7 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
 
             tasks.push_back(task);
             if (max_samples != numeric_limits<int>::max() && tasks.size() >= (unsigned)max_samples) {
-                max_samples_reached = true;
+                limit_reached = true;
                 break;
             }
         }
@@ -447,7 +448,7 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
     parser.add_option<int>(
             "searches",
             "Number of times this sampling technique shall be used.",
-            "1"
+            "-1"
     );
     parser.add_option<int>(
             "samples_per_search",
@@ -460,6 +461,11 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
             "If -1, max_samples is qual to numeric_limits<int>.",
             "-1"
     );
+    parser.add_option<bool>(
+            "unit_cost",
+            "Increments h by unit cost instead of operator cost.",
+            "false"
+    );
     parser.add_option<int>(
             "contrasting_percentage",
             "Percentage [0,100) of randomly generated samples (h = L+1).",
@@ -468,8 +474,9 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
     parser.add_option<string>(
             "contrasting_estimates",
             "Estimate values for random samples:"
-            "default, random, number"
-            "default");
+            "default, random, number",
+            "default"
+    );
     parser.add_option<double>(
             "bound_multiplier",
             "Multiplies the bound of each rollout by the given value.",

@@ -51,7 +51,6 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           subtechnique(opts.get<string>("subtechnique")),
           bound(opts.get<string>("bound")),
           depth_k(opts.get<int>("depth_k")),
-          unit_cost(opts.get<bool>("unit_cost")),
           allow_duplicates_interrollout(
               opts.get<string>("allow_duplicates") == "all" || opts.get<string>("allow_duplicates") == "interrollout"
           ),
@@ -145,6 +144,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
         }
         stopped = stop_sampling();
     }
+
     // assert(samples.size() <= steps);
     if (!(samples.size() <= steps)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:142" << endl; exit(0); }
     return samples;
@@ -407,14 +407,13 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
     if (technique == "rw" || technique == "bfs_rw" || technique == "dfs_rw") {
         samples_per_search = ceil(bound_multiplier * bound_n);
-        utils::g_log << "Depth limit: " << samples_per_search << endl;
     } else if (technique == "dfs" || technique == "bfs") {
         depth_k = ceil(bound_multiplier * bound_n);
-        utils::g_log << "Depth limit: " << depth_k << endl;
     }
 
     if (technique == "rw") {
         samples = sample_with_random_walk(pa, samples_per_search, is_valid_state, func_bias, task_proxy);
+        cout << "s=" << samples.size() << endl;
 
     } else if (technique == "bfs_rw" && subtechnique == "percentage") {
         samples = sample_with_percentage_limited_bfs(bfs_percentage, pa, is_valid_state, leaves, task_proxy);
@@ -479,6 +478,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             samples.insert(samples.end(), samples_.begin(), samples_.end());
         }
     }
+    cout << "returna " << samples.size() << endl;
     return samples;
 }
 
@@ -507,11 +507,6 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "Maximum depth using the dfs/bfs algorithm. "
             "If it doesn't reach max_samples, complete with random walks of each leaf state.",
             "99999"
-    );
-    parser.add_option<bool>(
-            "unit_cost",
-            "Increments h by unit cost instead of operator cost.",
-            "false"
     );
     parser.add_option<string>(
             "allow_duplicates",

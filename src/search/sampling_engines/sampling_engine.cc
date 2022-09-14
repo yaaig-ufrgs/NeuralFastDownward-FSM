@@ -100,14 +100,8 @@ SearchStatus SamplingEngine::step() {
     if ((*current_technique)->get_name() == "gbackward_yaaig") { // TODO: use_teacher_search var
         vector<shared_ptr<PartialAssignment>> tasks_all = (*current_technique)->next_all(task);
         bound_value = (*current_technique)->bound_value;
+        unit_cost = (*current_technique)->unit_cost;
         vector<string> new_samples = sample_all(tasks_all);
-        /*
-        size_t sum_size = 0;
-        for (string s : new_samples) {
-            sum_size += sizeof(char) * s.length();
-        }
-        cout << "\n#### SAMPLE_SIZE_STRING_OUTPUT: " << sum_size << endl;
-        */
         sample_cache_manager.insert(new_samples.begin(), new_samples.end());
     } else {
         const shared_ptr<AbstractTask> next_task = (*current_technique)->next(task);

@@ -143,16 +143,15 @@ def yaaig_ferber(args, meth):
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
                            f'--build release {instance} '
-                           f'{"--translate-options --unit-cost --search-options " if args.sample_unit_cost == "true" and args.evaluator == "pdb(hstar_pattern([]))" else ""}'
+                           f'{"--translate-options --unit-cost --search-options " if args.unit_cost == "true" and args.evaluator == "pdb(hstar_pattern([]))" else ""}'
                            f'--search \"sampling_search_yaaig({search_algo}, '
                            f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, max_samples={args.max_samples}, '
                            f'contrasting_percentage={args.contrasting_percentage}, contrasting_estimates={args.contrasting_estimates}, bound_multiplier={args.bound_multiplier}, 'f'technique={args.technique}, subtechnique={args.subtechnique}, '
                            f'bound={args.bound}, depth_k={args.k_depth}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state}, '
                            f'state_filtering={args.state_filtering}, bfs_percentage={args.bfs_percentage}, allow_duplicates={args.allow_dups}, '
-                           f'unit_cost={args.sample_unit_cost}, max_time={args.max_time}, mem_limit_mb={args.mem_limit})], '
+                           f'unit_cost={args.unit_cost}, max_time={args.max_time}, mem_limit_mb={args.mem_limit})], '
                            f'state_representation={state_repr}, random_sample_state_representation={random_state_repr}, random_seed={i}, minimization={args.minimization}, '
-                           f'avi_k={args.avi_k}, avi_epsilon={args.avi_eps}, avi_unit_cost={args.sample_unit_cost}, '
-                           f'avi_rule={args.avi_rule}, sort_h={args.sort_h}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
+                           f'avi_k={args.avi_k}, avi_epsilon={args.avi_eps}, avi_rule={args.avi_rule}, sort_h={args.sort_h}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
                            f'assignments_by_undefined_state={args.us_assignments}, evaluator={args.evaluator})\"')
                 elif meth == "ferber":
                     out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.ferber_technique}_{args.ferber_select_state.replace("_", "-")}_{args.ferber_num_tasks}_{args.ferber_min_walk_len}_{args.ferber_max_walk_len}_ss{i}'
@@ -182,7 +181,7 @@ def sample(args):
     os.system(f"tsp -S {args.threads}")
     args.restart_h_when_goal_state = bool2str(args.restart_h_when_goal_state)
     args.state_filtering = bool2str(args.state_filtering)
-    args.sample_unit_cost = bool2str(args.sample_unit_cost)
+    args.unit_cost = bool2str(args.unit_cost)
     args.sort_h = bool2str(args.sort_h)
     args.ferber_technique = "iforward" if args.ferber_technique == "forward" else "gbackward"
 

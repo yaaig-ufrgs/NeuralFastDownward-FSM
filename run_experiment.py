@@ -35,7 +35,7 @@ def filter_samples(samples: [str], seed: int) -> [str]:
     return filtered_samples
 
 
-def run_train_test(args, sample_seed: int, net_seed: int):
+def run_train_test(args, sample_seed: int, net_seed: int, run_tsp: bool = True):
     global PID
     sample_files = glob(f"{args.samples}/*")
     sample_files = filter_samples(sample_files, sample_seed)
@@ -80,7 +80,7 @@ def run_train_test(args, sample_seed: int, net_seed: int):
             f"-sdir {args.test_samples_dir} -atn {args.test_auto_tasks_n} "
             f"-ats {args.test_auto_tasks_seed} -pt {args.test_test_model} "
             f"-dlog {args.test_downward_logs} -unit-cost {args.test_unit_cost} "
-            f"{trained_model_dir}"
+            f"{trained_model_dir} {args.test_instance_pddl}"
         )
 
         eval_args = (
@@ -109,12 +109,14 @@ def run_train_test(args, sample_seed: int, net_seed: int):
             cmd = f"./test.py {test_args}"
         else:
             cmd = f"./train-and-test.sh '{train_args}' '{test_args}'"
-        cmd = f"tsp taskset -c {pcore} {cmd}"
-        if pdep >= 0:
-            cmd = cmd.replace("tsp", f"tsp -D {pdep}")
 
-        os.system(cmd)
+        if run_tsp:
+            cmd = f"tsp taskset -c {pcore} {cmd}"
+            if pdep >= 0:
+                cmd = cmd.replace("tsp", f"tsp -D {pdep}")
+
         print("run_experiment.py:", cmd, end="\n\n")
+        os.system(cmd)
 
         PID += 1
 
@@ -199,7 +201,7 @@ def experiment(args):
         only_eval(args)
     else:
         if args.exp_type == "single":
-            run_train_test(args, max_sample_seed, max_net_seed, runs=1)
+            run_train_test(args, max_sample_seed, max_net_seed, run_tsp=False)
 
         elif args.exp_type == "all":
             for i in range(min_sample_seed, max_sample_seed + 1):

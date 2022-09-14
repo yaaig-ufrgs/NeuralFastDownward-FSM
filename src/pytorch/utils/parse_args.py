@@ -1049,6 +1049,13 @@ def get_exp_args():
         help="Path to training folder with trained model. Only used if only testing.",
     )
     parser.add_argument(
+        "-tst-pddl",
+        "--test-instance-pddl",
+        type=str,
+        default="",
+        help="Instance PDDL used for testing. (default: auto)",
+    )
+    parser.add_argument(
         "-tst-diff",
         "--test-save-git-diff",
         type=str2bool,
@@ -1474,8 +1481,8 @@ def get_sample_args():
         help="Depth `k` for DFS or BFS. (default: %(default)s)",
     )
     parser.add_argument(
-        "-s-unit-cost",
-        "--sample-unit-cost",
+        "-unit",
+        "--unit-cost",
         type=str2bool,
         default=default_args.SAMPLE_UNIT_COST,
         help="Increments h by unit cost instead of operator cost. (default: %(default)s)",

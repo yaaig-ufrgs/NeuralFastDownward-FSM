@@ -48,9 +48,12 @@ public:
 protected:
     options::Registry *registry;
     const options::Predefinitions *predefinitions;
-    const int searches;
+    int searches;
     int samples_per_search;
     int max_samples;
+public:
+    const bool unit_cost;
+protected:
     int contrasting_percentage;
     std::string contrasting_estimates;
     const double bound_multiplier;

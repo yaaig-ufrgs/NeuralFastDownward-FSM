@@ -50,7 +50,7 @@ protected:
                         std::vector<std::shared_ptr<PartialAssignment>> /*tasks*/) { return {}; };
 
     int bound_value = 0;
-
+    bool unit_cost = false;
 
 public:
     explicit SamplingEngine(const options::Options &opts);

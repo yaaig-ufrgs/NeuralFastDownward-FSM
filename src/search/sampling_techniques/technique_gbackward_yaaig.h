@@ -25,7 +25,6 @@ protected:
     const string subtechnique;
     const string bound;
     int depth_k;
-    const bool unit_cost;
     const bool allow_duplicates_interrollout;
     const bool allow_duplicates_intrarollout;
     const bool wrap_partial_assignment;
