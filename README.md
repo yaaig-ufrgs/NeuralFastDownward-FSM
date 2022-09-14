@@ -29,25 +29,17 @@ See
 ### Default arguments
 See [`src/pytorch/utils/default_args.py`](https://github.com/yaaig-ufrgs/NeuralFastDownward/tree/main/src/pytorch/utils/default_args.py) and [`src/pytorch/utils/parse_args.py`](https://github.com/yaaig-ufrgs/NeuralFastDownward/tree/main/src/pytorch/utils/parse_args.py) for lists of default argument values when invoking programs.
 
-### Generating samples (CURRENTLY BEING REWORKED)
+### Generating samples
 
 ```
-usage: fast_sample.py [-h] [-stp STATESPACE]
-                      [-tech {rw,dfs,bfs,dfs_rw,bfs_rw,countBoth,countAdds,countDels}]
-                      [-stech {round_robin,random_leaf,percentage}]
-                      [-search {greedy,astar}] [-heur {ff,lmcut}]
-                      [-ftech {forward,backward}]
-                      [-fst {random_state,entire_plan,init_state}]
-                      [-fn FERBER_NUM_TASKS] [-fmin FERBER_MIN_WALK_LEN]
-                      [-fmax FERBER_MAX_WALK_LEN] [-st {fs,fs-nomutex,ps,us,au,vs}]
-                      [-uss US_ASSIGNMENTS] [-max MAX_SAMPLES] [-scs SEARCHES]
-                      [-sscs SAMPLES_PER_SEARCH] [-s SEED]
-                      [-dups {all,interrollout,none}] [-ms MULT_SEED]
-                      [-c CONTRASTING] [-rhg RESTART_H_WHEN_GOAL_STATE]
-                      [-o OUTPUT_DIR] [-sym SYMM_STATESPACE]
-                      [-min {none,partial,complete,both}] [-sorth SORT_H]
-                      [-avi AVI_K] [-avits AVI_ITS] [-avieps AVI_EPS] [-kd K_DEPTH]
-                      [-threads THREADS]
+usage: fast_sample.py [-h] [-tst-dir TEST_TASKS_DIR] [-stp STATESPACE] [-tech {rw,dfs,bfs,dfs_rw,bfs_rw,countBoth,countAdds,countDels}]
+                      [-stech {round_robin,random_leaf,percentage}] [-search {greedy,astar}] [-heur {ff,lmcut}] [-ftech {forward,backward}]
+                      [-fst {random_state,entire_plan,init_state}] [-fn FERBER_NUM_TASKS] [-fmin FERBER_MIN_WALK_LEN] [-fmax FERBER_MAX_WALK_LEN]
+                      [-st {fs,fs-nomutex,ps,us,au,uc,vs}] [-rst {fs,fs-nomutex,ps,us}] [-uss US_ASSIGNMENTS] [-max MAX_SAMPLES] [-scs SEARCHES]
+                      [-sscs SAMPLES_PER_SEARCH] [-b BOUND] [-bm BOUND_MULTIPLIER] [-s SEED] [-dups {all,interrollout,none}] [-ms MULT_SEED]
+                      [-c RANDOM_PERCENTAGE] [-ce RANDOM_ESTIMATES] [-rhg RESTART_H_WHEN_GOAL_STATE] [-sf STATE_FILTERING] [-bfsp BFS_PERCENTAGE]
+                      [-o OUTPUT_DIR] [-min {none,partial,complete,both}] [-sorth SORT_H] [-avi AVI_K] [-avieps AVI_EPS] [-avirule {vu_u,v_vu}]
+                      [-kd K_DEPTH] [-unit UNIT_COST] [-threads THREADS] [-t MAX_TIME] [-m MEM_LIMIT] [-eval EVALUATOR]
                       instance {ferber,yaaig}
 ```
 
@@ -67,24 +59,15 @@ the possible arguments. Almost everything is modifiable, and the default neural
 network is a ResNet.
 
 ```
-usage: train.py [-h] [-mdl {hnn,resnet}] [-sb SAVE_BEST_EPOCH_MODEL] [-pat PATIENCE]
-                [-o {regression,prefix,one-hot}] [-lo LINEAR_OUTPUT] [-f NUM_FOLDS]
-                [-hl HIDDEN_LAYERS] [-hu HIDDEN_UNITS [HIDDEN_UNITS ...]]
-                [-b BATCH_SIZE] [-lr LEARNING_RATE] [-e MAX_EPOCHS]
-                [-t MAX_TRAINING_TIME] [-a {sigmoid,relu,leakyrelu}]
-                [-w WEIGHT_DECAY] [-d DROPOUT_RATE] [-shs SHUFFLE_SEED] [-sh SHUFFLE]
-                [-gpu USE_GPU] [-bi BIAS] [-tsize TRAINING_SIZE]
-                [-spt SAMPLE_PERCENTAGE] [-us UNIQUE_SAMPLES] [-ust UNIQUE_STATES]
-                [-biout BIAS_OUTPUT] [-clp CLAMPING] [-rmg REMOVE_GOALS]
-                [-of OUTPUT_FOLDER] [-s SEED] [-sp SCATTER_PLOT] [-spn PLOT_N_EPOCHS]
-                [-wm {default,sqrt_k,1,01,xavier_uniform,xavier_normal,kaiming_uniform,kaiming_normal,rai}]
-                [-lf {mse,mse_weighted,rmse}] [-cdir COMPARE_CSV_DIR]
-                [-hdir HSTAR_CSV_DIR] [-no NORMALIZE_OUTPUT] [-rst RESTART_NO_CONV]
-                [-sibd SEED_INCREMENT_WHEN_BORN_DEAD] [-trd NUM_THREADS]
+usage: train.py [-h] [-mdl {hnn,resnet,resnet_rtdl}] [-sb SAVE_BEST_EPOCH_MODEL] [-diff SAVE_GIT_DIFF] [-pte POST_TRAIN_EVAL] [-pat PATIENCE]
+                [-o {regression,prefix,one-hot}] [-lo LINEAR_OUTPUT] [-f NUM_FOLDS] [-hl HIDDEN_LAYERS] [-hu HIDDEN_UNITS [HIDDEN_UNITS ...]]
+                [-b BATCH_SIZE] [-lr LEARNING_RATE] [-e MAX_EPOCHS] [-t MAX_TRAINING_TIME] [-a {sigmoid,relu,leakyrelu}] [-w WEIGHT_DECAY]
+                [-d DROPOUT_RATE] [-shs SHUFFLE_SEED] [-sh SHUFFLE] [-gpu USE_GPU] [-bi BIAS] [-tsize TRAINING_SIZE] [-spt SAMPLE_PERCENTAGE]
+                [-us UNIQUE_SAMPLES] [-ust UNIQUE_STATES] [-biout BIAS_OUTPUT] [-of OUTPUT_FOLDER] [-s SEED] [-sp SCATTER_PLOT]
+                [-spn PLOT_N_EPOCHS] [-wm {default,sqrt_k,1,01,xavier_uniform,xavier_normal,kaiming_uniform,kaiming_normal,rai}] [-lf {mse,rmse}]
+                [-no NORMALIZE_OUTPUT] [-rst RESTART_NO_CONV] [-cdead CHECK_DEAD_ONCE] [-sibd SEED_INCREMENT_WHEN_BORN_DEAD] [-trd NUM_THREADS]
                 [-dnw DATA_NUM_WORKERS] [-hpred SAVE_HEURISTIC_PRED]
-                [-sfst STANDARD_FIRST] [-cfst CONTRAST_FIRST]
-                [-itc INTERCALATE_SAMPLES] [-cut CUT_NON_INTERCALATED_SAMPLES]
-                [-addfn [{patience,output-layer,num-folds,hidden-layers,hidden-units,batch-size,learning-rate,max-epochs,max-training-time,activation,weight-decay,dropout-rate,shuffle-seed,shuffle,use-gpu,bias,bias-output,normalize-output,restart-no-conv,sample-percentage,training-size} ...]]
+                [-addfn [{patience,output-layer,num-folds,hidden-layers,hidden-units,batch-size,learning-rate,max-epochs,max-training-time,activation,weight-decay,dropout-rate,shuffle-seed,shuffle,use-gpu,bias,bias-output,normalize-output,restart-no-conv,sample-percentage,training-size} [{patience,output-layer,num-folds,hidden-layers,hidden-units,batch-size,learning-rate,max-epochs,max-training-time,activation,weight-decay,dropout-rate,shuffle-seed,shuffle,use-gpu,bias,bias-output,normalize-output,restart-no-conv,sample-percentage,training-size} ...]]]
                 samples
 ```
 
@@ -100,21 +83,19 @@ Executing `./test.py -h` will show how to use it with all
 the possible arguments.
 
 ```
-usage: test.py [-h] [-tfc TRAIN_FOLDER_COMPARE] [-d DOMAIN_PDDL] [-a {astar,eager_greedy}]
-               [-heu {nn,add,blind,ff,goalcount,hmax,lmcut}] [-hm HEURISTIC_MULTIPLIER] [-u UNARY_THRESHOLD]
-               [-t MAX_SEARCH_TIME] [-m MAX_SEARCH_MEMORY] [-e MAX_EXPANSIONS] [-pt {all,best,epochs}] [-sdir SAMPLES_DIR]
-               [-ffile FACTS_FILE] [-dfile DEFAULTS_FILE] [-atn AUTO_TASKS_N] [-atf AUTO_TASKS_FOLDER]
-               [-ats AUTO_TASKS_SEED] [-dlog DOWNWARD_LOGS]
-               train_folder [problem_pddls ...]
+usage: test.py [-h] [-tfc TRAIN_FOLDER_COMPARE] [-diff SAVE_GIT_DIFF] [-d DOMAIN_PDDL] [-a {astar,eager_greedy}]
+               [-heu {nn,add,blind,ff,goalcount,hmax,lmcut,hstar}] [-hm HEURISTIC_MULTIPLIER] [-u UNARY_THRESHOLD] [-t MAX_SEARCH_TIME]
+               [-m MAX_SEARCH_MEMORY] [-e MAX_EXPANSIONS] [-pt {all,best,epochs}] [-sdir SAMPLES_DIR] [-ffile FACTS_FILE] [-dfile DEFAULTS_FILE]
+               [-atn AUTO_TASKS_N] [-atf AUTO_TASKS_FOLDER] [-ats AUTO_TASKS_SEED] [-dlog DOWNWARD_LOGS] [-unit-cost UNIT_COST]
+               train_folder [problem_pddls [problem_pddls ...]]
 ```
 
 The example below takes a network folder (the trained model is located within
 it) as the first argument and will automatically find 10 random (fixed seed as default) 
-instances of the same domain to use for testing. `-t` is the time limit to solve the task, `-a` is the search algorithm used, and `-pt`
-[all|best] indicates if we want to use all the folds (if using e.g. 10-fold-cross-validation) for testing or the best one.
+instances of the same domain to use for testing. `-t` is the time limit to solve the task, `-a` is the search algorithm used.
 
 ```
-./test.py results/nfd_train.yaaig_blocks_probBLOCKS-7-0_rw_fs_avi1-itmax_1pct_ss0.ns0 -t 360 -a eager_greedy -pt all
+./test.py results/nfd_train.yaaig_blocks_probBLOCKS-7-0_rw_fs_avi1-itmax_1pct_ss0.ns0 -t 360 -a eager_greedy
 ```
 
 You can also manually indicate the _n_ tasks you want to evaluate.
@@ -136,7 +117,6 @@ over other samples and have `"exp-only-eval": "yes"`. The `"sampling"` section
 is interesting to have if you want to perform a full
 sampling-then-train-then-test workflow, but most of the time you'll have
 already generated your samples separately.
-
 
 
 ## Features
