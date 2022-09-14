@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
 
-"""
-./run_experiment.py --help
-
-Observation: do not enable multi-threading for multiple runs of this same script.
-             If using multi-threading, do it for only one instance directory.
-
-NEEDS TESTING.
-
-"""
-
 import sys
 import os
 from glob import glob
@@ -137,8 +127,9 @@ def yaaig_ferber(args, meth):
                 sps = f"_maxs-{args.max_samples}" if args.max_samples != -1 else ""
                 boundtype = f"bnd-{get_bound_type(args.bound)}"
                 boundmult = "" if args.bound_multiplier == 1.0 else f"_bmul-{str(args.bound_multiplier).replace('.', '-')}"
+                rsquant = "" if args.random_percentage == 0 else f"_rs-{int(args.max_samples*(args.random_percentage*0.01))}"
                 if meth == "yaaig":
-                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{subtech}{depthk}{avik}{avits}{dups}_min-{args.minimization}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}_ss{i}'
+                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{subtech}{depthk}{avik}{avits}{dups}_min-{args.minimization}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}{rsquant}_ss{i}'
                     rmse_out = out + "_rmse"
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
