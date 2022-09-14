@@ -413,7 +413,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
 
     if (technique == "rw") {
         samples = sample_with_random_walk(pa, samples_per_search, is_valid_state, func_bias, task_proxy);
-        cout << "s=" << samples.size() << endl;
 
     } else if (technique == "bfs_rw" && subtechnique == "percentage") {
         samples = sample_with_percentage_limited_bfs(bfs_percentage, pa, is_valid_state, leaves, task_proxy);
@@ -478,7 +477,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             samples.insert(samples.end(), samples_.begin(), samples_.end());
         }
     }
-    cout << "returna " << samples.size() << endl;
     return samples;
 }
 
