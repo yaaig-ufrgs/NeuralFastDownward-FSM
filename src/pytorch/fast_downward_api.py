@@ -1,8 +1,7 @@
-from distutils.filelist import translate_pattern
 import logging
 from os import path, makedirs
 from subprocess import check_output, CalledProcessError
-from re import compile, findall, match
+from re import findall, match
 import src.pytorch.utils.default_args as default_args
 
 _log = logging.getLogger(__name__)
@@ -113,7 +112,7 @@ def solve_instance_with_fd(
 
         if domain_pddl != default_args.DOMAIN_PDDL:
             cl.insert(3, domain_pddl)
-        if save_log_to != None:
+        if save_log_to is not None:
             # Set temp files to allow running multiple
             # downwards at the same time
             cl.insert(1, "--sas-file")
@@ -136,7 +135,7 @@ def solve_instance_with_fd(
         output = e.output
         _log.info("Solution not found.")
     output = output.decode("utf-8")
-    if save_log_bool and save_log_to != None:
+    if save_log_bool and save_log_to is not None:
         save_downward_log(save_log_to, instance_pddl, output)
     return parse_fd_output(output)
 

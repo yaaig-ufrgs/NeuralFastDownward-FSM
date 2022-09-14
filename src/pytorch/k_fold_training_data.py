@@ -1,5 +1,4 @@
 import logging
-from random import shuffle as randshuffle
 import torch
 import numpy as np
 import random
@@ -143,7 +142,7 @@ class KFoldTrainingData:
             )
 
             g = None if self.seed == -1 else torch.Generator()
-            if g != None:
+            if g is not None:
                 g.manual_seed(self.shuffle_seed)
 
             pin_mem = True if self.device == torch.device("cuda:0") else False

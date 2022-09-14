@@ -2,9 +2,6 @@ import matplotlib.pyplot as plt
 import imageio
 import glob
 import logging
-import csv
-import pandas as pd
-import seaborn as sns
 import numpy as np
 from os import path, makedirs, remove
 
@@ -26,7 +23,7 @@ def save_y_pred_scatter(data: list, t: int, fold_idx: int, directory: str, prefi
     """
     Create and save real y and predicted y scatter plot.
     """
-    if data == None:
+    if data is None:
         return
 
     if t == -1:
@@ -40,9 +37,6 @@ def save_y_pred_scatter(data: list, t: int, fold_idx: int, directory: str, prefi
 
     real = [d[1] for d in data]
     pred = [d[2] for d in data]
-
-    #real = [data[key][0] for key in data]
-    #pred = [data[key][1] for key in data]
 
     fig, ax = plt.subplots()
     ax.scatter(real, pred, s=2, alpha=0.35, c="red", zorder=10)
@@ -69,6 +63,49 @@ def save_y_pred_scatter(data: list, t: int, fold_idx: int, directory: str, prefi
     plt.close(fig)
 
 
+def save_pred_error_bar_eval(data: list, directory: str, data_type: str):
+    """
+    Create and save error count histogram plot for eval.
+    """
+    if len(data) == 0:
+        return
+
+    if not path.exists(directory):
+        makedirs(directory)
+
+    plot_title = get_plot_title(directory)
+    plot_filename = f"eval_error_{data_type}_{plot_title}"
+
+    rounded_errors = [round(d[4]) for d in data]
+
+    d_error_count = {}
+
+    for e in rounded_errors:
+        d_error_count[e] = d_error_count.get(e, 0) + 1
+
+    fig, ax = plt.subplots()
+    x_vals = list(d_error_count.keys())
+    y_vals = list(d_error_count.values())
+    low_y, high_y = min(y_vals), max(y_vals)
+
+    ax.bar(x_vals, y_vals, width=0.7, align='center', edgecolor='black', linewidth=0.5)
+    #ax.set_xlim(low_x-5, high_x+5)
+    ax.set_ylim(low_y, high_y+5)
+
+    ax.set_xlabel("y-pred")
+    ax.set_ylabel("count")
+    hl = round(len(plot_title) / 2)
+    ax.set_title(data_type + "_" + plot_title[:hl] + "\n" + plot_title[hl:], fontsize=9)
+    ax.text(0.70, 0.90, f'max_error = {max(rounded_errors)}\navg_error = {round(sum(rounded_errors) / len(rounded_errors), 2)}\nmax_count = {max(d_error_count, key=d_error_count.get)}',
+            horizontalalignment='left',
+            verticalalignment='center',
+            transform = ax.transAxes)
+    fig.savefig(directory + "/" + plot_filename + ".png")
+
+    plt.clf()
+    plt.close(fig)
+
+
 def save_y_pred_scatter_eval(data: list, directory: str, data_type: str):
     """
     Create and save real y and predicted y scatter plot for eval.
@@ -80,7 +117,6 @@ def save_y_pred_scatter_eval(data: list, directory: str, data_type: str):
         makedirs(directory)
 
     plot_title = get_plot_title(directory)
-    #plot_filename = f"eval_best_{data_type}_{plot_title}_{suffix}"
     plot_filename = f"eval_best_{data_type}_{plot_title}"
 
     real = [round(d[2]) for d in data]
@@ -102,158 +138,12 @@ def save_y_pred_scatter_eval(data: list, directory: str, data_type: str):
     ax.set_xlabel("h^sample")
     ax.set_ylabel("h^NN")
     hl = round(len(plot_title) / 2)
-    #ax.set_title(data_type + "_" + plot_title[:hl] + "\n" + plot_title[hl:] + suffix, fontsize=9)
     ax.set_title(data_type + "_" + plot_title[:hl] + "\n" + plot_title[hl:], fontsize=9)
 
     fig.savefig(directory + "/" + plot_filename + ".png")
 
     plt.clf()
     plt.close(fig)
-
-
-def save_pred_error_bar_eval(data: list, directory: str, data_type: str):
-    """
-    Create and save error count histogram plot for eval.
-    """
-    if len(data) == 0:
-        return
-
-    if not path.exists(directory):
-        makedirs(directory)
-
-    plot_title = get_plot_title(directory)
-    #plot_filename = f"eval_error_{data_type}_{plot_title}_{suffix}"
-    plot_filename = f"eval_error_{data_type}_{plot_title}"
-
-    rounded_errors = [round(d[4]) for d in data]
-
-    d_error_count = {}
-
-    for e in rounded_errors:
-        d_error_count[e] = d_error_count.get(e, 0) + 1
-
-    fig, ax = plt.subplots()
-    x_vals = list(d_error_count.keys())
-    y_vals = list(d_error_count.values())
-    #low_x, high_x = min(x_vals), max(x_vals)
-    low_y, high_y = min(y_vals), max(y_vals)
-
-    ax.bar(x_vals, y_vals, width=0.7, align='center', edgecolor='black', linewidth=0.5)
-    #ax.set_xlim(low_x-5, high_x+5)
-    ax.set_ylim(low_y, high_y+5)
-
-    ax.set_xlabel("y-pred")
-    ax.set_ylabel("count")
-    hl = round(len(plot_title) / 2)
-    #ax.set_title(data_type + "_" + + plot_title[:hl] + "\n" + plot_title[hl:], fontsize=9)
-    ax.set_title(data_type + "_" + plot_title[:hl] + "\n" + plot_title[hl:], fontsize=9)
-    ax.text(0.70, 0.90, f'max_error = {max(rounded_errors)}\navg_error = {round(sum(rounded_errors) / len(rounded_errors), 2)}\nmax_count = {max(d_error_count, key=d_error_count.get)}',
-            horizontalalignment='left',
-            verticalalignment='center',
-            transform = ax.transAxes)
-    fig.savefig(directory + "/" + plot_filename + ".png")
-
-    plt.clf()
-    plt.close(fig)
-
-
-def save_h_pred_scatter(directory: str, csv_hnn: str, csv_h: str) -> dict:
-    """
-    Creates a scatter plot with hnn and some other heuristic (if data for it is available).
-    """
-    merged_data = {}
-    with open(csv_hnn, "r") as f:
-        reader = csv.reader(f)
-        next(reader, None)
-        for row in reader:
-            state = row[0]
-            h_pred = row[2]
-            merged_data[state] = [int(h_pred), None]
-
-    with open(csv_h, "r") as f:
-        reader = csv.reader(f)
-        next(reader, None)
-        for row in reader:
-            state = row[0]
-            h = row[1]
-            if state in merged_data:
-                merged_data[state][1] = int(h)
-
-    data = {k: v for k, v in merged_data.items() if None not in v}
-
-    hnn = [data[key][0] for key in data]
-    h = [data[key][1] for key in data]
-
-    fig, ax = plt.subplots()
-    ax.scatter(h, hnn, s=2, alpha=0.35, c="red", zorder=10)
-
-    lims = [
-        np.min([ax.get_xlim(), ax.get_ylim()]),  # min of both axes
-        np.max([ax.get_xlim(), ax.get_ylim()]),  # max of both axes
-    ]
-
-    ax.plot(lims, lims, "k-", alpha=0.80, zorder=0)
-    ax.set_aspect("equal")
-    ax.set_xlim(lims)
-    ax.set_ylim(lims)
-
-    plot_name = get_plot_title(directory)
-
-    ax.set_title(plot_name, fontsize=9)
-
-    compared_heuristic = csv_h.split("/")[-2]
-    if compared_heuristic == "hstar":
-        compared_heuristic = "h*"
-
-    ax.set_xlabel(compared_heuristic)
-    ax.set_ylabel("h^NN")
-
-    plot_filename = "hnn_" + compared_heuristic + "_" + plot_name
-    fig.savefig(directory + "/" + plot_filename + ".png")
-    plt.clf()
-    plt.close(fig)
-
-    return data
-
-
-def save_box_plot(directory: str, data: dict, csv_h: str):
-    """
-    Creates a box plot with hnn, h* and goalcount (when possible, i.e. all the data is available).
-    """
-    with open(csv_h, "r") as f:
-        reader = csv.reader(f)
-        next(reader, None)
-        for row in reader:
-            state = row[0]
-            h = row[1]
-            if state in data:
-                # merged_data[state][2] = int(h)
-                data[state].append(int(h))
-
-    hnn = [data[key][0] for key in data]
-    goalcount = [data[key][1] for key in data]
-    hstar = [data[key][2] for key in data]
-
-    hnn_sub_exact = [a - b for a, b in zip(hnn, hstar)]
-    goalcount_sub_exact = [a - b for a, b in zip(goalcount, hstar)]
-
-    df_sub_hnn = pd.DataFrame(
-        list(zip(hstar, hnn_sub_exact)), columns=["h*", "heuristic - h*"]
-    ).assign(heuristic="hnn")
-    df_sub_gc = pd.DataFrame(
-        list(zip(hstar, goalcount_sub_exact)), columns=["h*", "heuristic - h*"]
-    ).assign(heuristic="goalcount")
-    cdf = pd.concat([df_sub_hnn, df_sub_gc])
-
-    plot_name = get_plot_title(directory)
-    plot_filename = "box_" + plot_name
-
-    ax = sns.boxplot(
-        x="h*", y="heuristic - h*", hue="heuristic", data=cdf, fliersize=2
-    ).set_title(plot_name)
-    ax.figure.savefig(directory + "/" + plot_filename + ".png")
-    plt.clf()
-    plt.close(ax.figure)
 
 
 def save_gif_from_plots(directory: str, fold_idx: int):

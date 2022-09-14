@@ -35,16 +35,14 @@ from src.pytorch.utils.file_helpers import (
 )
 from src.pytorch.utils.log_helpers import logging_train_config
 from src.pytorch.utils.plot import (
-    save_h_pred_scatter,
-    save_box_plot,
     save_gif_from_plots,
     remove_intermediate_plots,
 )
 import src.pytorch.utils.default_args as default_args
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer
-from src.pytorch.utils.loss import *
-from eval import eval_workflow 
+from src.pytorch.utils.loss import RMSELoss
+from eval import eval_workflow
 from argparse import Namespace
 
 _log = logging.getLogger(__name__)
@@ -101,7 +99,7 @@ def train_main(args: Namespace):
     _log.info(f"Elapsed time: {round(train_timer.current_time(), 4)}s")
     if num_retries:
         _log.info(f"Restarts needed: {num_retries}")
-    
+
     if best_fold['fold'] != -1:
         if args.save_heuristic_pred:
             try:

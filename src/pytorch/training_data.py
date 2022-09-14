@@ -3,8 +3,6 @@ import logging
 import numpy as np
 from torch.utils.data import Dataset
 from src.pytorch.utils.helpers import to_prefix, to_onehot
-import src.pytorch.fast_downward_api as fd_api
-import src.pytorch.utils.default_args as default_args
 
 _log = logging.getLogger(__name__)
 
@@ -103,74 +101,3 @@ def load_training_state_value_pairs(
                     domain_max_value = max_h
 
     return np.array(states), np.array(heuristics), domain_max_value
-
-
-def generate_optimal_state_value_pairs(domain, problems):
-    """
-    Generates the state value pair from a set of problems.
-    Returns a list of tuple(state, value).
-    """
-    states = convert_pddl_to_boolean(domain, problems)
-    state_value_pairs = []
-    for i in range(len(problems)):
-        value = fd_api.solve_instance_with_fd(domain, problems[i])
-        if value != None:
-            state_value_pairs.append((states[i], value))
-        else:
-            print(f"Solution plan not found for the problem {problems[i]}")
-
-    return state_value_pairs
-
-
-def convert_pddl_to_boolean(domain, problems):
-    """
-    From a pddl, it gets the boolean vector in the format for network input.
-    """
-    # TODO: Get atoms order from domain
-    with open("atoms/probBLOCKS-12-0.txt") as f:
-        # Read and convert (e.g. "Atom ontable(a)" -> "ontable a")
-        atoms = [x[5:] for x in f.readlines()[0].split(";")]  # remove "Atom " prefix
-        for i in range(len(atoms)):
-            pred, objs = atoms[i].split("(")
-            objs = objs[:-1].replace(",", "")
-            atoms[i] = pred
-            if objs != "":
-                atoms[i] += " " + objs
-
-    states = []
-    for problem in problems:
-        with open(problem) as f:
-            initial_state = f.read().split(":init")[1].split(":goal")[0]
-        state = []
-        for a in atoms:
-            state.append(int(a in initial_state))
-        states.append(state)
-
-    return states
-
-
-def load_training_state_value_tuples(sas_plan: str) -> ([[int]], [int]):
-    """
-    Load state-value pairs from a sampling output, returning
-    a list of states (each state is a bool list) and a list
-    of hvalues. States and hvalues correspond by index.
-    """
-    states = []
-    hvalues = []
-    with open(
-        sas_plan,
-    ) as f:
-        lines = f.readlines()
-        states_len = len(lines[2].split(";"))
-
-        for i in range(5, len(lines)):
-            if lines[i][0] != "#":
-                values = lines[i].split(";")
-
-                state = []
-                for i in range(1, states_len + 1):
-                    state.append(int(values[i]))
-                states.append(state)
-                hvalues.append(int(values[0]))
-
-    return states, hvalues

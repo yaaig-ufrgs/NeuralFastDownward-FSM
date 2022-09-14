@@ -36,8 +36,8 @@ class TrainWorkflow:
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
         self.test_dataloader = test_dataloader
-        self.validation = self.val_dataloader != None
-        self.testing = self.test_dataloader != None
+        self.validation = self.val_dataloader is not None
+        self.testing = self.test_dataloader is not None
         self.device = device
         self.max_epochs = max_epochs
         self.plot_n_epochs = plot_n_epochs
@@ -51,7 +51,7 @@ class TrainWorkflow:
         self.restart_no_conv = restart_no_conv
         self.check_dead_once = check_dead_once
         self.train_y_pred_values = []  # [state, y, pred]
-        self.val_y_pred_values = [] # [state, y, pred]
+        self.val_y_pred_values = []  # [state, y, pred]
 
     def train_loop(self, t: int, fold_idx: int) -> float:
         """
@@ -274,7 +274,6 @@ class TrainWorkflow:
             if len(y[i]) > 1:  # Prefix (unary encoding)
                 y_h = prefix_to_h(y[i].tolist())
                 pred_h = prefix_to_h(pred[i].tolist())
-                #y_pred_values[x_str] = (y_h, pred_h)
                 y_pred_values.append([x_str, y_h, pred_h])
             else:  # Regression
                 y_pred_values.append([

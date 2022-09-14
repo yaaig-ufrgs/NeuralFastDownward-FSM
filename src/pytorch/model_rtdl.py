@@ -1,9 +1,6 @@
-import src.pytorch.utils.default_args as default_args
 import torch
 import torch.nn as nn
-import random
 from math import sqrt
-import numpy as np
 import typing as ty
 
 class ResNetRTDL(nn.Module):
@@ -48,7 +45,7 @@ class ResNetRTDL(nn.Module):
                 for _ in range(num_layers)
             ]
         )
-        bias_output = False if self.use_bias == False else use_bias_output
+        bias_output = False if self.use_bias is False else use_bias_output
         self.head = nn.Linear(hidden_units, output_units, bias=bias_output)
 
         self.activation = self.set_activation(activation)

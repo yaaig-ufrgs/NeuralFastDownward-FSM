@@ -5,7 +5,7 @@ Management of file creation and deletion.
 import os
 import glob
 from argparse import Namespace
-from json import dump, load
+from json import dump
 from subprocess import check_output
 
 

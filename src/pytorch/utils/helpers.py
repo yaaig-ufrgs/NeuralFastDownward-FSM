@@ -3,7 +3,6 @@ Simple auxiliary functions.
 """
 
 import logging
-import glob
 import os
 from random import Random, sample, random, randint
 from json import dump, load
@@ -182,7 +181,7 @@ def get_test_tasks_from_problem(
             dir = candidate_dir
             break
 
-    if dir == None:
+    if dir is None:
         _log.error(
             f"No tasks were automatically found from {tasks_folder}. "
             "Enter tasks manually from the command line or enter the path to the tasks folder (-atf)."

@@ -24,8 +24,6 @@ from src.pytorch.utils.log_helpers import logging_eval_config
 from src.pytorch.utils.timer import Timer
 from src.pytorch.utils.plot import save_y_pred_scatter_eval, save_pred_error_bar_eval
 from src.pytorch.utils.helpers import get_train_args_json
-from src.pytorch.utils.loss import RMSELoss
-import src.pytorch.utils.default_args as default_args
 
 _log = logging.getLogger(__name__)
 

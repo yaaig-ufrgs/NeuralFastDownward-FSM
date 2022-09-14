@@ -1,7 +1,5 @@
-import src.pytorch.utils.default_args as default_args
 import torch
 import torch.nn as nn
-import random
 from math import sqrt
 import numpy as np
 
@@ -78,7 +76,7 @@ class HNN(nn.Module):
 
         # If `use_bias` is set to False, `bias_output` is set to False regardless
         # of the value in `use_bias_output`.
-        bias_output = False if self.use_bias == False else use_bias_output
+        bias_output = False if self.use_bias is False else use_bias_output
         self.opt = nn.Linear(hu[-1], output_units, bias=bias_output)
 
         if self.dropout_rate > 0:
