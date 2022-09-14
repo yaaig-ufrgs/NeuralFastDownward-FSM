@@ -198,20 +198,6 @@ def get_train_args():
         help="Use bias or not in the output layer. (default: %(default)s)",
     )
     parser.add_argument(
-        "-clp",
-        "--clamping",
-        type=int,
-        default=default_args.CLAMPING,
-        help="Value to clamp heuristics with h=value-cl. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-rmg",
-        "--remove-goals",
-        type=str2bool,
-        default=default_args.REMOVE_GOALS,
-        help="Remove goals from the sampling data (h = 0). (default: %(default)s)",
-    )
-    parser.add_argument(
         "-of",
         "--output-folder",
         type=Path,
@@ -261,25 +247,10 @@ def get_train_args():
         "--loss-function",
         choices=[
             "mse",
-            "mse_weighted",
             "rmse",
         ],
         default=default_args.LOSS_FUNCTION,
         help="Loss function to be used during training. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-cdir",
-        "--compare-csv-dir",
-        type=str,
-        default=default_args.COMPARED_HEURISTIC_CSV_DIR,
-        help="Directory with CSV data to compare h^nn against; used for plotting. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-hdir",
-        "--hstar-csv-dir",
-        type=str,
-        default=default_args.COMPARED_HEURISTIC_CSV_DIR,
-        help="Directory with h* CSV data; used for box plot. (default: %(default)s)",
     )
     parser.add_argument(
         "-no",
@@ -329,34 +300,6 @@ def get_train_args():
         type=str2bool,
         default=default_args.SAVE_HEURISTIC_PRED,
         help="Save a csv file with the expected and network-predicted heuristics for all training samples. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-sfst",
-        "--standard-first",
-        type=str2bool,
-        default=default_args.STANDARD_FIRST,
-        help="Show firstly the default samples to the network. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-rfst",
-        "--random-first",
-        type=str2bool,
-        default=default_args.RANDOM_FIRST,
-        help="Show firstly the random samples to the network. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-itc",
-        "--intercalate-samples",
-        type=int,
-        default=default_args.INTERCALATE_SAMPLES,
-        help="Intercalate by n the sampling data with random and standard data. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-cut",
-        "--cut-non-intercalated-samples",
-        type=str2bool,
-        default=default_args.CUT_NON_INTERCALATED_SAMPLES,
-        help="Remove leftover samples from the data. (default: %(default)s)",
     )
     parser.add_argument(
         "-addfn",
@@ -841,7 +784,6 @@ def get_exp_args():
         "--train-loss-function",
         choices=[
             "mse",
-            "mse_weighted",
             "rmse",
         ],
         default=default_args.LOSS_FUNCTION,
@@ -877,13 +819,6 @@ def get_exp_args():
         type=str2bool,
         default=default_args.BIAS,
         help="Use bias or not in the output layer. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-trn-clp",
-        "--train-clamping",
-        type=int,
-        default=default_args.CLAMPING,
-        help="Value to clamp heuristics with h=value-cl. (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-of",
@@ -942,46 +877,11 @@ def get_exp_args():
         help="Number of workers for multi-process data loading. (default: %(default)s)",
     )
     parser.add_argument(
-        "-trn-rmg",
-        "--train-remove-goals",
-        type=str2bool,
-        default=default_args.REMOVE_GOALS,
-        help="Remove goals from the sampling data (h = 0). (default: %(default)s)",
-    )
-    parser.add_argument(
         "-trn-hpred",
         "--train-save-heuristic-pred",
         type=str2bool,
         default=default_args.SAVE_HEURISTIC_PRED,
         help="Save a csv file with the expected and network-predicted heuristics for all training samples. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-trn-sfst",
-        "--train-standard-first",
-        type=str2bool,
-        default=default_args.STANDARD_FIRST,
-        help="Show firstly the default samples to the network. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-trn-rfst",
-        "--train-random-first",
-        type=str2bool,
-        default=default_args.RANDOM_FIRST,
-        help="Show firstly the random samples to the network. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-trn-itc",
-        "--train-intercalate-samples",
-        type=int,
-        default=default_args.INTERCALATE_SAMPLES,
-        help="Intercalate by n the sampling data with random and standard data. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-trn-cut",
-        "--train-cut-non-intercalated-samples",
-        type=str2bool,
-        default=default_args.CUT_NON_INTERCALATED_SAMPLES,
-        help="Remove leftover samples from the data. (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-gpu",

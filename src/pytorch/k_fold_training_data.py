@@ -31,12 +31,6 @@ class KFoldTrainingData:
         training_size: int = default_args.TRAINING_SIZE,
         data_num_workers: int = default_args.DATALOADER_NUM_WORKERS,
         normalize: bool = default_args.NORMALIZE_OUTPUT,
-        clamping: int = default_args.CLAMPING,
-        remove_goals: bool = default_args.REMOVE_GOALS,
-        standard_first: bool = default_args.STANDARD_FIRST,
-        random_first: bool = default_args.RANDOM_FIRST,
-        intercalate_samples: int = default_args.INTERCALATE_SAMPLES,
-        cut_non_intercalated_samples: bool = default_args.CUT_NON_INTERCALATED_SAMPLES,
         sample_percentage: float = default_args.SAMPLE_PERCENTAGE,
         loss_function: str = default_args.LOSS_FUNCTION,
         unique_samples: bool = default_args.UNIQUE_SAMPLES,
@@ -52,12 +46,9 @@ class KFoldTrainingData:
         (
             self.states,
             self.heuristics,
-            self.weights,
             self.domain_max_value,
         ) = load_training_state_value_pairs(
             samples_file,
-            clamping,
-            remove_goals,
             loss_function,
             unique_samples,
             unique_states,
@@ -77,10 +68,6 @@ class KFoldTrainingData:
         self.shuffle_seed = shuffle_seed
         self.training_size = training_size
         self.data_num_workers = data_num_workers
-        self.standard_first = standard_first
-        self.random_first = random_first
-        self.intercalate_samples = intercalate_samples
-        self.cut_non_intercalated_samples = cut_non_intercalated_samples
         self.sample_percentage = sample_percentage
         self.model = model
         self.kfolds = self.generate_kfold_training_data()
@@ -97,10 +84,7 @@ class KFoldTrainingData:
         kfolds = []
         instances_per_fold = int(len(self.states) / self.num_folds)
         for i in range(self.num_folds):
-            x_train, x_val, x_test, y_train, y_val, y_test, w_train, w_val, w_test = (
-                [],
-                [],
-                [],
+            x_train, x_val, x_test, y_train, y_val, y_test = (
                 [],
                 [],
                 [],
@@ -111,79 +95,33 @@ class KFoldTrainingData:
             if self.num_folds == 1:
                 # Test set = complement of training+val set
                 if self.sample_percentage < 1.0:
-                    if len(self.weights) > 0:
-                        (
-                            self.states,
-                            x_test,
-                            self.heuristics,
-                            y_test,
-                            self.weights,
-                            w_test,
-                        ) = train_test_split(
-                            self.states,
-                            self.heuristics,
-                            self.weights,
-                            train_size=self.sample_percentage,
-                            shuffle=self.shuffle,
-                            random_state=self.shuffle_seed,
-                        )
-                    else:
-                        self.states, x_test, self.heuristics, y_test = train_test_split(
-                            self.states,
-                            self.heuristics,
-                            train_size=self.sample_percentage,
-                            shuffle=self.shuffle,
-                            random_state=self.shuffle_seed,
-                        )
+                    self.states, x_test, self.heuristics, y_test = train_test_split(
+                        self.states,
+                        self.heuristics,
+                        train_size=self.sample_percentage,
+                        shuffle=self.shuffle,
+                        random_state=self.shuffle_seed,
+                    )
 
                 if self.training_size == 1.0:
-                    if len(self.weights) > 0:
-                        x_train, y_train, w_train = (
-                            skshuffle(
-                                self.states,
-                                self.heuristics,
-                                self.weights,
-                                random_state=self.shuffle_seed,
-                            )
-                            if self.shuffle
-                            else (self.states, self.heuristics, self.weights)
+                    x_train, y_train = (
+                        skshuffle(
+                            self.states,
+                            self.heuristics,
+                            random_state=self.shuffle_seed,
                         )
-                    else:
-                        x_train, y_train = (
-                            skshuffle(
-                                self.states,
-                                self.heuristics,
-                                random_state=self.shuffle_seed,
-                            )
-                            if self.shuffle
-                            else (self.states, self.heuristics)
-                        )
+                        if self.shuffle
+                        else (self.states, self.heuristics)
+                    )
 
                 else:
-                    if len(self.weights) > 0:
-                        (
-                            x_train,
-                            x_val,
-                            y_train,
-                            y_val,
-                            w_train,
-                            w_val,
-                        ) = train_test_split(
-                            self.states,
-                            self.heuristics,
-                            self.weights,
-                            train_size=self.training_size,
-                            shuffle=self.shuffle,
-                            random_state=self.shuffle_seed,
-                        )
-                    else:
-                        x_train, x_val, y_train, y_val = train_test_split(
-                            self.states,
-                            self.heuristics,
-                            train_size=self.training_size,
-                            shuffle=self.shuffle,
-                            random_state=self.shuffle_seed,
-                        )
+                    x_train, x_val, y_train, y_val = train_test_split(
+                        self.states,
+                        self.heuristics,
+                        train_size=self.training_size,
+                        shuffle=self.shuffle,
+                        random_state=self.shuffle_seed,
+                    )
 
             else:
                 # TODO: `sample_percentage` and `test_set` not implemented here!
@@ -191,29 +129,12 @@ class KFoldTrainingData:
                     if int(j / instances_per_fold) == i:
                         x_test.append(self.states[j])
                         y_test.append(self.heuristics[j])
-                        if len(self.weights) > 0:
-                            w_test.append(self.weights[j])
                     else:
                         x_train.append(self.states[j])
                         y_train.append(self.heuristics[j])
-                        if len(self.weights) > 0:
-                            w_train.append(self.weights[j])
 
             self.states = None
             self.heuristics = None
-            self.weights = None
-
-            """
-            # If necessary, change the ordering of the data.
-            if (
-                self.standard_first
-                or self.random_first
-                or self.intercalate_samples > 0
-            ):
-                self.shuffle = False
-                training_set = self.change_sampling_order(training_set)
-                test_set = self.change_sampling_order(test_set)
-            """
 
             worker_fn = (
                 None
@@ -232,7 +153,7 @@ class KFoldTrainingData:
             )
             train_dataloader = DataLoader(
                 dataset=InstanceDataset(
-                    x_train, y_train, w_train, self.domain_max_value, self.output_layer
+                    x_train, y_train, self.domain_max_value, self.output_layer
                 ),
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
@@ -246,12 +167,11 @@ class KFoldTrainingData:
 
             x_train = None
             y_train = None
-            w_train = None
 
             val_dataloader = (
                 DataLoader(
                     dataset=InstanceDataset(
-                        x_val, y_val, w_val, self.domain_max_value, self.output_layer
+                        x_val, y_val, self.domain_max_value, self.output_layer
                     ),
                     batch_size=self.batch_size,
                     shuffle=self.shuffle,
@@ -268,12 +188,11 @@ class KFoldTrainingData:
 
             x_val = None
             y_val = None
-            w_val = None
 
             test_dataloader = (
                 DataLoader(
                     dataset=InstanceDataset(
-                        x_test, y_test, w_test, self.domain_max_value, self.output_layer
+                        x_test, y_test, self.domain_max_value, self.output_layer
                     ),
                     batch_size=self.batch_size,
                     shuffle=self.shuffle,
@@ -290,7 +209,6 @@ class KFoldTrainingData:
 
             x_test = None
             y_test = None
-            w_test = None
 
             kfolds.append((train_dataloader, val_dataloader, test_dataloader))
             _log.info(
@@ -305,49 +223,6 @@ class KFoldTrainingData:
         Counting from 0.
         """
         return self.kfolds[idx]
-
-    def change_sampling_order(self, samples: list) -> list:
-        """
-        DOES NOT WORK ANYMORE AS OF 2022-05-07.
-        Returns state-value pairs with a different order for samples:
-        - `random_first`: random samples appear first.
-        - `standard_first`: non-random samples appear first.
-        - `intercalate_samples`: random and non-random samples appear intercalated.
-        """
-        if len(samples) == 0:
-            return samples
-
-        standard_samples = []
-        random_samples = []
-        interc_n = self.intercalate_samples
-
-        for sv in samples:
-            if sv[1] == self.domain_max_value:
-                random_samples.append(sv)
-            else:
-                standard_samples.append(sv)
-
-        if self.standard_first or self.random_first:
-            return (
-                standard_samples + random_samples
-                if self.standard_first
-                else random_samples + standard_samples
-            )
-        else:
-            min_len = min(len(standard_samples), len(random_samples))
-            new_state_value_pairs = []
-            for i in range(0, min_len, interc_n):
-                new_state_value_pairs += (
-                    standard_samples[i : i + interc_n]
-                    + random_samples[i : i + interc_n]
-                )
-            if not self.cut_non_intercalated_samples:
-                if min_len == len(standard_samples):
-                    new_state_value_pairs += random_samples[i + interc_n :]
-                else:
-                    new_state_value_pairs += standard_samples[i + interc_n :]
-
-            return new_state_value_pairs
 
 
 def seed_worker(worker_id: int):

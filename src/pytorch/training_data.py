@@ -14,22 +14,12 @@ class InstanceDataset(Dataset):
         self,
         states: np.array,
         heuristics: np.array,
-        weights: np.array,
         domain_max_value: int,
         output_layer: str,
     ):
 
         self.output_layer = output_layer
         self.domain_max_value = domain_max_value
-
-        # We don't need extra memory usage.
-        if len(weights) > 0:
-            self.weights = torch.tensor(
-                weights, dtype=torch.float32
-            ).unsqueeze(1)
-        else:
-            self.weights = []
-        weights = None
 
         self.states = torch.tensor(states, dtype=torch.int8)
         states = None
@@ -55,9 +45,7 @@ class InstanceDataset(Dataset):
 
         heuristics = None
 
-    def __getitem__(self, idx: int) -> (torch.Tensor, torch.Tensor, torch.Tensor):
-        if len(self.weights) > 0:
-            return self.states[idx], self.hvalues[idx], self.weights[idx]
+    def __getitem__(self, idx: int) -> (torch.Tensor, torch.Tensor):
         return self.states[idx], self.hvalues[idx]
 
     def __len__(self):
@@ -74,8 +62,6 @@ class InstanceDataset(Dataset):
 
 def load_training_state_value_pairs(
     samples_file: str,
-    clamping: int,
-    remove_goals: bool,
     loss_function: str,
     unique_samples: bool,
     unique_states: bool,
@@ -83,22 +69,14 @@ def load_training_state_value_pairs(
     """
     Loads the data.
     """
-    states, heuristics, weights = [], [], []
+    states, heuristics = [], []
     domain_max_value, max_h = 0, 0
     uniques_xy, uniques_x = [], []
-    state_count, sample_count = {}, {}
 
     with open(samples_file) as f:
         for line in f:
             if line[0] != "#":
                 line = line.split("\n")[0]
-
-                # Count how many times each state + heuristic (x + y) appeared.
-                if loss_function == "mse_weighted":
-                    if line in sample_count:
-                        sample_count[line] += 1
-                    else:
-                        sample_count[line] = 1
 
                 # If specified, skip repeated lines (state and heuristic) if they already appeared.
                 if unique_samples:
@@ -108,17 +86,6 @@ def load_training_state_value_pairs(
 
                 h, state = line.split(";")
                 h_int = int(h)
-
-                # h = 0 means state x is a goal, so remove it if specified.
-                if h_int == 0 and remove_goals:
-                    continue
-
-                # Count how many times each state (x) appeared.
-                if loss_function == "mse_weighted":
-                    if state in state_count:
-                        state_count[state] += 1
-                    else:
-                        state_count[state] = 1
 
                 # If specified, skip state (x) if it already appeared.
                 if unique_states:
@@ -135,29 +102,7 @@ def load_training_state_value_pairs(
                     max_h = h_int
                     domain_max_value = max_h
 
-    """
-    # Clamps the heuristic value.
-    if clamping != default_args.CLAMPING:
-        for i in range(len(state_value_pairs)):
-            curr_h = state_value_pairs[i][1]
-            if (curr_h >= max_h - clamping) and (curr_h != max_h):
-                state_value_pairs[i][1] = max_h
-    """
-
-    # Appends weights (counts) to state_value_pairs:
-    if loss_function == "mse_weighted":
-        for i in range(states):
-            curr_st = states[i]
-            curr_h = heuristics[i]
-            if unique_samples:  # Weighting based on quant of unique states + heuristic.
-                h_st = str(curr_h) + ";" + curr_st
-                weights.append(sample_count[h_st])
-            elif unique_states:  # Weighting based on quant. of unique states.
-                weights.append(state_count[curr_st])
-            else:  # No weighting, use default (1).
-                weights.append(1)
-
-    return np.array(states), np.array(heuristics), np.array(weights), domain_max_value
+    return np.array(states), np.array(heuristics), domain_max_value
 
 
 def generate_optimal_state_value_pairs(domain, problems):

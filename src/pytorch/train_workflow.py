@@ -28,7 +28,6 @@ class TrainWorkflow:
         scatter_plot: bool,
         check_dead_once: bool,
         loss_fn: nn = nn.MSELoss(),
-        is_weighted_loss_fn: bool = False,
         restart_no_conv: bool = True,
         patience: int = None,
     ):
@@ -47,7 +46,6 @@ class TrainWorkflow:
         self.optimizer = optimizer
         self.scatter_plot = scatter_plot
         self.loss_fn = loss_fn
-        self.is_weighted_loss_fn = is_weighted_loss_fn
         self.patience = patience
         self.early_stopped = False
         self.restart_no_conv = restart_no_conv
@@ -65,14 +63,9 @@ class TrainWorkflow:
 
         for _batch, item in enumerate(self.train_dataloader):
             # Compute prediction and loss.
-            if len(item) == 3:
-                X, y, w = item[0].to(self.device), item[1].to(self.device), item[2].to(self.device)
-                pred = self.model(X.float())
-                loss = self.loss_fn(pred, y, w) if self.is_weighted_loss_fn else self.loss_fn(pred, y)
-            else:
-                X, y = item[0].to(self.device), item[1].to(self.device)
-                pred = self.model(X.float())
-                loss = self.loss_fn(pred, y)
+            X, y = item[0].to(self.device), item[1].to(self.device)
+            pred = self.model(X.float())
+            loss = self.loss_fn(pred, y)
 
             train_loss += loss.item()
 
@@ -106,14 +99,9 @@ class TrainWorkflow:
         val_loss = 0
         with torch.no_grad():
             for item in self.val_dataloader:
-                if len(item) == 3:
-                    X, y, w = item[0].to(self.device), item[1].to(self.device), item[2].to(self.device)
-                    pred = self.model(X.float())
-                    val_loss += self.loss_fn(pred, y, w).item() if self.is_weighted_loss_fn else self.loss_fn(pred, y).item()
-                else:
-                    X, y = item[0].to(self.device), item[1].to(self.device)
-                    pred = self.model(X.float())
-                    val_loss += self.loss_fn(pred, y).item()
+                X, y = item[0].to(self.device), item[1].to(self.device)
+                pred = self.model(X.float())
+                val_loss += self.loss_fn(pred, y).item()
 
                 if t % self.plot_n_epochs == 0 and self.plot_n_epochs != -1:
                     self.val_y_pred_values = self.fill_y_pred(
@@ -134,34 +122,11 @@ class TrainWorkflow:
         test_loss = 0
         with torch.no_grad():
             for item in self.test_dataloader:
-                if len(item) == 3:
-                    X, y, w = item[0].to(self.device), item[1].to(self.device), item[2].to(self.device)
-                    pred = self.model(X.float())
-                    test_loss += self.loss_fn(pred, y, w).item() if self.is_weighted_loss_fn else self.loss_fn(pred, y).item()
-                else:
-                    X, y = item[0].to(self.device), item[1].to(self.device)
-                    pred = self.model(X.float())
-                    test_loss += self.loss_fn(pred, y).item()
-
-        return test_loss / num_batches
-
-    def val_loop_no_random(self, random_h: int = 501) -> float:
-        """
-        Evaluation loop without random.
-        """
-        num_batches = len(self.val_dataloader)
-        val_loss = 0
-        with torch.no_grad():
-            for item in self.val_dataloader:
                 X, y = item[0].to(self.device), item[1].to(self.device)
                 pred = self.model(X.float())
-                val_loss += self.loss_fn(
-                    torch.tensor(
-                        [pred_ for i, pred_ in enumerate(pred) if y[i] != random_h]
-                    ),
-                    torch.tensor([y_ for y_ in y if y_ != random_h]),
-                ).item()
-        return val_loss / num_batches
+                test_loss += self.loss_fn(pred, y).item()
+
+        return test_loss / num_batches
 
     def dead(self) -> bool:
         """

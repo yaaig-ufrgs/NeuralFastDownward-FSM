@@ -65,10 +65,6 @@ def train_main(args: Namespace):
 
     set_seeds(args)
 
-    # If forcibly changing the order that the samples are presented, disable shuffling.
-    if args.standard_first or args.random_first or args.intercalate_samples != 0:
-        args.shuffle = False
-
     args.domain, args.problem = get_problem_by_sample_filename(args.samples)
 
     dirname = create_train_directory(args)
@@ -170,8 +166,8 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
     born_dead = True
     _log.warning(f"ATTENTION: Training will be performed on device '{device}'.")
 
-    losses = {"mse": (nn.MSELoss(), False), "mse_weighted": (MSELossWeighted(), True), "rmse": (RMSELoss(), False)}
-    chosen_loss_function, is_weighted = losses[args.loss_function]
+    losses = {"mse": nn.MSELoss(), "rmse": RMSELoss()}
+    chosen_loss_function = losses[args.loss_function]
 
     train_timer = Timer(args.max_training_time).start()
     while born_dead:
@@ -188,12 +184,6 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
             training_size=args.training_size,
             data_num_workers=args.data_num_workers,
             normalize=args.normalize_output,
-            clamping=args.clamping,
-            remove_goals=args.remove_goals,
-            standard_first=args.standard_first,
-            random_first=args.random_first,
-            intercalate_samples=args.intercalate_samples,
-            cut_non_intercalated_samples=args.cut_non_intercalated_samples,
             sample_percentage=args.sample_percentage,
             unique_samples=args.unique_samples,
             unique_states=args.unique_states,
@@ -269,7 +259,6 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                 scatter_plot=args.scatter_plot,
                 check_dead_once=args.check_dead_once,
                 loss_fn=chosen_loss_function,
-                is_weighted_loss_fn=is_weighted,
                 restart_no_conv=args.restart_no_conv,
                 patience=args.patience,
             )
@@ -288,7 +277,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                     heuristic_pred_file_train = f"{dirname}/heuristic_pred_train_{fold_idx}.csv"
                     heuristic_pred_file_val = f"{dirname}/heuristic_pred_val_{fold_idx}.csv"
 
-                if fold_val_loss != None:
+                if fold_val_loss is not None:
                     if fold_val_loss < best_fold["val_loss"]:
                         if args.save_heuristic_pred:
                             save_y_pred_csv(train_wf.train_y_pred_values, heuristic_pred_file_train)
@@ -336,22 +325,16 @@ def post_training_evaluation(trained_model: str, args: Namespace, dirname: str) 
         training_size=args.training_size,
         data_num_workers=args.data_num_workers,
         normalize=args.normalize_output,
-        clamping=args.clamping,
-        remove_goals=args.remove_goals,
-        standard_first=args.standard_first,
-        random_first=args.random_first,
-        intercalate_samples=args.intercalate_samples,
-        cut_non_intercalated_samples=args.cut_non_intercalated_samples,
         sample_percentage=args.sample_percentage,
         unique_samples=args.unique_samples,
         model=args.model,
     ).get_fold(0)
 
-    if train_data != None:
+    if train_data is not None:
         eval_workflow(model, args.samples, dirname, train_data, "train", None, False, args.save_heuristic_pred, args.scatter_plot)
-    if val_data != None:
+    if val_data is not None:
         eval_workflow(model, args.samples, dirname, val_data, "val", None, False, args.save_heuristic_pred, args.scatter_plot)
-    if test_data != None:
+    if test_data is not None:
         eval_workflow(model, args.samples, dirname, test_data, "test", None, False, args.save_heuristic_pred, args.scatter_plot)
 
 
@@ -373,8 +356,6 @@ def make_extra_plots(args: Namespace, dirname: str, best_fold: dict):
     """
     Manages extra plots, suchs as:
     - h vs predicted h scatter plot animation.
-    - hnn vs chosen heuristic scatter plot.
-    - boxplot with hnn, h* and goalcount.
     """
     plots_dir = f"{dirname}/plots"
 
@@ -387,37 +368,6 @@ def make_extra_plots(args: Namespace, dirname: str, best_fold: dict):
             _log.error(f"Failed making plot GIF.")
 
     heuristic_pred_file = f"{dirname}/heuristic_pred.csv"
-    dir_split = dirname.split("/")[-1].split("_")
-    problem_name = "_".join(dir_split[2:4])
-    sample_seed = args.samples.split("_")[-1]
-    data = {}
-
-    if args.compare_csv_dir != "" and os.path.isfile(heuristic_pred_file):
-        csv_dir = args.compare_csv_dir
-        if csv_dir[-1] != "/":
-            csv_dir += "/"
-        problem_name = "_".join(dirname.split("/")[-1].split("_")[2:4])
-        csv_h = glob.glob(csv_dir + problem_name + ".csv")
-
-        if len(csv_h) > 0 and args.scatter_plot:
-            try:
-                _log.info(f"Saving h^nn vs. h scatter plot.")
-                data = save_h_pred_scatter(plots_dir, heuristic_pred_file, csv_h[0])
-            except:
-                _log.error(f"Failed making hnn vs. h scatter plot.")
-
-    if len(data) > 0 and args.hstar_csv_dir != "":
-        csv_dir = args.hstar_csv_dir
-        if csv_dir[-1] != "/":
-            csv_dir += "/"
-        csv_hstar = glob.glob(f"{csv_dir}*{problem_name}**{sample_seed}*.csv")
-
-        if len(csv_hstar) > 0:
-            try:
-                _log.info(f"Saving box plot.")
-                save_box_plot(plots_dir, data, csv_hstar[0])
-            except:
-                _log.error(f"Failed making box plot.")
 
     if not args.save_heuristic_pred and os.path.exists(heuristic_pred_file):
         os.remove(heuristic_pred_file)
