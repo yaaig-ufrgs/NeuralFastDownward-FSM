@@ -64,7 +64,7 @@ private:
     void do_minimization(std::vector<std::shared_ptr<PartialAssignment>>& states);
     void do_minimization(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& states);
     std::vector<State> assign_undefined_state(std::shared_ptr<PartialAssignment>& pa, int max_attempts);
-    void create_contrasting_samples(
+    void create_random_samples(
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& values_set, int percentage);
     std::vector<std::string> values_to_samples(
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> values_set);

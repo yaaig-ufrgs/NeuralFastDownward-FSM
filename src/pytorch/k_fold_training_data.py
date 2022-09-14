@@ -34,7 +34,7 @@ class KFoldTrainingData:
         clamping: int = default_args.CLAMPING,
         remove_goals: bool = default_args.REMOVE_GOALS,
         standard_first: bool = default_args.STANDARD_FIRST,
-        contrast_first: bool = default_args.STANDARD_FIRST,
+        random_first: bool = default_args.RANDOM_FIRST,
         intercalate_samples: int = default_args.INTERCALATE_SAMPLES,
         cut_non_intercalated_samples: bool = default_args.CUT_NON_INTERCALATED_SAMPLES,
         sample_percentage: float = default_args.SAMPLE_PERCENTAGE,
@@ -78,7 +78,7 @@ class KFoldTrainingData:
         self.training_size = training_size
         self.data_num_workers = data_num_workers
         self.standard_first = standard_first
-        self.contrast_first = contrast_first
+        self.random_first = random_first
         self.intercalate_samples = intercalate_samples
         self.cut_non_intercalated_samples = cut_non_intercalated_samples
         self.sample_percentage = sample_percentage
@@ -207,7 +207,7 @@ class KFoldTrainingData:
             # If necessary, change the ordering of the data.
             if (
                 self.standard_first
-                or self.contrast_first
+                or self.random_first
                 or self.intercalate_samples > 0
             ):
                 self.shuffle = False
@@ -310,40 +310,40 @@ class KFoldTrainingData:
         """
         DOES NOT WORK ANYMORE AS OF 2022-05-07.
         Returns state-value pairs with a different order for samples:
-        - `contrast_first`: contrasting samples appear first.
-        - `standard_first`: non-contrasting samples appear first.
-        - `intercalate_samples`: contrasting and non-contrasting samples appear intercalated.
+        - `random_first`: random samples appear first.
+        - `standard_first`: non-random samples appear first.
+        - `intercalate_samples`: random and non-random samples appear intercalated.
         """
         if len(samples) == 0:
             return samples
 
         standard_samples = []
-        contrast_samples = []
+        random_samples = []
         interc_n = self.intercalate_samples
 
         for sv in samples:
             if sv[1] == self.domain_max_value:
-                contrast_samples.append(sv)
+                random_samples.append(sv)
             else:
                 standard_samples.append(sv)
 
-        if self.standard_first or self.contrast_first:
+        if self.standard_first or self.random_first:
             return (
-                standard_samples + contrast_samples
+                standard_samples + random_samples
                 if self.standard_first
-                else contrast_samples + standard_samples
+                else random_samples + standard_samples
             )
         else:
-            min_len = min(len(standard_samples), len(contrast_samples))
+            min_len = min(len(standard_samples), len(random_samples))
             new_state_value_pairs = []
             for i in range(0, min_len, interc_n):
                 new_state_value_pairs += (
                     standard_samples[i : i + interc_n]
-                    + contrast_samples[i : i + interc_n]
+                    + random_samples[i : i + interc_n]
                 )
             if not self.cut_non_intercalated_samples:
                 if min_len == len(standard_samples):
-                    new_state_value_pairs += contrast_samples[i + interc_n :]
+                    new_state_value_pairs += random_samples[i + interc_n :]
                 else:
                     new_state_value_pairs += standard_samples[i + interc_n :]
 

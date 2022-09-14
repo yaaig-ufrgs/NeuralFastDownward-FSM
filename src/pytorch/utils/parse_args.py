@@ -338,18 +338,18 @@ def get_train_args():
         help="Show firstly the default samples to the network. (default: %(default)s)",
     )
     parser.add_argument(
-        "-cfst",
-        "--contrast-first",
+        "-rfst",
+        "--random-first",
         type=str2bool,
-        default=default_args.CONTRAST_FIRST,
-        help="Show firstly the contrasting samples to the network. (default: %(default)s)",
+        default=default_args.RANDOM_FIRST,
+        help="Show firstly the random samples to the network. (default: %(default)s)",
     )
     parser.add_argument(
         "-itc",
         "--intercalate-samples",
         type=int,
         default=default_args.INTERCALATE_SAMPLES,
-        help="Intercalate by n the sampling data with contrasting and standard data. (default: %(default)s)",
+        help="Intercalate by n the sampling data with random and standard data. (default: %(default)s)",
     )
     parser.add_argument(
         "-cut",
@@ -963,18 +963,18 @@ def get_exp_args():
         help="Show firstly the default samples to the network. (default: %(default)s)",
     )
     parser.add_argument(
-        "-trn-cfst",
-        "--train-contrast-first",
+        "-trn-rfst",
+        "--train-random-first",
         type=str2bool,
-        default=default_args.CONTRAST_FIRST,
-        help="Show firstly the contrasting samples to the network. (default: %(default)s)",
+        default=default_args.RANDOM_FIRST,
+        help="Show firstly the random samples to the network. (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-itc",
         "--train-intercalate-samples",
         type=int,
         default=default_args.INTERCALATE_SAMPLES,
-        help="Intercalate by n the sampling data with contrasting and standard data. (default: %(default)s)",
+        help="Intercalate by n the sampling data with random and standard data. (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-cut",
@@ -1398,17 +1398,17 @@ def get_sample_args():
     )
     parser.add_argument(
         "-c",
-        "--contrasting-percentage",
+        "--random-percentage",
         type=int,
-        default=default_args.SAMPLE_CONTRASTING_PERCENTAGE,
-        help="Percentage of contrasting samples. (default: %(default)s)",
+        default=default_args.SAMPLE_RANDOM_PERCENTAGE,
+        help="Percentage of random samples. (default: %(default)s)",
     )
     parser.add_argument(
         "-ce",
-        "--contrasting-estimates",
+        "--random-estimates",
         type=str,
-        default=default_args.SAMPLE_CONTRASTING_ESTIMATES,
-        help="Estimates of the contrasting samples. (default: %(default)s)",
+        default=default_args.SAMPLE_RANDOM_ESTIMATES,
+        help="Estimates of the random samples. (default: %(default)s)",
     )
     parser.add_argument(
         "-rhg",
