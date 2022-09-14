@@ -286,7 +286,7 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
     vector<shared_ptr<PartialAssignment>> tasks;
     bool limit_reached = false;
     utils::HashSet<PartialAssignment> hash_table;
-    for (unsigned i = 0; i < searches && (!empty() || !limit_reached); ++i) {
+    for (int i = 0; i < searches && (!empty() || !limit_reached); ++i) {
         update_alternative_task_mutexes(seed_task);
         vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
         for (shared_ptr<PartialAssignment>& task : next_tasks) {
