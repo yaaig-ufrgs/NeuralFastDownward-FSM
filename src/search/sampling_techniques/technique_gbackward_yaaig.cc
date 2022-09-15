@@ -386,9 +386,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 bound_n = depth_k;
             else // rw, bfs_rw, dfs_rw
                 bound_n = samples_per_search;
-        } else if (bound == "propositions") {
+        } else if (bound == "facts") {
             bound_n = pa.to_binary().length();
-        } else if (bound == "propositions_per_mean_effects") {
+        } else if (bound == "facts_per_avg_effects") {
             int num_props = pa.to_binary().length();
             int num_effects = 0, num_ops = 0;
             for (OperatorProxy op : task_proxy.get_operators()) {
@@ -497,7 +497,7 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
     );
     parser.add_option<string>(
             "bound",
-            "How to bound each rollout: default, propositions, propositions_per_mean_effects, digit",
+            "How to bound each rollout: default, facts, facts_per_avg_effects, digit",
             "default"
     );
     parser.add_option<int>(

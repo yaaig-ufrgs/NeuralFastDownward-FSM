@@ -57,10 +57,10 @@ def get_bound_type(bound):
         return str(bound)
     if bound == "default":
         return "def"
-    elif bound == "propositions":
-        return "props"
-    elif bound == "propositions_per_mean_effects":
-        return "propseff"
+    elif bound == "facts":
+        return "facts"
+    elif bound == "facts_per_avg_effects":
+        return "factseff"
 
 
 def yaaig_ferber(args, meth):
