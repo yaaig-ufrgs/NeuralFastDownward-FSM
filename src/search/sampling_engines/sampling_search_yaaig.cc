@@ -64,7 +64,7 @@ vector<int> SamplingSearchYaaig::binary_to_values(string bin) {
     return values;
 }
 
-void SamplingSearchYaaig::do_minimization(vector<shared_ptr<PartialAssignment>>& states) {
+void SamplingSearchYaaig::sample_improvement(vector<shared_ptr<PartialAssignment>>& states) {
     if (use_evaluator)
         return;
 
@@ -92,7 +92,7 @@ void SamplingSearchYaaig::do_minimization(vector<shared_ptr<PartialAssignment>>&
     }
 }
 
-void SamplingSearchYaaig::do_minimization(vector<pair<int,pair<vector<int>,string>>>& states) {
+void SamplingSearchYaaig::sample_improvement(vector<pair<int,pair<vector<int>,string>>>& states) {
     if (use_evaluator)
         return;
 
@@ -151,8 +151,8 @@ void SamplingSearchYaaig::create_random_samples(
         values_set.clear();
 
     unordered_map<string,int> state_value;
-    if (minimization != "complete" && minimization != "both") {
-        // if full state minimization is enabled this will be done implicitly later
+    if (sai != "complete" && sai != "both") {
+        // If full state SAI is enabled this will be done implicitly later
         for (pair<int,pair<vector<int>,string>>& p : values_set) {
             if (state_value.count(p.second.second) == 0)
                 state_value[p.second.second] = p.first;
@@ -192,7 +192,7 @@ void SamplingSearchYaaig::create_random_samples(
               h = ((*rng)() * (range))+1; // +1 so we don't get fake goals
         }
         if (h == -1) { utils::g_log << "Error: sampling_search_yaaig.cc:183" << endl; exit(0); }
-        if (minimization != "complete" && minimization != "both") {
+        if (sai != "complete" && sai != "both") {
             if (state_value.count(bin) != 0)
                 h = state_value[bin];
         }
@@ -393,7 +393,7 @@ void SamplingSearchYaaig::successor_improvement() {
         if (s->estimated_heuristic < sui_mapping[s_key].best_h)
             sui_mapping[s_key].best_h = s->estimated_heuristic;
     }
-    if (minimization == "partial" || minimization == "both") {
+    if (sai == "partial" || sai == "both") {
         for (pair<size_t, SuiNode> p : sui_mapping) {
             for (shared_ptr<PartialAssignment> &s : p.second.samples)
                 s->estimated_heuristic = p.second.best_h;
@@ -452,8 +452,8 @@ vector<string> SamplingSearchYaaig::extract_samples() {
 
     if (sui_k > 0) {
         successor_improvement();
-    } else if (minimization == "partial" || minimization == "both") {
-        do_minimization(sampling_technique::modified_tasks);
+    } else if (sai == "partial" || sai == "both") {
+        sample_improvement(sampling_technique::modified_tasks);
     }
     
     vector<pair<int,pair<vector<int>,string>>> values_set;
@@ -538,9 +538,9 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     if (sampling_technique::random_samples > 0)
         create_random_samples(values_set, sampling_technique::random_samples);
 
-    if ((minimization == "complete" || minimization == "both")
+    if ((sai == "complete" || sai == "both")
             && !(state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char")) {
-        do_minimization(values_set);
+        sample_improvement(values_set);
     }
 
     // blind is the default, sampling keeps the regression value
@@ -615,7 +615,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       store_state(opts.get<bool>("store_state")),
       state_representation(opts.get<string>("state_representation")),
       random_sample_state_representation(opts.get<string>("random_sample_state_representation")),
-      minimization(opts.get<string>("minimization")),
+      sai(opts.get<string>("sai")),
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
       sui_k(opts.get<int>("sui_k")),
       sui_rule(getRule(opts.get<string>("sui_rule"))),
@@ -665,8 +665,8 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "Random samples' state facts representation format (complete, complete_no_mutex, partial, undefined.",
             "complete");
     parser.add_option<string>(
-            "minimization",
-            "Identical states receive the best heuristic value assigned between them (minimization in : none, partial, complete, both).",
+            "sai",
+            "Identical states receive the best heuristic value assigned between them (SAI in : none, partial, complete, both).",
             "none");
     parser.add_option<int>(
             "assignments_by_undefined_state",

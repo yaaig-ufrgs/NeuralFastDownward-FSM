@@ -1339,11 +1339,11 @@ def get_sample_args():
         help="Directory where the samples will be saved. (default: %(default)s)",
     )
     parser.add_argument(
-        "-min",
-        "--minimization",
+        "-sai",
+        "--sample-improvement",
         choices=["none", "partial", "complete", "both"],
-        default=default_args.SAMPLE_MINIMIZATION,
-        help="Sample h-value minimization strategy to use. (default: %(default)s)",
+        default=default_args.SAMPLE_IMPROVEMENT,
+        help="Sample h-value improvement (SAI) strategy to use. (default: %(default)s)",
     )
     parser.add_argument(
         "-sorth",
@@ -1354,7 +1354,7 @@ def get_sample_args():
     )
     parser.add_argument(
         "-sui",
-        "--sui-k",
+        "--successor-improvement-k",
         type=int,
         default=default_args.SAMPLE_SUI,
         help="Successor Improvement (SUI) lookahead. If 0, no SUI is performed. (default: %(default)s)",

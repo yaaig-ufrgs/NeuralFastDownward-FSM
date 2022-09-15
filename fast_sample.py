@@ -117,10 +117,8 @@ def yaaig_ferber(args, meth):
                     subtech = f"_subtech-{args.subtechnique.replace('_', '')}"
                     if args.k_depth < 99999:
                         depthk = f"_depthk-{args.k_depth}"
-                if args.sui_k > 0:
-                    suik = f"_sui-{args.sui_k}"
-                    # suik = f"_sui-{args.sui_k}"
-                    # suits = f"_it-{sui_iterations}"
+                if args.successor_improvement_k > 0:
+                    suik = f"_sui-{args.successor_improvement_k}"
                 if args.allow_dups != "none":
                     dups = "_dups-" + ("ir" if args.allow_dups == "interrollout" else args.allow_dups)
                 # sps = f"srch-{args.searches}_sps-{args.samples_per_search}_maxs-{args.max_samples}" if args.samples_per_search != -1 else f"maxs-{args.max_samples}"
@@ -129,7 +127,7 @@ def yaaig_ferber(args, meth):
                 boundmult = "" if args.bound_multiplier == 1.0 else f"_bmul-{str(args.bound_multiplier).replace('.', '-')}"
                 rsquant = "" if args.random_percentage == 0 else f"_rs-{int(args.max_samples*(args.random_percentage*0.01))}"
                 if meth == "yaaig":
-                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{subtech}{depthk}{suik}{suits}{dups}_min-{args.minimization}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}{rsquant}_ss{i}'
+                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{subtech}{depthk}{suik}{suits}{dups}_sai-{args.sample_improvement}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}{rsquant}_ss{i}'
                     rmse_out = out + "_rmse"
                     cmd = (f'./fast-downward.py '
                            f'--sas-file {out}-output.sas --plan-file {out} '
@@ -141,8 +139,8 @@ def yaaig_ferber(args, meth):
                            f'bound={args.bound}, depth_k={args.k_depth}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state}, '
                            f'state_filtering={args.state_filtering}, bfs_percentage={args.bfs_percentage}, allow_duplicates={args.allow_dups}, '
                            f'unit_cost={args.unit_cost}, max_time={args.max_time}, mem_limit_mb={args.mem_limit})], '
-                           f'state_representation={state_repr}, random_sample_state_representation={random_state_repr}, random_seed={i}, minimization={args.minimization}, '
-                           f'sui_k={args.sui_k}, sui_epsilon={args.sui_eps}, sui_rule={args.sui_rule}, sort_h={args.sort_h}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
+                           f'state_representation={state_repr}, random_sample_state_representation={random_state_repr}, random_seed={i}, sai={args.sample_improvement}, '
+                           f'sui_k={args.successor_improvement_k}, sui_epsilon={args.sui_eps}, sui_rule={args.sui_rule}, sort_h={args.sort_h}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
                            f'assignments_by_undefined_state={args.us_assignments}, evaluator={args.evaluator})\"')
                 elif meth == "ferber":
                     out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.ferber_technique}_{args.ferber_select_state.replace("_", "-")}_{args.ferber_num_tasks}_{args.ferber_min_walk_len}_{args.ferber_max_walk_len}_ss{i}'

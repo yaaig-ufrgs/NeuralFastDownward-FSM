@@ -28,7 +28,7 @@ protected:
     const bool store_state;
     const std::string state_representation;
     const std::string random_sample_state_representation;
-    const std::string minimization;
+    const std::string sai;
     const int assignments_by_undefined_state;
     const int sui_k;
     const SearchRule sui_rule;
@@ -57,12 +57,8 @@ private:
     double mse(std::vector<std::shared_ptr<PartialAssignment>>& samples, bool root = false);
     void log_mse(int updates);
     void successor_improvement();
-    void old_successor_improvement(
-        std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> sample_pairs =
-            std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>()
-    );
-    void do_minimization(std::vector<std::shared_ptr<PartialAssignment>>& states);
-    void do_minimization(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& states);
+    void sample_improvement(std::vector<std::shared_ptr<PartialAssignment>>& states);
+    void sample_improvement(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& states);
     std::vector<State> assign_undefined_state(std::shared_ptr<PartialAssignment>& pa, int max_attempts);
     void create_random_samples(
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& values_set, int percentage);
