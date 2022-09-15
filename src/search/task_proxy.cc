@@ -168,6 +168,7 @@ static bool replace_dont_cares_with_non_mutex_values(
 }
 
 bool PartialAssignment::violates_mutexes() const {
+    if (!task->has_mutexes()) return false;
     return contains_mutex(task, get_unpacked_values());
 }
 pair<bool, State> PartialAssignment::get_full_state(
@@ -176,8 +177,9 @@ pair<bool, State> PartialAssignment::get_full_state(
     vector<int> new_values = get_unpacked_values();
     bool success = true;
     if (check_mutexes) {
-        if (contains_mutex(task, new_values)) {
-            return make_pair(false, State(*task, move(new_values)));
+        if (task->has_mutexes()) {
+            if (contains_mutex(task, new_values))
+                return make_pair(false, State(*task, move(new_values)));
         } else {
             success = replace_dont_cares_with_non_mutex_values(
                     task, new_values, rng);

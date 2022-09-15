@@ -62,6 +62,8 @@ class RootTask : public AbstractTask {
     vector<int> initial_state_values;
     vector<FactPair> goals;
 
+    bool has_mutexes_;
+
     const ExplicitVariable &get_variable(int var) const;
     const ExplicitEffect &get_effect(int op_id, int effect_id, bool is_axiom) const;
     const ExplicitOperator &get_operator_or_axiom(int index, bool is_axiom) const;
@@ -108,6 +110,8 @@ public:
         const AbstractTask *ancestor_task) const override;
 
     virtual bool is_undefined(const FactPair &fact) const override;
+
+    virtual bool has_mutexes() const override;
 };
 
 
@@ -334,6 +338,12 @@ RootTask::RootTask(istream &in) {
     int num_variables = variables.size();
 
     mutexes = read_mutexes(in, variables);
+    has_mutexes_ = false;
+    for (unsigned i = 0; i < mutexes.size() && !has_mutexes_; i++) {
+      for (unsigned j = 0; j < mutexes[i].size() && !has_mutexes_; j++)
+        if (mutexes[i][j].size() != 0)
+          has_mutexes_ = true;
+    }
 
     initial_state_values.resize(num_variables);
     check_magic(in, "begin_state");
@@ -497,6 +507,10 @@ void RootTask::convert_state_values(
 
 bool RootTask::is_undefined(const FactPair &/*fact*/) const {
     return false;
+}
+
+bool RootTask::has_mutexes() const {
+    return has_mutexes_;
 }
 
 void read_root_task(istream &in) {

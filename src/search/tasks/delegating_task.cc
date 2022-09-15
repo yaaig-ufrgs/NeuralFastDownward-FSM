@@ -104,6 +104,11 @@ bool DelegatingTask::is_undefined(const FactPair &fact) const {
     return parent->is_undefined(fact);
 }
 
+bool DelegatingTask::has_mutexes() const {
+    return parent->has_mutexes();
+}
+
+
 void DelegatingTask::convert_state_values(
     vector<int> &values, const AbstractTask *ancestor_task) const {
     if (this == ancestor_task) {

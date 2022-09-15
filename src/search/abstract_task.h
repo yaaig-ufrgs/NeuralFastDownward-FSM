@@ -110,6 +110,8 @@ public:
     std::string get_sas() const;
 
     virtual bool is_undefined(const FactPair &fact) const = 0;
+
+    virtual bool has_mutexes() const = 0;
 };
 
 #endif
