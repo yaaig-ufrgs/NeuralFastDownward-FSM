@@ -177,12 +177,10 @@ pair<bool, State> PartialAssignment::get_full_state(
     vector<int> new_values = get_unpacked_values();
     bool success = true;
     if (check_mutexes) {
-        if (task->has_mutexes()) {
-            if (contains_mutex(task, new_values))
-                return make_pair(false, State(*task, move(new_values)));
+        if (task->has_mutexes() && contains_mutex(task, new_values)) {
+            return make_pair(false, State(*task, move(new_values)));
         } else {
-            success = replace_dont_cares_with_non_mutex_values(
-                    task, new_values, rng);
+            success = replace_dont_cares_with_non_mutex_values(task, new_values, rng);
         }
 
     } else {
