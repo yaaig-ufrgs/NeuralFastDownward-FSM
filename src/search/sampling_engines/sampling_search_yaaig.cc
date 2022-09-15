@@ -281,7 +281,7 @@ void SamplingSearchYaaig::log_mse(int updates) {
         re = sqrt(e);
         file_str << updates << "," << e << "," << re << ",," << endl;
     }
-    log_str << "[AVI] Updates: " << updates;
+    log_str << "[SUI] Updates: " << updates;
     if (re != -1)
         log_str << " | RMSE: " << re;
     log_str << " | Time: " << fixed << (chrono::duration<double, milli>(
@@ -302,7 +302,7 @@ void SamplingSearchYaaig::create_trie_statespace() {
     if (!trie_statespace.empty()) { // was already created in a previous call
         return;
     }
-    auto t_start_avi = std::chrono::high_resolution_clock::now();
+    auto t_start_sui = std::chrono::high_resolution_clock::now();
     string h_sample;
     ifstream f(mse_hstar_file);
     if (f.is_open()) {
@@ -320,14 +320,14 @@ void SamplingSearchYaaig::create_trie_statespace() {
         }
         f.close();
         utils::g_log << "Time creating trie_statespace: " << (std::chrono::duration<double, std::milli>(
-            std::chrono::high_resolution_clock::now() - t_start_avi).count() / 1000.0) << "s" << endl;
+            std::chrono::high_resolution_clock::now() - t_start_sui).count() / 1000.0) << "s" << endl;
     } else {
         utils::g_log << "*** Could not open state space file! ***" << endl;
     }
 }
 
-void SamplingSearchYaaig::approximate_value_iteration() {
-    if (avi_k <= 0)
+void SamplingSearchYaaig::successor_improvement() {
+    if (sui_k <= 0)
         return;
     if (use_evaluator)
         return;
@@ -335,13 +335,13 @@ void SamplingSearchYaaig::approximate_value_iteration() {
         create_trie_statespace();
 
     // Trie
-    auto t_avi = std::chrono::high_resolution_clock::now();
-    auto t = t_avi;
+    auto t_sui = std::chrono::high_resolution_clock::now();
+    auto t = t_sui;
     trie::trie<shared_ptr<PartialAssignment>> trie;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         trie.insert(partialAssignment->get_values(), partialAssignment);
     }
-    utils::g_log << "[AVI] Time creating trie: " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[SUI] Time creating trie: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 
     // Check for hash conflicts.
@@ -366,10 +366,10 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     const std::unique_ptr<successor_generator::SuccessorGenerator> succ_generator =
         utils::make_unique_ptr<successor_generator::SuccessorGenerator>(task_proxy);
     const OperatorsProxy operators = task_proxy.get_operators();
-    unordered_map<size_t,AviNode> avi_mapping;
+    unordered_map<size_t,SuiNode> sui_mapping;
     for (shared_ptr<PartialAssignment>& s : sampling_technique::modified_tasks) {
         size_t s_key = hash<string>{}(s->values_to_string());
-        if (avi_mapping[s_key].samples.size() == 0) {
+        if (sui_mapping[s_key].samples.size() == 0) {
             vector<OperatorID> applicable_operators;
             succ_generator->generate_applicable_ops(*s, applicable_operators, true);
             for (OperatorID& op_id : applicable_operators) {
@@ -377,45 +377,45 @@ void SamplingSearchYaaig::approximate_value_iteration() {
                 PartialAssignment t = s->get_partial_successor(op_proxy);
                 if (state_representation == "complete_no_mutex" || !t.violates_mutexes()) {
                     std::vector<shared_ptr<PartialAssignment>> compatible_states;
-                    trie.find_all_compatible(t.get_values(), avi_rule, compatible_states);
+                    trie.find_all_compatible(t.get_values(), sui_rule, compatible_states);
                     for (shared_ptr<PartialAssignment>& t_: compatible_states) {
                         size_t t_key = hash<string>{}(t_->values_to_string());
                         pair<size_t,int> pair = make_pair(t_key, op_proxy.get_cost());
-                        if (find(avi_mapping[s_key].successors.begin(), avi_mapping[s_key].successors.end(), pair)
-                                == avi_mapping[s_key].successors.end()) {
-                            avi_mapping[s_key].successors.push_back(pair);
+                        if (find(sui_mapping[s_key].successors.begin(), sui_mapping[s_key].successors.end(), pair)
+                                == sui_mapping[s_key].successors.end()) {
+                            sui_mapping[s_key].successors.push_back(pair);
                         }
                     }
                 }
             }
         }
-        avi_mapping[s_key].samples.push_back(s);
-        if (s->estimated_heuristic < avi_mapping[s_key].best_h)
-            avi_mapping[s_key].best_h = s->estimated_heuristic;
+        sui_mapping[s_key].samples.push_back(s);
+        if (s->estimated_heuristic < sui_mapping[s_key].best_h)
+            sui_mapping[s_key].best_h = s->estimated_heuristic;
     }
     if (minimization == "partial" || minimization == "both") {
-        for (pair<size_t, AviNode> p : avi_mapping) {
+        for (pair<size_t, SuiNode> p : sui_mapping) {
             for (shared_ptr<PartialAssignment> &s : p.second.samples)
                 s->estimated_heuristic = p.second.best_h;
         }
     }
-    utils::g_log << "[AVI] Time creating AVI mapping: " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[SUI] Time creating SUI mapping: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 
-    // AVI loop
-    utils::g_log << "Starting AVI updates...\n";
+    // SUI loop
+    utils::g_log << "Starting SUI updates...\n";
     t = std::chrono::high_resolution_clock::now();
     int updates = 0, updates_between_rmse = sampling_technique::modified_tasks.size() * 0.25;
     log_mse(updates);
     bool relaxed, any_relaxed;
     do {
         any_relaxed = false;
-        for (pair<size_t,AviNode> s: avi_mapping) {
+        for (pair<size_t,SuiNode> s: sui_mapping) {
             relaxed = false;
             for (pair<size_t,int> s_ : s.second.successors) { // pair<state,op_cost>
-                int candidate_heuristic = avi_mapping[s_.first].best_h + (unit_cost ? 1 : s_.second);
-                if (candidate_heuristic < avi_mapping[s.first].best_h) {
-                    avi_mapping[s.first].best_h = candidate_heuristic;
+                int candidate_heuristic = sui_mapping[s_.first].best_h + (unit_cost ? 1 : s_.second);
+                if (candidate_heuristic < sui_mapping[s.first].best_h) {
+                    sui_mapping[s.first].best_h = candidate_heuristic;
                     relaxed = true;
                     for (shared_ptr<PartialAssignment>& s : s.second.samples)
                         s->estimated_heuristic = candidate_heuristic;
@@ -430,11 +430,11 @@ void SamplingSearchYaaig::approximate_value_iteration() {
     } while (any_relaxed);
     log_mse(updates);
 
-    utils::g_log << "[AVI] Time updating h-values: " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[SUI] Time updating h-values: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 
-    utils::g_log << "[AVI] Total time: " << (std::chrono::duration<double, std::milli>(
-        std::chrono::high_resolution_clock::now() - t_avi).count() / 1000.0) << "s" << endl;
+    utils::g_log << "[SUI] Total time: " << (std::chrono::duration<double, std::milli>(
+        std::chrono::high_resolution_clock::now() - t_sui).count() / 1000.0) << "s" << endl;
 }
 
 vector<string> SamplingSearchYaaig::extract_samples() {
@@ -450,8 +450,8 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         );
     }
 
-    if (avi_k > 0) {
-        approximate_value_iteration();
+    if (sui_k > 0) {
+        successor_improvement();
     } else if (minimization == "partial" || minimization == "both") {
         do_minimization(sampling_technique::modified_tasks);
     }
@@ -617,9 +617,9 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       random_sample_state_representation(opts.get<string>("random_sample_state_representation")),
       minimization(opts.get<string>("minimization")),
       assignments_by_undefined_state(opts.get<int>("assignments_by_undefined_state")),
-      avi_k(opts.get<int>("avi_k")),
-      avi_rule(getRule(opts.get<string>("avi_rule"))),
-      avi_epsilon(stod(opts.get<string>("avi_epsilon"))),
+      sui_k(opts.get<int>("sui_k")),
+      sui_rule(getRule(opts.get<string>("sui_rule"))),
+      sui_epsilon(stod(opts.get<string>("sui_epsilon"))),
       sort_h(opts.get<bool>("sort_h")),
       mse_hstar_file(opts.get<string>("mse_hstar_file")),
       mse_result_file(opts.get<string>("mse_result_file")),
@@ -633,8 +633,8 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       rng(utils::parse_rng_from_options(opts)) {
     // assert(assignments_by_undefined_state > 0);
     if (!(assignments_by_undefined_state > 0)) { utils::g_log << "Error: sampling_search_yaaig.cc:604" << endl; exit(0); }
-    // assert(avi_k == 0 || avi_k == 1);
-    if (!(avi_k == 0 || avi_k == 1)) { utils::g_log << "Error: sampling_search_yaaig.cc:606" << endl; exit(0); }
+    // assert(sui_k == 0 || sui_k == 1);
+    if (!(sui_k == 0 || sui_k == 1)) { utils::g_log << "Error: sampling_search_yaaig.cc:606" << endl; exit(0); }
 
     if (mse_hstar_file != "none")
         create_trie_statespace();
@@ -673,16 +673,16 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "Number of states generated from each undefined state (only with assign_undefined).",
             "10");
     parser.add_option<int>(
-            "avi_k",
-            "Correct h-values using AVI via K-step forward repeatedly",
+            "sui_k",
+            "Correct h-values using SUI via K-step forward repeatedly",
             "0");
     parser.add_option<string>(
-            "avi_rule",
+            "sui_rule",
             "Rule applied when checking subset states.",
             "vu_u");
     parser.add_option<string>(
-            "avi_epsilon",
-            "RMSE no-improvement threshold for AVI early stop.",
+            "sui_epsilon",
+            "RMSE no-improvement threshold for SUI early stop.",
             "-1");
     parser.add_option<bool>(
             "sort_h",

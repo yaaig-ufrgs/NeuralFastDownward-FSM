@@ -30,9 +30,9 @@ protected:
     const std::string random_sample_state_representation;
     const std::string minimization;
     const int assignments_by_undefined_state;
-    const int avi_k;
-    const SearchRule avi_rule;
-    const double avi_epsilon;
+    const int sui_k;
+    const SearchRule sui_rule;
+    const double sui_epsilon;
     const bool sort_h;
     const std::string mse_hstar_file;
     const std::string mse_result_file;
@@ -56,8 +56,8 @@ private:
     void create_trie_statespace();
     double mse(std::vector<std::shared_ptr<PartialAssignment>>& samples, bool root = false);
     void log_mse(int updates);
-    void approximate_value_iteration();
-    void old_approximate_value_iteration(
+    void successor_improvement();
+    void old_successor_improvement(
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> sample_pairs =
             std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>()
     );
@@ -74,16 +74,16 @@ private:
     std::vector<int> binary_to_values(std::string bin);
 };
 
-class AviNode {
+class SuiNode {
 public:
     std::vector<std::shared_ptr<PartialAssignment>> samples;
     std::vector<std::pair<size_t,int>> successors;
     int best_h = INT_MAX;
 };
 
-class AviNodePtrCompare {
+class SuiNodePtrCompare {
 public:
-    bool operator()(AviNode* const first, AviNode* const second) {
+    bool operator()(SuiNode* const first, SuiNode* const second) {
         return first->best_h > second->best_h;
     };
 };

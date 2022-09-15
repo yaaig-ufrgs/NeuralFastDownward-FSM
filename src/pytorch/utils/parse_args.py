@@ -1350,28 +1350,28 @@ def get_sample_args():
         "--sort-h",
         type=str2bool,
         default=default_args.SAMPLE_SORT_H,
-        help="Sort sampling by increasign h-values before performing AVI. (default: %(default)s)",
+        help="Sort sampling by increasign h-values before performing SUI. (default: %(default)s)",
     )
     parser.add_argument(
-        "-avi",
-        "--avi-k",
+        "-sui",
+        "--sui-k",
         type=int,
-        default=default_args.SAMPLE_AVI,
-        help="Approximate Value Iteration (AVI) lookahead. If 0, no AVI is performed. (default: %(default)s)",
+        default=default_args.SAMPLE_SUI,
+        help="Successor Improvement (SUI) lookahead. If 0, no SUI is performed. (default: %(default)s)",
     )
     parser.add_argument(
-        "-avieps",
-        "--avi-eps",
+        "-suieps",
+        "--sui-eps",
         type=int,
-        default=default_args.SAMPLE_AVI_EPSILON,
-        help="RMSE no-improvement threshold for AVI early stop. (default: %(default)s)",
+        default=default_args.SAMPLE_SUI_EPSILON,
+        help="RMSE no-improvement threshold for SUI early stop. (default: %(default)s)",
     )
     parser.add_argument(
-        "-avirule",
-        "--avi-rule",
+        "-suirule",
+        "--sui-rule",
         choices=["vu_u", "v_vu"], # v -> v | u,  u -> u :::: v -> v,  u -> v | u
-        default=default_args.SAMPLE_AVI_RULE,
-        help="Rule used to check if a state s' is compatible with s'' during AVI. (default: %(default)s)",
+        default=default_args.SAMPLE_SUI_RULE,
+        help="Rule used to check if a state s' is compatible with s'' during SUI. (default: %(default)s)",
     )
     parser.add_argument(
         "-kd",
