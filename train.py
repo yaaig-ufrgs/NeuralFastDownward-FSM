@@ -51,8 +51,8 @@ def train_main(args: Namespace):
     """
     Higher-level setup of the full training procedure.
     """
-    if args.num_threads != -1:
-        torch.set_num_threads(args.num_threads)
+    if args.num_cores != -1:
+        torch.set_num_cores(args.num_cores)
 
     if args.samples.startswith("fake_"):
         _, samples_domain, samples_problem, samples_num = args.samples.split("_")

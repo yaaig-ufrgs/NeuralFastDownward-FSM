@@ -108,7 +108,7 @@ def main(exp_paths: [str]):
             evalu = full_exp["eval"] if "eval" in full_exp else None
             sampling = full_exp["sampling"] if "sampling" in full_exp else None
             if sampling:
-                sampling["threads"] = exp["exp-threads"]
+                sampling["cores"] = exp["exp-cores"]
                 sampling["output-dir"] = exp["samples"]
             if train and test:
                 test["model-dir"] = train["output-folder"]

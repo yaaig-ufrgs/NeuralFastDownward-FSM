@@ -72,7 +72,7 @@ def logging_train_config(
         "seed": args.seed if args.seed != -1 else "random",
         "scatter_plot": args.scatter_plot if args.scatter_plot != -1 else None,
         "plot_n_epochs": args.plot_n_epochs if args.plot_n_epochs != -1 else None,
-        "num_threads": args.num_threads if args.num_threads != -1 else None,
+        "num_cores": args.num_cores if args.num_cores != -1 else None,
         "output_folder": str(args.output_folder),
         "additional_folder_name": args.additional_folder_name
         if args.additional_folder_name != ""

@@ -11,17 +11,17 @@ COUNT = 0
 ID_COUNT = 0
 FIRST = True
 
-def run_multi_thread(cmd, threads):
+def run_multi_core(cmd, cores):
     global COUNT
     global ID_COUNT
     global FIRST
-    thread_id = COUNT
-    if COUNT < threads and FIRST:
-        print(f'tsp taskset -c {thread_id} ' + cmd)
-        os.system(f'tsp taskset -c {thread_id} ' + cmd)
+    core_id = COUNT
+    if COUNT < cores and FIRST:
+        print(f'tsp taskset -c {core_id} ' + cmd)
+        os.system(f'tsp taskset -c {core_id} ' + cmd)
         COUNT += 1
     else:
-        if FIRST or COUNT == threads:
+        if FIRST or COUNT == cores:
             COUNT = 0
         FIRST = False
         print(f'tsp -D {ID_COUNT} taskset -c {COUNT} ' + cmd)
@@ -151,14 +151,14 @@ def yaaig_ferber(args, meth):
                            f'techniques=[{args.ferber_technique}_none({args.ferber_num_tasks}, '
                            f'distribution=uniform_int_dist({args.ferber_min_walk_len}, {args.ferber_max_walk_len}), random_seed={i})], '
                            f'select_state_method={args.ferber_select_state}, random_seed={i})\"')
-                if args.threads > 1:
-                    run_multi_thread(cmd, args.threads)
+                if args.cores > 1:
+                    run_multi_core(cmd, args.cores)
                 else:
                     print(cmd)
                     os.system(cmd)
 
 
-    if args.threads <= 1:
+    if args.cores <= 1:
         sas_files = glob(f'{args.output_dir}/*-output.sas')
         for sf in sas_files:
             if os.path.isfile(sf):
@@ -167,7 +167,7 @@ def yaaig_ferber(args, meth):
 
 def sample(args):
     os.system(f"tsp -K")
-    os.system(f"tsp -S {args.threads}")
+    os.system(f"tsp -S {args.cores}")
     args.restart_h_when_goal_state = bool2str(args.restart_h_when_goal_state)
     args.state_filtering = bool2str(args.state_filtering)
     args.unit_cost = bool2str(args.unit_cost)

@@ -282,10 +282,10 @@ def get_train_args():
     )
     parser.add_argument(
         "-trd",
-        "--num-threads",
+        "--num-cores",
         type=int,
-        default=default_args.NUM_THREADS,
-        help="Number of threads used for intra operations on CPU (PyTorch). (default: %(default)s)",
+        default=default_args.NUM_CORES,
+        help="Number of cores used for intra operations on CPU (PyTorch). (default: %(default)s)",
     )
     parser.add_argument(
         "-dnw",
@@ -589,11 +589,11 @@ def get_exp_args():
         help="Inclusive sample seed interval to be used in experiments. (default: %(default)s)",
     )
     parser.add_argument(
-        "-exp-threads",
-        "--exp-threads",
+        "-exp-cores",
+        "--exp-cores",
         type=int,
-        default=default_args.EXP_THREADS,
-        help="Number of threads to use. (default: %(default)s)",
+        default=default_args.EXP_CORES,
+        help="Number of cores to use. (default: %(default)s)",
     )
     parser.add_argument(
         "-exp-train",
@@ -864,10 +864,10 @@ def get_exp_args():
     )
     parser.add_argument(
         "-trn-trd",
-        "--train-num-threads",
+        "--train-num-cores",
         type=int,
-        default=default_args.NUM_THREADS,
-        help="Number of threads used for intra operations on CPU (PyTorch). (default: %(default)s)",
+        default=default_args.NUM_CORES,
+        help="Number of cores used for intra operations on CPU (PyTorch). (default: %(default)s)",
     )
     parser.add_argument(
         "-trn-dnw",
@@ -1387,11 +1387,11 @@ def get_sample_args():
         help="Increments h by unit cost instead of operator cost. (default: %(default)s)",
     )
     parser.add_argument(
-        "-threads",
-        "--threads",
+        "-cores",
+        "--cores",
         type=int,
-        default=default_args.SAMPLE_THREADS,
-        help="Threads to use. (default: %(default)s)",
+        default=default_args.SAMPLE_CORES,
+        help="Cores to use. (default: %(default)s)",
     )
     parser.add_argument(
         "-t",

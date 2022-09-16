@@ -56,7 +56,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, run_tsp: bool = True):
             f"-lo {args.train_linear_output} -f {args.train_num_folds} "
             f"-lr {args.train_learning_rate} -w {args.train_weight_decay} -no {args.train_normalize_output} "
             f"-sibd {args.train_seed_increment_when_born_dead} -hpred {args.train_save_heuristic_pred} "
-            f"-trd {args.train_num_threads} -dnw {args.train_data_num_workers} "
+            f"-trd {args.train_num_cores} -dnw {args.train_data_num_workers} "
             f"-d {args.train_dropout_rate} -bi {args.train_bias} -biout {args.train_bias_output} "
             f"-of {args.train_output_folder} -rst {args.train_restart_no_conv} "
             f"-s {net_seed} -shs {args.train_shuffle_seed} -sp {args.train_scatter_plot} "
@@ -96,8 +96,8 @@ def run_train_test(args, sample_seed: int, net_seed: int, run_tsp: bool = True):
         if args.test_max_expansions != default_args.MAX_EXPANSIONS:
             test_args += f" -e {args.test_max_expansions}"
 
-        pcore = PID % args.exp_threads
-        pdep = PID - args.exp_threads
+        pcore = PID % args.exp_cores
+        pdep = PID - args.exp_cores
 
         if args.exp_only_train and do_eval:
             cmd = f"./train-and-eval.sh '{train_args}' '{eval_args}'"
@@ -148,15 +148,15 @@ def only_eval(args):
     sample_files = " ".join(sample_files)
 
     for model in args.eval_trained_models:
-        thread_id = count
-        if count < args.exp_threads and first:
+        core_id = count
+        if count < args.exp_cores and first:
             os.system(
-                f"tsp taskset -c {thread_id} ./eval.py {model} {sample_files} {eval_args}"
+                f"tsp taskset -c {core_id} ./eval.py {model} {sample_files} {eval_args}"
             )
-            # print(f"tsp taskset -c {thread_id} ./eval.py {model} {sample_files} {eval_args}")
+            # print(f"tsp taskset -c {core_id} ./eval.py {model} {sample_files} {eval_args}")
             count += 1
         else:
-            if first or count == args.exp_threads:
+            if first or count == args.exp_cores:
                 count = 0
             first = False
             os.system(
@@ -192,7 +192,7 @@ def experiment(args):
     max_sample_seed = int(sample_seeds[1]) if len(sample_seeds) > 1 else int(sample_seeds[0])
 
     os.system(f"tsp -K")
-    os.system(f"tsp -S {args.exp_threads}")
+    os.system(f"tsp -S {args.exp_cores}")
 
     if args.exp_only_eval and not args.exp_only_train:
         # Evaluate on all networks passed through argument.
