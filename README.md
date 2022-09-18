@@ -1,3 +1,8 @@
+# TODO
+- Merge large tests to release.
+- Fix experiments in `paper-experiments`.
+- Add large state space experiments JSONs.
+
 # Neural Fast Downward
 Neural Fast Downward is intended to help with generating training data for
 classical planning domains, as well as, using machine learning techniques with
