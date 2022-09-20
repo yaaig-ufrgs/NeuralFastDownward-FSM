@@ -289,7 +289,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
                 idx_op++;
                 stopped = stop_sampling(true, bfs_percentage);
             }
-            if (samples.size() + succ_s.size() <= bfs_samples) {
+            if (!stopped && samples.size() + succ_s.size() <= bfs_samples) {
                 leaves.erase(find(leaves.begin(), leaves.end(), s));
                 for (PartialAssignment& s_ : succ_s) {
                     samples.push_back(make_shared<PartialAssignment>(s_));
