@@ -238,6 +238,7 @@ def get_defaults_and_facts_files(
         else:
             facts_filename_format = [
                 "tasks/ferber21/training_tasks/{domain}/{problem}_facts.txt",
+                "tasks/experiments/{domain}/{problem}_facts.txt"
             ]
             for filename in facts_filename_format:
                 candidate_filename = filename.format(domain=args.domain, problem=args.problem)
