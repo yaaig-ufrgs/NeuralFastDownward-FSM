@@ -222,68 +222,76 @@ void SamplingSearchYaaig::create_random_samples(
 }
 
 vector<string> SamplingSearchYaaig::values_to_samples(
+    vector<pair<int,pair<vector<int>,string>>> values_set_eval,
     vector<pair<int,string>> values_set
 ) {
     vector<string> samples;
-    for (pair<int,string>& p : values_set) {
-        ostringstream oss;
-        if (store_plan_cost)
-            oss << p.first << field_separator;
-        if (store_state) {
-             if (state_representation == "complete" || state_representation == "complete_no_mutex" ||
-                state_representation == "partial" || state_representation == "undefined_char" ||
-                state_representation == "valid") {
-                oss << p.second;
-            } else {
-                { utils::g_log << "Error: sampling_search_yaaig.cc:222: state_representation not implemented" << endl; exit(0); }
-            }
-        }
-        samples.push_back(oss.str());
-    }
-    return samples;
-}
-
-vector<string> SamplingSearchYaaig::values_to_samples_eval(
-    vector<pair<int,pair<vector<int>,string>>> values_set
-) {
-    vector<string> samples;
-    for (pair<int,pair<vector<int>,string>>& p : values_set) {
-        ostringstream oss;
-        if (store_plan_cost)
-            oss << p.first << field_separator;
-        if (store_state) {
-            if (state_representation == "facts_partial" || state_representation == "facts_complete") {
-                for (unsigned i = 0; i < relevant_facts.size(); i++) {
-                    if (p.second.first[relevant_facts[i].var] == relevant_facts[i].value) {
-                        oss << task->get_fact_name(relevant_facts[i]);
-                        if (i < relevant_facts.size() - 1)
+    if (use_evaluator || state_representation == "facts_partial" || state_representation == "facts_complete" ||
+        state_representation == "values_partial" || state_representation == "values_complete" ||
+        state_representation == "undefined" || state_representation == "assign_undefined") {
+        for (pair<int,pair<vector<int>,string>>& p : values_set_eval) {
+            ostringstream oss;
+            if (store_plan_cost)
+                oss << p.first << field_separator;
+            if (store_state) {
+                if (state_representation == "facts_partial" || state_representation == "facts_complete") {
+                    for (unsigned i = 0; i < relevant_facts.size(); i++) {
+                        if (p.second.first[relevant_facts[i].var] == relevant_facts[i].value) {
+                            oss << task->get_fact_name(relevant_facts[i]);
+                            if (i < relevant_facts.size() - 1)
+                                oss << ' ';
+                        }
+                    }
+                } else if (state_representation == "values_partial" || state_representation == "values_complete") {
+                    for (unsigned i = 0; i < p.second.first.size(); i++) {
+                        oss << p.second.first[i];
+                        if (i < p.second.first.size() - 1)
                             oss << ' ';
                     }
+                } else if (
+                        state_representation == "complete" ||
+                        state_representation == "complete_no_mutex" ||
+                        state_representation == "partial" ||
+                        state_representation == "undefined_char" ||
+                        state_representation == "valid") {
+                    oss << p.second.second;
+                } else if (state_representation == "undefined" || state_representation == "assign_undefined") {
+                    for (unsigned i = 0; i < relevant_facts.size(); i++) {
+                        if ((state_representation == "undefined") && (i == 0 || relevant_facts[i].var != relevant_facts[i-1].var))
+                            oss << (p.second.first[relevant_facts[i].var] == PartialAssignment::UNASSIGNED);
+                        oss << (p.second.first[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
+                    }
+                } else {
+                    {
+                        utils::g_log << "Error: sampling_search_yaaig.cc:266: state_representation not implemented" << endl;
+                        exit(0);
+                    } // not implemented
                 }
-            } else if (state_representation == "values_partial" || state_representation == "values_complete") {
-                for (unsigned i = 0; i < p.second.first.size(); i++) {
-                    oss << p.second.first[i];
-                    if (i < p.second.first.size() - 1)
-                        oss << ' ';
-                }
-            } else if (
-                    state_representation == "complete" ||
-                    state_representation == "complete_no_mutex" ||
-                    state_representation == "partial" ||
-                    state_representation == "undefined_char" ||
-                    state_representation == "valid") {
-                oss << p.second.second;
-            } else if (state_representation == "undefined" || state_representation == "assign_undefined") {
-                for (unsigned i = 0; i < relevant_facts.size(); i++) {
-                    if ((state_representation == "undefined") && (i == 0 || relevant_facts[i].var != relevant_facts[i-1].var))
-                        oss << (p.second.first[relevant_facts[i].var] == PartialAssignment::UNASSIGNED);
-                    oss << (p.second.first[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
-                }
-            } else {
-                { utils::g_log << "Error: sampling_search_yaaig.cc:231" << endl; exit(0); } // not implemented
             }
+            samples.push_back(oss.str());
         }
-        samples.push_back(oss.str());
+    } else {
+         for (pair<int,string>& p : values_set) {
+            ostringstream oss;
+            if (store_plan_cost)
+                oss << p.first << field_separator;
+            if (store_state) {
+                if (
+                        state_representation == "complete" ||
+                        state_representation == "complete_no_mutex" ||
+                        state_representation == "partial" ||
+                        state_representation == "undefined_char" ||
+                        state_representation == "valid") {
+                    oss << p.second;
+                } else {
+                    {
+                        utils::g_log << "Error: sampling_search_yaaig.cc:288: state_representation not implemented" << endl;
+                        exit(0);
+                    } // not implemented
+                }
+            }
+            samples.push_back(oss.str());
+        }
     }
     return samples;
 }
@@ -511,7 +519,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             if (task_properties::is_goal_state(task_proxy, s))
                 h = 0;
             s.unpack();
-            if (use_evaluator)
+            if (use_evaluator || state_representation == "values_complete" || state_representation == "facts_complete")
                 values_set_eval.push_back(make_pair(h, make_pair(s.get_values(), s.to_binary())));
             else
                 values_set.push_back(make_pair(h, s.to_binary()));
@@ -565,7 +573,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         } else if (state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial" || state_representation == "facts_partial") {
             if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
                 h = 0;
-            if (use_evaluator)
+            if (use_evaluator || state_representation == "undefined" || state_representation == "values_partial" || state_representation == "facts_partial")
                 values_set_eval.push_back(make_pair(h, make_pair(partialAssignment->get_values(), partialAssignment->to_binary(state_representation == "undefined_char"))));
             else
                 values_set.push_back(make_pair(h, partialAssignment->to_binary(state_representation == "undefined_char")));
@@ -574,10 +582,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 if (task_properties::is_goal_state(task_proxy, s))
                     h = 0;
                 s.unpack();
-                if (use_evaluator)
-                    values_set_eval.push_back(make_pair(h, make_pair(s.get_values(), s.to_binary())));
-                else
-                    values_set.push_back(make_pair(h, s.to_binary()));
+                values_set_eval.push_back(make_pair(h, make_pair(s.get_values(), s.to_binary())));
             }
         }
     }
@@ -593,12 +598,11 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     // blind is the default, keeping the regression value
     if (use_evaluator) {
         replace_h_with_evaluator(values_set_eval);
-        return values_to_samples_eval(values_set_eval);
     }
 
     //if (state_representation == "complete" || state_representation == "complete_no_mutex" || state_representation == "partial" || state_representation == "valid")
     //    compute_sampling_statistics(values_set);
-    return values_to_samples(values_set);
+    return values_to_samples(values_set_eval, values_set);
 }
 
 void SamplingSearchYaaig::replace_h_with_evaluator(

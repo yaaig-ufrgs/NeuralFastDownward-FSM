@@ -63,10 +63,8 @@ private:
     std::vector<State> assign_undefined_state(std::shared_ptr<PartialAssignment>& pa, int max_attempts);
     void create_random_samples(
           std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& values_set_eval, std::vector<std::pair<int,std::string>>& values_set, int percentage);
-    std::vector<std::string> values_to_samples_eval(
-        std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> values_set);
     std::vector<std::string> values_to_samples(
-        std::vector<std::pair<int,std::string>> values_set);
+        std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> values_set_eval, std::vector<std::pair<int,std::string>> values_set);
     void replace_h_with_evaluator(
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& values_set);
     void compute_sampling_statistics(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> samples);
