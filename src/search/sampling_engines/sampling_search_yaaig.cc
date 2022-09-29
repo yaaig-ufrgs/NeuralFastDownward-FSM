@@ -92,18 +92,19 @@ void SamplingSearchYaaig::sample_improvement(vector<shared_ptr<PartialAssignment
     }
 }
 
-void SamplingSearchYaaig::sample_improvement(vector<pair<int,pair<vector<int>,string>>>& states) {
+//void SamplingSearchYaaig::sample_improvement(vector<pair<int,pair<vector<int>,string>>>& states) {
+void SamplingSearchYaaig::sample_improvement(vector<pair<int,string>>& states) {
     if (use_evaluator)
         return;
 
     unordered_map<string,pair<int,vector<int*>>> pairs;
-    for (pair<int,pair<vector<int>,string>>& s: states) {
-        if (pairs.count(s.second.second) == 0) {
-            pairs[s.second.second] = make_pair(s.first, vector<int*>{&s.first});
+    for (pair<int,string>& s: states) {
+        if (pairs.count(s.second) == 0) {
+            pairs[s.second] = make_pair(s.first, vector<int*>{&s.first});
         } else {
-            if (s.first < pairs[s.second.second].first)
-                pairs[s.second.second].first = s.first;
-            pairs[s.second.second].second.push_back(&s.first);
+            if (s.first < pairs[s.second].first)
+                pairs[s.second].first = s.first;
+            pairs[s.second].second.push_back(&s.first);
         }
     }
     for (pair<string,pair<int,vector<int*>>> p : pairs) {
@@ -133,11 +134,14 @@ vector<State> SamplingSearchYaaig::assign_undefined_state(shared_ptr<PartialAssi
 }
 
 void SamplingSearchYaaig::create_random_samples(
-    vector<pair<int,pair<vector<int>,string>>>& values_set,
+    vector<pair<int,pair<vector<int>,string>>>& values_set_eval,
+    vector<pair<int,string>>& values_set,
     int num_samples
 ) {
     if (num_samples == 0)
         return;
+
+    utils::g_log << "[RS] Inserting random samples...\n";
 
     const size_t n_atoms = sampling_technique::modified_tasks[0]->get_values().size();
     PartialAssignment pa(
@@ -147,22 +151,35 @@ void SamplingSearchYaaig::create_random_samples(
 
     // Hack: if 100% random then we sample 1 state to know the structure of the state.
     // At this point it is no longer important.
-    if (sampling_technique::modified_tasks.size() == 1)
+    if (sampling_technique::modified_tasks.size() == 1) {
+        values_set_eval.clear();
         values_set.clear();
+    }
 
     unordered_map<string,int> state_value;
     if (sai != "complete" && sai != "both") {
         // If full state SAI is enabled this will be done implicitly later
-        for (pair<int,pair<vector<int>,string>>& p : values_set) {
-            if (state_value.count(p.second.second) == 0)
-                state_value[p.second.second] = p.first;
+        if (use_evaluator) {
+            for (pair<int, pair<vector<int>, string>> &p : values_set_eval) {
+                if (state_value.count(p.second.second) == 0)
+                    state_value[p.second.second] = p.first;
+            }
+        } else {
+             for (pair<int,string> &p : values_set) {
+                if (state_value.count(p.second) == 0)
+                    state_value[p.second] = p.first;
+            }
         }
     }
 
     int max_h = 0; // biggest h found in the search
     if (sampling_technique::random_estimates == "default") {
-        for (pair<int, pair<vector<int>, string>> &p : values_set)
-            max_h = max(max_h, p.first);
+        if (use_evaluator)
+            for (pair<int, pair<vector<int>, string>> &p : values_set_eval)
+                max_h = max(max_h, p.first);
+        else
+            for (pair<int, string> &p : values_set)
+                max_h = max(max_h, p.first);
     }
 
     while (num_samples > 0) {
@@ -184,7 +201,7 @@ void SamplingSearchYaaig::create_random_samples(
         int h = -1;
         if (sampling_technique::random_estimates == "random") {
             int idx = (*rng)() * values_set.size();
-            h = values_set[idx].first;
+            h = (use_evaluator ? values_set_eval[idx].first : values_set[idx].first);
         } else if (sampling_technique::random_estimates == "default" && max_h != 0) {
               h = max_h + 1;
         } else { // number range
@@ -196,12 +213,37 @@ void SamplingSearchYaaig::create_random_samples(
             if (state_value.count(bin) != 0)
                 h = state_value[bin];
         }
-        values_set.push_back(make_pair(h, make_pair(values, bin)));
+        if (use_evaluator)
+            values_set_eval.push_back(make_pair(h, make_pair(values, bin)));
+        else
+            values_set.push_back(make_pair(h, bin));
         num_samples--;
     }
 }
 
 vector<string> SamplingSearchYaaig::values_to_samples(
+    vector<pair<int,string>> values_set
+) {
+    vector<string> samples;
+    for (pair<int,string>& p : values_set) {
+        ostringstream oss;
+        if (store_plan_cost)
+            oss << p.first << field_separator;
+        if (store_state) {
+             if (state_representation == "complete" || state_representation == "complete_no_mutex" ||
+                state_representation == "partial" || state_representation == "undefined_char" ||
+                state_representation == "valid") {
+                oss << p.second;
+            } else {
+                { utils::g_log << "Error: sampling_search_yaaig.cc:222: state_representation not implemented" << endl; exit(0); }
+            }
+        }
+        samples.push_back(oss.str());
+    }
+    return samples;
+}
+
+vector<string> SamplingSearchYaaig::values_to_samples_eval(
     vector<pair<int,pair<vector<int>,string>>> values_set
 ) {
     vector<string> samples;
@@ -406,7 +448,7 @@ void SamplingSearchYaaig::successor_improvement() {
     utils::g_log << "Starting SUI updates...\n";
     t = std::chrono::high_resolution_clock::now();
     int updates = 0, updates_between_rmse = sampling_technique::modified_tasks.size() * 0.25;
-    log_mse(updates);
+    //log_mse(updates);
     bool relaxed, any_relaxed;
     do {
         any_relaxed = false;
@@ -423,12 +465,12 @@ void SamplingSearchYaaig::successor_improvement() {
             }
             if (relaxed) {
                 any_relaxed = true;
-                if (++updates % updates_between_rmse == 0)
-                    log_mse(updates);
+                //if (++updates % updates_between_rmse == 0)
+                //    log_mse(updates);
             }
         }
     } while (any_relaxed);
-    log_mse(updates);
+    //log_mse(updates);
 
     utils::g_log << "[SUI] Time updating h-values: " << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
@@ -456,7 +498,8 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         sample_improvement(sampling_technique::modified_tasks);
     }
     
-    vector<pair<int,pair<vector<int>,string>>> values_set;
+    vector<pair<int,pair<vector<int>,string>>> values_set_eval;
+    vector<pair<int,string>> values_set;
     for (shared_ptr<PartialAssignment>& partialAssignment: sampling_technique::modified_tasks) {
         int h = -1;
         if (store_plan_cost)
@@ -468,9 +511,10 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             if (task_properties::is_goal_state(task_proxy, s))
                 h = 0;
             s.unpack();
-            values_set.push_back(
-                make_pair(h, make_pair(s.get_values(), s.to_binary()))
-            );
+            if (use_evaluator)
+                values_set_eval.push_back(make_pair(h, make_pair(s.get_values(), s.to_binary())));
+            else
+                values_set.push_back(make_pair(h, s.to_binary()));
         } else if (state_representation == "valid") {
             State s = partialAssignment->get_full_state(true, *rng).second; // placeholder
             bool is_valid = false;
@@ -507,9 +551,10 @@ vector<string> SamplingSearchYaaig::extract_samples() {
                 if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
                     h = 0;
                 s.unpack();
-                values_set.push_back(
-                    make_pair(h, make_pair(s.get_values(), s.to_binary()))
-                );
+                if (use_evaluator)
+                    values_set_eval.push_back(make_pair(h, make_pair(s.get_values(), s.to_binary())));
+                else
+                    values_set.push_back(make_pair(h, s.to_binary()));
             } else {
                 utils::g_log << "Sample " << partialAssignment->to_binary(true)
                     << " not found in state space!" << endl;
@@ -520,35 +565,39 @@ vector<string> SamplingSearchYaaig::extract_samples() {
         } else if (state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char" || state_representation == "values_partial" || state_representation == "facts_partial") {
             if (task_properties::is_goal_assignment(task_proxy, *partialAssignment))
                 h = 0;
-            values_set.push_back(
-                make_pair(h, make_pair(partialAssignment->get_values(), partialAssignment->to_binary(state_representation == "undefined_char")))
-            );
+            if (use_evaluator)
+                values_set_eval.push_back(make_pair(h, make_pair(partialAssignment->get_values(), partialAssignment->to_binary(state_representation == "undefined_char"))));
+            else
+                values_set.push_back(make_pair(h, partialAssignment->to_binary(state_representation == "undefined_char")));
         } else if (state_representation == "assign_undefined") {
             for (State &s : assign_undefined_state(partialAssignment, 5 * assignments_by_undefined_state)) {
                 if (task_properties::is_goal_state(task_proxy, s))
                     h = 0;
                 s.unpack();
-                values_set.push_back(
-                    make_pair(h, make_pair(s.get_values(), s.to_binary()))
-                );
+                if (use_evaluator)
+                    values_set_eval.push_back(make_pair(h, make_pair(s.get_values(), s.to_binary())));
+                else
+                    values_set.push_back(make_pair(h, s.to_binary()));
             }
         }
     }
 
     if (sampling_technique::random_samples > 0)
-        create_random_samples(values_set, sampling_technique::random_samples);
+        create_random_samples(values_set_eval, values_set, sampling_technique::random_samples);
 
     if ((sai == "complete" || sai == "both")
             && !(state_representation == "partial" || state_representation == "undefined" || state_representation == "undefined_char")) {
         sample_improvement(values_set);
     }
 
-    // blind is the default, sampling keeps the regression value
-    if (use_evaluator)
-        replace_h_with_evaluator(values_set);
+    // blind is the default, keeping the regression value
+    if (use_evaluator) {
+        replace_h_with_evaluator(values_set_eval);
+        return values_to_samples_eval(values_set_eval);
+    }
 
-    if (state_representation == "complete" || state_representation == "complete_no_mutex" || state_representation == "partial" || state_representation == "valid")
-        compute_sampling_statistics(values_set);
+    //if (state_representation == "complete" || state_representation == "complete_no_mutex" || state_representation == "partial" || state_representation == "valid")
+    //    compute_sampling_statistics(values_set);
     return values_to_samples(values_set);
 }
 
