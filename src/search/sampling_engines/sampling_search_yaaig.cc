@@ -601,7 +601,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     }
 
     //if (state_representation == "complete" || state_representation == "complete_no_mutex" || state_representation == "partial" || state_representation == "valid")
-    //    compute_sampling_statistics(values_set);
+    //    compute_sampling_statistics(values_set_eval, values_set);
     return values_to_samples(values_set_eval, values_set);
 }
 
@@ -619,44 +619,69 @@ void SamplingSearchYaaig::replace_h_with_evaluator(
 }
 
 void SamplingSearchYaaig::compute_sampling_statistics(
-    vector<pair<int,pair<vector<int>,string>>> samples
+    vector<pair<int,pair<vector<int>,string>>> samples_eval,
+    vector<pair<int,string>> samples
 ) {
     if (mse_hstar_file == "none")
         return;
+    unsigned samples_size = (samples_eval.size() > 0 ? samples_eval.size() : samples.size());
     create_trie_statespace();
     utils::g_log << "Generating statistics on samples...\n";
     if (!trie_statespace.empty()) {
         int not_in_statespace = 0, underestimates = 0, with_hstar = 0, sum_h = 0;
-        for (auto& s : samples) {
-            int h = s.first;
-            sum_h += h;
-            vector<int> key;
-            for (char& b : s.second.second)
-                key.push_back((int)b - '0');
-	    vector<pair<int, string>> compatibles;
-	    trie_statespace.find_all_compatible(key, SearchRule::samesets, compatibles);
-            if (compatibles.size() == 0) {
-                not_in_statespace++;
-            } else {
-                // assert(compatibles.size() == 1);
-                if (!(compatibles.size() == 1)) { utils::g_log << "Error: sampling_search_yaaig.cc:554" << endl; exit(0); }
-                int hstar = compatibles[0].first;
-                if (h == hstar)
-                    with_hstar++;
-                else if (h < hstar)
-                    underestimates++;
+        if (samples_eval.size() > 0) {
+            for (auto& s : samples_eval) {
+                int h = s.first;
+                sum_h += h;
+                vector<int> key;
+                for (char& b : s.second.second)
+                    key.push_back((int)b - '0');
+                vector<pair<int, string>> compatibles;
+                trie_statespace.find_all_compatible(key, SearchRule::samesets, compatibles);
+                if (compatibles.size() == 0) {
+                    not_in_statespace++;
+                } else {
+                    // assert(compatibles.size() == 1);
+                    if (!(compatibles.size() == 1)) { utils::g_log << "Error: sampling_search_yaaig.cc:645" << endl; exit(0); }
+                    int hstar = compatibles[0].first;
+                    if (h == hstar)
+                        with_hstar++;
+                    else if (h < hstar)
+                        underestimates++;
+                }
+            }
+        } else {
+            for (auto& s : samples) {
+                int h = s.first;
+                sum_h += h;
+                vector<int> key;
+                for (char& b : s.second)
+                    key.push_back((int)b - '0');
+                vector<pair<int, string>> compatibles;
+                trie_statespace.find_all_compatible(key, SearchRule::samesets, compatibles);
+                if (compatibles.size() == 0) {
+                    not_in_statespace++;
+                } else {
+                    // assert(compatibles.size() == 1);
+                    if (!(compatibles.size() == 1)) { utils::g_log << "Error: sampling_search_yaaig.cc:666" << endl; exit(0); }
+                    int hstar = compatibles[0].first;
+                    if (h == hstar)
+                        with_hstar++;
+                    else if (h < hstar)
+                        underestimates++;
+                }
             }
         }
         if (evaluator->get_description() == "evaluator = pdb(hstar_pattern(list))") {
             // assert((unsigned)(with_hstar + not_in_statespace) == samples.size());
-            if (!((unsigned)(with_hstar + not_in_statespace) == samples.size())) { utils::g_log << "Error: sampling_search_yaaig.cc:564" << endl; exit(0); }
+            if (!((unsigned)(with_hstar + not_in_statespace) == samples_size)) { utils::g_log << "Error: sampling_search_yaaig.cc:564" << endl; exit(0); }
         }
 
-        utils::g_log << "[STATS] Samples: " << samples.size() << "\n";
+        utils::g_log << "[STATS] Samples: " << samples_size << "\n";
         utils::g_log << "[STATS] Samples with h*: " << with_hstar << "\n";
         utils::g_log << "[STATS] Samples underestimating h*: " << underestimates << "\n";
         utils::g_log << "[STATS] Samples not in state space: " << not_in_statespace << "\n";
-        utils::g_log << "[STATS] Average h value: " << ((float)sum_h / samples.size()) << "\n";
+        utils::g_log << "[STATS] Average h value: " << ((float)sum_h / samples_size) << "\n";
     } else {
         utils::g_log << "[STATS] trie_statespace was not created." << endl;
     }

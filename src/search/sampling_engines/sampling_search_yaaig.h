@@ -67,8 +67,7 @@ private:
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> values_set_eval, std::vector<std::pair<int,std::string>> values_set);
     void replace_h_with_evaluator(
         std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>>& values_set);
-    void compute_sampling_statistics(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> samples);
-    void compute_sampling_statistics(std::vector<std::pair<int,std::string>> samples);
+    void compute_sampling_statistics(std::vector<std::pair<int,std::pair<std::vector<int>,std::string>>> samples_eval, std::vector<std::pair<int,std::string>> samples);
     std::vector<int> binary_to_values(std::string bin);
 };
 
