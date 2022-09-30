@@ -25,7 +25,6 @@
         "statespace": "tasks/experiments/statespaces/statespace_scanalyzerunit_scanalyzer_hstar",
         "successor-improvement-k": 0,
         "bound": "200",
-        "sample-unit-cost": "yes",
         "state-filtering": "mutex",
         "bfs-percentage": 10
     },

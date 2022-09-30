@@ -24,7 +24,6 @@
         "statespace": "tasks/experiments/statespaces/statespace_transportunit_transport_hstar",
         "successor-improvement-k": 1,
         "bound": 200,
-        "sample-unit-cost": "yes",
         "state-filtering": "mutex",
         "evaluator": "pdb(hstar_pattern([]))"
     },

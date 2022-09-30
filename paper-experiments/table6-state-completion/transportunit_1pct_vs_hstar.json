@@ -25,7 +25,6 @@
         "statespace": "tasks/experiments/statespaces/statespace_transportunit_transport_hstar",
         "successor-improvement-k": 1,
         "bound": "facts_per_avg_effects",
-        "sample-unit-cost": "yes",
         "state-filtering": "statespace",
         "bfs-percentage": 10,
         "evaluator": "pdb(hstar_pattern([]))"

@@ -23,7 +23,6 @@
         "sample-improvement": "none",
         "statespace": "tasks/experiments/statespaces/statespace_transportunit_transport_hstar",
         "successor-improvement-k": 0,
-        "sample-unit-cost": "yes",
         "state-filtering": "mutex",
         "bound": 200
     },
