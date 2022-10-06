@@ -99,11 +99,12 @@ for train_folder in argv[1:]:
     except Exception as _:
         train_log = None
     try:
+        is_untested = False
         with open(f"{test_folder}/test_results.json") as test_results_file:
             test_results = load(test_results_file)
     except:
-        continue
-        # test_results = {"statistics" : "None"}
+        is_untested = True
+        test_results = {"statistics" : "None"}
 
     for fold in test_results["statistics"]:
         line = []
@@ -112,15 +113,6 @@ for train_folder in argv[1:]:
         domain = domain.replace("-opt14-strips", "")
         samples_file = train_args["samples"].split("/")[-1] if "samples" in train_args else "NA"
 
-        """"
-        sampling_algorithm = samples_file.split("-")[2] if samples_file != "NA" else "NA"
-        print(sampling_algorithm)
-        exit()
-        if sampling_algorithm == "baseline":
-            sampling_algorithm = "rw"
-        if sampling_algorithm == "bfs_rw":
-            sampling_algorithm = "bfs_rw"
-        """
         sampling_algorithm = "NA"
         if "bfsrw" in samples_file:
             sampling_algorithm = "bfs_rw"
@@ -144,7 +136,6 @@ for train_folder in argv[1:]:
             elif rw_bound_method == "factseff":
                 rw_bound = bounds[domain][2]
 
-        #if samples_file.endswith("-unitcost"):
         if "unit-" in train_folder:
             domain = domain + "_unitcost"
 
@@ -184,8 +175,8 @@ for train_folder in argv[1:]:
         domain = domain.replace("-opt14-strips", "")
 
         for h in HEADER:
+            value = "NA"
             try:
-                # training columns
                 if h == "network_seed":
                     h = "seed"
                 if h == "test_heuristic":
@@ -193,13 +184,13 @@ for train_folder in argv[1:]:
                 if h == "test_algorithm":
                     h = "search_algorithm"
 
-
-                elif h == "domain":
-                    value = domain
-                elif h in train_args:
+                # training columns
+                if h in train_args:
                     value = train_args[h]
                     if h == "problem" and value == domain.split("_unitcost")[0]:
                         value += "_adapted"
+                elif h == "domain":
+                    value = domain
                 elif h == "val_loss" or h == "train_loss":
                     if not train_log:
                         value = "NA"
@@ -223,18 +214,19 @@ for train_folder in argv[1:]:
                     value = round(float(train_log.split("Elapsed time: ")[1].split("s")[0]), 4)
 
                 # test columns
-                elif h == "coverage":
-                    # plans_found = test_results["statistics"][fold]["plans_found"]
-                    # total_problems = test_results["statistics"][fold]["total_problems"]
-                    value = round(test_results["statistics"][fold]["coverage"], 2)
-                    # value = f"{plans_found}/{total_problems} ({coverage}%)"
-                elif h in test_results["configuration"]:
-                    value = test_results["configuration"][h]
-                elif h in test_results["statistics"][fold]:
-                    value = test_results["statistics"][fold][h]
+                if not is_untested: 
+                    if h == "coverage":
+                        # plans_found = test_results["statistics"][fold]["plans_found"]
+                        # total_problems = test_results["statistics"][fold]["total_problems"]
+                        value = round(test_results["statistics"][fold]["coverage"], 2)
+                        # value = f"{plans_found}/{total_problems} ({coverage}%)"
+                    elif h in test_results["configuration"]:
+                        value = test_results["configuration"][h]
+                    elif h in test_results["statistics"][fold]:
+                        value = test_results["statistics"][fold][h]
 
                 # sampling columns
-                elif h == "state_representation":
+                if h == "state_representation":
                     value = sample_file.split("_")[4]
                 elif h == "sample_seed":
                     value = sample_file.split("ss")[1] if samples_file != "NA" else "NA"
@@ -247,8 +239,6 @@ for train_folder in argv[1:]:
                         value = train_folder.split("/")[-1].split(".")[1].split("_")[2]
                         if value == domain.split("_unitcost")[0]:
                             value += "_adapted"
-                    elif h == "seed":
-                        value = "NA"
                     if h == "sui":
                         value = sui
                     if h == "sai":
@@ -261,9 +251,7 @@ for train_folder in argv[1:]:
                         value = perfect_mutex
 
                     elif h == "sampling_algorithm":
-                        if samples_file == "NA":
-                            value = "NA"
-                        else:
+                        if samples_file != "NA":
                             value = sampling_algorithm
                             if value in sampling_algorithma:
                                 value = sampling_algorithma[value]
@@ -274,25 +262,19 @@ for train_folder in argv[1:]:
                         value = rw_bound
 
                     elif h == "bfs_samples":
-                        if samples_file == "NA":
-                            value = "NA"
-                        else:
+                        if samples_file != "NA":
                             if "bfs" in sampling_algorithm:
                                 value = round(int(total_samples) * 0.1)
                             else:
                                 value = 0
                     elif h == "rw_samples":
-                        if samples_file == "NA":
-                            value = "NA"
-                        else:
+                        if samples_file != "NA":
                             if "bfs" in sampling_algorithm:
                                 value = int(total_samples) - (round(int(total_samples) * 0.1)) - int(random_samples)
                             else:
                                 value = int(total_samples) - int(random_samples)
                     elif h == "total_samples":
-                        if samples_file == "NA":
-                            value = "NA"
-                        else:
+                        if samples_file != "NA":
                             value = total_samples
                     elif h == "statespace_size":
                         value = ss_samples[domain]
@@ -305,7 +287,6 @@ for train_folder in argv[1:]:
             except Exception as e:
                 print(train_folder)
                 raise e
-                value = "NA"
             line.append(str(value))
 
         # sp_id = HEADER.index("sample_percentage")
