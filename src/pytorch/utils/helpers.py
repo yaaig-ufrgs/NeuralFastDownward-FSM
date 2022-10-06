@@ -142,7 +142,7 @@ def add_train_arg(dirname: str, key, value):
         dump(data, f, indent=4)
 
 
-def get_problem_by_sample_filename(sample_filename: str, train_folder: str = None) -> (str, str):
+def get_problem_by_sample_filename(sample_filename: str, train_folder = None) -> (str, str):
     domain, problem = sample_filename.split("/")[-1].split("_")[1:3]
     if domain.endswith("unit"):
         domain = domain[:-len("unit")]
@@ -314,7 +314,7 @@ def get_train_args_json(train_folder: str) -> dict:
         return load(json_file)
 
 
-def create_fake_samples(domain: str, problem: str, n_samples: int) -> str:
+def create_fake_samples(domain: str, problem: str, n_samples: int) -> str or None:
     try:
         with open("reference/large_tasks.csv", "r") as f:
             pddl = None

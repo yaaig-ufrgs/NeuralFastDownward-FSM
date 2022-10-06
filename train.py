@@ -34,10 +34,6 @@ from src.pytorch.utils.file_helpers import (
     remove_csv_except_best,
 )
 from src.pytorch.utils.log_helpers import logging_train_config
-from src.pytorch.utils.plot import (
-    save_gif_from_plots,
-    remove_intermediate_plots,
-)
 import src.pytorch.utils.default_args as default_args
 from src.pytorch.utils.parse_args import get_train_args
 from src.pytorch.utils.timer import Timer

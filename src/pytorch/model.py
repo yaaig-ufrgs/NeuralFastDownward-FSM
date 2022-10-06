@@ -19,9 +19,9 @@ def RAI(fan_in, fan_out):
     return W, b
 
 
-class ResBlock(nn.Module):
+class ResidualBlock(nn.Module):
     def __init__(self, hidden_size):
-        super(ResBlock, self).__init__()
+        super(ResidualBlock, self).__init__()
         self.resblock = nn.Sequential(
             nn.Linear(hidden_size, hidden_size),
             nn.ReLU(),
@@ -73,7 +73,7 @@ class HNN(nn.Module):
         self.hid = self.set_hidden_layers(hu)
 
         if model == "resnet":
-            self.resblock = ResBlock(hidden_units[0])
+            self.resblock = ResidualBlock(hidden_units[0])
 
         # If `use_bias` is set to False, `bias_output` is set to False regardless
         # of the value in `use_bias_output`.

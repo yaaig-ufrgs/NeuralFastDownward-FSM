@@ -4,7 +4,6 @@
 Main file used to control the evaluation process of a network.
 """
 
-import os
 import sys
 import logging
 import random
@@ -172,7 +171,6 @@ def eval_model(model, dataloader: DataLoader, log_states: bool):
     y_true = []
     y_pred = []
     misses = 0
-    eval_diff = 0
 
     state_count = 1
     with torch.no_grad():
