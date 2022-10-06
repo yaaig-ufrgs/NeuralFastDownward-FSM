@@ -1,60 +1,31 @@
--------------------
-RUNNING EXPERIMENTS
--------------------
+# Running experiments
 
 Unless stated otherwise, to perform each experiment, run the following in the root directory:
 
-$ ./run.py tableX/*.json
+`./run.py tableX/*.json`
 
 The generated samples and results will be saved in tableX/samples and tableX/results, respectively. 
 
 Specifics are found within each tableX directory.
 
-* Table 3:
-- After generating the samples, run: 
-$ ./get_mean_h.py table3-algorithms-hmean/samples
-
-* Table 8:
-- After performing the evaluations with `run.py`, run: 
-$ ./compile_eval_csv.py table8-nn-statespace/results/*/*
-A CSV with the compiled average results will be generated as `statespace_hnn_avg.csv`.
-
-
----------------
-MODIFYING JSONS
----------------
+## Modifying JSONs
 
 To easily change multiple JSONs at once in case you want to try different parameters, you can use the 
 `modify_json.py` script. Example usage:
 
-$ ./modify_json.py experiment exp-threads 5 tableX/*.json
+`./modify_json.py experiment exp-cores 5 tableX/*.json`
 
-
------------------
-COMPILING RESULTS
------------------
+# Compiling results
 
 To create a CSV with the data of an experiment, you can run:
 
-$ ./make_csv.py tableX/results/*/nfd_train*/ > tableX/tableX.csv
+`./make_csv.py tableX/results/*/nfd_train*/ > tableX/tableX.csv`
 
-You can use Python's Pandas library or R to manipulate the data.
+Afterwards, you can use your tool of choice to manipulate the data to manipulate the data.
 
+* Table 3 (only for '-hmean' directories):
+    - After generating the samples, run `./get_mean_h.py table3-algorithms-hmean/samples`
 
-------------------
-NAMING CONVENTIONS
-------------------
-"propeff" or "propostions per mean effects"  -> LF/eff
-"prop" or "propositions"                     -> LF
-"200" or "default"                           -> D
-"min" or "hmin"                              -> SAI
-"avi" or "hvfc"                              -> SUI
-
-
-----
-TODO
-----
-- Fix `make_csv.py`.
-- Table 7: Add diff script that uses both the FSSP and the BSSP.
+# TODO
 - Table 8: Write script to evaluate the logic-based scripts to run the heuristics over the state spaces.
 - Table 9: Using `run_heuristic_experiments.py`, write a specific hassle-free script to run the heuristics over the PDDLs.
