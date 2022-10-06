@@ -3,6 +3,7 @@ import imageio
 import glob
 import logging
 import numpy as np
+from argparse import Namespace
 from os import path, makedirs, remove
 
 _log = logging.getLogger(__name__)
@@ -184,3 +185,24 @@ def remove_intermediate_plots(plots_dir: str, fold_idx: int):
             if idx == fold_idx and plot_split[-2] == "final":
                 continue
             remove(plot)
+
+
+def make_extra_plots(args: Namespace, dirname: str, best_fold: dict):
+    """
+    Manages extra plots, suchs as:
+    - h vs predicted h scatter plot animation.
+    """
+    plots_dir = f"{dirname}/plots"
+
+    if args.scatter_plot and args.plot_n_epochs != -1:
+        try:
+            _log.info(f"Saving scatter plot GIF.")
+            save_gif_from_plots(plots_dir, best_fold["fold"])
+            remove_intermediate_plots(plots_dir, best_fold["fold"])
+        except:
+            _log.error(f"Failed making plot GIF.")
+
+    heuristic_pred_file = f"{dirname}/heuristic_pred.csv"
+
+    if not args.save_heuristic_pred and path.exists(heuristic_pred_file):
+        remove(heuristic_pred_file)

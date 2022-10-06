@@ -19,6 +19,7 @@ from src.pytorch.k_fold_training_data import KFoldTrainingData
 from src.pytorch.model import HNN
 from src.pytorch.train_workflow import TrainWorkflow
 from src.pytorch.log import setup_full_logging
+from src.pytorch.utils.plot import make_extra_plots
 from src.pytorch.utils.helpers import (
     get_fixed_max_epochs,
     add_train_arg,
@@ -326,27 +327,6 @@ def set_seeds(args: Namespace, shuffle_seed: bool = True):
     torch.use_deterministic_algorithms(True)
     random.seed(args.seed)
     np.random.seed(args.seed)
-
-
-def make_extra_plots(args: Namespace, dirname: str, best_fold: dict):
-    """
-    Manages extra plots, suchs as:
-    - h vs predicted h scatter plot animation.
-    """
-    plots_dir = f"{dirname}/plots"
-
-    if args.scatter_plot and args.plot_n_epochs != -1:
-        try:
-            _log.info(f"Saving scatter plot GIF.")
-            save_gif_from_plots(plots_dir, best_fold["fold"])
-            remove_intermediate_plots(plots_dir, best_fold["fold"])
-        except:
-            _log.error(f"Failed making plot GIF.")
-
-    heuristic_pred_file = f"{dirname}/heuristic_pred.csv"
-
-    if not args.save_heuristic_pred and os.path.exists(heuristic_pred_file):
-        os.remove(heuristic_pred_file)
 
 
 if __name__ == "__main__":
