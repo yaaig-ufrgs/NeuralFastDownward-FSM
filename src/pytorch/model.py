@@ -27,12 +27,13 @@ class ResBlock(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_size, hidden_size),
         )
+        self.relu = nn.ReLU()
 
     def forward(self, x):
         identity = x
         out = self.resblock(x)
         out += identity
-        out = nn.functional.relu(out)
+        out = self.relu(out)
         return out
 
 
@@ -115,27 +116,27 @@ class HNN(nn.Module):
             hid.append(nn.Linear(hu[i], hu[i + 1], bias=self.use_bias))
         return hid
 
-    def set_activation(self, activation: str) -> nn.functional:
+    def set_activation(self, activation: str):
         if activation == "sigmoid":
-            return nn.functional.sigmoid
+            return nn.Sigmoid()
         elif activation == "relu":
-            return nn.functional.relu
+            return nn.ReLU()
         elif activation == "leakyrelu":
-            return nn.functional.leaky_relu
+            return nn.LeakyReLU()
         else:
             raise NotImplementedError(f"{activation} function not implemented!")
 
-    def set_output_activation(self, activation: str) -> nn.functional:
+    def set_output_activation(self, activation: str):
         if self.output_layer == "regression":
             return (
-                nn.functional.relu
+                nn.ReLU()
                 if activation != "leakyrelu"
-                else nn.functional.leaky_relu
+                else nn.LeakyReLU()
             )
         elif self.output_layer == "prefix":
-            return torch.sigmoid
+            return nn.Sigmoid()
         elif self.output_layer == "one-hot":
-            return nn.functional.softmax
+            return nn.Softmax()
         else:
             raise NotImplementedError(
                 f"{self.output_layer} not implemented for output layer!"

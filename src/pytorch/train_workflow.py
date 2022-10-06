@@ -151,7 +151,7 @@ class TrainWorkflow:
         """
         Saves a traced model to be used by the C++ backend.
         """
-        if model == "resnet" or model == "resnet_rtdl":
+        if model == "resnet":
             example_input = self.train_dataloader.dataset[:10][0].float()
         elif model == "simple" or model == "hnn":
             example_input = self.train_dataloader.dataset[0][0].float()
