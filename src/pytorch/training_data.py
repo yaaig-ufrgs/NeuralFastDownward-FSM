@@ -12,12 +12,12 @@ class InstanceDataset(Dataset):
         self,
         states: np.array,
         heuristics: np.array,
-        domain_max_value: int,
+        sample_max_value: int,
         output_layer: str,
     ):
 
         self.output_layer = output_layer
-        self.domain_max_value = domain_max_value
+        self.sample_max_value = sample_max_value
 
         self.states = torch.tensor(states, dtype=torch.int8)
         states = None
@@ -29,13 +29,13 @@ class InstanceDataset(Dataset):
 
         elif output_layer == "prefix":
             self.hvalues = torch.tensor(
-                [to_prefix(n, self.domain_max_value) for n in np.array(heuristics)],
+                [to_prefix(n, self.sample_max_value) for n in np.array(heuristics)],
                 dtype=torch.float32,
             )
 
         elif output_layer == "one-hot":
             self.hvalues = torch.tensor(
-                [to_onehot(n, self.domain_max_value) for n in np.array(heuristics)],
+                [to_onehot(n, self.sample_max_value) for n in np.array(heuristics)],
                 dtype=torch.float32,
             )
         else:
@@ -60,7 +60,6 @@ class InstanceDataset(Dataset):
 
 def load_training_state_value_pairs(
     samples_file: str,
-    loss_function: str,
     unique_samples: bool,
     unique_states: bool,
 ):
@@ -68,7 +67,7 @@ def load_training_state_value_pairs(
     Loads the data.
     """
     states, heuristics = [], []
-    domain_max_value, max_h = 0, 0
+    sample_max_value, max_h = 0, 0
     uniques_xy, uniques_x = [], []
 
     with open(samples_file) as f:
@@ -98,6 +97,6 @@ def load_training_state_value_pairs(
                 # Gets the domain max h value.
                 if h_int > max_h:
                     max_h = h_int
-                    domain_max_value = max_h
+                    sample_max_value = max_h
 
-    return np.array(states), np.array(heuristics), domain_max_value
+    return np.array(states), np.array(heuristics), sample_max_value

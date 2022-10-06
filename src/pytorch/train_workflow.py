@@ -29,7 +29,7 @@ class TrainWorkflow:
         check_dead_once: bool,
         loss_fn: nn = nn.MSELoss(),
         restart_no_conv: bool = True,
-        patience: int = None,
+        patience = None,
     ):
         self.model = model
         self.best_epoch_model = None
@@ -161,7 +161,7 @@ class TrainWorkflow:
         traced_model = torch.jit.trace(self.best_epoch_model.to("cpu"), example_input)
         traced_model.save(filename)
 
-    def run(self, fold_idx: int, train_timer: Timer) -> float:
+    def run(self, fold_idx: int, train_timer: Timer) -> float or None:
         """
         Network train/eval main loop.
         """

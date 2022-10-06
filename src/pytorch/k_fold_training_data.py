@@ -27,11 +27,10 @@ class KFoldTrainingData:
         shuffle: bool = default_args.SHUFFLE,
         seed: int = default_args.RANDOM_SEED,
         shuffle_seed: int = default_args.SHUFFLE_SEED,
-        training_size: int = default_args.TRAINING_SIZE,
+        training_size: float = default_args.TRAINING_SIZE,
         data_num_workers: int = default_args.DATALOADER_NUM_WORKERS,
         normalize: bool = default_args.NORMALIZE_OUTPUT,
         sample_percentage: float = default_args.SAMPLE_PERCENTAGE,
-        loss_function: str = default_args.LOSS_FUNCTION,
         unique_samples: bool = default_args.UNIQUE_SAMPLES,
         unique_states: bool = default_args.UNIQUE_STATES,
         model: str = default_args.MODEL,
@@ -45,10 +44,9 @@ class KFoldTrainingData:
         (
             self.states,
             self.heuristics,
-            self.domain_max_value,
+            self.sample_max_value,
         ) = load_training_state_value_pairs(
             samples_file,
-            loss_function,
             unique_samples,
             unique_states,
         )
@@ -58,7 +56,7 @@ class KFoldTrainingData:
         self.normalize = normalize
         if self.normalize:
             for i in range(len(self.heuristics)):
-                self.heuristics[i] /= self.domain_max_value
+                self.heuristics[i] /= self.sample_max_value
         self.batch_size = batch_size if batch_size > 0 else None
         self.num_folds = num_folds
         self.output_layer = output_layer
@@ -152,7 +150,7 @@ class KFoldTrainingData:
             )
             train_dataloader = DataLoader(
                 dataset=InstanceDataset(
-                    x_train, y_train, self.domain_max_value, self.output_layer
+                    x_train, y_train, self.sample_max_value, self.output_layer
                 ),
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
@@ -170,7 +168,7 @@ class KFoldTrainingData:
             val_dataloader = (
                 DataLoader(
                     dataset=InstanceDataset(
-                        x_val, y_val, self.domain_max_value, self.output_layer
+                        x_val, y_val, self.sample_max_value, self.output_layer
                     ),
                     batch_size=self.batch_size,
                     shuffle=self.shuffle,
@@ -191,7 +189,7 @@ class KFoldTrainingData:
             test_dataloader = (
                 DataLoader(
                     dataset=InstanceDataset(
-                        x_test, y_test, self.domain_max_value, self.output_layer
+                        x_test, y_test, self.sample_max_value, self.output_layer
                     ),
                     batch_size=self.batch_size,
                     shuffle=self.shuffle,
