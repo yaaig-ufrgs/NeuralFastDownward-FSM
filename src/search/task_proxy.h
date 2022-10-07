@@ -594,6 +594,9 @@ public:
     virtual ~PartialAssignment() = default;
 //    PartialAssignment(const PartialAssignment &) = default;
 
+    void assign(std::size_t var_id, int value) const;
+    void assign(const std::vector<int>& _values) const;
+
     bool assigned(std::size_t var_id) const;
     bool assigned(const VariableProxy &var) const;
 
@@ -828,6 +831,17 @@ public:
     }
 };
 
+inline void PartialAssignment::assign(std::size_t var_id, int value) const {
+    assert(var_id < size());
+    (*values)[var_id] = value;
+}
+
+inline void PartialAssignment::assign(const std::vector<int>& _values) const {
+    assert(values->size() == _values.size());
+    for (unsigned var_id = 0; var_id < values->size(); ++var_id)
+        (*values)[var_id] = _values[var_id];
+}
+
 inline bool PartialAssignment::assigned(std::size_t var_id) const {
     assert(var_id < size());
     return (*values)[var_id] != PartialAssignment::UNASSIGNED;
@@ -1017,7 +1031,6 @@ inline FactProxy::FactProxy(const AbstractTask &task, const FactPair &fact)
 inline FactProxy::FactProxy(const AbstractTask &task, int var_id, int value)
     : FactProxy(task, FactPair(var_id, value)) {
 }
-
 
 inline VariableProxy FactProxy::get_variable() const {
     return VariableProxy(*task, fact.var);

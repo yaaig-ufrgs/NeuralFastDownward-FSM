@@ -171,6 +171,7 @@ bool PartialAssignment::violates_mutexes() const {
     if (!task->has_mutexes()) return false;
     return contains_mutex(task, get_unpacked_values());
 }
+
 pair<bool, State> PartialAssignment::get_full_state(
         bool check_mutexes,
         utils::RandomNumberGenerator &rng) const {
