@@ -290,13 +290,6 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         update_alternative_task_mutexes(seed_task);
         vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
         for (shared_ptr<PartialAssignment>& task : next_tasks) {
-            /*
-            if (statespace_file != "none") {
-                string s = task->to_binary();
-                if (statespace.find(s) == statespace.end())
-                    continue;
-            }
-            */
             if (remove_duplicates) {
                 if (hash_table.count(*task))
                     continue;

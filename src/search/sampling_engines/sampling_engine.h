@@ -49,7 +49,7 @@ protected:
     virtual std::vector<std::string> sample_all(
                         std::vector<std::shared_ptr<PartialAssignment>> /*tasks*/) { return {}; };
 
-    int max_regression_depth = 0;
+    int regression_depth_value = 0;
     bool unit_cost = false;
 
 public:

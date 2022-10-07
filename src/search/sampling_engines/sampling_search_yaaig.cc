@@ -97,7 +97,7 @@ void SamplingSearchYaaig::create_trie_statespace() {
             trie_statespace.insert(key, make_pair(h, bin));
         }
         f.close();
-        utils::g_log << "[State space] Time creating trie: " << (std::chrono::duration<double, std::milli>(
+        utils::g_log << "[State space] Time creating trie: " << fixed << (std::chrono::duration<double, std::milli>(
             std::chrono::high_resolution_clock::now() - t_sstrie).count() / 1000.0) << "s" << endl;
     } else {
         utils::g_log << "[State space] *** COULD NOT OPEN STATE SPACE FILE (" << statespace_file << ")! ***" << endl;
@@ -120,7 +120,7 @@ void SamplingSearchYaaig::successor_improvement(vector<shared_ptr<PartialAssignm
     for (shared_ptr<PartialAssignment>& s: samples) {
         trie.insert(s->get_values(), s);
     }
-    utils::g_log << "[SUI] Time creating trie: " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[SUI] Time creating trie: " << fixed << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 
     // Check for hash conflicts
@@ -176,7 +176,7 @@ void SamplingSearchYaaig::successor_improvement(vector<shared_ptr<PartialAssignm
                 s->estimated_heuristic = p.second.best_h;
         }
     }
-    utils::g_log << "[SUI] Time creating mapping: " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[SUI] Time creating mapping: " << fixed << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s" << endl;
 
     // SUI loop
@@ -201,10 +201,10 @@ void SamplingSearchYaaig::successor_improvement(vector<shared_ptr<PartialAssignm
         }
     } while (any_relaxed);
 
-    utils::g_log << "[SUI] Time updating h-values: " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[SUI] Time updating h-values: " << fixed << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t).count() / 1000.0) << "s." << endl;
 
-    utils::g_log << "[SUI] Total time: " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[SUI] Total time: " << fixed << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t_sui).count() / 1000.0) << "s." << endl;
 }
 
@@ -243,7 +243,7 @@ void SamplingSearchYaaig::sample_improvement(vector<shared_ptr<PartialAssignment
         }
     }
     utils::g_log << "[SAI] Updated samples:" << updates << endl;
-    utils::g_log << "[SAI] Done in " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[SAI] Done in " << fixed << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t_sai).count() / 1000.0) << "s." << endl;
 }
 
@@ -251,8 +251,8 @@ void SamplingSearchYaaig::replace_h_with_evaluator(vector<shared_ptr<PartialAssi
     auto t_eval = std::chrono::high_resolution_clock::now();
     utils::g_log << "[Evaluator] Replacing h-values according to the evaluator "
         << evaluator->get_description() << "..." << endl;
-    utils::g_log << "[Evaluator] Eval equal to infinite will be replaced by 2*max_regression_depth ("
-        << max_regression_depth*2 << ")." << endl;
+    utils::g_log << "[Evaluator] Eval equal to infinite will be replaced by 2*regression_depth_value ("
+        << regression_depth_value*2 << ")." << endl;
 
     int total_inf = 0;
     for (shared_ptr<PartialAssignment>& s: samples) {
@@ -260,16 +260,16 @@ void SamplingSearchYaaig::replace_h_with_evaluator(vector<shared_ptr<PartialAssi
         EvaluationContext eval_context(registry.insert_state(move(values)));
         EvaluationResult eval_results = evaluator->compute_result(eval_context);
         assert(!eval_results.is_uninitialized());
-        // If the state is not found in the PDB then replace it with max_regression_depth*2!
+        // If the state is not found in the PDB then replace it with regression_depth_value*2!
         if (eval_results.is_infinite()) {
-            s->estimated_heuristic = max_regression_depth*2;
+            s->estimated_heuristic = regression_depth_value*2;
             total_inf++;
         } else {
             s->estimated_heuristic = eval_results.get_evaluator_value();
         }
     }
     utils::g_log << "[Evaluator] Total infinite values: " << total_inf << "/" << samples.size() << endl;
-    utils::g_log << "[Evaluator] Done in " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[Evaluator] Done in " << fixed << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t_eval).count() / 1000.0) << "s." << endl;
 }
 
@@ -322,7 +322,7 @@ void SamplingSearchYaaig::create_random_samples(
         num_random_samples--;
     }
 
-    utils::g_log << "[Random Samples] Done in " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[Random Samples] Done in " << fixed << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t_rs).count() / 1000.0) << "s." << endl;
 }
 
@@ -358,7 +358,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             vector<pair<int,string>> compatibles;
             trie_statespace.find_all_compatible(key, SearchRule::subsets, compatibles);
             if (compatibles.empty()) {
-                utils::g_log << "[Sample Completion] Sample " << s->to_binary(true)
+                utils::g_log << "[ERROR] Sample " << s->to_binary(true)
                     << " not found in state space!" << endl;
                 exit(0);
             }
@@ -368,14 +368,14 @@ vector<string> SamplingSearchYaaig::extract_samples() {
             // nothing to do
 
         } else {
-            utils::g_log << "State representation \"" << state_representation << "\" not implemented!";
+            utils::g_log << "[ERROR] State representation \"" << state_representation << "\" not implemented!";
             exit(0);
         }
 
         if (task_properties::is_goal_assignment(task_proxy, *s))
             s->estimated_heuristic = 0;
     }
-    utils::g_log << "[Sample Completion] Done in " << (std::chrono::duration<double, std::milli>(
+    utils::g_log << "[Sample Completion] Done in " << fixed << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t_completion).count() / 1000.0) << "s." << endl;
 
     if (sampling_technique::random_samples > 0)
@@ -433,7 +433,7 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "state_representation",
             "State facts representation format (complete, complete_no_mutex, partial, valid, undefined, assign_undefined, undefined_char, values_partial, values_complete, facts_partial, or facts_complete).",
             "complete");
-    parser.add_option<string>(
+    parser.add_option<string>( // remove
             "random_sample_state_representation",
             "Random samples' state facts representation format (complete, complete_no_mutex, partial, undefined.",
             "complete");
@@ -441,7 +441,7 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "sai",
             "Identical states receive the best heuristic value assigned between them (SAI in : none, partial, complete, both).",
             "none");
-    parser.add_option<int>(
+    parser.add_option<int>( // remove
             "assignments_by_undefined_state",
             "Number of states generated from each undefined state (only with assign_undefined).",
             "10");
@@ -453,19 +453,19 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "sui_rule",
             "Rule applied when checking subset states.",
             "vu_u");
-    parser.add_option<string>(
+    parser.add_option<string>( // remove
             "sui_epsilon",
             "RMSE no-improvement threshold for SUI early stop.",
             "-1");
-    parser.add_option<bool>(
+    parser.add_option<bool>( // remove
             "sort_h",
             "Sort samples by increasing h-values.",
             "false");
-    parser.add_option<string>(
+    parser.add_option<string>( // rename to statespace_file
             "mse_hstar_file",
             "Path to file with h;sample for MSE.",
             "none");
-    parser.add_option<string>(
+    parser.add_option<string>( // remove
             "mse_result_file",
             "Path to save MSE results.",
             "none");

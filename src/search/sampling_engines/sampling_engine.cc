@@ -97,13 +97,13 @@ SearchStatus SamplingEngine::step() {
         return SOLVED;
     }
 
-    if ((*current_technique)->get_name() == "gbackward_yaaig") { // TODO: use_teacher_search var
+    if ((*current_technique)->get_name() == "gbackward_yaaig") {
         vector<shared_ptr<PartialAssignment>> tasks_all = (*current_technique)->next_all(task);
-        max_regression_depth = (*current_technique)->regression_depth_value;
+        regression_depth_value = (*current_technique)->regression_depth_value;
         unit_cost = (*current_technique)->unit_cost;
         vector<string> new_samples = sample_all(tasks_all);
         sample_cache_manager.insert(new_samples.begin(), new_samples.end());
-    } else {
+    } else { // teacher search
         const shared_ptr<AbstractTask> next_task = (*current_technique)->next(task);
         vector<string> new_samples = sample({next_task});
         sample_cache_manager.insert(new_samples.begin(), new_samples.end());

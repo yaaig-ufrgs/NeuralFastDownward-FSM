@@ -22,7 +22,6 @@ namespace sampling_technique {
 class TechniqueGBackwardYaaig : public SamplingTechnique {
 protected:
     const string technique;
-    const string subtechnique;
     const string regression_depth;
     int depth_k;
     const bool allow_duplicates_interrollout;

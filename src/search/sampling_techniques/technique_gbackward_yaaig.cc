@@ -1,5 +1,6 @@
 #include <stack>
 #include <algorithm>
+#include <chrono>
 
 #include "technique_gbackward_yaaig.h"
 
@@ -48,7 +49,6 @@ const string &TechniqueGBackwardYaaig::get_name() const {
 TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
         : SamplingTechnique(opts),
           technique(opts.get<string>("technique")),
-          subtechnique(opts.get<string>("subtechnique")),
           regression_depth(opts.get<string>("regression_depth")),
           depth_k(opts.get<int>("depth_k")),
           allow_duplicates_interrollout(
@@ -68,16 +68,9 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           bias_adapt(opts.get<double>("bias_adapt")),
           bias_reload_frequency(opts.get<int>("bias_reload_frequency")),
           bias_reload_counter(0) {
-    if (technique == "bfs_rw") {
-        // assert(subtechnique == "round_robin" || subtechnique == "random_leaf" || subtechnique == "percentage");
-        if (!(subtechnique == "round_robin" || subtechnique == "random_leaf" || subtechnique == "percentage")) { utils::g_log << "Error: technique_gbackward_yaaig.cc:72" << endl; exit(0); }
-    }
-    if (technique == "dfs_rw") {
-        // assert(subtechnique == "round_robin" || subtechnique == "random_leaf");
-        if (!(subtechnique == "round_robin" || subtechnique == "random_leaf")) { utils::g_log << "Error: technique_gbackward_yaaig.cc:76" << endl; exit(0); }
-    }
-    // assert(bfs_percentage >= 0 && bfs_percentage <= 100);
-    if (!(bfs_percentage >= 0 && bfs_percentage <= 100)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:79" << endl; exit(0); }
+    assert(technique == "rw" || technique == "bfs" || technique == "dfs" || technique == "bfs_rw");
+    if (technique == "bfs_rw")
+        assert(bfs_percentage >= 0 && bfs_percentage <= 100);
 }
 
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_random_walk(
@@ -99,7 +92,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
     utils::HashSet<PartialAssignment> local_hash_table;
     utils::HashSet<PartialAssignment> *ht_pointer = global_hash_table ? &hash_table : &local_hash_table;
     bool renegerate_applicable_ops = true;
-    while ((samples.size() < steps) && !stopped) {
+    while (samples.size() < steps && !stopped) {
         OperatorID applied_op = OperatorID::no_operator;
         PartialAssignment pa_ = rrws->sample_state_length(
             pa,
@@ -112,21 +105,15 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
             bias_probabilistic,
             bias_adapt
         );
-        // TODO: if op.index() != regression_op.index()
-        // assert(
-        //     (pa_ == pa && applied_op == OperatorID::no_operator) ||
-        //     (pa_ != pa && applied_op != OperatorID::no_operator)
-        // );
-        if (!(
+        assert(
             (pa_ == pa && applied_op == OperatorID::no_operator) ||
             (pa_ != pa && applied_op != OperatorID::no_operator)
-        )) { utils::g_log << "Error: technique_gbackward_yaaig.cc:120" << endl; exit(0); }
+        );
         if (pa_ == pa) // there is no applicable operator
             break;
 
         if ((allow_duplicates_intrarollout || ht_pointer->find(pa_) == ht_pointer->end())
-            && (states_to_avoid.find(pa_) == states_to_avoid.end())) {
-            // if it is goal state then set h to 0
+                && (states_to_avoid.find(pa_) == states_to_avoid.end())) {
             if (restart_h_when_goal_state && task_properties::is_goal_assignment(task_proxy, pa_)) {
                 pa_.estimated_heuristic = 0;
                 pa_.states_to_goal = 0;
@@ -145,8 +132,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_rando
         stopped = stop_sampling();
     }
 
-    // assert(samples.size() <= steps);
-    if (!(samples.size() <= steps)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:142" << endl; exit(0); }
+    assert(samples.size() <= steps);
     return samples;
 }
 
@@ -160,7 +146,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
     OperatorsProxy ops = task_proxy.get_operators();
     PartialAssignment pa = initial_state;
     vector<shared_ptr<PartialAssignment>> samples;
-    // Each element of the stack is (state, operator index used to achieve the state)
     stack<PartialAssignment> stack;
     queue<PartialAssignment> queue;
 
@@ -170,20 +155,22 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
         queue.push(pa);
 
     hash_table.insert(pa);
-    while ((samples.size() < steps) && !stopped) {
-        if ((technique == "dfs" && stack.empty()) || (technique == "bfs" && queue.empty()))
-            break;
+    while (samples.size() < steps && !stopped) {
         if (technique == "dfs") {
+            if (stack.empty())
+                break;
             pa = stack.top();
             stack.pop();
         } else {
+            if (queue.empty())
+                break;
             pa = queue.front();
             queue.pop();
         }
         samples.push_back(make_shared<PartialAssignment>(pa));
 
         int idx_op = 0, rng_seed = (*rng)() * (INT32_MAX - 1);
-        while (idx_op != -1) {
+        while (idx_op != -1 && !stopped) {
             OperatorID applied_op = OperatorID::no_operator;
             PartialAssignment pa_ = dfss->sample_state_length(
                 pa,
@@ -193,27 +180,21 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
                 is_valid_state
             );
             // idx_op has the index of the operator that was used,
-            // or -1 if all operators have already been tested
-            // assert(
-            //     (idx_op == -1 && applied_op == OperatorID::no_operator) ||
-            //     (idx_op != -1 && applied_op != OperatorID::no_operator)
-            // );
-            if (!(
+            // or -1 if all operators have already been checked
+            assert(
                 (idx_op == -1 && applied_op == OperatorID::no_operator) ||
                 (idx_op != -1 && applied_op != OperatorID::no_operator)
-            )) { utils::g_log << "Error: technique_gbackward_yaaig.cc:197" << endl; exit(0); }
+            );
             if (idx_op == -1) {
-                // assert(pa == pa_);
-                if (!(pa == pa_)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:200" << endl; exit(0); }
+                assert(pa == pa_);
                 break;
             }
             if (pa_ == pa)
                 continue;
 
             if (allow_duplicates_intrarollout || hash_table.find(pa_) == hash_table.end()) {
-                // if it is goal state then set h to 0
                 if (restart_h_when_goal_state && task_properties::is_goal_assignment(task_proxy, pa_)) {
-		     pa_.estimated_heuristic = 0;
+		            pa_.estimated_heuristic = 0;
                     pa_.states_to_goal = 0;
                 } else {
                     pa_.estimated_heuristic = pa.estimated_heuristic + (unit_cost ? 1 : ops[applied_op].get_cost());
@@ -230,11 +211,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
             }
             idx_op++;
             stopped = stop_sampling();
-            if (stopped) break;
         }
     }
-    // assert(samples.size() <= steps);
-    if (!(samples.size() <= steps)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:227" << endl; exit(0); }
+    assert(samples.size() <= steps);
     return samples;
 }
 
@@ -245,11 +224,10 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
     vector<PartialAssignment> &leaves,
     const TaskProxy &task_proxy
 ) {
-    // assert(bfs_percentage >= 0.0 && bfs_percentage <= 1.0);
-    if (!(bfs_percentage >= 0.0 && bfs_percentage <= 1.0)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:239" << endl; exit(0); }
+    assert(bfs_percentage >= 0.0 && bfs_percentage <= 1.0);
     OperatorsProxy ops = task_proxy.get_operators();
     unsigned bfs_samples = (int)(bfs_percentage * max_samples);
-    vector<PartialAssignment> vk = {initial_state}, vk1 = {}; // vector_k, vector_k+1
+    vector<PartialAssignment> vk = {initial_state}, vk1 = {}; // depth k, depth k+1
     vector<shared_ptr<PartialAssignment>> samples = {make_shared<PartialAssignment>(initial_state)};
     leaves.push_back(initial_state);
 
@@ -263,19 +241,15 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
                 PartialAssignment s_ = dfss->sample_state_length(
                     s, rng_seed, idx_op, applied_op, is_valid_state
                 );
-                // assert(
-                //     (idx_op == -1 && applied_op == OperatorID::no_operator) ||
-                //     (idx_op != -1 && applied_op != OperatorID::no_operator)
-                // );
-                if (!(
+                assert(
                     (idx_op == -1 && applied_op == OperatorID::no_operator) ||
                     (idx_op != -1 && applied_op != OperatorID::no_operator)
-                )) { utils::g_log << "Error: technique_gbackward_yaaig.cc:263" << endl; exit(0); }
+                );
                 if (idx_op == -1)
                     break;
+
                 if (find(succ_s.begin(), succ_s.end(), s_) == succ_s.end()
-                    && (allow_duplicates_intrarollout || hash_table.find(s_) == hash_table.end())) {
-                    // if it is goal state then set h to 0
+                        && (allow_duplicates_intrarollout || hash_table.find(s_) == hash_table.end())) {
                     if (restart_h_when_goal_state && task_properties::is_goal_assignment(task_proxy, s_)) {
                         s_.estimated_heuristic = 0;
                         s_.states_to_goal = 0;
@@ -283,7 +257,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
                         s_.estimated_heuristic = s.estimated_heuristic + (unit_cost ? 1 : ops[applied_op].get_cost());
                         s_.states_to_goal = s.states_to_goal + 1;
                     }
-
                     succ_s.push_back(s_);
                 }
                 idx_op++;
@@ -305,18 +278,20 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_perce
         vk = vk1;
         vk1.clear();
     }
-    stopped = false;
+    stopped = false; // reset to rw step
     return samples;
 }
 
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         shared_ptr<AbstractTask> seed_task, const TaskProxy &task_proxy) {
+    auto t_sampling = std::chrono::high_resolution_clock::now();
+    
     if (seed_task != last_task) {
         regression_task_proxy = make_shared<RegressionTaskProxy>(*seed_task);
         state_registry = make_shared<StateRegistry>(task_proxy);
-        if (technique == "dfs" || technique == "bfs" || technique == "dfs_rw" || technique == "bfs_rw")
+        if (technique == "dfs" || technique == "bfs" || technique == "bfs_rw")
             dfss = make_shared<sampling::DFSSampler>(*regression_task_proxy, *rng);
-        if (technique == "rw" || technique == "dfs_rw" || technique == "bfs_rw")
+        if (technique == "rw" || technique == "bfs_rw")
             rrws = make_shared<sampling::RandomRegressionWalkSampler>(*regression_task_proxy, *rng);
     }
     bias_reload_counter++;
@@ -342,9 +317,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         }
     };
 
-    // assert(state_filtering != "statespace" || !sampling_engine::trie_statespace.empty());
-    if (!(state_filtering != "statespace" || !sampling_engine::trie_statespace.empty())) { utils::g_log << "Error: technique_gbackward_yaaig.cc:337" << endl; exit(0); }
-
+    assert(state_filtering != "statespace" || !sampling_engine::trie_statespace.empty());
     auto is_valid_state = [&](PartialAssignment &partial_assignment) {
         if (state_filtering == "none") {
             return true;
@@ -354,7 +327,6 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             vector<int> key;
             for (char& b : partial_assignment.to_binary(true))
                 key.push_back(b == '*' ? -1 : (int)b - '0');
-            //return sampling_engine::trie_statespace.has_subset(key);
             std::vector<std::pair<int,std::string>> compatible_states;
             sampling_engine::trie_statespace.find_all_compatible(key, SearchRule::subsets, compatible_states);
             return compatible_states.size() > 0;
@@ -362,13 +334,11 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         return false;
     };
 
+
     if (bias != nullptr) {
         func_bias = &pab;
     }
 
-    // Hash table does not work for cases like:
-    //   Atom on(b, a);Atom on(c, b);Atom on(d, c) and
-    //   Atom on(b, a);Atom on(c, b);Atom on(d, c);(handempty)
     if (allow_duplicates_interrollout)
         hash_table.clear();
 
@@ -387,7 +357,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         if (regression_depth == "default") {
             if (technique == "dfs" || technique == "bfs")
                 regression_depth_n = depth_k;
-            else // rw, bfs_rw, dfs_rw
+            else // rw, bfs_rw
                 regression_depth_n = samples_per_search;
         } else if (regression_depth == "facts") {
             regression_depth_n = pa.to_binary().length();
@@ -404,64 +374,76 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
             regression_depth_n = (float)num_props / mean_num_effects;
         }
     }
-    // assert(regression_depth_n > 0);
-    if (!(regression_depth_n > 0)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:380" << endl; exit(0); }
+    assert(regression_depth_n > 0);
     regression_depth_value = regression_depth_n;
 
-    if (technique == "rw" || technique == "bfs_rw" || technique == "dfs_rw") {
+    if (technique == "rw" || technique == "bfs_rw") {
         samples_per_search = ceil(regression_depth_multiplier * regression_depth_n);
     } else if (technique == "dfs" || technique == "bfs") {
         depth_k = ceil(regression_depth_multiplier * regression_depth_n);
     }
 
+    static bool first_call = true;
+    if (first_call) {
+        utils::g_log << "[Sampling] Starting the sampling (algorithm " << technique << ")..." << endl;
+        utils::g_log << "[Sampling] State filtering: " << state_filtering << endl;
+        utils::g_log << "[Sampling] Regression depth value: " << regression_depth_value << endl;
+        first_call = false;
+    }
+
     if (technique == "rw") {
         samples = sample_with_random_walk(pa, samples_per_search, is_valid_state, func_bias, task_proxy);
+        utils::g_log << "[Sampling] RW rollout sampled " << samples.size() << " states." << endl;
 
-    } else if (technique == "bfs_rw" && subtechnique == "percentage") {
+    } else if (technique == "bfs_rw") {
+        utils::g_log << "[Sampling] Starting BFS step..." << state_filtering << endl;
         samples = sample_with_percentage_limited_bfs(bfs_percentage, pa, is_valid_state, leaves, task_proxy);
+        utils::g_log << "[Sampling] BFS step sampled " << samples.size() << " states." << endl;
 
     } else if (technique == "dfs" || technique == "bfs") {
         do {
             vector<shared_ptr<PartialAssignment>> samples_ = sample_with_bfs_or_dfs(
-                technique.substr(0, 3), pa, max_samples-samples.size(), is_valid_state, task_proxy
+                technique, pa, max_samples-samples.size(), is_valid_state, task_proxy
             );
+            utils::g_log << "[Sampling] " << (technique == "bfs" ? "BFS" : "DFS")
+                << " rollout sampled " << samples.size() << " states. "
+                << "Looking for " << (unsigned)max_samples-samples.size() << " more." << endl;
             samples.insert(samples.end(), samples_.begin(), samples_.end());
-            hash_table.clear();
+            if (allow_duplicates_interrollout)
+                hash_table.clear();
         } while ((samples.size() < (unsigned)max_samples) && !stopped);
 
-    } else if (technique == "dfs_rw" || technique == "bfs_rw") {
-        utils::g_log << technique << " (" << subtechnique << ") not implemented!" << endl;
+    } else {
+        utils::g_log << "[ERROR] " << technique << " not implemented!" << endl;
         exit(0);
     }
 
-    // pos-dfs/bfs random walk step
-    if (technique == "dfs_rw" || technique == "bfs_rw") {
+    if (technique == "bfs_rw") {
+        // bfs_rw random walk step
         if (leaves.size() <= 0) {
-            utils::g_log << "The whole statespace was sampled. Skipping Random Walk." << endl;
+            utils::g_log << "[Sampling] The whole statespace was sampled. Skipping RW step." << endl;
             stopped = true;
             return samples;
         }
 
-        utils::HashSet<PartialAssignment> bfs_core; // or dfs_core
+        utils::HashSet<PartialAssignment> bfs_core;
         bool avoid_bfs_core = true;
         if (avoid_bfs_core) {
-            for (shared_ptr<PartialAssignment> &s : samples) {
+            for (shared_ptr<PartialAssignment> &s : samples)
                 bfs_core.insert(*s);
-            }
         }
 
-        utils::g_log << "Starting random walk search (" << subtechnique << ") from " << leaves.size() << " leaves" << endl;
+        utils::g_log << "[Sampling] Starting RW from " << leaves.size() << " leaves" << endl;
         if (max_samples != numeric_limits<int>::max())
-            utils::g_log << "Looking for " << (max_samples - samples.size()) << " more samples..." << endl;
+            utils::g_log << "[Sampling] Looking for " << (max_samples - samples.size()) << " more samples..." << endl;
         else
-            utils::g_log << "Looking for more samples until mem/time budget runs out." << endl;
+            utils::g_log << "[Sampling] Looking for more samples until mem/time budget runs out." << endl;
 
         int lid = 0;
         vector<bool> leaves_used(leaves.size(), false);
         while ((samples.size() < (unsigned)max_samples) && !stopped) {
             do {
-                lid = (subtechnique == "round_robin") ? // round_robin or random_leaf (random_leaf if percentage)
-                      (lid + 1) % leaves.size() : (int)((*rng)() * (INT32_MAX - 1)) % leaves.size();
+                lid = (int)((*rng)() * (INT32_MAX - 1)) % leaves.size();
             } while (leaves_used[lid]);
             leaves_used[lid] = true;
             if (all_of(leaves_used.begin(), leaves_used.end(), [](bool v) {return v;}))
@@ -477,9 +459,15 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 !allow_duplicates_interrollout,
                 bfs_core
             );
+            utils::g_log << "[Sampling] RW rollout sampled " << samples.size() << " states. "
+                << "Looking for " << (unsigned)max_samples-samples.size() << " more." << endl;
             samples.insert(samples.end(), samples_.begin(), samples_.end());
         }
     }
+
+    if (technique != "rw")
+        utils::g_log << "[Sampling] Done in " << fixed << (std::chrono::duration<double, std::milli>(
+            std::chrono::high_resolution_clock::now() - t_sampling).count() / 1000.0) << "s." << endl;
     return samples;
 }
 
@@ -489,11 +477,11 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
     SamplingTechnique::add_options_to_parser(parser);
     parser.add_option<string>(
             "technique",
-            "Search technique (rw, dfs, bfs, dfs_rw, bfs_rw). "
-            "If dfs_rw or bfs_rw and subtechnique != percentage, set depth_k.",
+            "Search technique (rw, dfs, bfs, bfs_rw). "
+            "If bfs_rw then set bfs_percentage.",
             "rw"
     );
-    parser.add_option<string>(
+    parser.add_option<string>( // remove
             "subtechnique",
             "If dfs_rw or bfs_rw: round_robin, random_leaf, percentage",
             "random_leaf"
@@ -512,7 +500,7 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
     parser.add_option<string>(
             "allow_duplicates",
             "Allow sample duplicated states in [all, interrollout, none]",
-            "all"
+            "interrollout"
     );
     parser.add_option<bool>(
             "wrap_partial_assignment",
@@ -543,7 +531,7 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "Filtering of applicable operators (none, mutex, statespace)",
             "mutex"
     );
-    parser.add_option<int>(
+    parser.add_option<int>( // double
             "bfs_percentage",
             "Percentage of samples per BFS when technique=bfs_rw",
             "10"
