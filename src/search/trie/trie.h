@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * Source: https://github.com/akshitgrover/trie
+ * Adapted from https://github.com/akshitgrover/trie
  */
 
 #include <vector>
@@ -36,10 +36,12 @@ namespace trie {
     void find_all_compatible(KeyType key, SearchRule rule, std::vector<T>& values) const;
 
     bool has_superset(KeyType key) const {
+      adjust_key(key);
       return has_superset(key, 0, root);
     }
 
     bool has_subset(KeyType key) const {
+      adjust_key(key);
       return has_subset(key, 0, root);
     }
 
@@ -195,8 +197,8 @@ namespace trie {
 
     if (key[pos] == 0)
       for(auto& [i,cnode] : n->children)
-	 return has_subset(key, pos + 1, cnode);
-
+	 if (has_subset(key, pos + 1, cnode))
+           return true;
     return false;
   }
 } // namespace trie
