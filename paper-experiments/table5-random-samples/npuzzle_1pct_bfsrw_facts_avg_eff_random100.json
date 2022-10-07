@@ -24,7 +24,7 @@
         "sample-improvement": "both",
         "successor-improvement-k": 1,
         "statespace": "tasks/experiments/statespaces/statespace_npuzzle_prob-n3-1_hstar",
-        "bound": "facts_per_avg_effects",
+        "regression-depth": "facts_per_avg_effects",
         "state-filtering": "mutex",
         "bfs-percentage": 10,
         "random-percentage": 100

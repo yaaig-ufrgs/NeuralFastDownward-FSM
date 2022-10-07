@@ -23,7 +23,7 @@ class TechniqueGBackwardYaaig : public SamplingTechnique {
 protected:
     const string technique;
     const string subtechnique;
-    const string bound;
+    const string regression_depth;
     int depth_k;
     const bool allow_duplicates_interrollout;
     const bool allow_duplicates_intrarollout;

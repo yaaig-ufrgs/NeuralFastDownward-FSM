@@ -49,7 +49,7 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
         : SamplingTechnique(opts),
           technique(opts.get<string>("technique")),
           subtechnique(opts.get<string>("subtechnique")),
-          bound(opts.get<string>("bound")),
+          regression_depth(opts.get<string>("regression_depth")),
           depth_k(opts.get<int>("depth_k")),
           allow_duplicates_interrollout(
               opts.get<string>("allow_duplicates") == "all" || opts.get<string>("allow_duplicates") == "interrollout"
@@ -380,18 +380,18 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     if (samples_per_search == -1)
         samples_per_search = max_samples;
 
-    float bound_n = -1;
-    if (is_number(bound)) {
-        bound_n = stoi(bound);
+    float regression_depth_n = -1;
+    if (is_number(regression_depth)) {
+        regression_depth_n = stoi(regression_depth);
     } else {
-        if (bound == "default") {
+        if (regression_depth == "default") {
             if (technique == "dfs" || technique == "bfs")
-                bound_n = depth_k;
+                regression_depth_n = depth_k;
             else // rw, bfs_rw, dfs_rw
-                bound_n = samples_per_search;
-        } else if (bound == "facts") {
-            bound_n = pa.to_binary().length();
-        } else if (bound == "facts_per_avg_effects") {
+                regression_depth_n = samples_per_search;
+        } else if (regression_depth == "facts") {
+            regression_depth_n = pa.to_binary().length();
+        } else if (regression_depth == "facts_per_avg_effects") {
             int num_props = pa.to_binary().length();
             int num_effects = 0, num_ops = 0;
             for (OperatorProxy op : task_proxy.get_operators()) {
@@ -401,17 +401,17 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 }
             }
             float mean_num_effects = (float)num_effects / num_ops;
-            bound_n = (float)num_props / mean_num_effects;
+            regression_depth_n = (float)num_props / mean_num_effects;
         }
     }
-    // assert(bound_n > 0);
-    if (!(bound_n > 0)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:380" << endl; exit(0); }
-    bound_value = bound_n;
+    // assert(regression_depth_n > 0);
+    if (!(regression_depth_n > 0)) { utils::g_log << "Error: technique_gbackward_yaaig.cc:380" << endl; exit(0); }
+    regression_depth_value = regression_depth_n;
 
     if (technique == "rw" || technique == "bfs_rw" || technique == "dfs_rw") {
-        samples_per_search = ceil(bound_multiplier * bound_n);
+        samples_per_search = ceil(regression_depth_multiplier * regression_depth_n);
     } else if (technique == "dfs" || technique == "bfs") {
-        depth_k = ceil(bound_multiplier * bound_n);
+        depth_k = ceil(regression_depth_multiplier * regression_depth_n);
     }
 
     if (technique == "rw") {
@@ -499,7 +499,7 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "random_leaf"
     );
     parser.add_option<string>(
-            "bound",
+            "regression_depth",
             "How to bound each rollout: default, facts, facts_per_avg_effects, digit",
             "default"
     );

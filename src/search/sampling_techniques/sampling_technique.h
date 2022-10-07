@@ -44,7 +44,7 @@ private:
     static int next_id;
 public:
     const int id;
-    int bound_value = 0;
+    int regression_depth_value = 0;
 protected:
     options::Registry *registry;
     const options::Predefinitions *predefinitions;
@@ -56,7 +56,7 @@ public:
 protected:
     int random_percentage;
     std::string random_estimates;
-    const double bound_multiplier;
+    const double regression_depth_multiplier;
     double max_time;
     const int mem_limit_mb;
     const bool remove_duplicates;

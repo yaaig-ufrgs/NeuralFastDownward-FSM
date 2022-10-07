@@ -1146,7 +1146,7 @@ def get_sample_args():
         "--test-tasks-dir",
         type=str,
         default=default_args.SAMPLE_TEST_TASKS_DIR,
-        help="Path to the directory where the test instances are located. Only used if `bound=max_task_hstar`. (default: %(default)s)",
+        help="Path to the directory where the test instances are located. Only used if `regression-depth=max_task_hstar`. (default: %(default)s)",
     )
     parser.add_argument(
         "-stp",
@@ -1261,17 +1261,17 @@ def get_sample_args():
         help="Number of samples per search. (default: %(default)s)",
     )
     parser.add_argument(
-        "-b",
-        "--bound",
+        "-rd",
+        "--regression-depth",
         type=str,
-        default=default_args.SAMPLE_BOUND,
+        default=default_args.SAMPLE_REGRESSION_DEPTH,
         help="How to bound each rollout. Choices=[default, facts, facts_per_avg_effects, max_task_hstar, digit] (default: %(default)s)",
     )
     parser.add_argument(
-        "-bm",
-        "--bound-multiplier",
+        "-rdm",
+        "--regression-depth-multiplier",
         type=float,
-        default=default_args.SAMPLE_BOUND_MULTIPLIER,
+        default=default_args.SAMPLE_REGRESSION_DEPTH_MULTIPLIER,
         help="Multiplies the bound of each rollout by the given value. (default: %(default)s)",
     )
     parser.add_argument(
@@ -1357,13 +1357,6 @@ def get_sample_args():
         type=int,
         default=default_args.SAMPLE_SUI,
         help="Successor Improvement (SUI) lookahead. If 0, no SUI is performed. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-suieps",
-        "--sui-eps",
-        type=int,
-        default=default_args.SAMPLE_SUI_EPSILON,
-        help="RMSE no-improvement threshold for SUI early stop. (default: %(default)s)",
     )
     parser.add_argument(
         "-suirule",

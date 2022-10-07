@@ -24,7 +24,7 @@
         "sample-improvement": "both",
         "statespace": "tasks/experiments/statespaces/statespace_scanalyzerunit_scanalyzer_hstar",
         "successor-improvement-k": 1,
-        "bound": "facts_per_avg_effects",
+        "regression-depth": "facts_per_avg_effects",
         "state-filtering": "mutex",
         "bfs-percentage": 10,
         "random-percentage": 10

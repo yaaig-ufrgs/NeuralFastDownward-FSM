@@ -121,7 +121,7 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
           unit_cost(opts.get<bool>("unit_cost")),
           random_percentage(opts.get<int>("random_percentage")),
           random_estimates(opts.get<string>("random_estimates")),
-          bound_multiplier(opts.get<double>("bound_multiplier")),
+          regression_depth_multiplier(opts.get<double>("regression_depth_multiplier")),
           max_time(opts.get<double>("max_time")),
           mem_limit_mb(opts.get<int>("mem_limit_mb")),
           remove_duplicates(opts.get<bool>("remove_duplicates")),
@@ -201,7 +201,7 @@ SamplingTechnique::SamplingTechnique(
             samples_per_search(-1),
             max_samples(-1),
             unit_cost(false),
-            bound_multiplier(1.0),
+            regression_depth_multiplier(1.0),
             max_time(-1.0),
             mem_limit_mb(-1),
             remove_duplicates(false),
@@ -478,7 +478,7 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
             "default"
     );
     parser.add_option<double>(
-            "bound_multiplier",
+            "regression_depth_multiplier",
             "Multiplies the bound of each rollout by the given value.",
             "1.0"
     );

@@ -52,14 +52,14 @@ def get_full_state_repr_name(state_repr):
     return state_repr
 
 
-def get_bound_type(bound):
-    if str(bound).isdigit():
-        return str(bound)
-    if bound == "default":
+def get_bound_type(regression_depth):
+    if str(regression_depth).isdigit():
+        return str(regression_depth)
+    if regression_depth == "default":
         return "def"
-    elif bound == "facts":
+    elif regression_depth == "facts":
         return "facts"
-    elif bound == "facts_per_avg_effects":
+    elif regression_depth == "facts_per_avg_effects":
         return "factseff"
 
 
@@ -73,25 +73,25 @@ def yaaig_ferber(args, meth):
     if args.technique == "dfs" or args.technique == "dfs_rw": # recheck this
         args.samples_per_search = int(1.0/args.searches*args.max_samples+0.999)
 
-    if args.bound == "max_task_hstar":
+    if args.regression_depth == "max_task_hstar":
         assert(args.test_tasks_dir != "")
         test_tasks = glob(f"{args.test_tasks_dir}/*")
         test_tasks += glob(f"{args.test_tasks_dir}/../*.pddl")
-        args.bound = max(get_hstar_tasks("scripts", test_tasks))
-        assert(args.bound > 0)
-    elif args.bound == "state_space_diameter":
+        args.regression_depth = max(get_hstar_tasks("scripts", test_tasks))
+        assert(args.regression_depth > 0)
+    elif args.regression_depth == "state_space_diameter":
         # expected state-space filename: statespace_transportunit_transport_hstar
         assert args.statespace
         statespace_unit = args.statespace.split("_")
         statespace_unit[-3] += "unit"
         statespace_unit = "_".join(statespace_unit)
-        statespace_bound_file = args.statespace if not os.path.exists(statespace_unit) else statespace_unit
-        assert statespace_bound_file
+        statespace_regression_depth_file = args.statespace if not os.path.exists(statespace_unit) else statespace_unit
+        assert statespace_regression_depth_file
         max_h = 0
-        with open(statespace_bound_file, "r") as ss_file:
+        with open(statespace_regression_depth_file, "r") as ss_file:
             for h, _ in [l.split(";") for l in ss_file.readlines() if not l.startswith("#")]:
                 max_h = max(max_h, int(h))
-        args.bound = max_h
+        args.regression_depth = max_h
 
     state_repr = get_full_state_repr_name(args.state_representation)
     random_state_repr = get_full_state_repr_name(args.random_sample_state_representation)
@@ -111,7 +111,7 @@ def yaaig_ferber(args, meth):
         domain = instance_split[-2]
         if instance_name != "domain" and instance_name != "source":
             for i in range(start, end):
-                cmd, out, subtech, depthk, suik, suits, dups, bound = "", "", "", "", "", "", "", ""
+                cmd, out, subtech, depthk, suik, suits, dups = "", "", "", "", "", "", ""
                 tech = args.technique.replace('_', '')
                 if args.technique == "dfs_rw" or args.technique == "bfs_rw":
                     subtech = f"_subtech-{args.subtechnique.replace('_', '')}"
@@ -123,8 +123,8 @@ def yaaig_ferber(args, meth):
                     dups = "_dups-" + ("ir" if args.allow_dups == "interrollout" else args.allow_dups)
                 # sps = f"srch-{args.searches}_sps-{args.samples_per_search}_maxs-{args.max_samples}" if args.samples_per_search != -1 else f"maxs-{args.max_samples}"
                 sps = f"_maxs-{args.max_samples}" if args.max_samples != -1 else ""
-                boundtype = f"bnd-{get_bound_type(args.bound)}"
-                boundmult = "" if args.bound_multiplier == 1.0 else f"_bmul-{str(args.bound_multiplier).replace('.', '-')}"
+                boundtype = f"bnd-{get_bound_type(args.regression_depth)}"
+                boundmult = "" if args.regression_depth_multiplier == 1.0 else f"_bmul-{str(args.regression_depth_multiplier).replace('.', '-')}"
                 rsquant = "" if args.random_percentage == 0 else f"_rs-{int(args.max_samples*(args.random_percentage*0.01))}"
                 if meth == "yaaig":
                     out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{subtech}{depthk}{suik}{suits}{dups}_sai-{args.sample_improvement}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}{rsquant}_ss{i}'
@@ -135,12 +135,12 @@ def yaaig_ferber(args, meth):
                            f'{"--translate-options --unit-cost --search-options " if args.unit_cost == "true" and args.evaluator == "pdb(hstar_pattern([]))" else ""}'
                            f'--search \"sampling_search_yaaig({search_algo}, '
                            f'techniques=[gbackward_yaaig(searches={args.searches}, samples_per_search={args.samples_per_search}, max_samples={args.max_samples}, '
-                           f'random_percentage={args.random_percentage}, random_estimates={args.random_estimates}, bound_multiplier={args.bound_multiplier}, 'f'technique={args.technique}, subtechnique={args.subtechnique}, '
-                           f'bound={args.bound}, depth_k={args.k_depth}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state}, '
+                           f'random_percentage={args.random_percentage}, random_estimates={args.random_estimates}, regression_depth_multiplier={args.regression_depth_multiplier}, 'f'technique={args.technique}, subtechnique={args.subtechnique}, '
+                           f'regression_depth={args.regression_depth}, depth_k={args.k_depth}, random_seed={i}, restart_h_when_goal_state={args.restart_h_when_goal_state}, '
                            f'state_filtering={args.state_filtering}, bfs_percentage={args.bfs_percentage}, allow_duplicates={args.allow_dups}, '
                            f'unit_cost={args.unit_cost}, max_time={args.max_time}, mem_limit_mb={args.mem_limit})], '
                            f'state_representation={state_repr}, random_sample_state_representation={random_state_repr}, random_seed={i}, sai={args.sample_improvement}, '
-                           f'sui_k={args.successor_improvement_k}, sui_epsilon={args.sui_eps}, sui_rule={args.sui_rule}, sort_h={args.sort_h}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
+                           f'sui_k={args.successor_improvement_k}, sui_rule={args.sui_rule}, sort_h={args.sort_h}, mse_hstar_file={args.statespace}, mse_result_file={rmse_out}, '
                            f'assignments_by_undefined_state={args.us_assignments}, evaluator={args.evaluator})\"')
                 elif meth == "ferber":
                     out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.ferber_technique}_{args.ferber_select_state.replace("_", "-")}_{args.ferber_num_tasks}_{args.ferber_min_walk_len}_{args.ferber_max_walk_len}_ss{i}'

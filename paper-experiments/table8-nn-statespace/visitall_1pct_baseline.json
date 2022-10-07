@@ -24,7 +24,7 @@
         "successor-improvement-k": 0,
         "statespace": "tasks/experiments/statespaces/statespace_visitall_p-1-4_hstar",
         "state-filtering": "mutex",
-        "bound": 200
+        "regression-depth": 200
     },
     "train": {
         "model": "resnet",

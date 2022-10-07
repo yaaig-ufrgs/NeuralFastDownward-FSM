@@ -24,7 +24,7 @@
         "sample-improvement": "none",
         "successor-improvement-k": 1,
         "statespace": "tasks/experiments/statespaces/statespace_visitall_p-1-4_hstar",
-        "bound": "facts",
+        "regression-depth": "facts",
         "state-filtering": "mutex",
         "bfs-percentage": 10
     },

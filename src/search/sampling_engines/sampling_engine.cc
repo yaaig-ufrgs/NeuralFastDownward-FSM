@@ -99,7 +99,7 @@ SearchStatus SamplingEngine::step() {
 
     if ((*current_technique)->get_name() == "gbackward_yaaig") { // TODO: use_teacher_search var
         vector<shared_ptr<PartialAssignment>> tasks_all = (*current_technique)->next_all(task);
-        max_regression_depth = (*current_technique)->bound_value;
+        max_regression_depth = (*current_technique)->regression_depth_value;
         unit_cost = (*current_technique)->unit_cost;
         vector<string> new_samples = sample_all(tasks_all);
         sample_cache_manager.insert(new_samples.begin(), new_samples.end());

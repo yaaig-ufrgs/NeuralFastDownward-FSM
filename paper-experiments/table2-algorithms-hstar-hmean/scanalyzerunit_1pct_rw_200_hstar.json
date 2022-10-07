@@ -23,7 +23,7 @@
         "sample-improvement": "both",
         "statespace": "tasks/experiments/statespaces/statespace_scanalyzerunit_scanalyzer_hstar",
         "successor-improvement-k": 1,
-        "bound": 200,
+        "regression-depth": 200,
         "state-filtering": "mutex",
         "evaluator": "pdb(hstar_pattern([]))"
     },
