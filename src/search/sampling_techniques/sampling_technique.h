@@ -54,7 +54,7 @@ protected:
 public:
     const bool unit_cost;
 protected:
-    int random_percentage;
+    double random_percentage;
     std::string random_estimates;
     const double regression_depth_multiplier;
     double max_time;

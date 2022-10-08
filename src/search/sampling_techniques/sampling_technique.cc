@@ -119,7 +119,7 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
           samples_per_search(opts.get<int>("samples_per_search")),
           max_samples(opts.get<int>("max_samples")),
           unit_cost(opts.get<bool>("unit_cost")),
-          random_percentage(opts.get<int>("random_percentage")),
+          random_percentage(opts.get<double>("random_percentage")),
           random_estimates(opts.get<string>("random_estimates")),
           regression_depth_multiplier(opts.get<double>("regression_depth_multiplier")),
           max_time(opts.get<double>("max_time")),
@@ -146,33 +146,18 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
         }
     }
 
-    /*
-    if (statespace_file != "none") {
-        ifstream f(statespace_file);
-        string line;
-        while (getline(f, line)) {
-            if (line[0] == '#') continue;
-            size_t comma_pos = line.find(";");
-            string state = line.substr(comma_pos + 1, line.size()-1);
-            statespace.insert(state);
-        }
-        f.close();
-    }
-    */
-
     if (max_samples == -1)
         max_samples = numeric_limits<int>::max();
     if (searches == -1)
         searches = numeric_limits<int>::max();
 
-    // assert(random_percentage >= 0 && random_percentage < 100);
-    if (!(random_percentage >= 0 && random_percentage <= 100)) { utils::g_log << "Error: sampling_technique.cc:159" << endl; exit(0); }
+    assert(random_percentage >= 0.0 && random_percentage <= 1.0);
 
-    if (random_percentage == 100) {
+    if (random_percentage == 1.0) {
         sampling_technique::random_samples = max_samples;
         max_samples = 1;
-    } else if (random_percentage > 0) {
-        sampling_technique::random_samples = int(max_samples * random_percentage*0.01);
+    } else if (random_percentage > 0.0) {
+        sampling_technique::random_samples = int(max_samples * random_percentage);
         max_samples -= sampling_technique::random_samples;
     }
 
@@ -459,10 +444,10 @@ void SamplingTechnique::add_options_to_parser(options::OptionParser &parser) {
             "Increments h by unit cost instead of operator cost.",
             "false"
     );
-    parser.add_option<int>(
+    parser.add_option<double>(
             "random_percentage",
-            "Percentage [0,100) of randomly generated samples (h = L+1).",
-            "0"
+            "Percentage [0.0, 1.0] of randomly generated samples (h = L+1).",
+            "0.0"
     );
     parser.add_option<string>(
             "random_estimates",

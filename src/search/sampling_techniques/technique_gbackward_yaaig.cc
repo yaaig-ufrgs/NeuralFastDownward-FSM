@@ -62,7 +62,7 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           is_valid_walk(opts.get<bool>("is_valid_walk")),
           restart_h_when_goal_state(opts.get<bool>("restart_h_when_goal_state")),
           state_filtering(opts.get<string>("state_filtering")),
-          bfs_percentage(opts.get<int>("bfs_percentage") / 100.0),
+          bfs_percentage(opts.get<double>("bfs_percentage")),
           bias_evaluator_tree(opts.get_parse_tree("bias", options::ParseTree())),
           bias_probabilistic(opts.get<bool>("bias_probabilistic")),
           bias_adapt(opts.get<double>("bias_adapt")),
@@ -70,7 +70,7 @@ TechniqueGBackwardYaaig::TechniqueGBackwardYaaig(const options::Options &opts)
           bias_reload_counter(0) {
     assert(technique == "rw" || technique == "bfs" || technique == "dfs" || technique == "bfs_rw");
     if (technique == "bfs_rw")
-        assert(bfs_percentage >= 0 && bfs_percentage <= 100);
+        assert(bfs_percentage >= 0.0 && bfs_percentage <= 1.0);
 }
 
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_random_walk(
@@ -218,7 +218,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_bfs_o
 }
 
 vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::sample_with_percentage_limited_bfs(
-    float bfs_percentage,
+    double bfs_percentage,
     PartialAssignment initial_state,
     const ValidStateDetector &is_valid_state,
     vector<PartialAssignment> &leaves,
@@ -485,11 +485,6 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "If bfs_rw then set bfs_percentage.",
             "rw"
     );
-    parser.add_option<string>( // remove
-            "subtechnique",
-            "If dfs_rw or bfs_rw: round_robin, random_leaf, percentage",
-            "random_leaf"
-    );
     parser.add_option<string>(
             "regression_depth",
             "How to bound each rollout: default, facts, facts_per_avg_effects, digit",
@@ -527,7 +522,7 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
     );
     parser.add_option<bool>(
             "restart_h_when_goal_state",
-            "Restart h value when goal state is sampled (only random walk)",
+            "Restart h value when goal state is sampled.",
             "true"
     );
     parser.add_option<string>(
@@ -535,10 +530,10 @@ static shared_ptr<TechniqueGBackwardYaaig> _parse_technique_gbackward_yaaig(
             "Filtering of applicable operators (none, mutex, statespace)",
             "mutex"
     );
-    parser.add_option<int>( // double
+    parser.add_option<double>(
             "bfs_percentage",
             "Percentage of samples per BFS when technique=bfs_rw",
-            "10"
+            "0.1"
     );
     parser.add_option<shared_ptr<Heuristic>>(
             "bias",

@@ -15,7 +15,6 @@
         "instance": "tasks/experiments/blocks",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "subtechnique": "percentage",
         "state-representation": "fs",
         "max-samples": 2000,
         "seed": "0",
@@ -26,7 +25,7 @@
         "successor-improvement-k": 1,
         "regression-depth": "facts_per_avg_effects",
         "state-filtering": "mutex",
-        "bfs-percentage": 10,
+        "bfs-percentage": 0.1,
         "random-percentage": 20
     },
     "train": {

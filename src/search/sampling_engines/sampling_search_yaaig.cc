@@ -399,7 +399,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       sai_complete(opts.get<string>("sai") == "complete" || opts.get<string>("sai") == "both"),
       sui_k(opts.get<int>("sui_k")),
       sui_rule(getRule(opts.get<string>("sui_rule"))),
-      statespace_file(opts.get<string>("mse_hstar_file")),
+      statespace_file(opts.get<string>("statespace_file")),
       evaluator(opts.get<shared_ptr<Evaluator>>("evaluator")),
       use_evaluator(
           evaluator->get_description() != "evaluator = blind" &&
@@ -431,20 +431,12 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "true");
     parser.add_option<string>(
             "state_representation",
-            "State facts representation format (complete, complete_no_mutex, partial, valid, undefined, assign_undefined, undefined_char, values_partial, values_complete, facts_partial, or facts_complete).",
-            "complete");
-    parser.add_option<string>( // remove
-            "random_sample_state_representation",
-            "Random samples' state facts representation format (complete, complete_no_mutex, partial, undefined.",
+            "State facts representation format (complete, complete_no_mutex, partial, valid).",
             "complete");
     parser.add_option<string>(
             "sai",
-            "Identical states receive the best heuristic value assigned between them (SAI in : none, partial, complete, both).",
+            "Identical states receive the best heuristic value assigned between them (SAI in: none, partial, complete, both).",
             "none");
-    parser.add_option<int>( // remove
-            "assignments_by_undefined_state",
-            "Number of states generated from each undefined state (only with assign_undefined).",
-            "10");
     parser.add_option<int>(
             "sui_k",
             "Correct h-values using SUI via K-step forward repeatedly",
@@ -453,21 +445,9 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "sui_rule",
             "Rule applied when checking subset states.",
             "vu_u");
-    parser.add_option<string>( // remove
-            "sui_epsilon",
-            "RMSE no-improvement threshold for SUI early stop.",
-            "-1");
-    parser.add_option<bool>( // remove
-            "sort_h",
-            "Sort samples by increasing h-values.",
-            "false");
-    parser.add_option<string>( // rename to statespace_file
-            "mse_hstar_file",
-            "Path to file with h;sample for MSE.",
-            "none");
-    parser.add_option<string>( // remove
-            "mse_result_file",
-            "Path to save MSE results.",
+    parser.add_option<string>(
+            "statespace_file",
+            "Path to file with h;sample for statespace trie.",
             "none");
     parser.add_option<shared_ptr<Evaluator>>(
             "evaluator",

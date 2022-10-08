@@ -31,7 +31,7 @@ protected:
     const bool is_valid_walk;
     const bool restart_h_when_goal_state;
     const string state_filtering;
-    const float bfs_percentage;
+    const double bfs_percentage;
     const options::ParseTree bias_evaluator_tree;
     const bool bias_probabilistic;
     const double bias_adapt;
@@ -82,7 +82,7 @@ private:
     );
 
     vector<shared_ptr<PartialAssignment>> sample_with_percentage_limited_bfs(
-        float bfs_percentage,
+        double bfs_percentage,
         PartialAssignment initial_state,
         const ValidStateDetector &is_valid_state,
         vector<PartialAssignment> &leaves,

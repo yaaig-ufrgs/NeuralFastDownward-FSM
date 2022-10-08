@@ -1158,16 +1158,9 @@ def get_sample_args():
     parser.add_argument(
         "-tech",
         "--technique",
-        choices=["rw", "dfs", "bfs", "dfs_rw", "bfs_rw", "countBoth", "countAdds", "countDels"],
+        choices=["rw", "dfs", "bfs", "bfs_rw"],
         default=default_args.SAMPLE_TECHNIQUE,
         help="Sample technique to use. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-stech",
-        "--subtechnique",
-        choices=["round_robin", "random_leaf", "percentage"],
-        default=default_args.SAMPLE_SUBTECHNIQUE,
-        help="Subtechique to use in dfs_rw or bfs_rw. (default: %(default)s)",
     )
     parser.add_argument(
         "-search",
@@ -1221,23 +1214,9 @@ def get_sample_args():
     parser.add_argument(
         "-st",
         "--state-representation",
-        choices=["fs", "fs-nomutex", "ps", "us", "au", "uc", "vs"],  # full state, full state no mutex, partial state, undefined, assign undefined, undefined char, valid state
+        choices=["fs", "fs-nomutex", "ps", "vs"],  # ['full state', 'full state no mutex', 'partial state', 'valid state']
         default=default_args.SAMPLE_STATE_REPRESENTATION,
         help="Output state representation. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-rst",
-        "--random-sample-state-representation",
-        choices=["fs", "fs-nomutex", "ps", "us"],  # full state, full state no mutex, partial state, undefined
-        default=default_args.SAMPLE_RANDOM_SAMPLE_STATE_REPRESENTATION,
-        help="Random sample state representation. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-uss",
-        "--us-assignments",
-        type=int,
-        default=default_args.SAMPLE_ASSIGNMENTS_US,
-        help="Number of assignments done with undefined state. (default: %(default)s)",
     )
     parser.add_argument(
         "-max",
@@ -1265,7 +1244,7 @@ def get_sample_args():
         "--regression-depth",
         type=str,
         default=default_args.SAMPLE_REGRESSION_DEPTH,
-        help="How to bound each rollout. Choices=[default, facts, facts_per_avg_effects, max_task_hstar, digit] (default: %(default)s)",
+        help="How to bound each rollout. Choices=[int, \"default\", \"facts\", \"facts_per_avg_effects\"] (default: %(default)s)",
     )
     parser.add_argument(
         "-rdm",
@@ -1284,7 +1263,7 @@ def get_sample_args():
     parser.add_argument(
         "-dups",
         "--allow-dups",
-        choices=["all", "interrollout", "none"],  # full state, full state no mutex, partial state, undefined, assign undefined
+        choices=["all", "interrollout", "none"],
         default=default_args.SAMPLE_ALLOW_DUPLICATES,
         help="Allow duplicate samples. (default: %(default)s)",
     )
@@ -1298,37 +1277,30 @@ def get_sample_args():
     parser.add_argument(
         "-c",
         "--random-percentage",
-        type=int,
+        type=float,
         default=default_args.SAMPLE_RANDOM_PERCENTAGE,
         help="Percentage of random samples. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-ce",
-        "--random-estimates",
-        type=str,
-        default=default_args.SAMPLE_RANDOM_ESTIMATES,
-        help="Estimates of the random samples. (default: %(default)s)",
     )
     parser.add_argument(
         "-rhg",
         "--restart-h-when-goal-state",
         type=str2bool,
         default=default_args.SAMPLE_RESTART_H_WHEN_GOAL_STATE,
-        help="Restart h value when goal state is sampled (only random walk). (default: %(default)s)",
+        help="Restart h value when goal state is sampled. (default: %(default)s)",
     )
     parser.add_argument(
         "-sf",
         "--state-filtering",
-        type=str,
+        choices=["none", "mutex", "statespace"],
         default=default_args.SAMPLE_STATE_FILTERING,
-        help="Filtering of applicable operators (none, mutex, statespace). (default: %(default)s)",
+        help="Filtering of applicable operators. (default: %(default)s)",
     )
     parser.add_argument(
         "-bfsp",
         "--bfs-percentage",
-        type=int,
+        type=float,
         default=default_args.SAMPLE_BFS_PERCENTAGE,
-        help="Percentage of samples per BFS when technique=bfs_rw. (default: %(default)s)",
+        help="Percentage of samples per BFS when technique=bfs_rw (range [0.0, 1.0]). (default: %(default)s)",
     )
     parser.add_argument(
         "-o",
@@ -1340,16 +1312,9 @@ def get_sample_args():
     parser.add_argument(
         "-sai",
         "--sample-improvement",
-        choices=["none", "partial", "complete", "both"],
+        choices=["none", "partial", "complete", "both"], # apply with partial states and/or complete states
         default=default_args.SAMPLE_IMPROVEMENT,
         help="Sample h-value improvement (SAI) strategy to use. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-sorth",
-        "--sort-h",
-        type=str2bool,
-        default=default_args.SAMPLE_SORT_H,
-        help="Sort sampling by increasign h-values before performing SUI. (default: %(default)s)",
     )
     parser.add_argument(
         "-sui",
@@ -1361,7 +1326,7 @@ def get_sample_args():
     parser.add_argument(
         "-suirule",
         "--sui-rule",
-        choices=["vu_u", "v_vu"], # v -> v | u,  u -> u :::: v -> v,  u -> v | u
+        choices=["supersets", "subsets", "samesets"],
         default=default_args.SAMPLE_SUI_RULE,
         help="Rule used to check if a state s' is compatible with s'' during SUI. (default: %(default)s)",
     )
