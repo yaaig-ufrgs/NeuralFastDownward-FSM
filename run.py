@@ -103,6 +103,18 @@ def main(exp_paths: [str]):
             exp = full_exp["experiment"] if "experiment" in full_exp else None
             if exp is None:
                 continue
+            exp_defaults = {
+                "exp-type": "all",
+                "exp-only-sampling": "no",
+                "exp-only-train": "no",
+                "exp-only-test": "no",
+                "exp-only-eval": "no",
+                "trained-model": ""
+            }
+            for key in exp_defaults:
+                if key not in exp:
+                    exp[key] = exp_defaults[key]
+
             train = full_exp["train"] if "train" in full_exp else None
             test = full_exp["test"] if "test" in full_exp else None
             evalu = full_exp["eval"] if "eval" in full_exp else None
@@ -110,6 +122,9 @@ def main(exp_paths: [str]):
             if sampling:
                 sampling["cores"] = exp["exp-cores"]
                 sampling["output-dir"] = exp["samples"]
+                sampling["seed"] = exp["exp-sample-seed"]
+            if train:
+                train["output-folder"] = exp["results"]
             if train and test:
                 test["model-dir"] = train["output-folder"]
                 if "save-git-diff" in train:

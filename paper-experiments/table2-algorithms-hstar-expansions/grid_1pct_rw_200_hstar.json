@@ -1,15 +1,10 @@
 {
     "experiment": {
         "samples": "paper-experiments/table2-algorithms-hstar-expansions/samples/grid-1pct-rw-default-hstar",
-        "exp-type": "all",
-        "exp-net-seed": "0..4",
-        "exp-sample-seed": "0..4",
+        "results": "paper-experiments/table2-algorithms-hstar-expansions/results/grid-1pct-rw-default-hstar",
         "exp-cores": 11,
-        "exp-only-sampling": "no",
-        "exp-only-train": "no",
-        "exp-only-test": "no",
-        "exp-only-eval": "no",
-        "trained-model": ""
+        "exp-sample-seed": "0..4",
+        "exp-net-seed": "0..4"
     },
     "sampling": {
         "instance": "tasks/experiments/grid",
@@ -17,7 +12,6 @@
         "technique": "rw",
         "state-representation": "fs",
         "max-samples": 4524,
-        "seed": "0..4",
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",
         "sample-improvement": "both",
@@ -25,12 +19,12 @@
         "successor-improvement-k": 1,
         "regression-depth": 200,
         "state-filtering": "mutex",
-        "evaluator": "pdb(hstar_pattern([]))"
+        "evaluator": "pdb(hstar_pattern([]))",
+        "bfs-percentage": 0.1
     },
     "train": {
         "model": "resnet",
         "training-size": 0.9,
-        "output-folder": "paper-experiments/table2-algorithms-hstar-expansions/results/grid-1pct-rw-default-hstar",
         "scatter-plot": "no",
         "restart-no-conv": "yes",
         "hidden-layers": 2,

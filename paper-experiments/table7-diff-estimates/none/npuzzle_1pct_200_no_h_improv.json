@@ -1,24 +1,17 @@
 {
     "experiment": {
         "samples": "paper-experiments/table7-diff-estimates/samples/npuzzle-1pct-bfsrw-200-no-h-improv",
-        "exp-type": "all",
-        "exp-net-seed": "0..4",
-        "exp-sample-seed": "0..4",
+        "results": "paper-experiments/table7-diff-estimates/results/npuzzle-1pct-bfsrw-200-no-h-improv",
         "exp-cores": 11,
-        "exp-only-sampling": "yes",
-        "exp-only-train": "no",
-        "exp-only-test": "no",
-        "exp-only-eval": "no",
-        "trained-model": ""
+        "exp-sample-seed": "0..4",
+        "exp-net-seed": "0..4"
     },
     "sampling": {
         "instance": "tasks/experiments/npuzzle",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "subtechnique": "percentage",
         "state-representation": "fs",
         "max-samples": 1814,
-        "seed": "0..4",
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",
         "sample-improvement": "none",
@@ -26,12 +19,11 @@
         "statespace": "tasks/experiments/statespaces/statespace_npuzzle_prob-n3-1_hstar",
         "regression-depth": 200,
         "state-filtering": "mutex",
-        "bfs-percentage": 10
+        "bfs-percentage": 0.1
     },
     "train": {
         "model": "resnet",
         "training-size": 0.9,
-        "output-folder": "paper-experiments/table7-diff-estimates/results/npuzzle-1pct-bfsrw-200-no-h-improv",
         "restart-no-conv": "yes",
         "hidden-layers": 2,
         "hidden-units": 250,
