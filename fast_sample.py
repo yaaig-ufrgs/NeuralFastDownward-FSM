@@ -122,7 +122,7 @@ def yaaig_ferber(args, meth):
                 sps = f"_maxs-{args.max_samples}" if args.max_samples != -1 else ""
                 boundtype = f"bnd-{get_bound_type(args.regression_depth)}"
                 boundmult = "" if args.regression_depth_multiplier == 1.0 else f"_bmul-{str(args.regression_depth_multiplier).replace('.', '-')}"
-                rsquant = "" if args.random_percentage == 0 else f"_rs-{int(args.max_samples*(args.random_percentage*0.01))}"
+                rsquant = "" if args.random_percentage == 0 else f"_rs-{int(args.max_samples*(args.random_percentage))}"
                 if meth == "yaaig":
                     out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{depthk}{suik}{suits}{dups}_sai-{args.sample_improvement}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}{rsquant}_ss{i}'
                     rmse_out = out + "_rmse"
