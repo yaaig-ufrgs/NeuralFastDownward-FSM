@@ -195,15 +195,20 @@ class TrainWorkflow:
                 epoch_log += f" | avg_val_loss={cur_val_loss:>7f}"
 
             cur_loss = cur_val_loss if self.validation else cur_train_loss
+            new_best = False
             if not best_loss or best_loss > cur_loss:
                 best_loss, best_epoch = cur_loss, t
                 self.best_epoch_model = deepcopy(self.model)
+                new_best = True
             if best_epoch < t - self.patience:
                 self.early_stopped = True
 
             if self.testing:
                 cur_test_loss = self.test_loop()
                 epoch_log += f" | avg_test_loss={cur_test_loss:>7f}"
+
+            if new_best:
+                epoch_log += " *"
 
             _log.info(epoch_log)
 
