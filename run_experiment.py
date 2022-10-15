@@ -37,8 +37,11 @@ def filter_samples(samples: [str], seed: int) -> [str]:
 
 def run_train_test(args, sample_seed: int, net_seed: int, run_tsp: bool = True):
     global PID
-    sample_files = glob(f"{args.samples}/*")
-    sample_files = filter_samples(sample_files, sample_seed)
+
+    sample_files = [args.samples]
+    if args.samples.lower() != "none":
+        sample_files = glob(f"{args.samples}/*")
+        sample_files = filter_samples(sample_files, sample_seed)
 
     do_eval = has_flag_prefix("--eval-")
     for sample in sample_files:

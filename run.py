@@ -109,7 +109,11 @@ def main(exp_paths: [str]):
                 "exp-only-train": "no",
                 "exp-only-test": "no",
                 "exp-only-eval": "no",
-                "trained-model": ""
+                "trained-model": "",
+                "samples": "None",
+                "exp-sample-seed": "0",
+                "exp-net-seed": "0",
+                "exp-cores": "1",
             }
             for key in exp_defaults:
                 if key not in exp:
@@ -125,8 +129,12 @@ def main(exp_paths: [str]):
                 sampling["seed"] = exp["exp-sample-seed"]
             if train:
                 train["output-folder"] = exp["results"]
+            if test:
+                test["model-dir"] = exp["results"]
+            if "results" in exp:
+                del exp["results"]
+
             if train and test:
-                test["model-dir"] = train["output-folder"]
                 if "save-git-diff" in train:
                     test["save-git-diff"] = train["save-git-diff"]
 
@@ -167,7 +175,7 @@ def main(exp_paths: [str]):
                         args += build_args(test, "--test-")
                     if evalu and not only_test:
                         args += build_args(evalu, "--eval-")
-                        
+
                 print("run.py [train/test]:", args, end="\n\n")
                 os.system(args)
 

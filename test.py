@@ -2,6 +2,9 @@
 
 import logging
 import sys
+import os
+from pathlib import Path
+from glob import glob
 
 from src.pytorch.fast_downward_api import solve_instance_with_fd_nh
 from src.pytorch.log import setup_full_logging
@@ -28,18 +31,26 @@ _log = logging.getLogger(__name__)
 
 
 def test_main(args):
-    try:
-        args.domain, args.problem = get_problem_by_sample_filename(
-            sample_filename=str(args.train_folder).split(".")[1],
-            train_folder=args.train_folder if args.heuristic == "nn" else None
-        )
-    except:
-        example = "nfd_train.yaaig_blocks_probBLOCKS-7-0_tech-rw_avi-1_maxs-6376_ss0.ns0"
-        if args.heuristic != "nn":
-            example = ("nfd_train.fd_blocks_probBLOCKS-7-0_eager-greedy_lmcut_ss0.ns0"
-                " (if it doesn't exist, it will be created at runtime)")
-        _log.error(f"train_folder example: {example}")
-        return
+    if args.heuristic == "nn":
+        try:
+            args.domain, args.problem = get_problem_by_sample_filename(
+                sample_filename=str(args.train_folder).split(".")[1],
+                train_folder=args.train_folder if args.heuristic == "nn" else None
+            )
+        except:
+            _log.error(f"train_folder not found: {args.train_folder}")
+            return
+    else:
+        try:
+            ferber21_path_format = args.problem_pddls[0].split("/")[-2] in ["moderate", "hard"]
+            args.domain, _, args.problem = args.problem_pddls[0].replace(".pddl", "").split("/")[-3 if ferber21_path_format else -2:]
+            if not os.path.exists(args.train_folder):
+                args.train_folder = Path(str(args.train_folder).split("nfd_train.")[0] +
+                    f"nfd_train.yaaig_{args.domain}_{args.problem}_{args.search_algorithm.replace('_', '-')}_{args.heuristic}_ss0.ns0")
+        except Exception as e:
+            raise e
+            _log.error(f"error creating the test folder")
+            return
 
     if len(args.train_folder_compare) > 0:
         domain_cmp, problem_cmp = get_problem_by_sample_filename(
@@ -94,6 +105,12 @@ def test_main(args):
         )
         if args.problem_pddls == []:
             return
+    elif os.path.isdir(args.problem_pddls[0]):
+        assert len(args.problem_pddls) == 1
+        args.problem_pddls = args.problem_pddls[0]
+        domain_pddl = f"{args.problem_pddls}/domain.pddl"
+        args.problem_pddls = glob(f"{args.problem_pddls}/*.pddl")
+        args.problem_pddls.remove(domain_pddl)
 
     cmd_line = " ".join(sys.argv)
     logging_test_config(args, dirname, cmd_line)
