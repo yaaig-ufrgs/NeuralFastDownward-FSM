@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "results": "paper-experiments/table9-expanded-heuristics/results/transport-eagergreedy-ff"
+        "results": "paper-experiments/table9-expanded-heuristics/results/transportunit-eagergreedy-ff"
     },
     "test": {
         "instance-pddl": [

@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "results": "paper-experiments/table9-expanded-heuristics/results/transport-eagergreedy-goalcount"
+        "results": "paper-experiments/table9-expanded-heuristics/results/transportunit-eagergreedy-goalcount"
     },
     "test": {
         "instance-pddl": [

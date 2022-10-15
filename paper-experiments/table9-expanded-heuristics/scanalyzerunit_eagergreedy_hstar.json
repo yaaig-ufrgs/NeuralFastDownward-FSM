@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "results": "paper-experiments/table9-expanded-heuristics/results/scanalyzer-eagergreedy-ff"
+        "results": "paper-experiments/table9-expanded-heuristics/results/scanalyzerunit-eagergreedy-hstar"
     },
     "test": {
         "instance-pddl": [
@@ -56,7 +56,7 @@
             "tasks/experiments/scanalyzer/scanalyzer/p49.pddl"
         ],
         "search-algorithm": "eager_greedy",
-        "heuristic": "ff",
+        "heuristic": "hstar",
         "max-search-time": 300,
         "max-search-memory": 2048,
         "unit-cost": "yes"
