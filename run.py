@@ -30,6 +30,8 @@ def build_args(d: dict, prefix: str) -> str:
             if k == "evaluator":
                 v = '"'+v+'"'
             arg = prefix + k
+            if isinstance(v, list):
+                v = ":".join(v)
             args += f" {arg} {v}"
     return args
 

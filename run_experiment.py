@@ -75,6 +75,8 @@ def run_train_test(args, sample_seed: int, net_seed: int, run_tsp: bool = True):
         if args.train_additional_folder_name != "":
             train_args += f" -addfn {args.train_additional_folder_name}"
 
+        if ":" in args.test_instance_pddl:
+            args.test_instance_pddl = " ".join(args.test_instance_pddl.split(":"))
         test_args = (
             f"-diff {args.test_save_git_diff} -a {args.test_search_algorithm} -heu {args.test_heuristic} "
             f"-t {args.test_max_search_time} -m {args.test_max_search_memory} "
