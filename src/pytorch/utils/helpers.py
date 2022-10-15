@@ -232,7 +232,6 @@ def get_defaults_and_facts_files(
 
     if not facts_file:
         candidate_filename = problem_pddl.replace(".pddl", "_facts.txt")
-        print(candidate_filename)
         if os.path.exists(candidate_filename):
             facts_file = candidate_filename
         else:
@@ -246,7 +245,7 @@ def get_defaults_and_facts_files(
                     facts_file = candidate_filename
                     break
 
-    if (not defaults_file) and facts_file:
+    if not defaults_file and facts_file:
         defaults_file = create_defaults_file(problem_pddl, facts_file, test_folder)
         if not os.path.exists(defaults_file):
             defaults_file = ""

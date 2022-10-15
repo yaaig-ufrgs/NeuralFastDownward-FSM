@@ -42,9 +42,14 @@ def test_main(args):
             return
     else:
         try:
-            ferber21_path_format = args.problem_pddls[0].split("/")[-2] in ["moderate", "hard"]
-            domain_problem = args.problem_pddls[0].replace(".pddl", "").split("/")[-3 if ferber21_path_format else -2:]
-            args.domain, args.problem = domain_problem[0], domain_problem[-1]
+            pddl_splitted = args.problem_pddls[0].split("/")
+            if len(pddl_splitted) >= 2 and pddl_splitted[-2] in ["moderate", "hard"]:
+                args.domain, _, args.problem = pddl_splitted[-3:]
+            elif len(pddl_splitted) >= 4 and pddl_splitted[-4] == "experiments" and pddl_splitted[-1].endswith(".pddl"):
+                args.domain, args.problem, _ = pddl_splitted[-3:]
+            else:
+                args.domain, args.problem = pddl_splitted[-2:]
+            args.problem = args.problem.replace(".pddl", "")
             if not os.path.exists(args.train_folder):
                 args.train_folder = Path(str(args.train_folder).split("nfd_train.")[0] +
                     f"nfd_train.yaaig_{args.domain}_{args.problem}_{args.search_algorithm.replace('_', '-')}_{args.heuristic}_ss0.ns0")
