@@ -1,0 +1,49 @@
+{
+    "experiment": {
+        "samples": "paper-experiments/table14_small_stdev/samples/visitall-1pct-baseline",
+        "results": "paper-experiments/table14_small_stdev/results/visitall-1pct-baseline",
+        "exp-cores": 11,
+        "exp-sample-seed": "0..4",
+        "exp-net-seed": "0..4"
+    },
+    "sampling": {
+        "instance": "tasks/experiments/visitall",
+        "method": "yaaig",
+        "technique": "rw",
+        "state-representation": "fs",
+        "max-samples": 799,
+        "allow-dups": "interrollout",
+        "restart-h-when-goal-state": "no",
+        "sample-improvement": "none",
+        "successor-improvement-k": 0,
+        "statespace": "tasks/experiments/statespaces/statespace_visitall_p-1-4_hstar",
+        "state-filtering": "mutex",
+        "regression-depth": 200,
+        "bfs-percentage": 0.1
+    },
+    "train": {
+        "model": "resnet",
+        "training-size": 0.9,
+        "scatter-plot": "no",
+        "restart-no-conv": "yes",
+        "hidden-layers": 2,
+        "hidden-units": 250,
+        "batch-size": 64,
+        "patience": 100,
+        "activation": "relu",
+        "loss-function": "mse",
+        "weights-method": "kaiming_uniform",
+        "shuffle": "yes",
+        "bias": "yes",
+        "learning-rate": 0.0001,
+        "normalize-output": "no",
+        "use-gpu": "no",
+        "output-layer": "regression",
+        "sample-percentage": 1.0,
+        "max-epochs": 18349
+    },
+    "test": {
+        "max-expansions": 125484,
+        "search-algorithm": "eager_greedy"
+    }
+}

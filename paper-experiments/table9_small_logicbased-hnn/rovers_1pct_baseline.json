@@ -1,7 +1,7 @@
 {
     "experiment": {
-        "samples": "paper-experiments/table9_small_logicbased-hnn/samples/rovers_1pct_baseline_default",
-        "results": "paper-experiments/table9_small_logicbased-hnn/results/rovers_1pct_baseline_default",
+        "samples": "paper-experiments/table9_small_logicbased-hnn/samples/rovers_1pct_baseline",
+        "results": "paper-experiments/table9_small_logicbased-hnn/results/rovers_1pct_baseline",
         "exp-cores": 11,
         "exp-sample-seed": "0..4",
         "exp-net-seed": "0..4"
