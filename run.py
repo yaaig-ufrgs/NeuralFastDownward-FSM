@@ -131,10 +131,14 @@ def main(exp_paths: [str]):
                 sampling["cores"] = exp["exp-cores"]
                 sampling["output-dir"] = exp["samples"]
                 sampling["seed"] = exp["exp-sample-seed"]
+                if "unit-cost" in exp:
+                    sampling["unit-cost"] = exp["unit-cost"]
             if train:
                 train["output-folder"] = exp["results"]
             if test:
                 test["model-dir"] = exp["results"]
+                if "unit-cost" in exp:
+                    test["unit-cost"] = exp["unit-cost"]
             if "results" in exp:
                 del exp["results"]
 
@@ -142,10 +146,10 @@ def main(exp_paths: [str]):
                 if "save-git-diff" in train:
                     test["save-git-diff"] = train["save-git-diff"]
 
-            only_sampling = str2bool(exp["exp-only-sampling"])
-            only_train = str2bool(exp["exp-only-train"])
-            only_test = str2bool(exp["exp-only-test"])
-            only_eval = str2bool(exp["exp-only-eval"])
+            only_sampling = str2bool(exp["exp-only-sampling"]) or (not train and not test and not evalu)
+            only_train = str2bool(exp["exp-only-train"]) or (not sampling and not test and not evalu)
+            only_test = str2bool(exp["exp-only-test"]) or (not sampling and not train and not evalu)
+            only_eval = str2bool(exp["exp-only-eval"]) or (not sampling and not train and not test)
 
             if sampling and not any([only_train, only_test, only_eval]):
                 mod_sample = "default" if "modify-sample" not in exp else exp["modify-sample"]
