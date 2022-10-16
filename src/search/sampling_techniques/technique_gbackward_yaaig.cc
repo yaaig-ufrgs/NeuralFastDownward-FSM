@@ -379,7 +379,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         }
     }
     assert(regression_depth_n > 0);
-    regression_depth_value = regression_depth_n;
+    regression_depth_value = ceil(regression_depth_multiplier * regression_depth_n);
 
     if (technique == "rw" || technique == "bfs_rw") {
         samples_per_search = ceil(regression_depth_multiplier * regression_depth_n);
