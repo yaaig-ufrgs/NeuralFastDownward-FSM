@@ -21,10 +21,10 @@ To create a CSV with the data of an experiment, you can run:
 
 `./make_csv.py tableX/results/*/nfd_train*/ > tableX/tableX.csv`
 
-Afterwards, you can use your tool of choice to manipulate the data to manipulate the data.
+Afterwards, you can use your tool of choice (e.g. pandas) to manipulate the data.
 
-* Table 3 (only for '-hmean' directories):
-    - After generating the samples, run `./get_mean_h.py table3-algorithms-hmean/samples`
+* Table 2 and 3 (right hand side):
+    - After generating the samples, run `./get_mean_h.py table2-algorithms-hstar-expansions/samples` and `./get_mean_h.py table3-algorithms-expansions/samples`.
 
 # TODO
 - Table 8: Write script to evaluate the logic-based scripts to run the heuristics over the state spaces.
