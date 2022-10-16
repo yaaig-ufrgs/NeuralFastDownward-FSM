@@ -1,0 +1,50 @@
+{
+    "experiment": {
+        "samples": "paper-experiments/table5_small_random-samples/samples/grid_1pct_bfsrw_factseff_random90",
+        "results": "paper-experiments/table5_small_random-samples/results/grid_1pct_bfsrw_factseff_random90",
+        "exp-cores": 11,
+        "exp-sample-seed": "0..4",
+        "exp-net-seed": "0..4"
+    },
+    "sampling": {
+        "instance": "tasks/experiments/grid",
+        "method": "yaaig",
+        "technique": "bfs_rw",
+        "state-representation": "fs",
+        "max-samples": 4524,
+        "allow-dups": "interrollout",
+        "restart-h-when-goal-state": "yes",
+        "sample-improvement": "both",
+        "statespace": "tasks/experiments/statespaces/statespace_grid_grid_hstar",
+        "successor-improvement-k": 1,
+        "regression-depth": "facts_per_avg_effects",
+        "state-filtering": "mutex",
+        "bfs-percentage": 0.1,
+        "random-percentage": 0.9
+    },
+    "train": {
+        "model": "resnet",
+        "training-size": 0.9,
+        "restart-no-conv": "yes",
+        "hidden-layers": 2,
+        "hidden-units": 250,
+        "batch-size": 64,
+        "patience": 100,
+        "activation": "relu",
+        "loss-function": "mse",
+        "weights-method": "kaiming_uniform",
+        "shuffle": "yes",
+        "bias": "yes",
+        "learning-rate": 0.0001,
+        "normalize-output": "no",
+        "use-gpu": "no",
+        "scatter-plot": "no",
+        "output-layer": "regression",
+        "sample-percentage": 1.0,
+        "max-epochs": 5173
+    },
+    "test": {
+        "max-expansions": 452354,
+        "search-algorithm": "eager_greedy"
+    }
+}

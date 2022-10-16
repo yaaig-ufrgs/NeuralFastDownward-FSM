@@ -1,7 +1,7 @@
 {
     "experiment": {
-        "samples": "paper-experiments/table2_small_algorithms-hstar/samples/scanalyzerunit-1pct-dfs-default-hstar",
-        "results": "paper-experiments/table2_small_algorithms-hstar/results/scanalyzerunit-1pct-dfs-default-hstar",
+        "samples": "paper-experiments/table2_small_algorithms-hstar/samples/scanalyzerunit_1pct_dfs_200_hstar",
+        "results": "paper-experiments/table2_small_algorithms-hstar/results/scanalyzerunit_1pct_dfs_200_hstar",
         "exp-cores": 11,
         "exp-sample-seed": "0..4",
         "exp-net-seed": "0..4"

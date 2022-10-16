@@ -4,7 +4,7 @@ from sys import argv
 from glob import glob
 import os
 from subprocess import check_output
-import re
+from re import findall
 
 fd_root = os.path.abspath(__file__).split("NeuralFastDownward")[0] + "NeuralFastDownward"
 
@@ -57,13 +57,13 @@ for regression_limit in ["facts", "facts_per_avg_effects"]:
             regression_limit=regression_limit
         )
         output = check_output(cl.split(" ", 10)).decode("utf-8")
-        assert "[Sampling] Regression depth value: " in output
+        assert "Regression depth value: " in output
         id = 1 if regression_limit == "facts" else 2
-        limits[domain][id] = re.findall(".*Regression depth value: (\d+).*", output)[0]
+        limits[domain][id] = findall(".*Regression depth value: (\d+).*", output)[0]
 os.remove(sas_file)
 os.remove(plan_file)
 
 
 print("domain,dstar,facts,factseff")
 for domain in limits:
-    print(domain, ",".join(limits[domain]), sep=",")
+    print(",".join([domain]+limits[domain]))
