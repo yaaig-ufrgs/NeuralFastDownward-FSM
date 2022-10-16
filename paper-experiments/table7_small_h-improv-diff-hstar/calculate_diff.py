@@ -2,7 +2,7 @@
 
 """
 To generate the table data, run the json in hvalue/ and its corresponding in hstar/
-e.g. at the root of NeuralFastDownward: python3 run.py paper-experiments/table7_small_h-improv-diff-hstar/*/with_sai_sui/blocks_1pct_bfsrw_factseff*.json)
+e.g. at the root of NeuralFastDownward: python3 run.py paper-experiments/table7_small_h-improv-diff-hstar/*/with_sai_sui/blocks_1pct_bfsrw_factseff*.json
 
 Use as an argument only the samples of hvalue/
 e.g. python3 calculate_diff.py hvalue/with_sai_sui/samples/blocks_1pct_bfsrw_factseff/*
