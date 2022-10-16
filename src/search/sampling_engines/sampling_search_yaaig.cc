@@ -242,7 +242,7 @@ void SamplingSearchYaaig::sample_improvement(vector<shared_ptr<PartialAssignment
             }
         }
     }
-    utils::g_log << "[SAI] Updated samples:" << updates << endl;
+    utils::g_log << "[SAI] Updated samples: " << updates << endl;
     utils::g_log << "[SAI] Done in " << fixed << (std::chrono::duration<double, std::milli>(
         std::chrono::high_resolution_clock::now() - t_sai).count() / 1000.0) << "s." << endl;
 }

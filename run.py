@@ -29,6 +29,8 @@ def build_args(d: dict, prefix: str) -> str:
         else:
             if k == "evaluator":
                 v = '"'+v+'"'
+            if k == "max-expansions" and v == "auto":
+                v = -1
             arg = prefix + k
             if isinstance(v, list):
                 v = ":".join(v)
