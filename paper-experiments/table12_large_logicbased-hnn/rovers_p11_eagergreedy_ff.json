@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "results": "paper-experiments/table11-large-reglimit-mutex/results/rovers_p11_eagergreedy_ff",
+        "results": "paper-experiments/table11-large-reglimit-mutex/results/rovers_p11_eagergreedy_ff"
     },
     "test": {
         "instance-pddl": [

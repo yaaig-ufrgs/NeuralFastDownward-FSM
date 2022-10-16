@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "results": "paper-experiments/table11-large-reglimit-mutex/results/scanalyzer-opt11-strips_p15_eagergreedy_goalcount",
+        "results": "paper-experiments/table11-large-reglimit-mutex/results/scanalyzer-opt11-strips_p15_eagergreedy_goalcount"
     },
     "test": {
         "instance-pddl": [

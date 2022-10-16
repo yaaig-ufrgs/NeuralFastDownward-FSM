@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "results": "paper-experiments/table11-large-reglimit-mutex/results/grid_prob03-0_eagergreedy_goalcount",
+        "results": "paper-experiments/table11-large-reglimit-mutex/results/grid_prob03-0_eagergreedy_goalcount"
     },
     "test": {
         "instance-pddl": [

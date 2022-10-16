@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "results": "paper-experiments/table11-large-reglimit-mutex/results/pipesworld-notankage_p32-net4-b14-g5_eagergreedy_goalcount",
+        "results": "paper-experiments/table11-large-reglimit-mutex/results/pipesworld-notankage_p32-net4-b14-g5_eagergreedy_goalcount"
     },
     "test": {
         "instance-pddl": [
