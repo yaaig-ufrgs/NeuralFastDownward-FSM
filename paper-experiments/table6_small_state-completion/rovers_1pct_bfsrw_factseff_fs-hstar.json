@@ -1,7 +1,7 @@
 {
     "experiment": {
-        "samples": "paper-experiments/table6-state-completion/samples/rovers_1pct_bfsrw_factseff_fs-hstar",
-        "results": "paper-experiments/table6-state-completion/results/rovers_1pct_bfsrw_factseff_fs-hstar",
+        "samples": "paper-experiments/table6_small_state-completion/samples/rovers_1pct_bfsrw_factseff_fs-hstar",
+        "results": "paper-experiments/table6_small_state-completion/results/rovers_1pct_bfsrw_factseff_fs-hstar",
         "exp-cores": 11,
         "exp-sample-seed": "0..4",
         "exp-net-seed": "0..4"
@@ -10,7 +10,7 @@
         "instance": "tasks/experiments/rovers/rovers.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "forward-statespace",
+        "state-representation": "forward_statespace",
         "max-samples": 5658,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

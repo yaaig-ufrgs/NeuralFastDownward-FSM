@@ -8,7 +8,7 @@
         "instance": "tasks/experiments/rovers",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "fs",
+        "state-representation": "complete",
         "max-samples": 5658,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

@@ -8,7 +8,7 @@
         "instance": "tasks/experiments/visitall",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "fs",
+        "state-representation": "complete",
         "max-samples": 799,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

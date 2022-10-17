@@ -11,7 +11,7 @@
         "instance": "tasks/ferber21/training_tasks/scanalyzer-opt11-strips/p20.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "complete-nomutex",
+        "state-representation": "complete_nomutex",
         "max-samples": 666666,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

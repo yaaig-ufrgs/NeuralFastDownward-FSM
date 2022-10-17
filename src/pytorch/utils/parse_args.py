@@ -1214,7 +1214,7 @@ def get_sample_args():
     parser.add_argument(
         "-st",
         "--state-representation",
-        choices=["complete", "complete-nomutex", "forward-statespace"],
+        choices=["complete", "complete_nomutex", "forward_statespace"],
         default=default_args.SAMPLE_STATE_REPRESENTATION,
         help="Output state representation. (default: %(default)s)",
     )

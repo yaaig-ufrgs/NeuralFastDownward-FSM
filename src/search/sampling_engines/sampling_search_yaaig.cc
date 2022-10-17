@@ -166,7 +166,7 @@ void SamplingSearchYaaig::successor_improvement(vector<shared_ptr<PartialAssignm
             for (OperatorID& op_id : applicable_operators) {
                 OperatorProxy op_proxy = operators[op_id];
                 PartialAssignment t = s->get_partial_successor(op_proxy);
-                if (state_representation == "complete_no_mutex" || !t.violates_mutexes()) {
+                if (state_representation == "complete_nomutex" || !t.violates_mutexes()) {
                     std::vector<shared_ptr<PartialAssignment>> compatible_states;
                     trie.find_all_compatible(t.get_values(), sui_rule, compatible_states);
                     for (shared_ptr<PartialAssignment>& t_: compatible_states) {
@@ -322,7 +322,7 @@ void SamplingSearchYaaig::create_random_samples(
 
     while (num_random_samples > 0) {
         PartialAssignment random_sample(pa_aux, vector<int>(n_atoms, PartialAssignment::UNASSIGNED));
-        pair<bool,State> p = random_sample.get_full_state(state_representation != "complete_no_mutex", *rng);
+        pair<bool,State> p = random_sample.get_full_state(state_representation != "complete_nomutex", *rng);
         if (!p.first)
             continue;
         random_sample.assign(p.second.get_values());
@@ -368,16 +368,16 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     utils::g_log << "[Sample Completion] " << sampling_technique::modified_tasks.size() << " samples obtained in sampling." << endl;
     utils::g_log << "[Sample Completion] State representation: " << state_representation << endl;
     for (shared_ptr<PartialAssignment>& s: sampling_technique::modified_tasks) {
-        if (state_representation == "complete" || state_representation == "complete_no_mutex") {
-            pair<bool,State> fs = s->get_full_state(state_representation != "complete_no_mutex", *rng);
+        if (state_representation == "complete" || state_representation == "complete_nomutex") {
+            pair<bool,State> fs = s->get_full_state(state_representation != "complete_nomutex", *rng);
             if (!fs.first) {
                 utils::g_log << "[Sample Completion] Could not cast " << s->to_binary(true)
                     << " to full state. Undefined values will be output as 0 in binary." << endl;
             }
             s->assign(fs.second.get_values());
 
-        } else if (state_representation == "valid") {
-            // Looking for valid state in forward state space
+        } else if (state_representation == "forward_statespace") {
+            // Looking for state in forward state space
             if (trie_statespace.empty()) create_trie_statespace();
             vector<int> key;
             for (char &b : s->to_binary(true))
@@ -459,7 +459,7 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "true");
     parser.add_option<string>(
             "state_representation",
-            "State facts representation format (complete, complete_no_mutex, partial, valid).",
+            "State facts representation format (complete, complete_nomutex, partial, forward_statespace).",
             "complete");
     parser.add_option<string>(
             "sai",

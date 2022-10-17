@@ -9,7 +9,7 @@
         "instance": "tasks/experiments/transport",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "fs",
+        "state-representation": "complete",
         "max-samples": 6376,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",
