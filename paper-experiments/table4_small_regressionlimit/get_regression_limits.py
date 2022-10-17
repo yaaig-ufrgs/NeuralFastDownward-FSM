@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 
+"""
+Gets the value for each regression limit as shown in Table 4 of the paper.
+"""
+
 from sys import argv
 from glob import glob
 import os
 from subprocess import check_output
 from re import findall
 
-fd_root = os.path.abspath(__file__).split("NeuralFastDownward")[0] + "NeuralFastDownward"
 
 limits = {
     "blocks": [None, None, None],
@@ -18,14 +21,15 @@ limits = {
     "visitall": [None, None, None]
 }
 
+fd_root = os.path.abspath(__file__).split("NeuralFastDownward")[0] + "NeuralFastDownward"
 pddl = {
-    "blocks": "tasks/experiments/blocks/probBLOCKS-7-0.pddl",
-    "grid": "tasks/experiments/grid/grid.pddl",
-    "npuzzle": "tasks/experiments/npuzzle/prob-n3-1.pddl",
-    "rovers": "tasks/experiments/rovers/rovers.pddl",
-    "scanalyzerunit": "tasks/experiments/scanalyzer/scanalyzer.pddl",
-    "transportunit": "tasks/experiments/transport/transport.pddl",
-    "visitall": "tasks/experiments/visitall/p-1-4.pddl"
+    "blocks": f"{fd_root}/tasks/experiments/blocks/probBLOCKS-7-0.pddl",
+    "grid": f"{fd_root}/tasks/experiments/grid/grid.pddl",
+    "npuzzle": f"{fd_root}/tasks/experiments/npuzzle/prob-n3-1.pddl",
+    "rovers": f"{fd_root}/tasks/experiments/rovers/rovers.pddl",
+    "scanalyzerunit": f"{fd_root}/tasks/experiments/scanalyzer/scanalyzer.pddl",
+    "transportunit": f"{fd_root}/tasks/experiments/transport/transport.pddl",
+    "visitall": f"{fd_root}/tasks/experiments/visitall/p-1-4.pddl"
 }
 
 # d*
@@ -42,9 +46,9 @@ for file in statespace_files:
 # F and \bar F
 sas_file, plan_file = "output.sas", "sas_plan"
 commandline = (
-    'python3 {fd_root}/fast-downward.py --sas-file {sas_file} --plan-file {plan_file} --build release {problem_pddl} --search '
-    'sampling_search_yaaig(eager_greedy([ff(transform=sampling_transform())], transform=sampling_transform()), techniques=['
-    'gbackward_yaaig(searches=1, samples_per_search=1, regression_depth={regression_limit})])'
+    'python3 {fd_root}/fast-downward.py --sas-file {sas_file} --plan-file {plan_file} --build release {problem_pddl} '
+    '--translate-options --unit-cost --search-options --search sampling_search_yaaig(eager_greedy([ff(transform=sampling_transform())], '
+    'transform=sampling_transform()), techniques=[gbackward_yaaig(searches=1, samples_per_search=1, regression_depth={regression_limit})])'
 )
 for regression_limit in ["facts", "facts_per_avg_effects"]:
     for domain in limits:
@@ -53,16 +57,15 @@ for regression_limit in ["facts", "facts_per_avg_effects"]:
             fd_root=fd_root,
             sas_file=sas_file,
             plan_file=plan_file,
-            problem_pddl=f"{fd_root}/{pddl[domain]}",
+            problem_pddl=pddl[domain],
             regression_limit=regression_limit
         )
-        output = check_output(cl.split(" ", 10)).decode("utf-8")
+        output = check_output(cl.split(" ", 13)).decode("utf-8")
         assert "Regression depth value: " in output
         id = 1 if regression_limit == "facts" else 2
         limits[domain][id] = findall(".*Regression depth value: (\d+).*", output)[0]
 os.remove(sas_file)
 os.remove(plan_file)
-
 
 print("domain,dstar,facts,factseff")
 for domain in limits:

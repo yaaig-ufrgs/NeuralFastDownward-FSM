@@ -11,9 +11,12 @@ e.g. python3 calculate_diff.py hvalue/with_sai_sui/samples/blocks_1pct_bfsrw_fac
 from sys import argv
 import os
 
-def read_samples(file):
-    with open(file, "r") as f:
-        return [s for s in f.readlines() if not s.startswith("#")]
+def read_samples(sample_file):
+    pairs = []
+    with open(sample_file, "r") as f:
+        for h, s in [l.strip().split(";") for l in f.readlines() if not l.startswith("#")]:
+            pairs.append((int(h), s))
+    return pairs
 
 table = {}
 for sample_path in argv[1:]:
@@ -28,19 +31,15 @@ for sample_path in argv[1:]:
     domain = folder.split("_")[0]
     regression_limit = folder.split("_")[3]
 
-    samples_hvalue = read_samples(sample_path)
-    samples_hstar = read_samples(hstar_sample_path)
-    n = len(samples_hvalue)
-    assert n == len(samples_hstar)
-
-    s = 0
+    hvalue_pairs = read_samples(sample_path)
+    hstar_pairs = read_samples(hstar_sample_path)
+    n = len(hvalue_pairs)
+    assert n == len(hstar_pairs)
+    err = 0.0
     for i in range(n):
-        h_hvalue, s_hvalue = samples_hvalue[i].split(";")
-        h_hstar, s_hstar = samples_hstar[i].split(";")
-        assert s_hvalue == s_hstar
-        h_hvalue, h_hstar = int(h_hvalue), int(h_hstar)
-        assert h_hvalue >= h_hstar
-        s += h_hvalue - h_hstar
+        assert hvalue_pairs[i][1] == hstar_pairs[i][1]
+        err += abs(hvalue_pairs[i][0] - hstar_pairs[i][0])
+    err /= n
 
     if experiment not in table:
         table[experiment] = {}
@@ -48,7 +47,7 @@ for sample_path in argv[1:]:
         table[experiment][regression_limit] = {}
     if domain not in table[experiment][regression_limit]:
         table[experiment][regression_limit][domain] = []
-    table[experiment][regression_limit][domain].append(s/n)
+    table[experiment][regression_limit][domain].append(err)
 
 print("experiment,regression_limit,domain,value")
 for experiment in table:
