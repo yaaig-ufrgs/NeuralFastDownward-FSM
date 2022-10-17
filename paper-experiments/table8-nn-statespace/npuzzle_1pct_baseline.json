@@ -7,7 +7,7 @@
         "exp-net-seed": "0..4"
     },
     "sampling": {
-        "instance": "tasks/experiments/npuzzle",
+        "instance": "tasks/experiments/npuzzle/prob-n3-1.pddl",
         "method": "yaaig",
         "technique": "rw",
         "state-representation": "fs",

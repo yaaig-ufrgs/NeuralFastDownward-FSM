@@ -7,7 +7,7 @@
         "exp-net-seed": "0..4"
     },
     "sampling": {
-        "instance": "tasks/experiments/scanalyzer",
+        "instance": "tasks/experiments/scanalyzer/scanalyzer.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
         "state-representation": "fs",

@@ -7,7 +7,7 @@
         "exp-net-seed": "0..4"
     },
     "sampling": {
-        "instance": "tasks/experiments/grid",
+        "instance": "tasks/experiments/grid/grid.pddl",
         "method": "yaaig",
         "technique": "rw",
         "state-representation": "fs",

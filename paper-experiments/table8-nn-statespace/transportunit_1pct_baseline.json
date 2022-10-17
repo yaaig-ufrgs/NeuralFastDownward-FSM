@@ -7,7 +7,7 @@
         "exp-net-seed": "0..4"
     },
     "sampling": {
-        "instance": "tasks/experiments/transport",
+        "instance": "tasks/experiments/transport/transport.pddl",
         "method": "yaaig",
         "technique": "rw",
         "state-representation": "fs",
