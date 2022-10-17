@@ -139,8 +139,9 @@ def main(exp_paths: [str]):
                 test["model-dir"] = exp["results"]
                 if "unit-cost" in exp:
                     test["unit-cost"] = exp["unit-cost"]
-            if "results" in exp:
-                del exp["results"]
+            for remove_label in ["results", "unit-cost"]:
+                if remove_label in exp:
+                    del exp[remove_label]
 
             if train and test:
                 if "save-git-diff" in train:
