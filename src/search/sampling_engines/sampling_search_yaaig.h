@@ -33,6 +33,7 @@ protected:
     const SearchRule sui_rule;
     const std::string statespace_file;
     const std::shared_ptr<Evaluator> evaluator;
+    const std::string evaluate_file;
     const bool use_evaluator;
     const std::vector<FactPair> relevant_facts;
     StateRegistry registry;

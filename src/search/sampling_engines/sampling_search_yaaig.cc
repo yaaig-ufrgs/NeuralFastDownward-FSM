@@ -23,6 +23,28 @@ using namespace std;
 
 namespace sampling_engine {
 
+vector<pair<int,string>> read_sample_file(string sample_file) {
+    vector<pair<int,string>> state_value_pairs;
+    string h_sample;
+    ifstream f(sample_file);
+    if (f.is_open()) {
+        while (getline(f, h_sample)) {
+            if (h_sample[0] == '#')
+                continue;
+            state_value_pairs.push_back(
+                make_pair(
+                    stoi(h_sample.substr(0, h_sample.find(';'))),
+                    h_sample.substr(h_sample.find(';') + 1, h_sample.size())
+                )
+            );
+        }
+        f.close();
+    } else {
+        utils::g_log << "*** COULD NOT OPEN FILE " << sample_file << " ***" << endl;
+    }
+    return state_value_pairs;
+}
+
 string SamplingSearchYaaig::construct_header() const {
     ostringstream oss;
 
@@ -81,27 +103,19 @@ void SamplingSearchYaaig::create_trie_statespace() {
 
     auto t_sstrie = std::chrono::high_resolution_clock::now();
     utils::g_log << "[State space] Creating the state space trie..." << endl;
-    string h_sample;
-    ifstream f(statespace_file);
-    if (f.is_open()) {
-        while (getline(f, h_sample)) {
-            if (h_sample[0] == '#')
-                continue;
-            int h = stoi(h_sample.substr(0, h_sample.find(';')));
-            vector<int> key;
-            string bin = "";
-            for (char &b : h_sample.substr(h_sample.find(';') + 1, h_sample.size())) {
-                key.push_back((int)b - '0');
-                bin += b;
-            }
-            trie_statespace.insert(key, make_pair(h, bin));
+    vector<pair<int,string>> state_value_pairs = read_sample_file(statespace_file);
+    assert(!state_value_pairs.empty());
+    for (pair<int,string> pair : state_value_pairs) {
+        vector<int> key;
+        string bin = "";
+        for (char &b : pair.second) {
+            key.push_back((int)b - '0');
+            bin += b;
         }
-        f.close();
-        utils::g_log << "[State space] Time creating trie: " << fixed << (std::chrono::duration<double, std::milli>(
-            std::chrono::high_resolution_clock::now() - t_sstrie).count() / 1000.0) << "s" << endl;
-    } else {
-        utils::g_log << "[State space] *** COULD NOT OPEN STATE SPACE FILE (" << statespace_file << ")! ***" << endl;
+        trie_statespace.insert(key, make_pair(pair.first, bin));
     }
+    utils::g_log << "[State space] Time creating trie: " << fixed << (std::chrono::duration<double, std::milli>(
+        std::chrono::high_resolution_clock::now() - t_sstrie).count() / 1000.0) << "s" << endl;
 }
 
 void SamplingSearchYaaig::successor_improvement(vector<shared_ptr<PartialAssignment>>& samples) {
@@ -327,6 +341,19 @@ void SamplingSearchYaaig::create_random_samples(
 }
 
 vector<string> SamplingSearchYaaig::extract_samples() {
+    if (evaluate_file != "none") {
+        PartialAssignment pa = *(sampling_technique::modified_tasks[0]);
+        sampling_technique::modified_tasks.clear();
+        vector<pair<int,string>> state_value_pairs = read_sample_file(evaluate_file);
+        for (pair<int,string> pair : state_value_pairs) {
+            PartialAssignment state(pa, binary_to_values(pair.second));
+            state.estimated_heuristic = pair.first;
+            sampling_technique::modified_tasks.push_back(make_shared<PartialAssignment>(state));
+        }
+        replace_h_with_evaluator(sampling_technique::modified_tasks);
+        return format_output(sampling_technique::modified_tasks);
+    }
+
     utils::g_log << "[Sampling Engine] Extracting samples..." << endl;
 
     if (sui_k > 0) {
@@ -336,7 +363,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     } else if (sai_partial) {
         sample_improvement(sampling_technique::modified_tasks);
     }
-    
+
     auto t_completion = std::chrono::high_resolution_clock::now();
     utils::g_log << "[Sample Completion] " << sampling_technique::modified_tasks.size() << " samples obtained in sampling." << endl;
     utils::g_log << "[Sample Completion] State representation: " << state_representation << endl;
@@ -401,6 +428,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       sui_rule(getRule(opts.get<string>("sui_rule"))),
       statespace_file(opts.get<string>("statespace_file")),
       evaluator(opts.get<shared_ptr<Evaluator>>("evaluator")),
+      evaluate_file(opts.get<string>("evaluate_file")),
       use_evaluator(
           evaluator->get_description() != "evaluator = blind" &&
           evaluator->get_description() != "blind"),
@@ -453,6 +481,11 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "evaluator",
             "Evaluator to use to estimate the h-values.",
             "blind()");
+    parser.add_option<string>(
+            "evaluate_file",
+            "Evaluate a sample file in 'h;sample' format: replaces current h-value with that of the evaluator). "
+            "Samples obtained from sampling will be discarded.",
+            "none");
 
     SearchEngine::add_options_to_parser(parser);
     Options opts = parser.parse();
