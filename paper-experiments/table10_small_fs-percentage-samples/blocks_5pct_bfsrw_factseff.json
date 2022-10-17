@@ -10,7 +10,7 @@
         "instance": "tasks/experiments/blocks/probBLOCKS-7-0.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "fs",
+        "state-representation": "complete",
         "max-samples": 3300,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

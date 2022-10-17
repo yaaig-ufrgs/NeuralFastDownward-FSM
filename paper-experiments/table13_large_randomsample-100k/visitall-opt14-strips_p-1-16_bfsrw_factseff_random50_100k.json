@@ -10,7 +10,7 @@
         "instance": "tasks/ferber21/training_tasks/visitall-opt14-strips/p-1-16.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "fs",
+        "state-representation": "complete",
         "max-samples": 100000,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

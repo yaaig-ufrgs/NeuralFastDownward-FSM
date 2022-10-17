@@ -10,7 +10,7 @@
         "instance": "tasks/experiments/transport/transport.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "fs-nomutex",
+        "state-representation": "complete-nomutex",
         "max-samples": 6376,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

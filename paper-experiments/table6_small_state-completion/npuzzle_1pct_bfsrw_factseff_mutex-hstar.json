@@ -10,7 +10,7 @@
         "instance": "tasks/experiments/npuzzle/prob-n3-1.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "fs",
+        "state-representation": "complete",
         "max-samples": 1814,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

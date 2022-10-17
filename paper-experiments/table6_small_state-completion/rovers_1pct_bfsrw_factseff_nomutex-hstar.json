@@ -10,7 +10,7 @@
         "instance": "tasks/experiments/rovers/rovers.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "fs-nomutex",
+        "state-representation": "complete-nomutex",
         "max-samples": 5658,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

@@ -10,7 +10,7 @@
         "instance": "tasks/ferber21/training_tasks/pipesworld-notankage/p28-net3-b18-g7.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "fs",
+        "state-representation": "complete",
         "max-samples": 34334,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

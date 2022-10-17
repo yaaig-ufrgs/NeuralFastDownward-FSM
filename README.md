@@ -36,7 +36,7 @@ See [`src/pytorch/utils/default_args.py`](https://github.com/yaaig-ufrgs/NeuralF
 ```
 usage: fast_sample.py [-h] [-tst-dir TEST_TASKS_DIR] [-stp STATESPACE] [-tech {rw,dfs,bfs,bfs_rw}] [-search {greedy,astar}] [-heur {ff,lmcut}]
                       [-ftech {forward,backward}] [-fst {random_state,entire_plan,init_state}] [-fn FERBER_NUM_TASKS] [-fmin FERBER_MIN_WALK_LEN]
-                      [-fmax FERBER_MAX_WALK_LEN] [-st {fs,fs-nomutex,ps,vs}] [-max MAX_SAMPLES] [-scs SEARCHES] [-sscs SAMPLES_PER_SEARCH]
+                      [-fmax FERBER_MAX_WALK_LEN] [-st {complete,complete-nomutex,forward-statespace}] [-max MAX_SAMPLES] [-scs SEARCHES] [-sscs SAMPLES_PER_SEARCH]
                       [-rd REGRESSION_DEPTH] [-rdm REGRESSION_DEPTH_MULTIPLIER] [-s SEED] [-dups {all,interrollout,none}] [-ms MULT_SEED]
                       [-c RANDOM_PERCENTAGE] [-rhg RESTART_H_WHEN_GOAL_STATE] [-sf {none,mutex,statespace}] [-bfsp BFS_PERCENTAGE] [-o OUTPUT_DIR]
                       [-sai {none,partial,complete,both}] [-sui SUCCESSOR_IMPROVEMENT_K] [-suirule {supersets,subsets,samesets}] [-kd K_DEPTH]

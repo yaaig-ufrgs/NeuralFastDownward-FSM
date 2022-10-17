@@ -10,7 +10,7 @@
         "instance": "tasks/ferber21/training_tasks/scanalyzer-opt11-strips/p07.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "fs",
+        "state-representation": "complete",
         "max-samples": 444444,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

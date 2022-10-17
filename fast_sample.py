@@ -30,28 +30,6 @@ def run_multi_core(cmd, cores):
         COUNT += 1
 
 
-def get_full_state_repr_name(state_repr):
-    if state_repr == "fs":
-        return "complete"
-    elif state_repr == "fs-nomutex":
-        return "complete_no_mutex"
-    elif state_repr == "ps":
-        return "partial"
-    elif state_repr == "us":
-        return "undefined"
-    elif state_repr == "au":
-        return "assign_undefined"
-    elif state_repr == "uc":
-        return "undefined_char"
-    elif state_repr == "vps":
-        return "values_partial"
-    elif state_repr == "vfs":
-        return "values_complete"
-    elif state_repr == "vs":
-        return "valid"
-    return state_repr
-
-
 def get_bound_type(regression_depth):
     if str(regression_depth).isdigit():
         return str(regression_depth)
@@ -70,7 +48,7 @@ def yaaig_ferber(args, meth):
     elif args.search_algorithm == "astar":
         search_algo = f'astar({args.search_heuristic}(transform=sampling_transform()), transform=sampling_transform())'
 
-    if args.technique == "dfs" or args.technique == "dfs_rw": # recheck this
+    if args.technique == "dfs":
         args.samples_per_search = int(1.0/args.searches*args.max_samples+0.999)
 
     if args.regression_depth == "max_task_hstar":
@@ -93,7 +71,6 @@ def yaaig_ferber(args, meth):
                 max_h = max(max_h, int(h))
         args.regression_depth = max_h
 
-    state_repr = get_full_state_repr_name(args.state_representation)
     instances = [args.instance] if args.instance.endswith(".pddl") else glob(f"{args.instance}/*.pddl")
 
     if ".." in args.seed:
@@ -112,7 +89,7 @@ def yaaig_ferber(args, meth):
             for i in range(start, end):
                 cmd, out, depthk, suik, suits, dups = "", "", "", "", "", ""
                 tech = args.technique.replace('_', '')
-                if args.technique == "dfs_rw" or args.technique == "bfs_rw":
+                if args.technique == "bfs_rw":
                     if args.k_depth < 99999:
                         depthk = f"_depthk-{args.k_depth}"
                 if args.successor_improvement_k > 0:
@@ -149,7 +126,7 @@ def yaaig_ferber(args, meth):
                            f'unit_cost={args.unit_cost}, '
                            f'max_time={args.max_time}, '
                            f'mem_limit_mb={args.mem_limit})], '
-                           f'state_representation={state_repr}, '
+                           f'state_representation={args.state_representation}, '
                            f'random_seed={i}, '
                            f'sai={args.sample_improvement}, '
                            f'sui_k={args.successor_improvement_k}, '

@@ -10,7 +10,7 @@
         "instance": "tasks/experiments/grid/grid.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "fs",
+        "state-representation": "complete",
         "max-samples": 22618,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",

@@ -10,7 +10,7 @@
         "instance": "tasks/experiments/visitall/p-1-4.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "vs",
+        "state-representation": "forward-statespace",
         "max-samples": 799,
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",
