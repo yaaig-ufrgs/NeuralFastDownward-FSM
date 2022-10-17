@@ -41,7 +41,8 @@ SearchEngine::SearchEngine(const Options &opts)
       is_unit_cost(task_properties::is_unit_cost(task_proxy)),
       max_time(opts.get<double>("max_time")),
       timer(nullptr),
-      verbosity(opts.get<utils::Verbosity>("verbosity")) {
+      verbosity(opts.get<utils::Verbosity>("verbosity")),
+      endless(opts.get<bool>("endless")) {
     if (opts.get<int>("bound") < 0) {
         cerr << "error: negative cost bound " << opts.get<int>("bound") << endl;
         utils::exit_with(ExitCode::SEARCH_INPUT_ERROR);
@@ -200,17 +201,21 @@ void SearchEngine::add_options_to_parser(OptionParser &parser) {
         "maximum number of expansions the search is allowed to run for.",
         "infinity");
     parser.add_option<double>(
-            "statistics_interval",
-            "Prints every interval seconds some statistics on the search."
-            "Use a negative value to disable. Default: 30",
-            "30"
-            );
+        "statistics_interval",
+        "Prints every interval seconds some statistics on the search."
+        "Use a negative value to disable. Default: 30",
+        "30");
     parser.add_option<shared_ptr<AbstractTask>>(
         "transform",
         "Optional task transformation for the search algorithm."
         " Currently, adapt_costs(), sampling_transform(), and no_transform() are "
         "available.",
         "no_transform()");
+    parser.add_option<bool>(
+        "endless",
+        "The search ignores goal states and stops only after visiting "
+        "the entire forward state space.",
+        "false");
 }
 
 /* Method doesn't belong here because it's only useful for certain derived classes.

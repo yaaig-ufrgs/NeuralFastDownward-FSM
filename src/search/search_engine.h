@@ -58,6 +58,7 @@ protected:
     double max_time;
     std::unique_ptr<utils::CountdownTimer> timer;
     const utils::Verbosity verbosity;
+    const bool endless;
 
     virtual void initialize() {}
     virtual SearchStatus step() = 0;
