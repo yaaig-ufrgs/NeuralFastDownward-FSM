@@ -104,7 +104,7 @@ for train_folder in argv[1:]:
             test_results = load(test_results_file)
     except:
         is_untested = True
-        test_results = {"statistics" : "None"}
+        test_results = {"statistics" : ["None"]}
 
     for fold in test_results["statistics"]:
         line = []
