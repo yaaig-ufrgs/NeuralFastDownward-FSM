@@ -1,6 +1,7 @@
 {
     "experiment": {
-        "results": "paper-experiments/table11-large-reglimit-mutex/results/transport-opt14-strips_p17_eagergreedy_ff"
+        "results": "paper-experiments/table11-large-reglimit-mutex/results/transport-opt14-strips_p17_eagergreedy_ff",
+        "unit-cost": "yes"
     },
     "test": {
         "instance-pddl": [

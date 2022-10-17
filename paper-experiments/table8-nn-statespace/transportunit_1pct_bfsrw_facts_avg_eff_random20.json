@@ -4,7 +4,8 @@
         "results": "paper-experiments/table8-nn-statespace/results/transportunit-1pct-bfsrw-factseff-random20",
         "exp-cores": 11,
         "exp-sample-seed": "0..4",
-        "exp-net-seed": "0..4"
+        "exp-net-seed": "0..4",
+        "unit-cost": "yes"
     },
     "sampling": {
         "instance": "tasks/experiments/transport/transport.pddl",

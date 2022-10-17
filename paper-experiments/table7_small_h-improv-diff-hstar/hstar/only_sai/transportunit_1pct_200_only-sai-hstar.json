@@ -2,7 +2,8 @@
     "experiment": {
         "samples": "paper-experiments/table7_small_h-improv-diff-hstar/hstar/only_sai/samples/transportunit_1pct_bfsrw_200_only-sai-hstar",
         "exp-cores": 11,
-        "exp-sample-seed": "0..4"
+        "exp-sample-seed": "0..4",
+        "unit-cost": "yes"
     },
     "sampling": {
         "instance": "tasks/experiments/transport",

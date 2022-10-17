@@ -4,7 +4,8 @@
         "results": "paper-experiments/table6-state-completion/results/scanalyzerunit_1pct_bfsrw_factseff_nomutex-hstar",
         "exp-cores": 11,
         "exp-sample-seed": "0..4",
-        "exp-net-seed": "0..4"
+        "exp-net-seed": "0..4",
+        "unit-cost": "yes"
     },
     "sampling": {
         "instance": "tasks/experiments/scanalyzer/scanalyzer.pddl",
@@ -46,7 +47,6 @@
     "test": {
         "max-expansions": 46081,
         "search-algorithm": "eager_greedy",
-        "unit-cost": "yes",
         "instance-pddl": [
             "tasks/experiments/scanalyzer/scanalyzer/p0.pddl",
             "tasks/experiments/scanalyzer/scanalyzer/p1.pddl",

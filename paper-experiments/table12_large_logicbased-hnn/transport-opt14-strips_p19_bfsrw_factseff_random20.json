@@ -4,7 +4,8 @@
         "results": "paper-experiments/table12_large_logicbased-hnn/results/transport-opt14-strips_p19_bfsrw_factseff_random20",
         "exp-cores": 11,
         "exp-sample-seed": "0..2",
-        "exp-net-seed": "0..2"
+        "exp-net-seed": "0..2",
+        "unit-cost": "yes"
     },
     "sampling": {
         "instance": "tasks/ferber21/training_tasks/transport-opt14-strips/p19.pddl",

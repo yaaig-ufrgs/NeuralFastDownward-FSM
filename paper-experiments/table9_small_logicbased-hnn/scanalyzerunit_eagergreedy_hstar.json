@@ -1,6 +1,7 @@
 {
     "experiment": {
-        "results": "paper-experiments/table9_small_logicbased-hnn/results/scanalyzerunit_eagergreedy_hstar"
+        "results": "paper-experiments/table9_small_logicbased-hnn/results/scanalyzerunit_eagergreedy_hstar",
+        "unit-cost": "yes"
     },
     "test": {
         "instance-pddl": [
@@ -58,7 +59,6 @@
         "search-algorithm": "eager_greedy",
         "heuristic": "hstar",
         "max-search-time": 300,
-        "max-search-memory": 2048,
-        "unit-cost": "yes"
+        "max-search-memory": 2048
     }
 }
