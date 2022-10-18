@@ -51,6 +51,7 @@ protected:
     int searches;
     int samples_per_search;
     int max_samples;
+    bool limit_reached;
 public:
     const bool unit_cost;
 protected:

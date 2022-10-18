@@ -118,6 +118,7 @@ SamplingTechnique::SamplingTechnique(const options::Options &opts)
           searches(opts.get<int>("searches")),
           samples_per_search(opts.get<int>("samples_per_search")),
           max_samples(opts.get<int>("max_samples")),
+          limit_reached(false),
           unit_cost(opts.get<bool>("unit_cost")),
           random_percentage(opts.get<double>("random_percentage")),
           random_estimates(opts.get<string>("random_estimates")),
@@ -211,7 +212,7 @@ int SamplingTechnique::get_counter() const {
 }
 
 bool SamplingTechnique::empty() const {
-    return counter >= searches;
+    return counter >= searches || limit_reached;
 }
 
 bool SamplingTechnique::stop_sampling(bool is_bfs, float bfs_pct) const {
@@ -268,28 +269,27 @@ shared_ptr<AbstractTask> SamplingTechnique::next(
 
 vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
         const shared_ptr<AbstractTask> &seed_task) {
-    vector<shared_ptr<PartialAssignment>> tasks;
-    bool limit_reached = false;
+    vector<shared_ptr<PartialAssignment>> samples;
     utils::HashSet<PartialAssignment> hash_table;
-    for (int i = 0; i < searches && (!empty() || !limit_reached); ++i) {
+    while (!empty()) {
         update_alternative_task_mutexes(seed_task);
-        vector<shared_ptr<PartialAssignment>> next_tasks = create_next_all(seed_task, TaskProxy(*seed_task));
-        for (shared_ptr<PartialAssignment>& task : next_tasks) {
+        vector<shared_ptr<PartialAssignment>> next_samples = create_next_all(seed_task, TaskProxy(*seed_task));
+        for (shared_ptr<PartialAssignment>& sample : next_samples) {
             if (remove_duplicates) {
-                if (hash_table.count(*task))
+                if (hash_table.count(*sample))
                     continue;
-                hash_table.insert(*task);
+                hash_table.insert(*sample);
             }
 
-            tasks.push_back(task);
-            if (max_samples != numeric_limits<int>::max() && tasks.size() >= (unsigned)max_samples) {
+            samples.push_back(sample);
+            if (max_samples != numeric_limits<int>::max() && samples.size() >= (unsigned)max_samples) {
                 limit_reached = true;
                 break;
             }
         }
         counter++;
     }
-    return tasks;
+    return samples;
 }
 
 void SamplingTechnique::update_alternative_task_mutexes(
