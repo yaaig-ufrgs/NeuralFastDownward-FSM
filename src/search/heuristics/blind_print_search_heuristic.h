@@ -7,7 +7,7 @@ namespace blind_print_search_heuristic {
 class BlindPrintSearchHeuristic : public Heuristic {
     const std::vector<FactPair> relevant_facts;
     int min_operator_cost;
-    const std::string prefix = "@";
+    const std::string prefix = ";;";
 protected:
     virtual int compute_heuristic(const State &ancestor_state) override;
 public:

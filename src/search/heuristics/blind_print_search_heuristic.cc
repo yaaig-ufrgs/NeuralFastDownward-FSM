@@ -20,7 +20,7 @@ BlindPrintSearchHeuristic::BlindPrintSearchHeuristic(const Options &opts)
     utils::g_log << "Initializing blind print search heuristic..." << endl;
 
     int curVar = 0;
-    cout << prefix << " ";
+    cout << prefix << "#";
     for (unsigned i = 0; i < relevant_facts.size(); i++) {
         if (curVar != relevant_facts[i].var) {
             cout << ";";
@@ -35,46 +35,9 @@ BlindPrintSearchHeuristic::~BlindPrintSearchHeuristic() {
 }
 
 int BlindPrintSearchHeuristic::compute_heuristic(const State &ancestor_state) {
-    /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     * Comment lines 172 and 173 of
-     * src/search/search_egnines/eager_search.cc
-     * to print the entire state space
-     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
-
     State state = convert_ancestor_state(ancestor_state);
 
-    vector<int> values = state.get_values();
-    vector<int> bin;
-    for (unsigned i = 0; i < relevant_facts.size(); i++)
-        bin.push_back(values[relevant_facts[i].var] == relevant_facts[i].value ? 1 : 0);
-
-    // Print binary state
-    // cout << "# ";
-    // for (unsigned i = 0; i < relevant_facts.size(); i++)
-    //     cout << ((values[relevant_facts[i].var] == relevant_facts[i].value) ? 1 : 0);
-    // cout << endl;
-
-    // binary to vector<long long> decimals
-    // bin: 111111111110101100101111111010101001101010101010101101010110101001
-    // split, max 63 bits: 11 1111111110101100101111111010101001101010101010101101010110101001
-    // vector decimals: 3 18423310914320782761
-    vector<unsigned long long> decimals;
-	unsigned long long decimal = 0, base = 1;
-    int bits = 0;
-    for (int i = bin.size()-1; i >= 0; i--) {
-        decimal += (bin[i] == 1) ? base : 0;
-        base *= 2;
-        if (++bits >= 64 || i == 0) {
-            decimals.insert(decimals.begin(), decimal);
-            bits = 0;
-            base = 1;
-            decimal = 0;
-        }
-    }
-    cout << prefix;
-    for (size_t i = 0; i < decimals.size(); i++)
-        cout << " " << decimals[i];
-    cout << endl;
+    cout << prefix << state.to_binary() << endl;
 
     if (task_properties::is_goal_state(task_proxy, state))
         return 0;
