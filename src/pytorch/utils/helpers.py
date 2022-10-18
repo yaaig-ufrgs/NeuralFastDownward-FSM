@@ -135,14 +135,18 @@ def add_train_arg(dirname: str, key, value):
         dump(data, f, indent=4)
 
 
-def get_problem_by_sample_filename(sample_filename: str, train_folder = None) -> (str, str):
+def get_problem_by_sample_filename(sample_filename: str, train_folder: str = None) -> (str, str):
     domain, problem = sample_filename.split("/")[-1].split("_")[1:3]
-    if domain.endswith("unit"):
-        domain = domain[:-len("unit")]
+    unitary = False
+    for suffix in ["-unit", "unit"]:
+        if domain.endswith(suffix):
+            domain = domain[:-len(suffix)]
+            unitary = True
     if train_folder:
         with open(f"{train_folder}/train_args.json") as f:
             data = load(f)
-            assert domain == data["domain"]
+            assert domain == data["domain"] or (unitary and domain+"-unit" == data["domain"]) \
+                or (unitary and domain+"-" == data["domain"]) or (unitary and domain.replace("-opt", "unit-opt") == data["domain"]) # hack, remove later
             assert problem == data["problem"]
     return domain, problem
 
@@ -174,7 +178,7 @@ def get_test_tasks_from_problem(
             dir = candidate_dir
             break
 
-    if dir is None:
+    if dir == None:
         _log.error(
             f"No tasks were automatically found from {tasks_folder}. "
             "Enter tasks manually from the command line or enter the path to the tasks folder (-atf)."

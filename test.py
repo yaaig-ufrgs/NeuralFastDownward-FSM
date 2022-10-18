@@ -73,7 +73,7 @@ def test_main(args):
 
     if args.samples_dir == None or args.samples_dir == "None":
         args.samples_dir = get_samples_folder_from_train_folder(args.train_folder)
-    if args.max_expansions == -1:
+    args.max_expansions_per_task = get_fixed_max_expansions(args.domain, args.problem) if args.max_expansions == -1 else {}
         args.max_expansions = get_fixed_max_expansions(args)
     if (
         args.max_expansions == default_args.MAX_EXPANSIONS
@@ -143,7 +143,8 @@ def test_main(args):
                 unary_threshold=args.unary_threshold,
                 time_limit=args.max_search_time,
                 memory_limit=args.max_search_memory,
-                max_expansions=args.max_expansions,
+                max_expansions=args.max_expansions if args.max_expansions != -1 \
+                    else args.max_expansions_per_task[problem_pddl.split("/")[-1].split(".pddl")[0]],
                 facts_file=facts_file,
                 defaults_file=defaults_file,
                 save_log_to=dirname,
