@@ -1,6 +1,4 @@
 # TODO
-- paper-experiments/make_csv.py
-- paper-experiments/get_mean_h.py
 - paper-experiments/README.md
 - large_tasks.csv (merge large_tests_epochs_nn_yaaig.csv: mudar também as calls)
 - reference/max_expansions.csv (copiar de large_tests)

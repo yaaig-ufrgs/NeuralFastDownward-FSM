@@ -169,7 +169,7 @@ for train_folder in argv[1:]:
             mutex = "true"
             
         perfect_mutex = "false"
-        if "-vs" in train_folder:
+        if "forward_statespace" in train_folder:
             perfect_mutex = "true"
 
         domain = domain.replace("-opt14-strips", "")

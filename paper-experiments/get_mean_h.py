@@ -5,31 +5,24 @@ E.g.: ./get_mean_h.py samples-directory
 
 """
 
+import os
 import pandas as pd
 from sys import argv
 from glob import glob
-import numpy as np
-from statistics import geometric_mean
 
-domains_d = {'blocks': "../../NeuralFastDownward/tasks/experiments/statespaces/statespace_blocks_probBLOCKS-7-0_hstar",
-             'grid': "../../NeuralFastDownward/tasks/experiments/statespaces/statespace_grid_grid_hstar",
-             'npuzzle': "../../NeuralFastDownward/tasks/experiments/statespaces/statespace_npuzzle_prob-n3-1_hstar",
-             'rovers': "../../NeuralFastDownward/tasks/experiments/statespaces/statespace_rovers_rovers_hstar",
-             'scanalyzer': "../../NeuralFastDownward/tasks/experiments/statespaces/statespace_scanalyzer_scanalyzer_hstar",
-             'scanalyzerunit': "../../NeuralFastDownward/tasks/experiments/statespaces/statespace_scanalyzerunit_scanalyzer_hstar",
-             'transport': "../../NeuralFastDownward/tasks/experiments/statespaces/statespace_transport_transport_hstar",
-             'transportunit': "../../NeuralFastDownward/tasks/experiments/statespaces/statespace_transportunit_transport_hstar",
-             'visitall': "../../NeuralFastDownward/tasks/experiments/statespaces/statespace_visitall_p-1-4_hstar",
-             }
+fd_root = os.path.abspath(__file__).split("NeuralFastDownward")[0] + "NeuralFastDownward"
+domains_d = {
+    "blocks": f"{fd_root}/tasks/experiments/statespaces/statespace_blocks_probBLOCKS-7-0_hstar",
+    "grid": f"{fd_root}/tasks/experiments/statespaces/statespace_grid_grid_hstar",
+    "npuzzle": f"{fd_root}/tasks/experiments/statespaces/statespace_npuzzle_prob-n3-1_hstar",
+    "rovers": f"{fd_root}/tasks/experiments/statespaces/statespace_rovers_rovers_hstar",
+    "scanalyzerunit": f"{fd_root}/tasks/experiments/statespaces/statespace_scanalyzerunit_scanalyzer_hstar",
+    "transportunit": f"{fd_root}/tasks/experiments/statespaces/statespace_transportunit_transport_hstar",
+    "visitall": f"{fd_root}/tasks/experiments/statespaces/statespace_visitall_p-1-4_hstar"
+}
 
-#domains = ['blocks', 'grid', 'npuzzle', 'rovers', 'scanalyzer', 'scanalyzerunit', 'transport', 'transportunit', 'visitall']
+
 domains = ['blocks', 'grid', 'npuzzle', 'rovers', 'scanalyzerunit', 'transportunit', 'visitall']
-
-#h_ss = []
-#h_bfs = []
-#h_dfs = []
-#h_rw = []
-#h_bfsrw = []
 
 print("domain,sample,n_seeds,mean_h")
 for domain in domains:
@@ -62,15 +55,6 @@ for domain in domains:
         assert df_curr is not None
 
         mean_h = df_curr['h'].mean()
-
-        #if "-bfs-" in sample:
-        #    h_bfs.append(mean_h)
-        #if "-dfs-" in sample:
-        #    h_dfs.append(mean_h)
-        #if "-rw-" in sample:
-        #    h_rw.append(mean_h)
-        #if "-bfsrw-" in sample:
-        #    h_bfsrw.append(mean_h)
 
         h_algo.append(mean_h)
         print(f"{domain},{sample.split('/')[-1]},{len(csv_files)},{round(mean_h,2)}")
