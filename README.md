@@ -1,8 +1,5 @@
 # TODO
 - paper-experiments/README.md
-- large_tasks.csv (merge large_tests_epochs_nn_yaaig.csv: mudar também as calls)
-- reference/max_expansions.csv (copiar de large_tests)
-- scripts/get_state_space.py (comment lines -> trocar por argumento endless)
 - README.md
 
 # Neural Fast Downward

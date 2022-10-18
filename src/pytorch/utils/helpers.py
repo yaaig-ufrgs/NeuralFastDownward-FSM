@@ -32,7 +32,8 @@ def count_parameters(model):
         total_params+=params
     _log.info(f"\n{table}")
     _log.info(f"Total Trainable Params: {total_params}")
-    return total_params   
+    return total_params
+
 
 def to_prefix(n: int, max_value: int) -> [int]:
     """
@@ -79,20 +80,18 @@ def get_memory_usage_mb(peak: bool = False):
 
     return round(int(memusage.strip()) / 1024)
 
-def get_fixed_max_epochs(args, model="resnet_ferber21", time="1800") -> int:
+def get_fixed_max_epochs(args, reference_file="reference/large_tasks.csv") -> int:
     """
     If argument `-e` equals -1, returns a default number of training epochs
     for the given problem. This is used to avoid time-based training.
     """
-    with open(f"reference/{model}.csv", "r") as f:
+    with open(reference_file, "r") as f:
         lines = [l.replace("\n", "").split(",") for l in f.readlines()]
         header = lines[0]
         for line in lines[1:]:
-            if (
-                args.domain == line[header.index("domain")]
-                and args.problem == line[header.index("problem")]
-            ):
-                return int(line[header.index(f"epochs_{time}s")])
+            if (args.domain == line[header.index("domain")]
+                    and args.problem == line[header.index("problem")]):
+                return int(line[header.index(f"epochs")])
     _log.warning(
         f"Fixed number of epochs not found. "
         f"Setting to default value ({default_args.MAX_EPOCHS})."
@@ -100,27 +99,21 @@ def get_fixed_max_epochs(args, model="resnet_ferber21", time="1800") -> int:
     return default_args.MAX_EPOCHS
 
 
-def get_fixed_max_expansions(
-    args: Namespace, model="resnet_ferber21", time="600"
-) -> int:
+def get_fixed_max_expansions(domain: str, problem: str, reference_file="reference/large_tests_expansions_nn_yaaig.csv") -> int:
     """
     Gets reference values for max expansions until stop seeking for a solution
     when trying to solve a problem.
     """
-    with open(f"reference/{model}.csv", "r") as f:
-        lines = [l.replace("\n", "").split(",") for l in f.readlines()]
-        header = lines[0]
-        for line in lines[1:]:
-            if (
-                args.domain == line[header.index("domain")]
-                and args.problem == line[header.index("problem")]
-            ):
-                return int(line[header.index(f"expansions_{time}s")])
-    _log.warning(
-        f"Fixed maximum expansions not found. "
-        f"Setting to default value ({default_args.MAX_EXPANSIONS})."
-    )
-    return default_args.MAX_EXPANSIONS
+    map = {}
+    with open(reference_file, "r") as f:
+        for d, p, t in [x.strip().split(",", 2) for x in f.readlines()[1:]]:
+            if d == domain and p == problem:
+                for i, pX in enumerate(t.split(",")):
+                    map[f"p{i+1}"] = pX
+    if len(map) != 50:
+        _log.error(f"Fixed maximum expansions not found.")
+        exit()
+    return map
 
 
 def get_git_commit() -> str:
@@ -311,45 +304,3 @@ def get_samples_folder_from_train_folder(train_folder: str) -> [str]:
 def get_train_args_json(train_folder: str) -> dict:
     with open(train_folder + "/train_args.json") as json_file:
         return load(json_file)
-
-
-def create_fake_samples(domain: str, problem: str, n_samples: int) -> str or None:
-    try:
-        with open("reference/large_tasks.csv", "r") as f:
-            pddl = None
-            for line in [x.strip() for x in f.readlines()[1:]]:
-                if line.startswith(f"{domain},{problem}"):
-                    pddl = line.split(",")[3]
-            if not pddl:
-                return None
-
-        search_command = "sampling_search_yaaig(eager_greedy([ff(transform=sampling_transform())], transform=sampling_transform()), "\
-            "techniques=[gbackward_yaaig(searches=1, samples_per_search=-1, max_samples=1000, random_percentage=0, bound_multiplier=1.0, "\
-            "technique=rw, subtechnique=percentage, bound=default, depth_k=99999, random_seed=0, restart_h_when_goal_state=true, mutex=true, "\
-            "allow_duplicates=interrollout, unit_cost=false, max_time=1200.0, mem_limit_mb=2048)], state_representation=complete, "\
-            "random_seed=0, sai=none, sui_k=0, sui_epsilon=-1, sui_rule=vu_u, sort_h=false, "\
-            "mse_hstar_file=, mse_result_file={sample_file}, assignments_by_undefined_state=10, evaluator=blind())"
-
-        unique_id = str(random())[2:]
-        samples_file = f"fake_{domain}_{problem}_{n_samples}_s{unique_id}"
-        cl = [
-            "./fast-downward.py",
-            "--sas-file", f"{unique_id}-output.sas",
-            "--plan-file", f"{unique_id}_sas_plan",
-            "--build", "release",
-            pddl,
-            "--search", search_command.format(sample_file=samples_file)
-        ]
-        output = check_output(cl).decode("utf-8")
-        if "Total samples: " not in output:
-            return None
-
-        with open(samples_file) as f:
-            samples = [x.strip() for x in f.readlines()]
-        with open(samples_file, "w") as f:
-            for i in range(int(n_samples)):
-                f.write(samples[randint(0, len(samples)-1)]+"\n")
-        return samples_file
-    except Exception as e:
-        print(e)
-        return None

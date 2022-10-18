@@ -25,7 +25,6 @@ from src.pytorch.utils.helpers import (
     add_train_arg,
     get_problem_by_sample_filename,
     get_memory_usage_mb,
-    create_fake_samples,
     count_parameters,
 )
 from src.pytorch.utils.file_helpers import (
@@ -49,13 +48,6 @@ def train_main(args: Namespace):
     """
     if args.num_cores != -1:
         torch.set_num_threads(args.num_cores)
-
-    if args.samples.startswith("fake_"):
-        _, samples_domain, samples_problem, samples_num = args.samples.split("_")
-        args.samples = create_fake_samples(samples_domain, samples_problem, int(samples_num))
-        if not args.samples:
-            _log.error("Fake samples failed.")
-            exit(0)
 
     set_seeds(args)
 
