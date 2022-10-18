@@ -16,7 +16,6 @@ import re
 from sys import argv
 from json import load
 from glob import glob
-from natsort import natsorted
 from scripts.create_random_sample import random_sample_statespace
 
 def build_args(d: dict, prefix: str) -> str:
@@ -66,38 +65,13 @@ def remove_leftover_files(output_dir: str):
             os.remove(sf)
 
 
-def sort_list_intercalate(files: [str]) -> [str]:
-    ret = []
-    d = {}
-    files = natsorted(files)
-    for f in files:
-        f_split = f.split('/')[-1].split('_')
-        domain = f_split[0]
-        if domain not in d:
-            d[domain] = []
-        d[domain].append(f)
-
-    count = 0
-    while count < len(d):
-        for k in d:
-            if not d[k]:
-                continue
-            ret.append(d[k].pop(0))
-            if not d[k]:
-                count += 1
-
-    return ret
-
-
 def do_sample_mod(mod: str, samples_dir: str, statespace: str, min_seed: int, max_seed: int):
     if mod == "random-sample":
         pct = float(re.findall(".*-(\d*)pct.*", samples_dir)[0]) * 0.01
         random_sample_statespace(statespace, samples_dir, min_seed, max_seed, [pct])
 
+
 def main(exp_paths: [str]):
-    intercalate = False
-    if intercalate:
-        exp_paths = sort_list_intercalate(exp_paths)
     for exp_path in exp_paths:
         try:
             full_exp = {}

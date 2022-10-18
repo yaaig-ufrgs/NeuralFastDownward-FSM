@@ -1,7 +1,6 @@
 import logging
 import torch
 import numpy as np
-import random
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle as skshuffle
 from torch.utils.data import DataLoader
@@ -121,7 +120,6 @@ class KFoldTrainingData:
                     )
 
             else:
-                # TODO: `sample_percentage` and `test_set` not implemented here!
                 for j in range(len(self.states)):
                     if int(j / instances_per_fold) == i:
                         x_test.append(self.states[j])
@@ -220,13 +218,3 @@ class KFoldTrainingData:
         Counting from 0.
         """
         return self.kfolds[idx]
-
-
-def seed_worker(worker_id: int):
-    """
-    Sets the seed of each worker.
-    See: https://pytorch.org/docs/stable/notes/randomness.html
-    """
-    worker_seed = torch.initial_seed() % 2 ** 32
-    np.random.seed(worker_seed)
-    random.seed(worker_seed)

@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
-import sys
 import os
 from glob import glob
 from src.pytorch.utils.parse_args import get_sample_args
-from src.pytorch.utils.default_args import SAMPLE_TECHNIQUE
 from scripts.get_hstar_pddl import get_hstar_tasks
 
 COUNT = 0
