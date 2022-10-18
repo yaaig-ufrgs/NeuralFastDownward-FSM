@@ -15,7 +15,7 @@
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "no",
         "sample-improvement": "none",
-        "successor-improvement-k": 0,
+        "successor-improvement": "no",
         "regression-depth": 200,
         "state-filtering": "mutex",
         "max-time": 3600,

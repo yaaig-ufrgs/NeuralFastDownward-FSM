@@ -12,7 +12,7 @@
         "trained-model": ""
     },
     "sampling": {
-        "instance": "tasks/experiments/blocks",
+        "instance": "tasks/experiments/blocks/probBLOCKS-7-0.pddl",
         "method": "yaaig",
         "technique": "bfs_rw",
         "state-representation": "complete",
@@ -22,7 +22,7 @@
         "restart-h-when-goal-state": "yes",
         "sample-improvement": "both",
         "statespace": "tasks/experiments/statespaces/statespace_blocks_probBLOCKS-7-0_hstar",
-        "successor-improvement-k": 1,
+        "successor-improvement": "yes",
         "regression-depth": "facts_per_avg_effects",
         "state-filtering": "mutex",
         "bfs-percentage": 10,
@@ -52,6 +52,13 @@
     },
     "test": {
         "max-expansions": 65992,
-        "search-algorithm": "eager_greedy"
+        "search-algorithm": "eager_greedy",
+        "instance-pddl": [
+            "tasks/experiments/blocks/probBLOCKS-7-0/p0.pddl",
+            "tasks/experiments/blocks/probBLOCKS-7-0/p1.pddl",
+            "tasks/experiments/blocks/probBLOCKS-7-0/p2.pddl",
+            "tasks/experiments/blocks/probBLOCKS-7-0/p3.pddl",
+            "tasks/experiments/blocks/probBLOCKS-7-0/p4.pddl"
+        ]
     }
 }

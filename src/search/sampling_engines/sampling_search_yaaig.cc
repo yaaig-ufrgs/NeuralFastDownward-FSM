@@ -119,7 +119,7 @@ void SamplingSearchYaaig::create_trie_statespace() {
 }
 
 void SamplingSearchYaaig::successor_improvement(vector<shared_ptr<PartialAssignment>>& samples) {
-    if (sui_k <= 0)
+    if (!sui)
         return;
     if (use_evaluator)
         return;
@@ -356,7 +356,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
 
     utils::g_log << "[Sampling Engine] Extracting samples..." << endl;
 
-    if (sui_k > 0) {
+    if (sui) {
         if (sai_partial)
             utils::g_log << "[SAI] SAI in partial states will be done implicitly with the SUI." << endl;
         successor_improvement(sampling_technique::modified_tasks);
@@ -424,7 +424,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       state_representation(opts.get<string>("state_representation")),
       sai_partial(opts.get<string>("sai") == "partial" || opts.get<string>("sai") == "both"),
       sai_complete(opts.get<string>("sai") == "complete" || opts.get<string>("sai") == "both"),
-      sui_k(opts.get<int>("sui_k")),
+      sui(opts.get<int>("sui")),
       sui_rule(getRule(opts.get<string>("sui_rule"))),
       statespace_file(opts.get<string>("statespace_file")),
       evaluator(opts.get<shared_ptr<Evaluator>>("evaluator")),
@@ -436,7 +436,6 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       registry(task_proxy),
       header(construct_header()),
       rng(utils::parse_rng_from_options(opts)) {
-    assert(sui_k == 0 || sui_k == 1);
     if (statespace_file != "none")
         create_trie_statespace();
 }
@@ -466,9 +465,9 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "Identical states receive the best heuristic value assigned between them (SAI in: none, partial, complete, both).",
             "none");
     parser.add_option<int>(
-            "sui_k",
+            "sui",
             "Correct h-values using SUI via K-step forward repeatedly",
-            "0");
+            "false");
     parser.add_option<string>(
             "sui_rule",
             "Rule applied when checking subset states.",

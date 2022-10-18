@@ -16,7 +16,7 @@
         "restart-h-when-goal-state": "yes",
         "sample-improvement": "both",
         "statespace": "tasks/experiments/statespaces/statespace_grid_grid_hstar",
-        "successor-improvement-k": 1,
+        "successor-improvement": "yes",
         "regression-depth": "facts_per_avg_effects",
         "state-filtering": "mutex",
         "bfs-percentage": 0.1

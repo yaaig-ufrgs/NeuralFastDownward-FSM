@@ -15,7 +15,7 @@
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",
         "sample-improvement": "both",
-        "successor-improvement-k": 1,
+        "successor-improvement": "yes",
         "statespace": "tasks/experiments/statespaces/statespace_visitall_p-1-4_hstar",
         "regression-depth": "facts_per_avg_effects",
         "state-filtering": "statespace",

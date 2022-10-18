@@ -29,7 +29,7 @@ protected:
     const std::string state_representation;
     const bool sai_partial;
     const bool sai_complete;
-    const int sui_k;
+    const bool sui;
     const SearchRule sui_rule;
     const std::string statespace_file;
     const std::shared_ptr<Evaluator> evaluator;

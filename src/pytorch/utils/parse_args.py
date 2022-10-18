@@ -1283,10 +1283,10 @@ def get_sample_args():
     )
     parser.add_argument(
         "-sui",
-        "--successor-improvement-k",
-        type=int,
+        "--successor-improvement",
+        type=str2bool,
         default=default_args.SAMPLE_SUI,
-        help="Successor Improvement (SUI) lookahead. If 0, no SUI is performed. (default: %(default)s)",
+        help="Successor Improvement (SUI). (default: %(default)s)",
     )
     parser.add_argument(
         "-suirule",

@@ -13,7 +13,7 @@
         "allow-dups": "interrollout",
         "restart-h-when-goal-state": "yes",
         "sample-improvement": "both",
-        "successor-improvement-k": 0,
+        "successor-improvement": "no",
         "statespace": "tasks/experiments/statespaces/statespace_npuzzle_prob-n3-1_hstar",
         "regression-depth": "facts_per_avg_effects",
         "state-filtering": "mutex",

@@ -85,13 +85,13 @@ def yaaig_sample(args, meth):
         domain = instance_split[-2]
         if instance_name != "domain" and instance_name != "source":
             for i in range(start, end):
-                cmd, out, depthk, suik, suits, dups = "", "", "", "", "", ""
+                cmd, out, depthk, sui, suits, dups = "", "", "", "", "", ""
                 tech = args.technique.replace('_', '')
                 if args.technique == "bfs_rw":
                     if args.k_depth < 99999:
                         depthk = f"_depthk-{args.k_depth}"
-                if args.successor_improvement_k > 0:
-                    suik = f"_sui-{args.successor_improvement_k}"
+                if args.successor_improvement:
+                    sui = f"_sui"
                 if args.allow_dups != "none":
                     dups = "_dups-" + ("ir" if args.allow_dups == "interrollout" else args.allow_dups)
                 sps = f"_maxs-{args.max_samples}" if args.max_samples != -1 else ""
@@ -99,7 +99,7 @@ def yaaig_sample(args, meth):
                 boundmult = "" if args.regression_depth_multiplier == 1.0 else f"_bmul-{str(args.regression_depth_multiplier).replace('.', '-')}"
                 rsquant = "" if args.random_percentage == 0 else f"_rs-{int(args.max_samples*(args.random_percentage))}"
                 assert meth == "yaaig"
-                out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{depthk}{suik}{suits}{dups}_sai-{args.sample_improvement}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}{rsquant}_ss{i}'
+                out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{depthk}{sui}{suits}{dups}_sai-{args.sample_improvement}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}{rsquant}_ss{i}'
                 cmd = (f'./fast-downward.py '
                         f'--sas-file {out}-output.sas --plan-file {out} '
                         f'--build release {instance} '
@@ -126,7 +126,7 @@ def yaaig_sample(args, meth):
                         f'state_representation={args.state_representation}, '
                         f'random_seed={i}, '
                         f'sai={args.sample_improvement}, '
-                        f'sui_k={args.successor_improvement_k}, '
+                        f'sui={args.successor_improvement}, '
                         f'sui_rule={args.sui_rule}, '
                         f'statespace_file={args.statespace}, '
                         f'evaluator={args.evaluator})\"')

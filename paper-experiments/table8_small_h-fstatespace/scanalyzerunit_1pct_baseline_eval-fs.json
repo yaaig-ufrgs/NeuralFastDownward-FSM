@@ -17,7 +17,7 @@
         "restart-h-when-goal-state": "no",
         "sample-improvement": "none",
         "statespace": "tasks/experiments/statespaces/statespace_scanalyzerunit_scanalyzer_hstar",
-        "successor-improvement-k": 0,
+        "successor-improvement": "no",
         "state-filtering": "mutex",
         "regression-depth": 200,
         "bfs-percentage": 0.1

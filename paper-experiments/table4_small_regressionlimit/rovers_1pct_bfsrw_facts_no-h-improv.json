@@ -16,7 +16,7 @@
         "restart-h-when-goal-state": "yes",
         "sample-improvement": "none",
         "statespace": "tasks/experiments/statespaces/statespace_rovers_rovers_hstar",
-        "successor-improvement-k": 0,
+        "successor-improvement": "no",
         "regression-depth": "facts",
         "state-filtering": "mutex",
         "bfs-percentage": 0.1
