@@ -1,4 +1,5 @@
 # TODO
+- Fix assert() in C++
 - paper-experiments/README.md
 - README.md
 

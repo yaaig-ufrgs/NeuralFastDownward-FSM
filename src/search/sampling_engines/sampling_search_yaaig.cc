@@ -471,7 +471,7 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
     parser.add_option<string>(
             "sui_rule",
             "Rule applied when checking subset states.",
-            "vu_u");
+            "supersets");
     parser.add_option<string>(
             "statespace_file",
             "Path to file with h;sample for statespace trie.",

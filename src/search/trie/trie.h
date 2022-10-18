@@ -11,11 +11,11 @@
 
 enum SearchRule { supersets, subsets, samesets };
 SearchRule getRule(std::string rule) {
-    if (rule=="vu_u" || rule=="supersets")
+    if (rule=="supersets")
         return SearchRule::supersets;
-    else if (rule=="v_vu" || rule=="subsets")
+    else if (rule=="subsets")
         return SearchRule::subsets;
-    else if (rule=="v_v" || rule=="samesets")
+    else if (rule=="samesets")
         return SearchRule::samesets;
     assert(false);
     return SearchRule::samesets;
