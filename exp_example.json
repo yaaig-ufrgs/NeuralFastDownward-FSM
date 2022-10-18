@@ -15,7 +15,7 @@
         "instance": "tasks/experiments/blocks",
         "method": "yaaig",
         "technique": "bfs_rw",
-        "state-representation": "fs",
+        "state-representation": "complete",
         "max-samples": 10000,
         "seed": "0",
         "allow-dups": "interrollout",

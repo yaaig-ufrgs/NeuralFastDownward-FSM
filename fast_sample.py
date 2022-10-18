@@ -41,7 +41,7 @@ def get_bound_type(regression_depth):
         return "factseff"
 
 
-def yaaig_ferber(args, meth):
+def yaaig_sample(args, meth):
     search_algo = ""
     if args.search_algorithm == "greedy":
         search_algo = f'eager_greedy([{args.search_heuristic}(transform=sampling_transform())], transform=sampling_transform())'
@@ -100,51 +100,38 @@ def yaaig_ferber(args, meth):
                 boundtype = f"bnd-{get_bound_type(args.regression_depth)}"
                 boundmult = "" if args.regression_depth_multiplier == 1.0 else f"_bmul-{str(args.regression_depth_multiplier).replace('.', '-')}"
                 rsquant = "" if args.random_percentage == 0 else f"_rs-{int(args.max_samples*(args.random_percentage))}"
-                if meth == "yaaig":
-                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{depthk}{suik}{suits}{dups}_sai-{args.sample_improvement}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}{rsquant}_ss{i}'
-                    rmse_out = out + "_rmse"
-                    cmd = (f'./fast-downward.py '
-                           f'--sas-file {out}-output.sas --plan-file {out} '
-                           f'--build release {instance} '
-                           f'{"--translate-options --unit-cost --search-options " if args.unit_cost == "true" and args.evaluator == "pdb(hstar_pattern([]))" else ""}'
-                           f'--search \"sampling_search_yaaig({search_algo}, '
-                           f'techniques=['
-                           f'gbackward_yaaig('
-                           f'searches={args.searches}, '
-                           f'samples_per_search={args.samples_per_search}, '
-                           f'max_samples={args.max_samples}, '
-                           f'random_percentage={args.random_percentage}, '
-                           f'regression_depth_multiplier={args.regression_depth_multiplier}, '
-                           f'technique={args.technique}, '
-                           f'regression_depth={args.regression_depth}, '
-                           f'depth_k={args.k_depth}, '
-                           f'random_seed={i}, '
-                           f'restart_h_when_goal_state={args.restart_h_when_goal_state}, '
-                           f'state_filtering={args.state_filtering}, '
-                           f'bfs_percentage={args.bfs_percentage}, '
-                           f'allow_duplicates={args.allow_dups}, '
-                           f'unit_cost={args.unit_cost}, '
-                           f'max_time={args.max_time}, '
-                           f'mem_limit_mb={args.mem_limit})], '
-                           f'state_representation={args.state_representation}, '
-                           f'random_seed={i}, '
-                           f'sai={args.sample_improvement}, '
-                           f'sui_k={args.successor_improvement_k}, '
-                           f'sui_rule={args.sui_rule}, '
-                           f'statespace_file={args.statespace}, '
-                           f'evaluator={args.evaluator})\"')
-                elif meth == "ferber":
-                    out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_{args.ferber_technique}_{args.ferber_select_state.replace("_", "-")}_{args.ferber_num_tasks}_{args.ferber_min_walk_len}_{args.ferber_max_walk_len}_ss{i}'
-                    cmd = (f'./fast-downward.py '
-                           f'--sas-file {out}-output.sas --plan-file {out} '
-                           f'--build release {instance} '
-                           f'--search \"sampling_search_ferber({search_algo}, '
-                           f'techniques=[{args.ferber_technique}_none({args.ferber_num_tasks}, '
-                           f'distribution=uniform_int_dist({args.ferber_min_walk_len}, '
-                           f'{args.ferber_max_walk_len}), '
-                           f'random_seed={i})], '
-                           f'select_state_method={args.ferber_select_state}, '
-                           f'random_seed={i})\"')
+                assert meth == "yaaig"
+                out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{depthk}{suik}{suits}{dups}_sai-{args.sample_improvement}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}{rsquant}_ss{i}'
+                cmd = (f'./fast-downward.py '
+                        f'--sas-file {out}-output.sas --plan-file {out} '
+                        f'--build release {instance} '
+                        f'{"--translate-options --unit-cost --search-options " if args.unit_cost == "true" and args.evaluator == "pdb(hstar_pattern([]))" else ""}'
+                        f'--search \"sampling_search_yaaig({search_algo}, '
+                        f'techniques=['
+                        f'gbackward_yaaig('
+                        f'searches={args.searches}, '
+                        f'samples_per_search={args.samples_per_search}, '
+                        f'max_samples={args.max_samples}, '
+                        f'random_percentage={args.random_percentage}, '
+                        f'regression_depth_multiplier={args.regression_depth_multiplier}, '
+                        f'technique={args.technique}, '
+                        f'regression_depth={args.regression_depth}, '
+                        f'depth_k={args.k_depth}, '
+                        f'random_seed={i}, '
+                        f'restart_h_when_goal_state={args.restart_h_when_goal_state}, '
+                        f'state_filtering={args.state_filtering}, '
+                        f'bfs_percentage={args.bfs_percentage}, '
+                        f'allow_duplicates={args.allow_dups}, '
+                        f'unit_cost={args.unit_cost}, '
+                        f'max_time={args.max_time}, '
+                        f'mem_limit_mb={args.mem_limit})], '
+                        f'state_representation={args.state_representation}, '
+                        f'random_seed={i}, '
+                        f'sai={args.sample_improvement}, '
+                        f'sui_k={args.successor_improvement_k}, '
+                        f'sui_rule={args.sui_rule}, '
+                        f'statespace_file={args.statespace}, '
+                        f'evaluator={args.evaluator})\"')
                 if args.cores > 1:
                     run_multi_core(cmd, args.cores)
                 else:
@@ -165,13 +152,12 @@ def sample(args):
     args.restart_h_when_goal_state = bool2str(args.restart_h_when_goal_state)
     args.state_filtering = bool2str(args.state_filtering)
     args.unit_cost = bool2str(args.unit_cost)
-    args.ferber_technique = "iforward" if args.ferber_technique == "forward" else "gbackward"
 
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
 
-    if args.method == "yaaig" or args.method == "ferber":
-        yaaig_ferber(args, meth=args.method)
+    if args.method == "yaaig":
+        yaaig_sample(args, meth=args.method)
     else:
         print("Invalid configuration.")
         exit(1)

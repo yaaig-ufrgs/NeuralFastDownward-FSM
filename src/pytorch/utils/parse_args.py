@@ -1137,7 +1137,7 @@ def get_sample_args():
     )
     parser.add_argument(
         "method",
-        choices=["ferber", "yaaig"],
+        choices=["yaaig"],
         default=default_args.SAMPLE_METHOD,
         help="Sampling base method to use. (default: %(default)s)",
     )
@@ -1175,41 +1175,6 @@ def get_sample_args():
         choices=["ff", "lmcut"],
         default=default_args.SAMPLE_SEARCH_HEURISTIC,
         help="Search heuristic used in the search algorithm. (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-ftech",
-        "--ferber-technique",
-        choices=["forward", "backward"],
-        default=default_args.SAMPLE_FERBER_TECHNIQUE,
-        help="Forward or backward search (Ferber). (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-fst",
-        "--ferber-select-state",
-        choices=["random_state", "entire_plan", "init_state"],
-        default=default_args.SAMPLE_FERBER_SELECT_STATE,
-        help="Forward or backward search (Ferber). (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-fn",
-        "--ferber-num-tasks",
-        type=int,
-        default=default_args.SAMPLE_FERBER_NUM_TASKS,
-        help="Number of tasks to generate (Ferber). (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-fmin",
-        "--ferber-min-walk-len",
-        type=int,
-        default=default_args.SAMPLE_FERBER_MIN_WALK_LENGTH,
-        help="Minimum random walk length (Ferber). (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-fmax",
-        "--ferber-max-walk-len",
-        type=int,
-        default=default_args.SAMPLE_FERBER_MAX_WALK_LENGTH,
-        help="Maximum random walk length (Ferber). (default: %(default)s)",
     )
     parser.add_argument(
         "-st",
