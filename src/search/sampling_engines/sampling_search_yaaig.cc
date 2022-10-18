@@ -424,7 +424,7 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       state_representation(opts.get<string>("state_representation")),
       sai_partial(opts.get<string>("sai") == "partial" || opts.get<string>("sai") == "both"),
       sai_complete(opts.get<string>("sai") == "complete" || opts.get<string>("sai") == "both"),
-      sui(opts.get<int>("sui")),
+      sui(opts.get<bool>("sui")),
       sui_rule(getRule(opts.get<string>("sui_rule"))),
       statespace_file(opts.get<string>("statespace_file")),
       evaluator(opts.get<shared_ptr<Evaluator>>("evaluator")),
@@ -464,7 +464,7 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "sai",
             "Identical states receive the best heuristic value assigned between them (SAI in: none, partial, complete, both).",
             "none");
-    parser.add_option<int>(
+    parser.add_option<bool>(
             "sui",
             "Correct h-values using SUI via K-step forward repeatedly",
             "false");
