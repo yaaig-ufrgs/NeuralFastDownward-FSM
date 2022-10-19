@@ -150,6 +150,7 @@ def sample(args):
     args.restart_h_when_goal_state = bool2str(args.restart_h_when_goal_state)
     args.state_filtering = bool2str(args.state_filtering)
     args.unit_cost = bool2str(args.unit_cost)
+    args.successor_improvement = bool2str(args.successor_improvement)
 
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
