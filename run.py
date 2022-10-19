@@ -129,7 +129,7 @@ def main(exp_paths: [str]):
             if sampling and not any([only_train, only_test, only_eval]):
                 mod_sample = "default" if "modify-sample" not in exp else exp["modify-sample"]
                 if mod_sample == "default":
-                    args = "./fast_sample.py"
+                    args = "./fast-sample.py"
                     args += build_args(sampling, "--")
                     print("run.py [sampling]:", args, end="\n\n")
                     os.system(args)

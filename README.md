@@ -38,7 +38,7 @@ See [`src/pytorch/utils/default_args.py`](https://github.com/yaaig-ufrgs/NeuralF
 ### Generating samples
 
 ```
-usage: fast_sample.py [-h] [-tst-dir TEST_TASKS_DIR] [-stp STATESPACE] [-tech {rw,dfs,bfs,bfs_rw}] [-search {greedy,astar}] [-heur {ff,lmcut}]
+usage: fast-sample.py [-h] [-tst-dir TEST_TASKS_DIR] [-stp STATESPACE] [-tech {rw,dfs,bfs,bfs_rw}] [-search {greedy,astar}] [-heur {ff,lmcut}]
                       [-ftech {forward,backward}] [-fst {random_state,entire_plan,init_state}] [-fn FERBER_NUM_TASKS] [-fmin FERBER_MIN_WALK_LEN]
                       [-fmax FERBER_MAX_WALK_LEN] [-st {complete,complete_nomutex,forward_statespace}] [-max MAX_SAMPLES] [-scs SEARCHES] [-sscs SAMPLES_PER_SEARCH]
                       [-rd REGRESSION_DEPTH] [-rdm REGRESSION_DEPTH_MULTIPLIER] [-s SEED] [-dups {all,interrollout,none}] [-ms MULT_SEED]
@@ -53,7 +53,7 @@ samples, facts and defaults files in the `samples` directory with an
 appropriate filename. In the example, we're generating 1000 samples using BFS+RW, states completed with mutexes, all h-value improvements, regression depth limited by facts/avg(eff), and a random sample percentage of 50% (i.e. 500 samples will be randomly generated).
 
 ```
-./fast_sample.py tasks/experiments/blocks yaaig --technique bfs_rw --state-representation fs --max-samples 10000 --seed 0 --allow-dups interrollout --restart-h-when-goal-state yes --sample-improvement both --statespace tasks/experiments/statespaces/statespace_blocks_probBLOCKS-7-0_hstar --successor-improvement yes --regression-depth facts_per_avg_effects --state-filtering mutex --bfs-percentage 10 --random-percentage 0.5 --cores 1 --output-dir samples
+./fast-sample.py tasks/experiments/blocks yaaig --technique bfs_rw --state-representation fs --max-samples 10000 --seed 0 --allow-dups interrollout --restart-h-when-goal-state yes --sample-improvement both --statespace tasks/experiments/statespaces/statespace_blocks_probBLOCKS-7-0_hstar --successor-improvement yes --regression-depth facts_per_avg_effects --state-filtering mutex --bfs-percentage 10 --random-percentage 0.5 --cores 1 --output-dir samples
 ```
 
 ### Training a neural network
