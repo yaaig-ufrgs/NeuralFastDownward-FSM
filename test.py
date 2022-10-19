@@ -74,7 +74,7 @@ def test_main(args):
     if args.samples_dir == None or args.samples_dir == "None":
         args.samples_dir = get_samples_folder_from_train_folder(args.train_folder)
     args.max_expansions_per_task = get_fixed_max_expansions(args.domain, args.problem) if args.max_expansions == -1 else {}
-        args.max_expansions = get_fixed_max_expansions(args)
+    #args.max_expansions = get_fixed_max_expansions(args)
     if (
         args.max_expansions == default_args.MAX_EXPANSIONS
         and args.max_search_time == default_args.MAX_SEARCH_TIME
