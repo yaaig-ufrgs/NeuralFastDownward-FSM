@@ -147,7 +147,7 @@ def main(exp_paths: [str]):
                     do_sample_mod(mod_sample, exp["samples"], sampling["statespace"], min_seed, max_seed)
 
             if not only_sampling:
-                args = "./run_experiment.py"
+                args = "./run-experiment.py"
                 args += build_args(exp, "--")
                 if evalu and only_eval:
                     args += build_args(evalu, "--eval-")
