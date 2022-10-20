@@ -1,6 +1,5 @@
 # TODO
 - paper-experiments/README.md
-- README.md
 
 # Neural Fast Downward
 Neural Fast Downward is intended to help with generating training data for
@@ -25,6 +24,8 @@ list of contributors, history, etc.), see [here](https://github.com/PatrickFerbe
     export Torch_DIR=p   OR   export PATH_TORCH=p
     pip install -r requirements.txt
     ./build.py release
+    # And if interested in running FastDownward in debug mode:
+    ./build.py debug
     ```
    3.1. If torch 1.9.0 is not found, install Python <= 3.9.10.
 
@@ -38,22 +39,23 @@ See [`src/pytorch/utils/default_args.py`](https://github.com/yaaig-ufrgs/NeuralF
 ### Generating samples
 
 ```
-usage: fast-sample.py [-h] [-tst-dir TEST_TASKS_DIR] [-stp STATESPACE] [-tech {rw,dfs,bfs,bfs_rw}] [-search {greedy,astar}] [-heur {ff,lmcut}]
-                      [-ftech {forward,backward}] [-fst {random_state,entire_plan,init_state}] [-fn FERBER_NUM_TASKS] [-fmin FERBER_MIN_WALK_LEN]
-                      [-fmax FERBER_MAX_WALK_LEN] [-st {complete,complete_nomutex,forward_statespace}] [-max MAX_SAMPLES] [-scs SEARCHES] [-sscs SAMPLES_PER_SEARCH]
-                      [-rd REGRESSION_DEPTH] [-rdm REGRESSION_DEPTH_MULTIPLIER] [-s SEED] [-dups {all,interrollout,none}] [-ms MULT_SEED]
-                      [-c RANDOM_PERCENTAGE] [-rhg RESTART_H_WHEN_GOAL_STATE] [-sf {none,mutex,statespace}] [-bfsp BFS_PERCENTAGE] [-o OUTPUT_DIR]
-                      [-sai {none,partial,complete,both}] [-sui SUCCESSOR_IMPROVEMENT_K] [-suirule {supersets,subsets,samesets}] [-kd K_DEPTH]
-                      [-unit UNIT_COST] [-cores CORES] [-t MAX_TIME] [-m MEM_LIMIT] [-eval EVALUATOR]
-                      instance {ferber,yaaig}
+usage: fast-sample.py [-h] [-tst-dir TEST_TASKS_DIR] [-stp STATESPACE] [-tech {rw,dfs,bfs,bfs_rw}] [-search {greedy,astar}]
+                      [-heur {ff,lmcut}] [-st {complete,complete_nomutex,forward_statespace}] [-max MAX_SAMPLES] [-scs SEARCHES]
+                      [-sscs SAMPLES_PER_SEARCH] [-rd REGRESSION_DEPTH] [-rdm REGRESSION_DEPTH_MULTIPLIER] [-s SEED]
+                      [-dups {all,interrollout,none}] [-ms MULT_SEED] [-c RANDOM_PERCENTAGE] [-rhg RESTART_H_WHEN_GOAL_STATE]
+                      [-sf {none,mutex,statespace}] [-bfsp BFS_PERCENTAGE] [-o OUTPUT_DIR] [-sai {none,partial,complete,both}]
+                      [-sui SUCCESSOR_IMPROVEMENT] [-suirule {supersets,subsets,samesets}] [-kd K_DEPTH] [-unit UNIT_COST]
+                      [-cores CORES] [-t MAX_TIME] [-m MEM_LIMIT] [-eval EVALUATOR] [-dbg DEBUG]
+                      instance {yaaig}
+fast-sample.py: error: the following arguments are required: instance, method
 ```
 
 The example below takes all the instances in the `blocks` directory and saves the
 samples, facts and defaults files in the `samples` directory with an
-appropriate filename. In the example, we're generating 1000 samples using BFS+RW, states completed with mutexes, all h-value improvements, regression depth limited by facts/avg(eff), and a random sample percentage of 50% (i.e. 500 samples will be randomly generated).
+appropriate filename. In the example below, we're generating 1000 samples. Of the final sample set, 500 are generated using BFS+RW and the remaining will be randomly generated. Duplicates are only allowed between rollout, states are completed with mutexes, all h-value improvements are used and the regression depth is limited by facts/avg(eff). 
 
 ```
-./fast-sample.py tasks/experiments/blocks yaaig --technique bfs_rw --state-representation fs --max-samples 10000 --seed 0 --allow-dups interrollout --restart-h-when-goal-state yes --sample-improvement both --statespace tasks/experiments/statespaces/statespace_blocks_probBLOCKS-7-0_hstar --successor-improvement yes --regression-depth facts_per_avg_effects --state-filtering mutex --bfs-percentage 10 --random-percentage 0.5 --cores 1 --output-dir samples
+./fast-sample.py tasks/experiments/blocks yaaig --technique bfs_rw --state-representation complete --max-samples 1000 --seed 0 --allow-dups interrollout --restart-h-when-goal-state yes --sample-improvement both --statespace tasks/experiments/statespaces/statespace_blocks_probBLOCKS-7-0_hstar --successor-improvement yes --regression-depth facts_per_avg_effects --state-filtering mutex --bfs-percentage 0.1 --random-percentage 0.5 --cores 1 --output-dir samples
 ```
 
 ### Training a neural network
@@ -63,21 +65,22 @@ network is a ResNet.
 
 ```
 usage: train.py [-h] [-mdl {hnn,resnet}] [-sb SAVE_BEST_EPOCH_MODEL] [-diff SAVE_GIT_DIFF] [-pte POST_TRAIN_EVAL] [-pat PATIENCE]
-                [-o {regression,prefix,one-hot}] [-lo LINEAR_OUTPUT] [-f NUM_FOLDS] [-hl HIDDEN_LAYERS] [-hu HIDDEN_UNITS [HIDDEN_UNITS ...]]
-                [-b BATCH_SIZE] [-lr LEARNING_RATE] [-e MAX_EPOCHS] [-t MAX_TRAINING_TIME] [-a {sigmoid,relu,leakyrelu}] [-w WEIGHT_DECAY]
-                [-d DROPOUT_RATE] [-shs SHUFFLE_SEED] [-sh SHUFFLE] [-gpu USE_GPU] [-bi BIAS] [-tsize TRAINING_SIZE] [-spt SAMPLE_PERCENTAGE]
-                [-us UNIQUE_SAMPLES] [-ust UNIQUE_STATES] [-biout BIAS_OUTPUT] [-of OUTPUT_FOLDER] [-s SEED] [-sp SCATTER_PLOT] [-spn PLOT_N_EPOCHS]
-                [-wm {default,sqrt_k,1,01,xavier_uniform,xavier_normal,kaiming_uniform,kaiming_normal,rai}] [-lf {mse,rmse}] [-no NORMALIZE_OUTPUT]
-                [-rst RESTART_NO_CONV] [-cdead CHECK_DEAD_ONCE] [-sibd SEED_INCREMENT_WHEN_BORN_DEAD] [-trd NUM_CORES] [-dnw DATA_NUM_WORKERS]
-                [-hpred SAVE_HEURISTIC_PRED]
+                [-o {regression,prefix,one-hot}] [-lo LINEAR_OUTPUT] [-f NUM_FOLDS] [-hl HIDDEN_LAYERS]
+                [-hu HIDDEN_UNITS [HIDDEN_UNITS ...]] [-b BATCH_SIZE] [-lr LEARNING_RATE] [-e MAX_EPOCHS] [-t MAX_TRAINING_TIME]
+                [-a {sigmoid,relu,leakyrelu}] [-w WEIGHT_DECAY] [-d DROPOUT_RATE] [-shs SHUFFLE_SEED] [-sh SHUFFLE] [-gpu USE_GPU]
+                [-bi BIAS] [-tsize TRAINING_SIZE] [-spt SAMPLE_PERCENTAGE] [-us UNIQUE_SAMPLES] [-ust UNIQUE_STATES]
+                [-biout BIAS_OUTPUT] [-of OUTPUT_FOLDER] [-s SEED] [-sp SCATTER_PLOT] [-spn PLOT_N_EPOCHS]
+                [-wm {default,sqrt_k,1,01,xavier_uniform,xavier_normal,kaiming_uniform,kaiming_normal,rai}] [-lf {mse,rmse}]
+                [-no NORMALIZE_OUTPUT] [-rst RESTART_NO_CONV] [-cdead CHECK_DEAD_ONCE] [-sibd SEED_INCREMENT_WHEN_BORN_DEAD]
+                [-trd NUM_CORES] [-dnw DATA_NUM_WORKERS] [-hpred SAVE_HEURISTIC_PRED]
                 [-addfn [{patience,output-layer,num-folds,hidden-layers,hidden-units,batch-size,learning-rate,max-epochs,max-training-time,activation,weight-decay,dropout-rate,shuffle-seed,shuffle,use-gpu,bias,bias-output,normalize-output,restart-no-conv,sample-percentage,training-size} [{patience,output-layer,num-folds,hidden-layers,hidden-units,batch-size,learning-rate,max-epochs,max-training-time,activation,weight-decay,dropout-rate,shuffle-seed,shuffle,use-gpu,bias,bias-output,normalize-output,restart-no-conv,sample-percentage,training-size} ...]]]
                 samples
 ```
 
-The example below will train a neural network with a sampling file as input, utilizing seed 0 (for reproducibility), a max of 28200 training epochs, ReLU activation, regression output, MSE loss function and Kaiming Uniform network initialization. The trained model will be saved in the `results` folder.
+The example below will train a neural network with a sampling file as input, utilizing seed 0 (for reproducibility), a max of 20 training epochs, ReLU activation, regression output, MSE loss function and Kaiming Uniform network initialization. The trained model will be saved in the `results` folder.
 
 ```
-./train.py samples/yaaig_blocks_probBLOCKS-7-0_tech-bfsrw_sui-1_dups-ir_sai-both_repr-fs_bnd-factseff_maxs-10000_rs-5000_ss0 -s 0 -e 28200 -a relu -o regression -of results -lf mse -wm kaiming_uniform
+./train.py samples/yaaig_blocks_probBLOCKS-7-0_tech-bfsrw_sui_dups-ir_sai-both_repr-complete_bnd-factseff_maxs-1000_rs-500_ss0 -s 0 -e 20 -a relu -o regression -of results -lf mse -wm kaiming_uniform
 
 ```
 
@@ -88,8 +91,9 @@ the possible arguments.
 ```
 usage: test.py [-h] [-tfc TRAIN_FOLDER_COMPARE] [-diff SAVE_GIT_DIFF] [-d DOMAIN_PDDL] [-a {astar,eager_greedy}]
                [-heu {nn,add,blind,ff,goalcount,hmax,lmcut,hstar}] [-hm HEURISTIC_MULTIPLIER] [-u UNARY_THRESHOLD] [-t MAX_SEARCH_TIME]
-               [-m MAX_SEARCH_MEMORY] [-e MAX_EXPANSIONS] [-pt {all,best,epochs}] [-sdir SAMPLES_DIR] [-ffile FACTS_FILE] [-dfile DEFAULTS_FILE]
-               [-atn AUTO_TASKS_N] [-atf AUTO_TASKS_FOLDER] [-ats AUTO_TASKS_SEED] [-dlog DOWNWARD_LOGS] [-unit-cost UNIT_COST]
+               [-m MAX_SEARCH_MEMORY] [-e MAX_EXPANSIONS] [-pt {all,best,epochs}] [-sdir SAMPLES_DIR] [-ffile FACTS_FILE]
+               [-dfile DEFAULTS_FILE] [-atn AUTO_TASKS_N] [-atf AUTO_TASKS_FOLDER] [-ats AUTO_TASKS_SEED] [-dlog DOWNWARD_LOGS]
+               [-unit-cost UNIT_COST]
                train_folder [problem_pddls [problem_pddls ...]]
 ```
 
@@ -98,23 +102,14 @@ it) as the first argument and will automatically find 50 random (fixed seed as d
 instances of the same domain to use for testing. `-t` is the time limit to solve the task, `-a` is the search algorithm used.
 
 ```
-./test.py results/yaaig_blocks_probBLOCKS-7-0_tech-bfsrw_sui-1_dups-ir_sai-both_repr-fs_bnd-factseff_maxs-10000_rs-5000_ss0 -t 360 -a eager_greedy
+./test.py results/nfd_train.yaaig_blocks_probBLOCKS-7-0_tech-bfsrw_sui_dups-ir_sai-both_repr-complete_bnd-factseff_maxs-1000_rs-500_ss0.ns0 -t 360 -a eager_greedy
 ```
 
 ### Running full experiments
 You can create multiple files like `exp_example.json` and call `./run.py exp_example.json`. Batch experiments will be performed according to the content in the JSON files. All the empty/unspecified settings will be run as
 default, and missing sections will be ignored. 
 
-Generally, most of the time
-you'll be interested in having only short `"experiment"`, `"train"` and `"test"`
-sections in the JSON files. Evaluation with the samples used for training are already performed
-automatically at the end of every train, so you'll only be interested in
-inserting an `"eval"` section if you are interested in evaluating your network
-over other samples and have `"exp-only-eval": "yes"`. The `"sampling"` section
-is interesting to have if you want to perform a full
-sampling-then-train-then-test workflow, but most of the time you'll have
-already generated your samples separately.
-
+You can find a multitude of examples in the `paper-experiments` directory.
 
 # The information below is from the original [NeuralFastDownward](https://github.com/yaaig-ufrgs/NeuralFastDownward/blob/main/exp_example.json) repository!
 
