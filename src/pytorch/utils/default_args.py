@@ -115,3 +115,4 @@ SAMPLE_UNIT_COST = False
 SAMPLE_MAX_TIME = -1
 SAMPLE_MEM_LIMIT_MB = -1
 SAMPLE_EVALUATOR = "blind()" # 'blind()' is equal to not apply. Use 'pdb(hstar_pattern([]))' for h*.
+SAMPLE_DEBUG = False # Call FastDownward in debug mode.

@@ -1337,6 +1337,13 @@ def get_sample_args():
         default=default_args.SAMPLE_EVALUATOR,
         help="Evaluator to use to estimate the h-values. (default: sampling)",
     )
+    parser.add_argument(
+        "-dbg",
+        "--debug",
+        type=str2bool,
+        default=default_args.SAMPLE_DEBUG,
+        help="Call FastDownward in debug mode. (default: %(defaults)s)",
+    )
 
     return parser.parse_args()
 

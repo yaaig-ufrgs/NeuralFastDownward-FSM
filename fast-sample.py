@@ -98,11 +98,12 @@ def yaaig_sample(args, meth):
                 boundtype = f"bnd-{get_bound_type(args.regression_depth)}"
                 boundmult = "" if args.regression_depth_multiplier == 1.0 else f"_bmul-{str(args.regression_depth_multiplier).replace('.', '-')}"
                 rsquant = "" if args.random_percentage == 0 else f"_rs-{int(args.max_samples*(args.random_percentage))}"
+                fd_build = "debug" if args.debug else "release"
                 assert meth == "yaaig"
                 out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{depthk}{sui}{suits}{dups}_sai-{args.sample_improvement}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}{rsquant}_ss{i}'
                 cmd = (f'./fast-downward.py '
                         f'--sas-file {out}-output.sas --plan-file {out} '
-                        f'--build release {instance} '
+                        f'--build {fd_build} {instance} '
                         f'{"--translate-options --unit-cost --search-options " if args.unit_cost == "true" and args.evaluator == "pdb(hstar_pattern([]))" else ""}'
                         f'--search \"sampling_search_yaaig({search_algo}, '
                         f'techniques=['
