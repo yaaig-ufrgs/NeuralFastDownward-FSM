@@ -4,8 +4,8 @@
 Compiles multiple result folders into a single table.
 Choose table columns in variable `HEADER`.
 
-Usage: ./compile_results.py train_folder [train_folder ...]
-  e.g. ./compile_results.py ../../NeuralFastDownward/results/nfd_train.*
+Usage: ./make_csv.py train_folder [train_folder ...]
+  e.g. ./make_csv.py ../../NeuralFastDownward/results/nfd_train.*
 """
 
 from sys import argv

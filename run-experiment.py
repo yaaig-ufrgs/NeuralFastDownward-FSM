@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 """
-./run_experiment.py --help
+./run-experiment.py --help
 
 Examples:
-$ ./run_experiment.py samples -exp-type combined -trn-e 10 -exp-ns 5 -exp-ss 5
-$ ./run_experiment.py samples -exp-eval true -evl-mdl results/*/models/traced_0.pt
+$ ./run-experiment.py samples -exp-type combined -trn-e 10 -exp-ns 5 -exp-ss 5
+$ ./run-experiment.py samples -exp-eval true -evl-mdl results/*/models/traced_0.pt
 
 """
 
@@ -118,7 +118,7 @@ def run_train_test(args, sample_seed: int, net_seed: int, run_tsp: bool = True):
             if pdep >= 0:
                 cmd = cmd.replace("tsp", f"tsp -D {pdep}")
 
-        print("run_experiment.py:", cmd, end="\n\n")
+        print("run-experiment.py:", cmd, end="\n\n")
         os.system(cmd)
 
         PID += 1
