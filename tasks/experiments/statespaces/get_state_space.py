@@ -2,7 +2,7 @@
 
 """
 Get the entire state space of a pddl using the sampling engine.
-Usage: ./get_state_space.py ../tasks/experiments/blocks/probBLOCKS-7-0.pddl
+Usage: ./get_state_space.py ../blocks/probBLOCKS-7-0.pddl
 """
 
 from sys import argv
@@ -13,7 +13,7 @@ from math import ceil, prod
 import numpy as np
 import os
 
-FD = "../fast-downward.py"
+FD = "../../../fast-downward.py"
 OUTPUT_FOLDER = "state_space"
 
 def save_output(instance_name: str, output: bytes):
