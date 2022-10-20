@@ -876,7 +876,7 @@ inline std::size_t PartialAssignment::assigned_size() const {
 
 inline FactProxy PartialAssignment::operator[](std::size_t var_id) const {
     assert(var_id < size());
-    assert((*values)[var_id] != PartialAssignment::UNASSIGNED);
+    // assert((*values)[var_id] != PartialAssignment::UNASSIGNED);
     return FactProxy(*task, var_id, (*values)[var_id]);
 }
 
@@ -1025,7 +1025,7 @@ inline const std::vector<int> &State::get_unpacked_values() const {
 inline FactProxy::FactProxy(const AbstractTask &task, const FactPair &fact)
     : task(&task), fact(fact) {
     assert(fact.var >= 0 && fact.var < task.get_num_variables());
-    assert(fact.value >= 0 && fact.value < get_variable().get_domain_size());
+    assert((fact.value >= 0 || fact.value == PartialAssignment::UNASSIGNED) && fact.value < get_variable().get_domain_size());
 }
 
 inline FactProxy::FactProxy(const AbstractTask &task, int var_id, int value)
