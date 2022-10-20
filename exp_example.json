@@ -25,7 +25,7 @@
         "successor-improvement": "yes",
         "regression-depth": "facts_per_avg_effects",
         "state-filtering": "mutex",
-        "bfs-percentage": 10,
+        "bfs-percentage": 0.1,
         "random-percentage": 0.5
     },
     "train": {
