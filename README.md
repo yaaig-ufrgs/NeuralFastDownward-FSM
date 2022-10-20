@@ -6,10 +6,9 @@ Neural Fast Downward is intended to help with generating training data for
 classical planning domains, as well as, using machine learning techniques with
 Fast Downward (especially, Tensorflow and PyTorch). 
 
-Neural Fast Downward is a fork from Fast Downward. For more information (full
-list of contributors, history, etc.), see [here](https://github.com/PatrickFerber/NeuralFastDownward).
+NeuralFastDownward-yaaig is a fork from [Ferber's Neural Fast Downward](https://github.com/PatrickFerber/NeuralFastDownward), which in turn derives from [Fast Downward](https://github.com/aibasel/downward).
 
-* Attention: you can find our experiments from the paper in the `paper-experiments` directory.
+Important: you can find our experiments from the paper in the `paper-experiments` directory.
 
 ## Fast Instructions
 
