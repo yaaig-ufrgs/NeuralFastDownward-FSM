@@ -295,11 +295,16 @@ void SamplingSearchYaaig::create_random_samples(
 
     utils::g_log << "[Random Samples] Inserting " << num_random_samples << " random samples..." << endl;
 
+    int max_h = -1;
     PartialAssignment pa_aux = *(samples[0]);
     // Hack: if 100% random then we sample 1 state to know the structure of the state.
     // At this point it is no longer important.
-    if (samples.size() == 1)
+    if (samples.size() == 1) {
         samples.clear();
+        // With 100% of random samples, max_h = L+1 instead of the maximum heuristic value found,
+        // because we don't have samples and it does not make sense for max_h to be small.
+        max_h = regression_depth_value; 
+    }
     const size_t n_atoms = pa_aux.get_values().size();
 
     unordered_map<string,int> binary_hvalue;
@@ -313,7 +318,6 @@ void SamplingSearchYaaig::create_random_samples(
     }
 
      // Biggest h found in the sampling
-    int max_h = -1;
     for (shared_ptr<PartialAssignment>& s: samples)
         max_h = max(max_h, s->estimated_heuristic);
     assert(max_h != -1);
