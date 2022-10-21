@@ -97,7 +97,7 @@ def yaaig_sample(args, meth):
                 sps = f"_maxs-{args.max_samples}" if args.max_samples != -1 else ""
                 boundtype = f"bnd-{get_bound_type(args.regression_depth)}"
                 boundmult = "" if args.regression_depth_multiplier == 1.0 else f"_bmul-{str(args.regression_depth_multiplier).replace('.', '-')}"
-                rsquant = "" if args.random_percentage == 0 else f"_rs-{int(args.max_samples*(args.random_percentage))}"
+                rsquant = "" if args.random_percentage == 0 else f"_rs-{round(args.max_samples*(args.random_percentage))}"
                 fd_build = "debug" if args.debug else "release"
                 assert meth == "yaaig"
                 out = f'{args.output_dir}/{meth}_{domain}_{instance_name}_tech-{tech}{depthk}{sui}{suits}{dups}_sai-{args.sample_improvement}_repr-{args.state_representation}_{boundtype}{boundmult}{sps}{rsquant}_ss{i}'
