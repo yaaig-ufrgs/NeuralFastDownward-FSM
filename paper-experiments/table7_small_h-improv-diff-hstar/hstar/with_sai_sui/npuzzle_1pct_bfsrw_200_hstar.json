@@ -1,6 +1,6 @@
 {
     "experiment": {
-        "samples": "paper-experiments/table7_small_h-improv-diff-hstar/hstar/with_sai_sui/samples/npuzzle_1pct_bfsrw_200_hstar",
+        "samples": "paper-experiments/table7_small_h-improv-diff-hstar/hstar/with_sai_sui/samples/npuzzle_1pct_bfsrw_200-hstar",
         "exp-cores": 11,
         "exp-sample-seed": "0..4"
     },
