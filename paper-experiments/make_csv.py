@@ -263,13 +263,17 @@ for train_folder in argv[1:]:
 
                     elif h == "bfs_samples":
                         if samples_file != "NA":
-                            if "bfs" in sampling_algorithm:
+                            if random_samples == total_samples:
+                                value = 0
+                            elif "bfs" in sampling_algorithm:
                                 value = round(int(total_samples) * 0.1)
                             else:
                                 value = 0
                     elif h == "rw_samples":
                         if samples_file != "NA":
-                            if "bfs" in sampling_algorithm:
+                            if random_samples == total_samples:
+                                value = 0
+                            elif "bfs" in sampling_algorithm:
                                 value = int(total_samples) - (round(int(total_samples) * 0.1)) - int(random_samples)
                             else:
                                 value = int(total_samples) - int(random_samples)
