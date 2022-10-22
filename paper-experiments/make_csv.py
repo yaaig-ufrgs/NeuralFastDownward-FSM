@@ -136,7 +136,7 @@ for train_folder in argv[1:]:
             elif rw_bound_method == "factseff":
                 rw_bound = bounds[domain][2]
 
-        if "unit_" in train_folder:
+        if "unit" in train_folder:
             domain = domain + "_unitcost"
 
         if domain == "scanalyzerunit" or domain == "scanalyzerunit_unitcost" :
