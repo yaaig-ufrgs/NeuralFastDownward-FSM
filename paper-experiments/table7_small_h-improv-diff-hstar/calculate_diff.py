@@ -21,9 +21,9 @@ def read_samples(sample_file):
 table = {}
 for sample_path in argv[1:]:
     assert "hvalue/" in sample_path
-    hstar_sample_path = sample_path.replace("hvalue/", "hstar/").replace("/yaaig_", "_hstar/yaaig_")
+    hstar_sample_path = sample_path.replace("hvalue/", "hstar/").replace("/yaaig_", "-hstar/yaaig_")
     if not os.path.exists(hstar_sample_path):
-        print(f"Not found hstar/ file for {sample_path}")
+        print(f"Not found hstar/ file for {sample_path}: {hstar_sample_path}")
         continue
 
     experiment, samples_folder, folder, sample = sample_path.split("/")[-4:]
