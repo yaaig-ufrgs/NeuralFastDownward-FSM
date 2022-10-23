@@ -15,9 +15,17 @@ from src.pytorch.utils.helpers import (
 )
 from src.pytorch.utils.file_helpers import save_json
 from argparse import Namespace
+import hashlib
 
 _log = logging.getLogger(__name__)
 
+def md5(fname):
+    # Source: https://stackoverflow.com/questions/3431825/generating-an-md5-checksum-of-a-file
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
 def logging_train_config(
     args: Namespace, dirname: str, cmd_line: str, json: bool = True
@@ -34,6 +42,7 @@ def logging_train_config(
         "domain": args.domain,
         "problem": args.problem,
         "samples": args.samples,
+        "samples_md5sum": md5(args.samples),
         "unique_samples": args.unique_samples,
         "unique_states": args.unique_states,
         "model": args.model,
