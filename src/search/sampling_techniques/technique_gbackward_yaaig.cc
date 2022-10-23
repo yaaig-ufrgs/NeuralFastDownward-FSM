@@ -400,7 +400,7 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
         utils::g_log << "[Sampling] RW rollout sampled " << samples.size() << " states." << endl;
 
     } else if (technique == "bfs_rw") {
-        utils::g_log << "[Sampling] Starting BFS step..." << state_filtering << endl;
+        utils::g_log << "[Sampling] Starting BFS step..." << endl;
         samples = sample_with_percentage_limited_bfs(bfs_percentage, pa, is_valid_state, leaves, task_proxy);
         utils::g_log << "[Sampling] BFS step sampled " << samples.size() << " states." << endl;
 
@@ -463,8 +463,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 !allow_duplicates_interrollout,
                 bfs_core
             );
-            utils::g_log << "[Sampling] RW rollout sampled " << samples.size() << " states. "
-                << "Looking for " << (unsigned)max_samples-samples.size() << " more." << endl;
+
+            utils::g_log << "[Sampling] RW rollout sampled " << samples_.size() << " states. "
+                << "Total: " << samples.size() << "/" << max_samples << endl;
             samples.insert(samples.end(), samples_.begin(), samples_.end());
         }
     }
