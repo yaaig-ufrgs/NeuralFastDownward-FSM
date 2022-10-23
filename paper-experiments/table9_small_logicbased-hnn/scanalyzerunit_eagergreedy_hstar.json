@@ -59,6 +59,6 @@
         "search-algorithm": "eager_greedy",
         "heuristic": "hstar",
         "max-search-time": 300,
-        "max-search-memory": 2048
+        "max-search-memory": 4096
     }
 }
