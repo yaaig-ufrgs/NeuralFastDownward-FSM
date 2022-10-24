@@ -463,10 +463,9 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
                 !allow_duplicates_interrollout,
                 bfs_core
             );
-
+            samples.insert(samples.end(), samples_.begin(), samples_.end());
             utils::g_log << "[Sampling] RW rollout sampled " << samples_.size() << " states. "
                 << "Total: " << samples.size() << "/" << max_samples << endl;
-            samples.insert(samples.end(), samples_.begin(), samples_.end());
         }
     }
 
