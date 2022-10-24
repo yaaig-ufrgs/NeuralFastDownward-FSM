@@ -105,6 +105,17 @@ for train_folder in argv[1:]:
     except:
         is_untested = True
         test_results = {"statistics" : ["None"]}
+    try:
+        is_large_task = True if "_large_" in train_folder else False
+        if not is_large_task:
+            with open(f"{test_folder}/test_args.json") as test_args_file:
+                test_args = load(test_args_file)
+                for p in test_args["problems_pddl"]:
+                    if "tasks/ferber21" in p:
+                        is_large_task = True
+                        break
+    except:
+        test_args = {}
 
     for fold in test_results["statistics"]:
         line = []
@@ -281,7 +292,10 @@ for train_folder in argv[1:]:
                         if samples_file != "NA":
                             value = total_samples
                     elif h == "statespace_size":
-                        value = ss_samples[domain]
+                        if is_large_task:
+                            value = "NA"
+                        else:
+                            value = ss_samples[domain]
                     elif h == "random_samples":
                         value = random_samples
 
