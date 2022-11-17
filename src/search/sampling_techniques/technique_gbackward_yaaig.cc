@@ -396,8 +396,11 @@ vector<shared_ptr<PartialAssignment>> TechniqueGBackwardYaaig::create_next_all(
     }
 
     if (technique == "rw") {
+        static int total_samples = 0;
         samples = sample_with_random_walk(pa, samples_per_search, is_valid_state, func_bias, task_proxy);
-        utils::g_log << "[Sampling] RW rollout sampled " << samples.size() << " states." << endl;
+        int new_samples = samples.size();
+        total_samples += new_samples;
+        utils::g_log << "[Sampling] RW rollout sampled " << new_samples << " states (total: " << total_samples << "/" << max_samples << ")." << endl;
 
     } else if (technique == "bfs_rw") {
         utils::g_log << "[Sampling] Starting BFS step..." << endl;
