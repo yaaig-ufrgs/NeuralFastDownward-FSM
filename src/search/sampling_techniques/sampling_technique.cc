@@ -288,6 +288,8 @@ vector<shared_ptr<PartialAssignment>> SamplingTechnique::next_all(
             }
         }
         counter++;
+        if (stopped)
+            limit_reached = true;
     }
     return samples;
 }
