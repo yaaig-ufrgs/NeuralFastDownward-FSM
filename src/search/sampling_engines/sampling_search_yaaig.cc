@@ -303,16 +303,16 @@ void SamplingSearchYaaig::create_random_samples(
         samples.clear();
         // With 100% of random samples, max_h = L+1 instead of the maximum heuristic value found,
         // because we don't have samples and it does not make sense for max_h to be small.
-        max_h = regression_depth_value; 
+        max_h = regression_depth_value;
     }
     const size_t n_atoms = pa_aux.get_values().size();
 
     unordered_map<string,int> binary_hvalue;
     // If full state SAI is enabled this will be done implicitly later
-    if (sai_complete) {
+    if (!sai_complete) {
         for (shared_ptr<PartialAssignment>& s: samples) {
             string bin = s->to_binary(true);
-            if (binary_hvalue.count(bin) == 0)
+            if (binary_hvalue.count(bin) == 0 || binary_hvalue[bin] > s->estimated_heuristic)
                 binary_hvalue[bin] = s->estimated_heuristic;
         }
     }
@@ -331,7 +331,7 @@ void SamplingSearchYaaig::create_random_samples(
             continue;
         random_sample.assign(p.second.get_values());
         random_sample.estimated_heuristic = max_h + 1;
-        if (sai_complete) {
+        if (!sai_complete) {
             string bin = random_sample.to_binary(true);
             if (binary_hvalue.count(bin) != 0)
                 random_sample.estimated_heuristic = binary_hvalue[bin];
@@ -412,7 +412,7 @@ vector<string> SamplingSearchYaaig::extract_samples() {
     if (sampling_technique::random_samples > 0)
         create_random_samples(sampling_technique::modified_tasks, sampling_technique::random_samples);
 
-    if (sai_complete && state_representation != "partial")
+    if (sai_complete)
         sample_improvement(sampling_technique::modified_tasks);
 
     if (use_evaluator)
@@ -427,7 +427,10 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       store_state(opts.get<bool>("store_state")),
       state_representation(opts.get<string>("state_representation")),
       sai_partial(opts.get<string>("sai") == "partial" || opts.get<string>("sai") == "both"),
-      sai_complete(opts.get<string>("sai") == "complete" || opts.get<string>("sai") == "both"),
+      sai_complete(
+          state_representation != "partial" &&
+          (opts.get<string>("sai") == "complete" || opts.get<string>("sai") == "both")
+      ),
       sui(opts.get<bool>("sui")),
       sui_rule(getRule(opts.get<string>("sui_rule"))),
       statespace_file(opts.get<string>("statespace_file")),
