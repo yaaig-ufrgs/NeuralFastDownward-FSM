@@ -43,7 +43,9 @@ def test_main(args):
     else:
         try:
             pddl_splitted = args.problem_pddls[0].split("/")
-            if len(pddl_splitted) >= 2 and pddl_splitted[-2] in ["moderate", "hard"]:
+            if len(pddl_splitted) >= 2 and pddl_splitted[-3] in ["moderate", "hard"]:
+                args.domain, _, args.problem, _ = pddl_splitted[-4:]
+            elif len(pddl_splitted) >= 2 and pddl_splitted[-2] in ["moderate", "hard"]:
                 args.domain, _, args.problem = pddl_splitted[-3:]
             elif len(pddl_splitted) >= 4 and pddl_splitted[-4] == "experiments" and pddl_splitted[-1].endswith(".pddl"):
                 args.domain, args.problem, _ = pddl_splitted[-3:]
@@ -74,11 +76,7 @@ def test_main(args):
     if args.samples_dir == None or args.samples_dir == "None":
         args.samples_dir = get_samples_folder_from_train_folder(args.train_folder)
     args.max_expansions_per_task = get_fixed_max_expansions(args.domain, args.problem) if args.max_expansions == -1 else {}
-    #args.max_expansions = get_fixed_max_expansions(args)
-    if (
-        args.max_expansions == default_args.MAX_EXPANSIONS
-        and args.max_search_time == default_args.MAX_SEARCH_TIME
-    ):
+    if (args.max_expansions == default_args.MAX_EXPANSIONS and args.max_search_time == default_args.MAX_SEARCH_TIME):
         args.max_search_time = default_args.FORCED_MAX_SEARCH_TIME
         _log.warning(
             f"Neither max expansions nor max search time have been defined. "
@@ -128,7 +126,7 @@ def test_main(args):
         for j, problem_pddl in enumerate(args.problem_pddls):
             facts_file, defaults_file = get_defaults_and_facts_files(
                 args, dirname, problem_pddl
-            )
+            ) if args.heuristic == "nn" else None, None
             _log.info(
                 f'Solving instance "{problem_pddl}" ({j+1}/{len(args.problem_pddls)})'
             )
