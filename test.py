@@ -126,7 +126,7 @@ def test_main(args):
         for j, problem_pddl in enumerate(args.problem_pddls):
             facts_file, defaults_file = get_defaults_and_facts_files(
                 args, dirname, problem_pddl
-            ) if args.heuristic == "nn" else None, None
+            ) if args.heuristic == "nn" else (None, None)
             _log.info(
                 f'Solving instance "{problem_pddl}" ({j+1}/{len(args.problem_pddls)})'
             )
