@@ -22,8 +22,6 @@ SearchRule getRule(std::string rule) {
 }
 
 namespace trie {
-    int MAX_CHILDREN = 128;
-
     template <typename T>
     class trie {
     public:
@@ -98,12 +96,12 @@ namespace trie {
         return is_empty;
     }
 
-    // Our use case has -1, so its increments to get the values in the range (0..MAX_CHILDREN-1)
+    // Our use case has -1, so its increments to get the values in the range (0..inf)
     template<typename T>
     void trie<T>::adjust_key(KeyType& key) const {
         for (int& v : key) {
             v++;
-            assert(v >= 0 && v < MAX_CHILDREN);
+            assert(v >= 0);
         }
     }
 
