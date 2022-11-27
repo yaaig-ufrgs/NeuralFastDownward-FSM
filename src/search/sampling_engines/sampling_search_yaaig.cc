@@ -287,6 +287,10 @@ void SamplingSearchYaaig::replace_h_with_evaluator(vector<shared_ptr<PartialAssi
         std::chrono::high_resolution_clock::now() - t_eval).count() / 1000.0) << "s." << endl;
 }
 
+bool is_number(const string& s) {
+    return !s.empty() && find_if(s.begin(), s.end(), [](unsigned char c) { return !isdigit(c); }) == s.end();
+}
+
 void SamplingSearchYaaig::create_random_samples(
     vector<shared_ptr<PartialAssignment>>& samples, int num_random_samples
 ) {
@@ -295,15 +299,15 @@ void SamplingSearchYaaig::create_random_samples(
 
     utils::g_log << "[Random Samples] Inserting " << num_random_samples << " random samples..." << endl;
 
-    int max_h = -1;
+    int h_to_assign = -1;
     PartialAssignment pa_aux = *(samples[0]);
     // Hack: if 100% random then we sample 1 state to know the structure of the state.
     // At this point it is no longer important.
     if (samples.size() == 1) {
         samples.clear();
-        // With 100% of random samples, max_h = L+1 instead of the maximum heuristic value found,
-        // because we don't have samples and it does not make sense for max_h to be small.
-        max_h = regression_depth_value;
+        // With 100% of random samples, h_to_assign = L+1 instead of the maximum heuristic value found,
+        // because we don't have samples and it does not make sense for h_to_assign to be small.
+        h_to_assign = regression_depth_value;
     }
     const size_t n_atoms = pa_aux.get_values().size();
 
@@ -317,12 +321,20 @@ void SamplingSearchYaaig::create_random_samples(
         }
     }
 
-     // Biggest h found in the sampling
-    for (shared_ptr<PartialAssignment>& s: samples)
-        max_h = max(max_h, s->estimated_heuristic);
-    assert(max_h != -1);
-    utils::g_log << "[Random Samples] Biggest h-value found in the samples: " << max_h << endl;
-    utils::g_log << "[Random Samples] h-value " << max_h + 1 << " will be assigned for unknown samples." << endl;
+    utils::g_log << "[Random Samples] Random sample h-value chosen is: " << random_value << endl;
+    utils::g_log << "[Random Samples] Random sample h-value multiplier is: " << random_multiplier << endl;
+    if (random_value == "max_h") {
+        // Biggest h found in the sampling
+        for (shared_ptr<PartialAssignment>& s: samples) {
+            h_to_assign = max(h_to_assign, s->estimated_heuristic);
+	}
+        utils::g_log << "[Random Samples] Biggest h-value found in the samples: " << h_to_assign << endl;
+	h_to_assign++; // max_h + 1
+    } else if (is_number(random_value)) {
+         h_to_assign = stoi(random_value);
+    }
+    assert(h_to_assign != -1);
+    utils::g_log << "[Random Samples] h-value " << h_to_assign << " will be assigned for unknown samples." << endl;
 
     while (num_random_samples > 0) {
         PartialAssignment random_sample(pa_aux, vector<int>(n_atoms, PartialAssignment::UNASSIGNED));
@@ -330,7 +342,7 @@ void SamplingSearchYaaig::create_random_samples(
         if (!p.first)
             continue;
         random_sample.assign(p.second.get_values());
-        random_sample.estimated_heuristic = max_h + 1;
+        random_sample.estimated_heuristic = h_to_assign * random_multiplier;
         if (!sai_complete) {
             string bin = random_sample.to_binary(true);
             if (binary_hvalue.count(bin) != 0)
@@ -434,6 +446,8 @@ SamplingSearchYaaig::SamplingSearchYaaig(const options::Options &opts)
       sui(opts.get<bool>("sui")),
       sui_rule(getRule(opts.get<string>("sui_rule"))),
       statespace_file(opts.get<string>("statespace_file")),
+      random_value(opts.get<string>("random_value")),
+      random_multiplier(opts.get<int>("random_multiplier")),
       evaluator(opts.get<shared_ptr<Evaluator>>("evaluator")),
       evaluate_file(opts.get<string>("evaluate_file")),
       use_evaluator(
@@ -483,6 +497,14 @@ static shared_ptr<SearchEngine> _parse_sampling_search_yaaig(OptionParser &parse
             "statespace_file",
             "Path to file with h;sample for statespace trie.",
             "none");
+    parser.add_option<string>(
+            "random_value",
+            "Value to be used for each random sample h-value (max_h, digit).",
+            "max_h");
+    parser.add_option<int>(
+            "random_multiplier",
+            "Value to multiply each random sample h-value.",
+            "1");
     parser.add_option<shared_ptr<Evaluator>>(
             "evaluator",
             "Evaluator to use to estimate the h-values.",

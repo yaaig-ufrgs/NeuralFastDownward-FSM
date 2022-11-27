@@ -130,6 +130,8 @@ def yaaig_sample(args, meth):
                         f'sui={args.successor_improvement}, '
                         f'sui_rule={args.sui_rule}, '
                         f'statespace_file={args.statespace}, '
+                        f'random_value={str(args.random_value)}, '
+                        f'random_multiplier={args.random_multiplier}, '
                         f'evaluator={args.evaluator})\"')
                 if args.cores > 1:
                     run_multi_core(cmd, args.cores)

@@ -32,6 +32,8 @@ protected:
     const bool sui;
     const SearchRule sui_rule;
     const std::string statespace_file;
+    const std::string random_value;
+    const int random_multiplier;
     const std::shared_ptr<Evaluator> evaluator;
     const std::string evaluate_file;
     const bool use_evaluator;

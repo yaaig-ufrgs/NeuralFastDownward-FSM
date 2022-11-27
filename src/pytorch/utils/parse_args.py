@@ -1247,6 +1247,21 @@ def get_sample_args():
         help="Percentage of random samples. (default: %(default)s)",
     )
     parser.add_argument(
+        "-cv",
+        "--random-value",
+        type=str,
+        #choices=["max_h"] # or a digit,
+        default=default_args.SAMPLE_RANDOM_VALUE,
+        help="Value to be used for each random sample h-value. (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-cm",
+        "--random-multiplier",
+        type=int,
+        default=default_args.SAMPLE_RANDOM_MULTIPLIER,
+        help="Value to multiply each random sample h-value. (default: %(default)s)",
+    )
+    parser.add_argument(
         "-rhg",
         "--restart-h-when-goal-state",
         type=str2bool,
