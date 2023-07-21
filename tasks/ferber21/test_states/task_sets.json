@@ -1,0 +1,206 @@
+{
+    "blocks": {
+        "hard": [
+            "prob-B-18-4",
+            "prob-B-20-1",
+            "prob-B-25-2",
+            "prob-B-30-1",
+            "prob-B-35-2"
+        ],
+        "moderate": [
+            "probBLOCKS-14-0",
+            "probBLOCKS-15-0",
+            "probBLOCKS-15-1",
+            "probBLOCKS-16-1",
+            "probBLOCKS-17-0"
+        ]
+    },
+    "depot": {
+        "hard": [
+            "p06",
+            "p12",
+            "p14",
+            "p18",
+            "p19",
+            "p20",
+            "p22"
+        ],
+        "moderate": [
+            "p05",
+            "p08",
+            "p09",
+            "p11",
+            "p15",
+            "p16"
+        ]
+    },
+    "grid": {
+        "hard": [
+            "prob04_1",
+            "prob04_2",
+            "prob04_3",
+            "prob04_4",
+            "prob05",
+            "prob05_1",
+            "prob05_2",
+            "prob05_3",
+            "prob05_4"
+        ],
+        "moderate": [
+            "prob03",
+            "prob04"
+        ]
+    },
+    "npuzzle": {
+        "hard": [
+            "prob_n8_1",
+            "prob_n8_2",
+            "prob_n8_3",
+            "prob_n8_4",
+            "prob_n9_1",
+            "prob_n9_2",
+            "prob_n9_3",
+            "prob_n9_4"
+        ],
+        "moderate": [
+            "prob_n6_1",
+            "prob_n6_2",
+            "prob_n6_3",
+            "prob_n6_4",
+            "prob_n7_1",
+            "prob_n7_2",
+            "prob_n7_3",
+            "prob_n7_4"
+        ]
+    },
+    "pipesworld-notankage": {
+        "hard": [
+            "p22-net3-b12-g4",
+            "p25-net3-b16-g5",
+            "p26-net3-b16-g7",
+            "p29-net3-b20-g6",
+            "p33-net4-b16-g5",
+            "p35-net4-b18-g4",
+            "p36-net4-b18-g6",
+            "p37-net4-b20-g5",
+            "p38-net4-b20-g7",
+            "p39-net4-b22-g7",
+            "p40-net4-b22-g8",
+            "p42-net5-b22-g4",
+            "p43-net5-b24-g3",
+            "p44-net5-b24-g5",
+            "p45-net5-b26-g4",
+            "p46-net5-b26-g6",
+            "p47-net5-b28-g5",
+            "p48-net5-b28-g7",
+            "p49-net5-b30-g6",
+            "p50-net5-b30-g8"
+        ],
+        "moderate": [
+            "p19-net2-b18-g6",
+            "p21-net3-b12-g2",
+            "p24-net3-b14-g5",
+            "p27-net3-b18-g6",
+            "p28-net3-b18-g7",
+            "p30-net3-b20-g8",
+            "p31-net4-b14-g3",
+            "p32-net4-b14-g5",
+            "p34-net4-b16-g6",
+            "p41-net5-b22-g2"
+        ]
+    },
+    "rovers": {
+        "hard": [
+            "p19",
+            "p24",
+            "p27",
+            "p29",
+            "p30",
+            "p31",
+            "p32",
+            "p33",
+            "p34",
+            "p35",
+            "p36",
+            "p37",
+            "p38",
+            "p39",
+            "p40"
+        ],
+        "moderate": [
+            "p11",
+            "p18",
+            "p20",
+            "p21",
+            "p22",
+            "p23",
+            "p26",
+            "p28"
+        ]
+    },
+    "scanalyzer-opt11-strips": {
+        "hard": [
+            "p17",
+            "p18",
+            "p19"
+        ],
+        "moderate": [
+            "p07",
+            "p10",
+            "p13",
+            "p15",
+            "p16",
+            "p20"
+        ]
+    },
+    "storage": {
+        "hard": [
+            "p19",
+            "p24",
+            "p25",
+            "p26",
+            "p27",
+            "p28",
+            "p29",
+            "p30"
+        ],
+        "moderate": [
+            "p18",
+            "p20",
+            "p21",
+            "p23"
+        ]
+    },
+    "transport-opt14-strips": {
+        "hard": [
+            "p31",
+            "p32",
+            "p33",
+            "p34",
+            "p35"
+        ],
+        "moderate": [
+            "p10",
+            "p11",
+            "p12",
+            "p16",
+            "p17",
+            "p18",
+            "p19",
+            "p20"
+        ]
+    },
+    "visitall-opt14-strips": {
+        "hard": [
+            "p-1-18"
+        ],
+        "moderate": [
+            "p-1-12",
+            "p-1-13",
+            "p-1-14",
+            "p-1-15",
+            "p-1-16",
+            "p-1-17"
+        ]
+    }
+}

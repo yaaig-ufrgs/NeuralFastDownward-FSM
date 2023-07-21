@@ -1,0 +1,24 @@
+{
+    "experiment": {
+        "samples": "paper-experiments/table7_small_h-improv-diff-hstar/hstar/with_sai_sui/samples/transportunit_1pct_bfsrw_factseff-hstar",
+        "exp-cores": 11,
+        "exp-sample-seed": "0..4",
+        "unit-cost": "yes"
+    },
+    "sampling": {
+        "instance": "tasks/experiments/transport",
+        "method": "yaaig",
+        "technique": "bfs_rw",
+        "state-representation": "complete",
+        "max-samples": 6376,
+        "allow-dups": "interrollout",
+        "restart-h-when-goal-state": "yes",
+        "sample-improvement": "both",
+        "statespace": "tasks/experiments/statespaces/statespace_transportunit_transport_hstar",
+        "successor-improvement": "yes",
+        "regression-depth": "facts_per_avg_effects",
+        "state-filtering": "mutex",
+        "bfs-percentage": 0.1,
+        "evaluator": "pdb(hstar_pattern([]))"
+    }
+}

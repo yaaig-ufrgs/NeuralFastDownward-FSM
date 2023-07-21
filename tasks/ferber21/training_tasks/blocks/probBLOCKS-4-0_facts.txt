@@ -1,0 +1,1 @@
+Atom holding(a);Atom on(a, b);Atom on(a, c);Atom on(a, d);Atom ontable(a);Atom clear(a);Atom clear(b);Atom clear(c);Atom clear(d);Atom handempty();Atom holding(b);Atom on(b, a);Atom on(b, c);Atom on(b, d);Atom ontable(b);Atom holding(c);Atom on(c, a);Atom on(c, b);Atom on(c, d);Atom ontable(c);Atom holding(d);Atom on(d, a);Atom on(d, b);Atom on(d, c);Atom ontable(d)

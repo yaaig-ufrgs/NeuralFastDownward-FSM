@@ -1,0 +1,23 @@
+{
+    "experiment": {
+        "samples": "paper-experiments/table7_small_h-improv-diff-hstar/hstar/with_sai_sui/samples/blocks_1pct_bfsrw_facts-hstar",
+        "exp-cores": 11,
+        "exp-sample-seed": "0..4"
+    },
+    "sampling": {
+        "instance": "tasks/experiments/blocks",
+        "method": "yaaig",
+        "technique": "bfs_rw",
+        "state-representation": "complete",
+        "max-samples": 660,
+        "allow-dups": "interrollout",
+        "restart-h-when-goal-state": "yes",
+        "sample-improvement": "both",
+        "statespace": "tasks/experiments/statespaces/statespace_blocks_probBLOCKS-7-0_hstar",
+        "successor-improvement": "yes",
+        "regression-depth": "facts",
+        "state-filtering": "mutex",
+        "bfs-percentage": 0.1,
+        "evaluator": "pdb(hstar_pattern([]))"
+    }
+}

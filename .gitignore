@@ -1,0 +1,15 @@
+**/*.tmp
+.idea/
+.vscode/
+/**/cmake-build-debug
+/builds/
+/experiments/issue*/.venv/
+/experiments/issue*/data/
+/misc/.tox/
+/misc/autodoc/downward-xmlrpc.secret
+/output.sas
+/sas_plan*
+/defaults.txt
+__pycache__/
+results*/
+samples*/

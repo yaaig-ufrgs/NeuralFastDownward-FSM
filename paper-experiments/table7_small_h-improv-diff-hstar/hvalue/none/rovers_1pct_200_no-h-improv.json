@@ -1,0 +1,22 @@
+{
+    "experiment": {
+        "samples": "paper-experiments/table7_small_h-improv-diff-hstar/hvalue/none/samples/rovers_1pct_bfsrw_200_no-h-improv",
+        "exp-cores": 11,
+        "exp-sample-seed": "0..4"
+    },
+    "sampling": {
+        "instance": "tasks/experiments/rovers",
+        "method": "yaaig",
+        "technique": "bfs_rw",
+        "state-representation": "complete",
+        "max-samples": 5658,
+        "allow-dups": "interrollout",
+        "restart-h-when-goal-state": "yes",
+        "sample-improvement": "none",
+        "statespace": "tasks/experiments/statespaces/statespace_rovers_rovers_hstar",
+        "successor-improvement": "no",
+        "regression-depth": 200,
+        "state-filtering": "mutex",
+        "bfs-percentage": 0.1
+    }
+}
