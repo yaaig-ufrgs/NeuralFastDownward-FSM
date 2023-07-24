@@ -173,6 +173,7 @@ def only_eval(args):
 
 
 def experiment(args):
+    global PID
     args.train_hidden_units = (
         default_args.HIDDEN_UNITS[0]
         if args.train_hidden_units == default_args.HIDDEN_UNITS
@@ -196,8 +197,13 @@ def experiment(args):
     min_sample_seed = int(sample_seeds[0])
     max_sample_seed = int(sample_seeds[1]) if len(sample_seeds) > 1 else int(sample_seeds[0])
 
-    os.system(f"tsp -K")
-    os.system(f"tsp -S {args.exp_cores}")
+
+    args.pid = int(args.pid)
+    if args.pid == 0:
+        os.system(f"tsp -K")
+        os.system(f"tsp -S {args.exp_cores}")
+    else:
+        PID = args.pid
 
     if args.exp_only_eval and not args.exp_only_train:
         # Evaluate on all networks passed through argument.
@@ -224,6 +230,9 @@ def experiment(args):
         else:
             print("ERROR: Invalid experiment configuration.")
             exit(1)
+
+    with open("PID", 'w') as f:
+        f.write(str(PID))
 
 
 if __name__ == "__main__":
