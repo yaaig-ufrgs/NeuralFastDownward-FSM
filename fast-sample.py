@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import re
 from glob import glob
 from src.pytorch.utils.parse_args import get_sample_args
 from scripts.get_hstar_pddl import get_hstar_tasks
@@ -9,23 +10,19 @@ COUNT = 0
 ID_COUNT = 0
 FIRST = True
 
+
+PID = 0
+
 def run_multi_core(cmd, cores):
-    global COUNT
-    global ID_COUNT
-    global FIRST
-    core_id = COUNT
-    if COUNT < cores and FIRST:
-        print(f'tsp taskset -c {core_id} ' + cmd)
-        os.system(f'tsp taskset -c {core_id} ' + cmd)
-        COUNT += 1
-    else:
-        if FIRST or COUNT == cores:
-            COUNT = 0
-        FIRST = False
-        print(f'tsp -D {ID_COUNT} taskset -c {COUNT} ' + cmd)
-        os.system(f'tsp -D {ID_COUNT} taskset -c {COUNT} ' + cmd)
-        ID_COUNT += 1
-        COUNT += 1
+    global PID
+    pcore = PID % cores
+    pdep = PID - cores
+    cmd = f"tsp taskset -c {pcore} {cmd}"
+    if pdep >= 0:
+        cmd = cmd.replace("tsp", f"tsp -D {pdep}")
+    print("fast-sample.py:", cmd, end="\n\n")
+    os.system(cmd)
+    PID += 1
 
 
 def get_bound_type(regression_depth):
@@ -148,8 +145,14 @@ def yaaig_sample(args, meth):
 
 
 def sample(args):
-    os.system(f"tsp -K")
-    os.system(f"tsp -S {args.cores}")
+    global PID
+    args.pid = int(args.pid)
+    if args.pid == 0:
+        os.system(f"tsp -K")
+        os.system(f"tsp -S {args.cores}")
+    else:
+        PID = args.pid
+
     args.restart_h_when_goal_state = bool2str(args.restart_h_when_goal_state)
     args.state_filtering = bool2str(args.state_filtering)
     args.unit_cost = bool2str(args.unit_cost)
@@ -163,6 +166,9 @@ def sample(args):
     else:
         print("Invalid configuration.")
         exit(1)
+
+    with open("PID", 'w') as f:
+        f.write(str(PID))
 
 
 def bool2str(b):

@@ -1124,6 +1124,13 @@ def get_exp_args():
         default=default_args.SAVE_PLOTS,
         help="Save plots related to the evaluation. (default: %(default)s)",
     )
+    parser.add_argument(
+        "-pid",
+        "--pid",
+        type=int,
+        default=default_args.GLOBAL_PID,
+        help="Current PID when running full experiments. (default: %(default)s)",
+    )
 
     return parser.parse_args()
 
@@ -1359,6 +1366,14 @@ def get_sample_args():
         default=default_args.SAMPLE_DEBUG,
         help="Call FastDownward in debug mode. (default: %(defaults)s)",
     )
+    parser.add_argument(
+        "-pid",
+        "--pid",
+        type=int,
+        default=default_args.GLOBAL_PID,
+        help="Current PID when running full experiments. (default: %(default)s)",
+    )
+
 
     return parser.parse_args()
 
