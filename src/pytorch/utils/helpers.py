@@ -269,9 +269,7 @@ def get_models_from_train_folder(train_folder: str, test_model: str) -> [str]:
     models_folder = f"{train_folder}/models"
 
     if test_model == "best":
-        best_fold_path = f"{models_folder}/traced_best_val_loss.pt"
-        if os.path.exists(best_fold_path):
-            models.append(best_fold_path)
+        models = glob(f"{models_folder}/*best*.pt")
     elif test_model == "all":
         models = glob(f"{models_folder}/*.pt")
 
