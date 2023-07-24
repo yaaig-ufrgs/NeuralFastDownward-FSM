@@ -416,7 +416,7 @@ def get_test_args():
     parser.add_argument(
         "-pt",
         "--test-model",
-        choices=["all", "best", "epochs"],
+        choices=["all", "best"],
         default=default_args.TEST_MODEL,
         help="Model(s) used for testing. (default: %(default)s)",
     )

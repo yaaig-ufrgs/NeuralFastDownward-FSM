@@ -4,12 +4,14 @@ Simple auxiliary functions.
 
 import logging
 import os
-from random import Random, sample, random, randint
+from random import Random, sample
 from json import dump, load
 from datetime import datetime, timezone
 from subprocess import check_output
 from argparse import Namespace
 from prettytable import PrettyTable
+from glob import glob
+from natsort import natsorted
 
 import src.pytorch.utils.default_args as default_args
 from src.pytorch.utils.file_helpers import (
@@ -270,20 +272,14 @@ def get_models_from_train_folder(train_folder: str, test_model: str) -> [str]:
         best_fold_path = f"{models_folder}/traced_best_val_loss.pt"
         if os.path.exists(best_fold_path):
             models.append(best_fold_path)
-        else:
-            _log.error(f"Best val loss model does not exists!")
     elif test_model == "all":
-        i = 0
-        while os.path.exists(f"{models_folder}/traced_{i}.pt"):
-            models.append(f"{models_folder}/traced_{i}.pt")
-            i += 1
-    elif test_model == "epochs":
-        i = 0
-        while os.path.exists(f"{models_folder}/traced_0-epoch-{i}.pt"):
-            models.append(f"{models_folder}/traced_0-epoch-{i}.pt")
-            i += 1
+        models = glob(f"{models_folder}/*.pt")
 
-    return models
+    if not models:
+        _log.error(f"No trained models found!")
+        exit(1)
+
+    return natsorted(models)
 
 
 def get_random_samples(lst: list, percent: float) -> list:

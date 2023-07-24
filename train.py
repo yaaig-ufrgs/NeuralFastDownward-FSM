@@ -261,7 +261,7 @@ def train_nn(args: Namespace, dirname: str, device: torch.device) -> (dict, int,
                     best_fold["train_loss"] = train_wf.cur_train_loss
 
                 train_wf.save_traced_model(
-                    f"{dirname}/models/traced_{fold_idx}.pt", args.model
+                    f"{dirname}/models", args.model
                 )
 
         if train_timer.check_timeout():

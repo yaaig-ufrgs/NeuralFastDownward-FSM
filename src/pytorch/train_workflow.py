@@ -11,6 +11,7 @@ from src.pytorch.utils.timer import Timer
 
 _log = logging.getLogger(__name__)
 
+X_EPOCH = 10
 
 class TrainWorkflow:
     def __init__(
@@ -32,7 +33,7 @@ class TrainWorkflow:
         patience = None,
     ):
         self.model = model
-        self.best_epoch_model = None
+        self.best_epoch_model = [None, None] # [model, epoch]
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
         self.test_dataloader = test_dataloader
@@ -52,6 +53,7 @@ class TrainWorkflow:
         self.check_dead_once = check_dead_once
         self.train_y_pred_values = []  # [state, y, pred]
         self.val_y_pred_values = []  # [state, y, pred]
+        self.saved_models = [] # [(model, epoch)]
 
     def train_loop(self, t: int, fold_idx: int) -> float:
         """
@@ -147,7 +149,7 @@ class TrainWorkflow:
                             return False
         return True
 
-    def save_traced_model(self, filename: str, model="hnn"):
+    def save_traced_model(self, dirname: str, model="hnn"):
         """
         Saves a traced model to be used by the C++ backend.
         """
@@ -158,8 +160,12 @@ class TrainWorkflow:
 
         # To make testing possible (and fair), the model has to be saved while in the CPU,
         # even if training was performed in GPU.
-        traced_model = torch.jit.trace(self.best_epoch_model.to("cpu"), example_input)
-        traced_model.save(filename)
+        traced_model = torch.jit.trace(self.best_epoch_model[0].to("cpu"), example_input)
+        traced_model.save(f"{dirname}/traced_e{self.best_epoch_model[1]}_best.pt")
+
+        for mdl in self.saved_models:
+            traced_model = torch.jit.trace(mdl[0].to("cpu"), example_input)
+            traced_model.save(f"{dirname}/traced_e{mdl[1]}.pt")
 
     def run(self, fold_idx: int, train_timer: Timer) -> float or None:
         """
@@ -198,7 +204,8 @@ class TrainWorkflow:
             new_best = False
             if not best_loss or best_loss > cur_loss:
                 best_loss, best_epoch = cur_loss, t
-                self.best_epoch_model = deepcopy(self.model)
+                self.best_epoch_model[0] = deepcopy(self.model)
+                self.best_epoch_model[1] = t
                 new_best = True
             if best_epoch < t - self.patience:
                 self.early_stopped = True
@@ -214,6 +221,7 @@ class TrainWorkflow:
 
             if t % 10 == 0:
                 _log.debug(f"Current mem usage: {get_memory_usage_mb()} MB")
+                self.saved_models.append((deepcopy(self.model), t))
 
             t += 1
 

@@ -80,7 +80,7 @@ def create_train_directory(args: Namespace) -> str:
     return dirname
 
 
-def create_test_directory(args):
+def create_test_directory(args, suffix: str = ""):
     """
     Creates testing directory according to current configuration.
     """
@@ -88,7 +88,7 @@ def create_test_directory(args):
     tests_folder = args.train_folder / "tests"
     if not os.path.exists(tests_folder):
         os.makedirs(tests_folder)
-    dirname = f"{tests_folder}/nfd_test"
+    dirname = f"{tests_folder}/nfd_test{suffix}"
     if os.path.exists(dirname):
         i = 2
         while os.path.exists(f"{dirname}{sep}{i}"):

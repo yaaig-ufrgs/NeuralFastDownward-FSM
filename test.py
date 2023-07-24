@@ -70,8 +70,8 @@ def test_main(args):
             )
             return
 
-    dirname = create_test_directory(args)
-    setup_full_logging(dirname)
+    #dirname = create_test_directory(args)
+    #setup_full_logging(dirname)
 
     if args.samples_dir == None or args.samples_dir == "None":
         args.samples_dir = get_samples_folder_from_train_folder(args.train_folder)
@@ -117,10 +117,14 @@ def test_main(args):
         args.problem_pddls.remove(domain_pddl)
 
     cmd_line = " ".join(sys.argv)
-    logging_test_config(args, dirname, cmd_line)
+    #logging_test_config(args, dirname, cmd_line)
 
     for i in range(len(models)):
         model_path = models[i]
+        model_suffix = "_"+model_path.split("traced_")[1].split(".pt")[0]
+        dirname = create_test_directory(args, model_suffix)
+        setup_full_logging(dirname)
+        logging_test_config(args, dirname, cmd_line)
         model_cmp_path = models_cmp[i] if len(models_cmp) > 0 else ""
         output = {}
         for j, problem_pddl in enumerate(args.problem_pddls):
@@ -156,8 +160,8 @@ def test_main(args):
         model_file = model_path.split("/")[-1]
         logging_test_statistics(args, dirname, model_file, output)
         _log.info(f"Test on model {model_file} complete!")
+        remove_temporary_files(dirname)
 
-    remove_temporary_files(dirname)
     _log.info("Test complete!")
 
 
