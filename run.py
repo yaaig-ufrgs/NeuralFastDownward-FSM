@@ -100,6 +100,7 @@ def get_exp_dicts(full_exp):
         if key not in exp:
             exp[key] = exp_defaults[key]
 
+    results_bckp = exp["results"]
     train = full_exp["train"] if "train" in full_exp else None
     test = full_exp["test"] if "test" in full_exp else None
     evalu = full_exp["eval"] if "eval" in full_exp else None
@@ -116,6 +117,7 @@ def get_exp_dicts(full_exp):
         test["model-dir"] = exp["results"]
         if "unit-cost" in exp:
             test["unit-cost"] = exp["unit-cost"]
+
     for remove_label in ["results", "unit-cost"]:
         if remove_label in exp:
             del exp[remove_label]
@@ -124,7 +126,7 @@ def get_exp_dicts(full_exp):
         if "save-git-diff" in train:
             test["save-git-diff"] = train["save-git-diff"]
 
-    return (exp, sampling, train, test, evalu)
+    return (exp, sampling, train, test, evalu, results_bckp)
 
 
 def main(exp_paths: [str]):
@@ -141,7 +143,7 @@ def main(exp_paths: [str]):
     sample_locations = []
     all_exps = []
     for full_exp in full_exps:
-        exp, sampling, train, test, evalu = get_exp_dicts(full_exp)
+        exp, sampling, train, test, evalu, results_bckp = get_exp_dicts(full_exp)
         all_exps.append((exp, sampling, train, test, evalu))
 
         only_train = str2bool(exp["exp-only-train"]) or (
@@ -202,6 +204,7 @@ def main(exp_paths: [str]):
     for sample_loc in sample_locations:
         remove_leftover_files(sample_loc)
 
+    print(all_exps)
     # 2nd pass: do rest.
     for (exp, sampling, train, test, evalu) in all_exps:
         only_sampling = str2bool(exp["exp-only-sampling"]) or (
@@ -218,7 +221,7 @@ def main(exp_paths: [str]):
         )
 
         if evalu and "trained-model" not in evalu:
-            evalu["trained-model"] = exp["results"] + "/*/models/*.pt"
+            evalu["trained-model"] = results_bckp + "/*/models/*.pt"
 
         if not only_sampling:
             args = "./run-experiment.py"
